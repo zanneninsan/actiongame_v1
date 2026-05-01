@@ -8,7 +8,10 @@ const TILE = 32;
 const WORLD_WIDTH = 4200;
 const WORLD_HEIGHT = 720;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.1";
+const DEBUG_VERSION = "v0.1.2";
+const FOOTPATH_SOURCE_HEIGHT = 348;
+const FOOTPATH_DISPLAY_HEIGHT = 284;
+const FOOTPATH_SCALE = FOOTPATH_DISPLAY_HEIGHT / FOOTPATH_SOURCE_HEIGHT;
 const PLAYER_DISPLAY_WIDTH = 320;
 const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
@@ -32,6 +35,7 @@ class PrototypeScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
   private cityLoopBackground?: Phaser.GameObjects.TileSprite;
+  private footpathBackground?: Phaser.GameObjects.TileSprite;
   private statusText!: Phaser.GameObjects.Text;
   private hasWon = false;
   private wasOnFloor = false;
@@ -44,6 +48,7 @@ class PrototypeScene extends Phaser.Scene {
   preload() {
     this.load.image("background-stars", `${ASSET_BASE}assets/backgrounds/starry_sky.webp`);
     this.load.image("background-city-loop", `${ASSET_BASE}assets/backgrounds/city_loop_strip.webp`);
+    this.load.image("background-footpath", `${ASSET_BASE}assets/backgrounds/footpath_loop.webp`);
     this.load.spritesheet("player-idle", `${ASSET_BASE}assets/sprites/player_idle_8_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
@@ -190,7 +195,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private buildStage(platforms: Phaser.Physics.Arcade.StaticGroup) {
     for (let x = 0; x < WORLD_WIDTH; x += TILE) {
-      this.addBlock(platforms, x, 672, "ground");
+      this.addBlock(platforms, x, 672, "ground", false);
     }
 
     [
@@ -234,18 +239,28 @@ class PrototypeScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setScrollFactor(0)
       .setDepth(-15);
+
+    this.footpathBackground = this.add
+      .tileSprite(0, GAME_HEIGHT - FOOTPATH_DISPLAY_HEIGHT, GAME_WIDTH, FOOTPATH_DISPLAY_HEIGHT, "background-footpath")
+      .setOrigin(0, 0)
+      .setScrollFactor(0)
+      .setDepth(-5);
+    this.footpathBackground.setTileScale(FOOTPATH_SCALE, FOOTPATH_SCALE);
   }
 
   private updateBackground() {
-    if (!this.cityLoopBackground) {
-      return;
+    if (this.cityLoopBackground) {
+      this.cityLoopBackground.tilePositionX = this.cameras.main.scrollX * 0.58;
     }
 
-    this.cityLoopBackground.tilePositionX = this.cameras.main.scrollX * 0.58;
+    if (this.footpathBackground) {
+      this.footpathBackground.tilePositionX = this.cameras.main.scrollX / FOOTPATH_SCALE;
+    }
   }
 
-  private addBlock(platforms: Phaser.Physics.Arcade.StaticGroup, x: number, y: number, texture: string) {
+  private addBlock(platforms: Phaser.Physics.Arcade.StaticGroup, x: number, y: number, texture: string, visible = true) {
     const block = platforms.create(x + TILE / 2, y + TILE / 2, texture);
+    block.setVisible(visible);
     block.refreshBody();
   }
 
