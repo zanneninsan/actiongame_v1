@@ -8,12 +8,12 @@ const TILE = 32;
 const WORLD_WIDTH = 4200;
 const WORLD_HEIGHT = 720;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.6";
+const DEBUG_VERSION = "v0.1.7";
 const FOOTPATH_SOURCE_HEIGHT = 204;
 const FOOTPATH_DISPLAY_HEIGHT = 204;
 const FOOTPATH_SCALE = FOOTPATH_DISPLAY_HEIGHT / FOOTPATH_SOURCE_HEIGHT;
-const PLATFORM_UNIT_WIDTH = 96;
-const PLATFORM_UNIT_HEIGHT = 135;
+const PLATFORM_UNIT_WIDTH = 64;
+const PLATFORM_UNIT_HEIGHT = 90;
 const PLAYER_DISPLAY_WIDTH = 320;
 const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
@@ -264,20 +264,20 @@ class PrototypeScene extends Phaser.Scene {
       this.addBlock(platforms, x, 672, "ground", false);
     }
 
-    this.addPlatformRun(platforms, 360, 548, 3);
-    this.addPlatformRun(platforms, 744, 488, 5);
-    this.addPlatformRun(platforms, 1160, 548, 2);
-    this.addPlatformRun(platforms, 1256, 500, 2);
-    this.addPlatformRun(platforms, 1580, 456, 4);
-    this.addPlatformRun(platforms, 1980, 548, 7);
-    this.addPlatformRun(platforms, 2200, 420, 2);
-    this.addPlatformRun(platforms, 2392, 372, 2);
-    this.addPlatformRun(platforms, 2584, 324, 3);
-    this.addPlatformRun(platforms, 2920, 292, 2);
-    this.addPlatformRun(platforms, 3112, 244, 2);
-    this.addPlatformRun(platforms, 3304, 196, 3);
+    this.addPlatformRun(platforms, 360, 548, 4);
+    this.addPlatformRun(platforms, 744, 488, 7);
+    this.addPlatformRun(platforms, 1160, 548, 3);
+    this.addPlatformRun(platforms, 1288, 500, 3);
+    this.addPlatformRun(platforms, 1580, 456, 6);
+    this.addPlatformRun(platforms, 1980, 548, 10);
+    this.addPlatformRun(platforms, 2200, 420, 3);
+    this.addPlatformRun(platforms, 2392, 372, 3);
+    this.addPlatformRun(platforms, 2584, 324, 4);
+    this.addPlatformRun(platforms, 2920, 292, 3);
+    this.addPlatformRun(platforms, 3112, 244, 3);
+    this.addPlatformRun(platforms, 3304, 196, 4);
     this.addPlatformRun(platforms, 3540, 300, 1);
-    this.addPlatformRun(platforms, 3720, 560, 5);
+    this.addPlatformRun(platforms, 3720, 560, 7);
   }
 
   private createBackground() {
