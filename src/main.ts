@@ -8,7 +8,7 @@ const TILE = 32;
 const WORLD_WIDTH = 4200;
 const WORLD_HEIGHT = 720;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.3";
+const DEBUG_VERSION = "v0.1.4";
 const FOOTPATH_SOURCE_HEIGHT = 204;
 const FOOTPATH_DISPLAY_HEIGHT = 204;
 const FOOTPATH_SCALE = FOOTPATH_DISPLAY_HEIGHT / FOOTPATH_SOURCE_HEIGHT;
@@ -29,6 +29,18 @@ const MAX_FALL_SPEED = 680;
 const JUMP_VELOCITY = -560;
 const BOOSTED_JUMP_VELOCITY = -635;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
+const PLATFORM_ASSETS = {
+  short: "platform-short",
+  medium: "platform-medium",
+  long: "platform-long",
+  stairsTall: "platform-stairs-tall",
+  stairsMid: "platform-stairs-mid",
+  stairsLow: "platform-stairs-low",
+  block: "platform-block",
+} as const;
+
+type PlatformAsset = (typeof PLATFORM_ASSETS)[keyof typeof PLATFORM_ASSETS];
+type PlatformHitbox = { x: number; y: number; width: number; height: number };
 
 class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -49,6 +61,13 @@ class PrototypeScene extends Phaser.Scene {
     this.load.image("background-stars", `${ASSET_BASE}assets/backgrounds/starry_sky.webp`);
     this.load.image("background-city-loop", `${ASSET_BASE}assets/backgrounds/city_loop_strip.webp`);
     this.load.image("background-footpath", `${ASSET_BASE}assets/backgrounds/footpath_loop.webp`);
+    this.load.image(PLATFORM_ASSETS.short, `${ASSET_BASE}assets/platforms/platform_short.webp`);
+    this.load.image(PLATFORM_ASSETS.medium, `${ASSET_BASE}assets/platforms/platform_medium.webp`);
+    this.load.image(PLATFORM_ASSETS.long, `${ASSET_BASE}assets/platforms/platform_long.webp`);
+    this.load.image(PLATFORM_ASSETS.stairsTall, `${ASSET_BASE}assets/platforms/platform_stairs_tall.webp`);
+    this.load.image(PLATFORM_ASSETS.stairsMid, `${ASSET_BASE}assets/platforms/platform_stairs_mid.webp`);
+    this.load.image(PLATFORM_ASSETS.stairsLow, `${ASSET_BASE}assets/platforms/platform_stairs_low.webp`);
+    this.load.image(PLATFORM_ASSETS.block, `${ASSET_BASE}assets/platforms/platform_block.webp`);
     this.load.spritesheet("player-idle", `${ASSET_BASE}assets/sprites/player_idle_8_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
@@ -63,6 +82,7 @@ class PrototypeScene extends Phaser.Scene {
     });
     this.createPixelTexture("ground", TILE, TILE, 0x263244, 0x8bd3ff);
     this.createPixelTexture("platform", TILE, TILE, 0x384257, 0xf6c453);
+    this.createPixelTexture("platform-hitbox", 1, 1, 0xffffff, 0xffffff);
     this.createPixelTexture("goal", 12, 48, 0xfb7185, 0x881337);
   }
 
@@ -198,26 +218,16 @@ class PrototypeScene extends Phaser.Scene {
       this.addBlock(platforms, x, 672, "ground", false);
     }
 
-    [
-      [420, 568, 5],
-      [760, 488, 5],
-      [1120, 568, 6],
-      [1500, 456, 6],
-      [1940, 568, 7],
-      [1840, 392, 5],
-      [2220, 320, 5],
-      [2600, 248, 7],
-      [3040, 176, 7],
-      [3480, 264, 5],
-      [2380, 496, 5],
-      [2800, 568, 6],
-      [3260, 512, 5],
-      [3620, 600, 6],
-    ].forEach(([x, y, count]) => {
-      for (let i = 0; i < count; i += 1) {
-        this.addBlock(platforms, x + i * TILE, y, "platform");
-      }
-    });
+    this.addPlatformPart(platforms, 360, 548, PLATFORM_ASSETS.short);
+    this.addPlatformPart(platforms, 760, 488, PLATFORM_ASSETS.medium);
+    this.addPlatformPart(platforms, 1180, 548, PLATFORM_ASSETS.stairsLow);
+    this.addPlatformPart(platforms, 1580, 456, PLATFORM_ASSETS.medium);
+    this.addPlatformPart(platforms, 2040, 548, PLATFORM_ASSETS.long);
+    this.addPlatformPart(platforms, 2240, 344, PLATFORM_ASSETS.stairsMid);
+    this.addPlatformPart(platforms, 2620, 260, PLATFORM_ASSETS.stairsTall);
+    this.addPlatformPart(platforms, 3100, 188, PLATFORM_ASSETS.short);
+    this.addPlatformPart(platforms, 3500, 292, PLATFORM_ASSETS.block);
+    this.addPlatformPart(platforms, 3700, 560, PLATFORM_ASSETS.medium);
   }
 
   private createBackground() {
@@ -262,6 +272,47 @@ class PrototypeScene extends Phaser.Scene {
     const block = platforms.create(x + TILE / 2, y + TILE / 2, texture);
     block.setVisible(visible);
     block.refreshBody();
+  }
+
+  private addPlatformPart(platforms: Phaser.Physics.Arcade.StaticGroup, x: number, y: number, texture: PlatformAsset) {
+    this.add.image(x, y, texture).setOrigin(0, 0).setDepth(-1);
+
+    this.getPlatformHitboxes(texture).forEach((hitbox) => {
+      const block = platforms.create(x + hitbox.x + hitbox.width / 2, y + hitbox.y + hitbox.height / 2, "platform-hitbox");
+      block.setDisplaySize(hitbox.width, hitbox.height);
+      block.setVisible(false);
+      block.refreshBody();
+    });
+  }
+
+  private getPlatformHitboxes(texture: PlatformAsset): PlatformHitbox[] {
+    switch (texture) {
+      case PLATFORM_ASSETS.short:
+        return [{ x: 0, y: 0, width: 292, height: 134 }];
+      case PLATFORM_ASSETS.medium:
+        return [{ x: 0, y: 0, width: 599, height: 134 }];
+      case PLATFORM_ASSETS.long:
+        return [{ x: 0, y: 0, width: 1302, height: 135 }];
+      case PLATFORM_ASSETS.stairsLow:
+        return [
+          { x: 0, y: 40, width: 228, height: 130 },
+          { x: 228, y: 0, width: 91, height: 170 },
+        ];
+      case PLATFORM_ASSETS.stairsMid:
+        return [
+          { x: 0, y: 44, width: 140, height: 136 },
+          { x: 140, y: 0, width: 191, height: 180 },
+        ];
+      case PLATFORM_ASSETS.stairsTall:
+        return [
+          { x: 0, y: 126, width: 92, height: 130 },
+          { x: 92, y: 84, width: 78, height: 172 },
+          { x: 170, y: 42, width: 78, height: 214 },
+          { x: 248, y: 0, width: 130, height: 256 },
+        ];
+      case PLATFORM_ASSETS.block:
+        return [{ x: 0, y: 0, width: 130, height: 156 }];
+    }
   }
 
   private createPixelTexture(key: string, width: number, height: number, fill: number, stroke: number) {
