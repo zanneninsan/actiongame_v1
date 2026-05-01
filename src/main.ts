@@ -32,6 +32,7 @@ class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
+  private cityLoopBackground?: Phaser.GameObjects.TileSprite;
   private statusText!: Phaser.GameObjects.Text;
   private hasWon = false;
   private wasOnFloor = false;
@@ -43,6 +44,7 @@ class PrototypeScene extends Phaser.Scene {
 
   preload() {
     this.load.image("background-shibuya", `${ASSET_BASE}assets/backgrounds/shibuya_evening.png`);
+    this.load.image("background-city-loop", `${ASSET_BASE}assets/backgrounds/city_loop_strip.png`);
     this.load.spritesheet("player-idle", `${ASSET_BASE}assets/sprites/player_idle_8_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
@@ -114,6 +116,7 @@ class PrototypeScene extends Phaser.Scene {
 
   update() {
     this.applyPlayerBody();
+    this.updateBackground();
 
     const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
     const left = this.keys.a.isDown || this.cursors.left.isDown;
@@ -219,6 +222,20 @@ class PrototypeScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setScrollFactor(0.72, 1)
       .setDepth(-20);
+
+    this.cityLoopBackground = this.add
+      .tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, "background-city-loop")
+      .setOrigin(0, 0)
+      .setScrollFactor(0)
+      .setDepth(-15);
+  }
+
+  private updateBackground() {
+    if (!this.cityLoopBackground) {
+      return;
+    }
+
+    this.cityLoopBackground.tilePositionX = this.cameras.main.scrollX * 0.58;
   }
 
   private addBlock(platforms: Phaser.Physics.Arcade.StaticGroup, x: number, y: number, texture: string) {
