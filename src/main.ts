@@ -41,8 +41,8 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("background-stars", `${ASSET_BASE}assets/backgrounds/starry_sky.png`);
-    this.load.image("background-city-loop", `${ASSET_BASE}assets/backgrounds/city_loop_strip.png`);
+    this.load.image("background-stars", `${ASSET_BASE}assets/backgrounds/starry_sky.webp`);
+    this.load.image("background-city-loop", `${ASSET_BASE}assets/backgrounds/city_loop_strip.webp`);
     this.load.spritesheet("player-idle", `${ASSET_BASE}assets/sprites/player_idle_8_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
