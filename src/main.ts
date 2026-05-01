@@ -7,6 +7,7 @@ const CAMERA_ZOOM = 1;
 const TILE = 32;
 const WORLD_WIDTH = 4200;
 const WORLD_HEIGHT = 720;
+const ASSET_BASE = import.meta.env.BASE_URL;
 const BACKGROUND_DISPLAY_WIDTH = 1280;
 const BACKGROUND_DISPLAY_HEIGHT = 720;
 const PLAYER_DISPLAY_WIDTH = 320;
@@ -32,16 +33,16 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("background-shibuya", "/assets/backgrounds/shibuya_evening.png");
-    this.load.spritesheet("player-idle", "/assets/sprites/player_idle_8_320x260.png", {
+    this.load.image("background-shibuya", `${ASSET_BASE}assets/backgrounds/shibuya_evening.png`);
+    this.load.spritesheet("player-idle", `${ASSET_BASE}assets/sprites/player_idle_8_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
-    this.load.spritesheet("player-walk", "/assets/sprites/player_walk_13_320x260.png", {
+    this.load.spritesheet("player-walk", `${ASSET_BASE}assets/sprites/player_walk_13_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
-    this.load.spritesheet("player-jump", "/assets/sprites/player_jump_15_320x260.png", {
+    this.load.spritesheet("player-jump", `${ASSET_BASE}assets/sprites/player_jump_15_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
