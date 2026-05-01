@@ -8,6 +8,7 @@ const TILE = 32;
 const WORLD_WIDTH = 4200;
 const WORLD_HEIGHT = 720;
 const ASSET_BASE = import.meta.env.BASE_URL;
+const DEBUG_VERSION = "v0.1.0";
 const PLAYER_DISPLAY_WIDTH = 320;
 const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
@@ -108,6 +109,17 @@ class PrototypeScene extends Phaser.Scene {
         color: "#e5e7eb",
       })
       .setScrollFactor(0);
+
+    this.add
+      .text(GAME_WIDTH - 8, 8, DEBUG_VERSION, {
+        fontFamily: "monospace",
+        fontSize: "10px",
+        color: "#cbd5e1",
+      })
+      .setOrigin(1, 0)
+      .setScrollFactor(0)
+      .setDepth(100)
+      .setShadow(1, 1, "#020617", 2, true, true);
 
     this.input.keyboard!.on("keydown-R", () => this.scene.restart());
   }
