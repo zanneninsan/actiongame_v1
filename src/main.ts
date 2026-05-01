@@ -18,6 +18,12 @@ const PLAYER_BODY_OFFSET_X = 134;
 const PLAYER_BODY_OFFSET_Y = 86;
 const PLAYER_IDLE_FRAME_COUNT = 8;
 const PLAYER_FRAME_COUNT = 13;
+const GROUND_ACCELERATION = 2400;
+const AIR_ACCELERATION = 720;
+const GROUND_DRAG = 2400;
+const AIR_DRAG = 120;
+const MAX_RUN_SPEED = 380;
+const MAX_FALL_SPEED = 680;
 
 class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -68,8 +74,7 @@ class PrototypeScene extends Phaser.Scene {
     this.player.setDisplaySize(PLAYER_DISPLAY_WIDTH, PLAYER_DISPLAY_HEIGHT);
     this.player.setCollideWorldBounds(true);
     this.applyPlayerBody();
-    this.player.setDragX(2400);
-    this.player.setMaxVelocity(360, 680);
+    this.player.setMaxVelocity(MAX_RUN_SPEED, MAX_FALL_SPEED);
     this.player.play("player-idle");
     this.wasOnFloor = true;
     this.player.on(`${Phaser.Animations.Events.ANIMATION_COMPLETE_KEY}player-land`, () => {
@@ -112,12 +117,14 @@ class PrototypeScene extends Phaser.Scene {
     const right = this.keys.d.isDown || this.cursors.right.isDown;
     const jump = Phaser.Input.Keyboard.JustDown(this.keys.w) || Phaser.Input.Keyboard.JustDown(this.cursors.space);
     let startedJump = false;
+    const horizontalAcceleration = onFloor ? GROUND_ACCELERATION : AIR_ACCELERATION;
+    this.player.setDragX(onFloor ? GROUND_DRAG : AIR_DRAG);
 
     if (left) {
-      this.player.setAccelerationX(-2200);
+      this.player.setAccelerationX(-horizontalAcceleration);
       this.player.setFlipX(true);
     } else if (right) {
-      this.player.setAccelerationX(2200);
+      this.player.setAccelerationX(horizontalAcceleration);
       this.player.setFlipX(false);
     } else {
       this.player.setAccelerationX(0);
