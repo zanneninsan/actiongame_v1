@@ -8,8 +8,6 @@ const TILE = 32;
 const WORLD_WIDTH = 4200;
 const WORLD_HEIGHT = 720;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const BACKGROUND_DISPLAY_WIDTH = 1280;
-const BACKGROUND_DISPLAY_HEIGHT = 720;
 const PLAYER_DISPLAY_WIDTH = 320;
 const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
@@ -43,7 +41,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("background-shibuya", `${ASSET_BASE}assets/backgrounds/shibuya_evening.png`);
+    this.load.image("background-stars", `${ASSET_BASE}assets/backgrounds/starry_sky.png`);
     this.load.image("background-city-loop", `${ASSET_BASE}assets/backgrounds/city_loop_strip.png`);
     this.load.spritesheet("player-idle", `${ASSET_BASE}assets/sprites/player_idle_8_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
@@ -206,22 +204,18 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createBackground() {
-    const repeats = Math.ceil(WORLD_WIDTH / BACKGROUND_DISPLAY_WIDTH) + 1;
-
-    for (let i = 0; i < repeats; i += 1) {
-      this.add
-        .image(i * BACKGROUND_DISPLAY_WIDTH, 0, "background-shibuya")
-        .setOrigin(0, 0)
-        .setDisplaySize(BACKGROUND_DISPLAY_WIDTH, BACKGROUND_DISPLAY_HEIGHT)
-        .setScrollFactor(0.72, 1)
-        .setDepth(-30);
-    }
+    this.add
+      .image(0, 0, "background-stars")
+      .setOrigin(0, 0)
+      .setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
+      .setScrollFactor(0)
+      .setDepth(-40);
 
     this.add
-      .rectangle(0, 0, WORLD_WIDTH, WORLD_HEIGHT, 0x070a12, 0.28)
+      .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x070a12, 0.2)
       .setOrigin(0, 0)
-      .setScrollFactor(0.72, 1)
-      .setDepth(-20);
+      .setScrollFactor(0)
+      .setDepth(-35);
 
     this.cityLoopBackground = this.add
       .tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, "background-city-loop")
