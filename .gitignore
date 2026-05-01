@@ -1,0 +1,14 @@
+node_modules/
+dist/
+*.zip
+
+# Generated/intermediate sprite extraction workspace.
+public/assets/sprites/video_extract/
+public/assets/sprites/preview_*.png
+
+# Superseded generated sheets kept locally for comparison.
+public/assets/sprites/player_idle.png
+public/assets/sprites/player_idle_framed.png
+public/assets/sprites/player_idle_8.png
+public/assets/sprites/player_idle_8_framed.png
+public/assets/sprites/player_walk_13.png
