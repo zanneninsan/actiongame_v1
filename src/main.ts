@@ -24,6 +24,9 @@ const GROUND_DRAG = 2400;
 const AIR_DRAG = 120;
 const MAX_RUN_SPEED = 380;
 const MAX_FALL_SPEED = 680;
+const JUMP_VELOCITY = -560;
+const BOOSTED_JUMP_VELOCITY = -635;
+const BOOST_JUMP_SPEED_THRESHOLD = 285;
 
 class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -115,7 +118,10 @@ class PrototypeScene extends Phaser.Scene {
     const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
     const left = this.keys.a.isDown || this.cursors.left.isDown;
     const right = this.keys.d.isDown || this.cursors.right.isDown;
-    const jump = Phaser.Input.Keyboard.JustDown(this.keys.w) || Phaser.Input.Keyboard.JustDown(this.cursors.space);
+    const debugJump = Phaser.Input.Keyboard.JustDown(this.keys.w);
+    const normalJump = Phaser.Input.Keyboard.JustDown(this.cursors.space);
+    const jump = debugJump || normalJump;
+    const canJump = onFloor || debugJump;
     let startedJump = false;
     const horizontalAcceleration = onFloor ? GROUND_ACCELERATION : AIR_ACCELERATION;
     this.player.setDragX(onFloor ? GROUND_DRAG : AIR_DRAG);
@@ -130,8 +136,10 @@ class PrototypeScene extends Phaser.Scene {
       this.player.setAccelerationX(0);
     }
 
-    if (jump && onFloor) {
-      this.player.setVelocityY(-560);
+    if (jump && canJump) {
+      const jumpVelocity =
+        Math.abs(this.player.body.velocity.x) >= BOOST_JUMP_SPEED_THRESHOLD ? BOOSTED_JUMP_VELOCITY : JUMP_VELOCITY;
+      this.player.setVelocityY(jumpVelocity);
       this.isLanding = false;
       startedJump = true;
       this.player.anims.play("player-jump-start", true);
