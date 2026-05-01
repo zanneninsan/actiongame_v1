@@ -8,7 +8,7 @@ const TILE = 32;
 const WORLD_WIDTH = 4200;
 const WORLD_HEIGHT = 720;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.4";
+const DEBUG_VERSION = "v0.1.5";
 const FOOTPATH_SOURCE_HEIGHT = 204;
 const FOOTPATH_DISPLAY_HEIGHT = 204;
 const FOOTPATH_SCALE = FOOTPATH_DISPLAY_HEIGHT / FOOTPATH_SOURCE_HEIGHT;
@@ -41,6 +41,41 @@ const PLATFORM_ASSETS = {
 
 type PlatformAsset = (typeof PLATFORM_ASSETS)[keyof typeof PLATFORM_ASSETS];
 type PlatformHitbox = { x: number; y: number; width: number; height: number };
+type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
+type ScoreState = Record<ItemType, number>;
+
+const ITEM_DEFINITIONS: Record<ItemType, { key: string; label: string; points: number; assetPath: string }> = {
+  energyDrink: {
+    key: "item-energy-drink",
+    label: "ENERGY",
+    points: 100,
+    assetPath: "assets/items/energy_drink.png",
+  },
+  shoppingBag: {
+    key: "item-shopping-bag",
+    label: "BAG",
+    points: 250,
+    assetPath: "assets/items/shopping_bag.png",
+  },
+  bubbleTea: {
+    key: "item-bubble-tea",
+    label: "TEA",
+    points: 150,
+    assetPath: "assets/items/bubble_tea.png",
+  },
+};
+
+const ITEM_PLACEMENTS: Array<{ type: ItemType; x: number; y: number }> = [
+  { type: "energyDrink", x: 475, y: 492 },
+  { type: "bubbleTea", x: 915, y: 432 },
+  { type: "shoppingBag", x: 1285, y: 492 },
+  { type: "energyDrink", x: 1750, y: 400 },
+  { type: "bubbleTea", x: 2345, y: 288 },
+  { type: "shoppingBag", x: 2720, y: 204 },
+  { type: "energyDrink", x: 3185, y: 132 },
+  { type: "bubbleTea", x: 3575, y: 236 },
+  { type: "shoppingBag", x: 3925, y: 504 },
+];
 
 class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -49,6 +84,8 @@ class PrototypeScene extends Phaser.Scene {
   private cityLoopBackground?: Phaser.GameObjects.TileSprite;
   private footpathBackground?: Phaser.GameObjects.TileSprite;
   private statusText!: Phaser.GameObjects.Text;
+  private scoreText!: Phaser.GameObjects.Text;
+  private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
   private hasWon = false;
   private wasOnFloor = false;
   private isLanding = false;
@@ -68,6 +105,9 @@ class PrototypeScene extends Phaser.Scene {
     this.load.image(PLATFORM_ASSETS.stairsMid, `${ASSET_BASE}assets/platforms/platform_stairs_mid.webp`);
     this.load.image(PLATFORM_ASSETS.stairsLow, `${ASSET_BASE}assets/platforms/platform_stairs_low.webp`);
     this.load.image(PLATFORM_ASSETS.block, `${ASSET_BASE}assets/platforms/platform_block.webp`);
+    Object.values(ITEM_DEFINITIONS).forEach((item) => {
+      this.load.image(item.key, `${ASSET_BASE}${item.assetPath}`);
+    });
     this.load.spritesheet("player-idle", `${ASSET_BASE}assets/sprites/player_idle_8_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
@@ -112,6 +152,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.physics.add.collider(this.player, platforms);
     this.physics.add.overlap(this.player, goal, () => this.win());
+    this.createItems();
 
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.keys = {
@@ -134,6 +175,17 @@ class PrototypeScene extends Phaser.Scene {
         color: "#e5e7eb",
       })
       .setScrollFactor(0);
+
+    this.scoreText = this.add
+      .text(8, 24, "", {
+        fontFamily: "monospace",
+        fontSize: "12px",
+        color: "#f8fafc",
+      })
+      .setScrollFactor(0)
+      .setDepth(100)
+      .setShadow(1, 1, "#020617", 2, true, true);
+    this.updateScoreText();
 
     this.add
       .text(GAME_WIDTH - 8, 8, DEBUG_VERSION, {
@@ -283,6 +335,42 @@ class PrototypeScene extends Phaser.Scene {
       block.setVisible(false);
       block.refreshBody();
     });
+  }
+
+  private createItems() {
+    const items = this.physics.add.staticGroup();
+
+    ITEM_PLACEMENTS.forEach((placement) => {
+      const definition = ITEM_DEFINITIONS[placement.type];
+      const item = items.create(placement.x, placement.y, definition.key) as Phaser.Physics.Arcade.Sprite;
+      item.setData("itemType", placement.type);
+      item.setDisplaySize(48, 48);
+      item.refreshBody();
+    });
+
+    this.physics.add.overlap(this.player, items, (_, itemObject) => {
+      this.collectItem(itemObject as Phaser.Physics.Arcade.Sprite);
+    });
+  }
+
+  private collectItem(item: Phaser.Physics.Arcade.Sprite) {
+    if (!item.active) {
+      return;
+    }
+
+    const itemType = item.getData("itemType") as ItemType;
+    const definition = ITEM_DEFINITIONS[itemType];
+    this.score[itemType] += definition.points;
+    this.updateScoreText();
+    item.disableBody(true, true);
+  }
+
+  private updateScoreText() {
+    const total = Object.values(this.score).reduce((sum, value) => sum + value, 0);
+    const itemScores = (Object.keys(ITEM_DEFINITIONS) as ItemType[])
+      .map((itemType) => `${ITEM_DEFINITIONS[itemType].label}:${this.score[itemType]}`)
+      .join("  ");
+    this.scoreText.setText(`SCORE:${total}  ${itemScores}`);
   }
 
   private getPlatformHitboxes(texture: PlatformAsset): PlatformHitbox[] {
