@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.38";
+const DEBUG_VERSION = "v0.1.39";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -627,9 +627,9 @@ class PrototypeScene extends Phaser.Scene {
     this.updateTimerText();
 
     this.controlHintText = this.add
-      .text(GAME_WIDTH - 12, 58, "", {
+      .text(GAME_WIDTH - 82, 8, "", {
         fontFamily: "monospace",
-        fontSize: "13px",
+        fontSize: "15px",
         color: "#fde68a",
       })
       .setOrigin(1, 0)

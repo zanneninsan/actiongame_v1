@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.39
+### English
+- Increased the control hint text size and aligned it horizontally with the version display.
+### 日本語
+- 操作説明の文字サイズを少し大きくし、バージョン表示と横並びになるよう配置しました。
+
 ## v0.1.38
 ### English
 - Removed the HUD frame from the in-game display while keeping the artwork asset in the repository.
