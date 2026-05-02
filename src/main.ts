@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.19";
+const DEBUG_VERSION = "v0.1.20";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -460,11 +460,14 @@ class PrototypeScene extends Phaser.Scene {
   private statusText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
+  private countdownText?: Phaser.GameObjects.Text;
   private finalScoreText?: Phaser.GameObjects.Text;
   private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false };
   private mobileJumpQueued = false;
   private mobileControlCleanup: Array<() => void> = [];
   private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
+  private countdownTimer?: Phaser.Time.TimerEvent;
+  private countdownReleaseTimer?: Phaser.Time.TimerEvent;
   private startTime = 0;
   private isRunActive = false;
   private setupComplete = false;
@@ -707,6 +710,12 @@ class PrototypeScene extends Phaser.Scene {
   private resetRunState() {
     this.removeStartModal();
     this.removeMobileControls();
+    this.countdownTimer?.remove(false);
+    this.countdownTimer = undefined;
+    this.countdownReleaseTimer?.remove(false);
+    this.countdownReleaseTimer = undefined;
+    this.countdownText?.destroy();
+    this.countdownText = undefined;
     this.mobileInput = { w: false, a: false, s: false, d: false };
     this.mobileJumpQueued = false;
     this.score = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
@@ -725,9 +734,6 @@ class PrototypeScene extends Phaser.Scene {
 
   private startRun() {
     this.removeStartModal();
-    this.isRunActive = true;
-    this.startTime = this.time.now;
-    this.physics.resume();
     this.playerNameText.setText(`PLAYER:${this.playerName}`);
     this.statusText.setText(
       this.controlMode === "mobile" ? "TOUCH: move/jump  R: restart" : "A/D: move  W/Space: jump  R: restart",
@@ -735,6 +741,64 @@ class PrototypeScene extends Phaser.Scene {
     if (this.controlMode === "mobile") {
       this.createMobileControls();
     }
+    this.startCountdown();
+  }
+
+  private startCountdown() {
+    this.physics.pause();
+    this.isRunActive = false;
+    this.startTime = 0;
+    this.updateTimerText();
+
+    const sequence = ["3", "2", "1", "GO!!"];
+    let index = 0;
+    this.countdownText?.destroy();
+    this.countdownText = this.add
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, sequence[index], {
+        fontFamily: "monospace",
+        fontSize: "96px",
+        color: "#fef3c7",
+        align: "center",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(220)
+      .setShadow(0, 0, "#22d3ee", 16, true, true);
+
+    this.countdownTimer?.remove(false);
+    this.countdownTimer = this.time.addEvent({
+      delay: 900,
+      repeat: sequence.length - 1,
+      callback: () => {
+        index += 1;
+        if (!this.countdownText) {
+          return;
+        }
+
+        this.countdownText.setText(sequence[index]);
+        this.tweens.add({
+          targets: this.countdownText,
+          scale: { from: 1.18, to: 1 },
+          alpha: { from: 0.72, to: 1 },
+          duration: 180,
+          ease: "Sine.easeOut",
+        });
+
+        if (index === sequence.length - 1) {
+          this.countdownReleaseTimer = this.time.delayedCall(420, () => this.activateRun());
+        }
+      },
+    });
+  }
+
+  private activateRun() {
+    this.countdownTimer = undefined;
+    this.countdownReleaseTimer = undefined;
+    this.countdownText?.destroy();
+    this.countdownText = undefined;
+    this.startTime = this.time.now;
+    this.isRunActive = true;
+    this.physics.resume();
     this.updateTimerText();
   }
 
