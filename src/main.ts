@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.21";
+const DEBUG_VERSION = "v0.1.22";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -573,7 +573,7 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(96);
 
     this.playerNameText = this.add
-      .text(34, 28, "", {
+      .text(66, 28, "", {
         fontFamily: "monospace",
         fontSize: "18px",
         color: "#e0f2fe",
@@ -583,7 +583,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0);
 
     this.statusText = this.add
-      .text(34, 112, "A/D: move  W/Space: jump  R: restart", {
+      .text(66, 112, "A/D: move  W/Space: jump  R: restart", {
         fontFamily: "monospace",
         fontSize: "13px",
         color: "#e5e7eb",
@@ -593,7 +593,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0);
 
     this.scoreText = this.add
-      .text(34, 56, "", {
+      .text(66, 56, "", {
         fontFamily: "monospace",
         fontSize: "15px",
         color: "#f8fafc",
@@ -604,7 +604,7 @@ class PrototypeScene extends Phaser.Scene {
     this.updateScoreText();
 
     this.timerText = this.add
-      .text(34, 82, "", {
+      .text(66, 82, "", {
         fontFamily: "monospace",
         fontSize: "18px",
         color: "#fde68a",
@@ -756,14 +756,21 @@ class PrototypeScene extends Phaser.Scene {
     this.countdownText = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, sequence[index], {
         fontFamily: "monospace",
-        fontSize: "96px",
-        color: "#fef3c7",
+        fontSize: "132px",
+        color: "#ffffff",
+        stroke: "#ffffff",
+        strokeThickness: 12,
         align: "center",
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(220)
-      .setShadow(0, 0, "#22d3ee", 16, true, true);
+      .setShadow(0, 0, "#22d3ee", 22, true, true);
+    if (this.game.renderer.type === Phaser.WEBGL) {
+      this.countdownText.setPipeline(RAINBOW_PIPELINE_KEY);
+    } else {
+      this.countdownText.setTint(0xff66ff, 0x66ffff, 0xffff66, 0x66ff66);
+    }
 
     this.countdownTimer?.remove(false);
     this.countdownTimer = this.time.addEvent({
@@ -778,9 +785,9 @@ class PrototypeScene extends Phaser.Scene {
         this.countdownText.setText(sequence[index]);
         this.tweens.add({
           targets: this.countdownText,
-          scale: { from: 1.18, to: 1 },
+          scale: { from: 1.28, to: 1 },
           alpha: { from: 0.72, to: 1 },
-          duration: 180,
+          duration: 220,
           ease: "Sine.easeOut",
         });
 
@@ -998,10 +1005,6 @@ class PrototypeScene extends Phaser.Scene {
       groundLight.fillEllipse(sourceX, groundY + 1, poolWidth * 0.58, 12 * scale);
       groundLight.setDepth(STREET_LAMP_GROUND_LIGHT_DEPTH);
 
-      this.add
-        .circle(sourceX, sourceY, 12 * scale, 0xfff3bd, 0.36)
-        .setBlendMode(Phaser.BlendModes.ADD)
-        .setDepth(DECORATION_DEPTH + 0.02);
     });
   }
 
