@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.41";
+const DEBUG_VERSION = "v0.1.42";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -30,6 +30,7 @@ const PLAYER_BODY_OFFSET_X = 134;
 const PLAYER_BODY_OFFSET_Y = 86;
 const PLAYER_IDLE_FRAME_COUNT = 8;
 const PLAYER_FRAME_COUNT = 13;
+const PLAYER_CROUCH_FRAME_COUNT = 27;
 const GROUND_ACCELERATION = 2400;
 const AIR_ACCELERATION = 720;
 const GROUND_DRAG = 2400;
@@ -536,6 +537,10 @@ class PrototypeScene extends Phaser.Scene {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
+    this.load.spritesheet("player-crouch", `${ASSET_BASE}assets/sprites/player_crouch_27_320x260.png`, {
+      frameWidth: PLAYER_DISPLAY_WIDTH,
+      frameHeight: PLAYER_DISPLAY_HEIGHT,
+    });
     this.createPixelTexture("ground", TILE, TILE, 0x263244, 0x8bd3ff);
     this.createPixelTexture("platform", TILE, TILE, 0x384257, 0xf6c453);
     this.createPixelTexture("platform-hitbox", 1, 1, 0xffffff, 0xffffff);
@@ -671,6 +676,7 @@ class PrototypeScene extends Phaser.Scene {
     const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
     const left = this.keys.a.isDown || this.cursors.left.isDown || this.mobileInput.a;
     const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
+    const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
     const debugJump = Phaser.Input.Keyboard.JustDown(this.keys.w) || this.mobileJumpQueued;
     this.mobileJumpQueued = false;
     const normalJump = Phaser.Input.Keyboard.JustDown(this.cursors.space);
@@ -703,6 +709,7 @@ class PrototypeScene extends Phaser.Scene {
 
     const isMovingHorizontally = Math.abs(this.player.body.velocity.x) > 8;
     const landedThisFrame = !this.wasOnFloor && onFloor && !startedJump;
+    const isCrouching = down && onFloor && !startedJump;
 
     if (landedThisFrame) {
       this.isLanding = true;
@@ -725,6 +732,11 @@ class PrototypeScene extends Phaser.Scene {
       const currentAnimation = this.player.anims.currentAnim?.key;
       if (currentAnimation !== "player-jump-start" || !this.player.anims.isPlaying) {
         this.player.anims.play("player-air", true);
+      }
+    } else if (isCrouching) {
+      this.player.anims.timeScale = 1;
+      if (this.player.anims.currentAnim?.key !== "player-crouch") {
+        this.player.anims.play("player-crouch");
       }
     } else if (isMovingHorizontally) {
       this.player.anims.play("player-walk", true);
@@ -1642,6 +1654,16 @@ class PrototypeScene extends Phaser.Scene {
         end: 14,
       }),
       frameRate: 14,
+      repeat: 0,
+    });
+
+    this.anims.create({
+      key: "player-crouch",
+      frames: this.anims.generateFrameNumbers("player-crouch", {
+        start: 0,
+        end: PLAYER_CROUCH_FRAME_COUNT - 1,
+      }),
+      frameRate: 16,
       repeat: 0,
     });
   }

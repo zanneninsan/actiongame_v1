@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.42
+### English
+- Built a crouch spritesheet from the `mabiki` frame images.
+- Added a crouch animation that plays while the down input is held.
+### 日本語
+- `mabiki`フォルダ内のフレーム画像を結合して、しゃがみ用スプライトシートを作成しました。
+- 下入力を押している間、しゃがみアニメーションを再生するようにしました。
+
 ## v0.1.41
 ### English
 - Moved the version display into the same top-right DOM layout as the BGM and options buttons to prevent overlap at 16:9 resolutions.
