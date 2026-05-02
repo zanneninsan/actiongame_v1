@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.32";
+const DEBUG_VERSION = "v0.1.33";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -735,6 +735,7 @@ class PrototypeScene extends Phaser.Scene {
     this.removeStartModal();
     this.removeMobileControls();
     this.removeStageEditor();
+    this.removeGlobalUI();
     this.countdownTimer?.remove(false);
     this.countdownTimer = undefined;
     this.countdownReleaseTimer?.remove(false);
@@ -871,7 +872,7 @@ class PrototypeScene extends Phaser.Scene {
         </label>
         <div class="mode-row" role="group" aria-label="Control mode">
           <button type="button" data-mode="pc" class="mode-button is-selected">PC</button>
-          <button type="button" data-mode="mobile" class="mode-button">スマホ</button>
+          <button type="button" data-mode="mobile" class="mode-button">&#12473;&#12510;&#12507;</button>
         </div>
         <button type="submit" class="start-button">START</button>
       </form>
@@ -1099,13 +1100,13 @@ class PrototypeScene extends Phaser.Scene {
     controls.id = "mobile-controls";
     controls.innerHTML = `
       <div class="mobile-pad">
-        <button class="mobile-button pad-up" data-key="w" type="button" aria-label="Jump">↑</button>
-        <button class="mobile-button pad-left" data-key="a" type="button" aria-label="Move left">←</button>
-        <button class="mobile-button pad-down" data-key="s" type="button" aria-label="Down">↓</button>
-        <button class="mobile-button pad-right" data-key="d" type="button" aria-label="Move right">→</button>
+        <button class="mobile-button pad-up" data-key="w" type="button" aria-label="Jump">&uarr;</button>
+        <button class="mobile-button pad-left" data-key="a" type="button" aria-label="Move left">&larr;</button>
+        <button class="mobile-button pad-down" data-key="s" type="button" aria-label="Down">&darr;</button>
+        <button class="mobile-button pad-right" data-key="d" type="button" aria-label="Move right">&rarr;</button>
       </div>
       <div class="mobile-actions">
-        <button class="mobile-button" data-key="w" type="button" aria-label="Jump">↑</button>
+        <button class="mobile-button" data-key="w" type="button" aria-label="Jump">&uarr;</button>
         <button class="mobile-button restart-button" data-action="restart" type="button">R</button>
       </div>
     `;
@@ -1280,15 +1281,13 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createGlobalUI() {
-    if (document.getElementById("global-ui")) {
-      return;
-    }
+    this.removeGlobalUI();
 
     const uiContainer = document.createElement("div");
     uiContainer.id = "global-ui";
     uiContainer.innerHTML = `
-      <button id="bgm-toggle" class="ui-button" type="button" aria-label="Toggle Sound">🔊</button>
-      <button id="options-toggle" class="ui-button" type="button" aria-label="Options">⚙️</button>
+      <button id="bgm-toggle" class="ui-button" type="button" aria-label="Toggle Sound">BGM</button>
+      <button id="options-toggle" class="ui-button" type="button" aria-label="Options">OPT</button>
     `;
     document.body.appendChild(uiContainer);
 
@@ -1314,14 +1313,10 @@ class PrototypeScene extends Phaser.Scene {
     this.sound.volume = 0.5;
     volumeSlider.value = "50";
     let isMuted = this.sound.mute;
-    
+
     const updateIcon = () => {
       const currentVolume = parseInt(volumeSlider.value, 10);
-      if (isMuted || currentVolume === 0) {
-        bgmToggle.textContent = "🔇";
-      } else {
-        bgmToggle.textContent = "🔊";
-      }
+      bgmToggle.textContent = isMuted || currentVolume === 0 ? "OFF" : "BGM";
     };
 
     updateIcon();
@@ -1363,6 +1358,11 @@ class PrototypeScene extends Phaser.Scene {
     optionsModal.addEventListener("keypress", (e) => e.stopPropagation());
     optionsModal.addEventListener("pointerdown", (e) => e.stopPropagation());
     uiContainer.addEventListener("pointerdown", (e) => e.stopPropagation());
+  }
+
+  private removeGlobalUI() {
+    document.getElementById("global-ui")?.remove();
+    document.getElementById("options-modal")?.remove();
   }
 
   private handleEditorPointerDown(pointer: Phaser.Input.Pointer) {

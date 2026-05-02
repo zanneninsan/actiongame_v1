@@ -1,41 +1,51 @@
 # Release Notes / リリースノート
 
+## v0.1.33
+### English
+- Fixed corrupted BGM and options button labels.
+- Recreated the global UI on scene restart so BGM and volume controls always bind to the current scene.
+- Stabilized corrupted mobile labels and arrow button markup by using HTML entities.
+### 日本語
+- BGMボタンとオプションボタンの文字化けを修正しました。
+- シーン再起動時にグローバルUIを作り直すようにし、BGMと音量操作が常に現在のシーンへ紐づくようにしました。
+- 文字化けで壊れていたモバイル表示と矢印ボタンを、HTMLエンティティ表記に変更して安定化しました。
+
 ## v0.1.32
 ### English
 - Fixed a bug where interacting with the volume slider caused the BGM toggle icon to become out of sync.
 ### 日本語
-- ボリュームバー操作時にBGMアイコンのON/OFFが正しく切り替わらなくなるバグを修正しました。
+- 音量スライダー操作時にBGMトグル表示が実際の状態とずれる不具合を修正しました。
 
 ## v0.1.31
 ### English
-- Fixed a timing issue in WebAudio state reading that caused the BGM toggle icon to be out of sync.
+- Fixed a WebAudio timing issue that caused the BGM toggle icon to be out of sync.
 ### 日本語
-- WebAudio APIの仕様による遅延で、BGMのON/OFFアイコンが実際の状態と1回分ズレて表示されてしまうバグを完全に修正しました。
+- WebAudioの状態取得タイミングにより、BGMトグル表示がずれる問題を修正しました。
 
 ## v0.1.30
 ### English
-- Fixed a bug where the BGM toggle icon didn't sync correctly with the volume slider state.
+- Synced the BGM toggle icon with the volume slider state.
 ### 日本語
-- 音量スライダーの変更とBGMのON/OFFアイコンが正しく連動しないバグを修正しました。
+- 音量スライダーの状態とBGMトグル表示が連動するようにしました。
 
 ## v0.1.29
 ### English
 - Added `RELEASE_NOTES.md` to track project updates.
 ### 日本語
-- プロジェクトの更新履歴を記録するため、`RELEASE_NOTES.md`を追加。
+- プロジェクト更新履歴を記録するため、`RELEASE_NOTES.md`を追加しました。
 
 ## v0.1.28
 ### English
 - Added a one-touch BGM toggle button to the top right of the screen.
-- Added an options menu with a slider to adjust the master volume from 0 to 100.
+- Added an options menu with a volume slider.
 ### 日本語
 - 画面右上にBGMのワンタッチON/OFFボタンを追加しました。
-- 音量を0〜100で調整できるオプション画面（スライダー付き）を追加しました。
+- 音量スライダー付きのオプションメニューを追加しました。
 
 ## v0.1.27
 ### English
-- Fixed an issue where the game engine incorrectly captured WASD and Space key inputs while the user was typing in the player name field on the start screen.
-- Added background music (BGM) that automatically loops when the game starts.
+- Fixed an issue where WASD and Space inputs were captured by the game while typing in the player name field.
+- Added looping background music.
 ### 日本語
-- スタート画面のプレイヤー名入力欄で、WASDやスペースキーの入力がゲーム側に奪われてしまう問題を修正しました。
-- ゲーム開始時に自動でループ再生されるBGMを追加しました。
+- プレイヤー名入力中にWASDやSpace入力がゲーム側へ取られる問題を修正しました。
+- ループ再生されるBGMを追加しました。
