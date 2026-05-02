@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.16";
+const DEBUG_VERSION = "v0.1.17";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -445,6 +445,7 @@ const STAGES = {
   neonCanal: NEON_CANAL_STAGE,
 };
 const ACTIVE_STAGE = STAGES.neonCanal;
+let extraTouchPointersAdded = false;
 
 class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -509,7 +510,10 @@ class PrototypeScene extends Phaser.Scene {
   create() {
     this.registerRainbowPipeline();
     this.resetRunState();
-    this.input.addPointer(4);
+    if (!extraTouchPointersAdded) {
+      this.input.addPointer(4);
+      extraTouchPointersAdded = true;
+    }
     this.physics.world.setBounds(0, WORLD_TOP, ACTIVE_STAGE.worldWidth, WORLD_HEIGHT);
     this.createBackground();
 
@@ -996,12 +1000,18 @@ class PrototypeScene extends Phaser.Scene {
       background.setStrokeStyle(2, pressed ? 0xfde68a : 0xe5e7eb, pressed ? 0.95 : 0.72);
       onPressedChange(pressed);
     };
+    const clearPressed = () => {
+      activePointers.clear();
+      setPressed(false);
+    };
 
     const press = (pointer: Phaser.Input.Pointer) => {
+      pointer.event?.preventDefault();
       activePointers.add(pointer.id);
       setPressed(true);
     };
     const release = (pointer: Phaser.Input.Pointer) => {
+      pointer.event?.preventDefault();
       activePointers.delete(pointer.id);
       setPressed(activePointers.size > 0);
     };
@@ -1009,6 +1019,14 @@ class PrototypeScene extends Phaser.Scene {
     background.on("pointerdown", press);
     background.on("pointerup", release);
     background.on("pointerupoutside", release);
+    this.input.on("pointerup", release);
+    window.addEventListener("pointercancel", clearPressed);
+    window.addEventListener("blur", clearPressed);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
+      this.input.off("pointerup", release);
+      window.removeEventListener("pointercancel", clearPressed);
+      window.removeEventListener("blur", clearPressed);
+    });
     container.add([background, text]);
   }
 
