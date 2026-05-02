@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.44
+### English
+- Rebuilt the crouch spritesheet with horizontal alignment based on each frame's head center to reduce side-to-side sliding.
+### 日本語
+- 各フレームの頭中心を基準に横位置を揃えてしゃがみスプライトを再生成し、左右のスライドぶれを抑えました。
+
 ## v0.1.43
 ### English
 - Rescaled the crouch spritesheet so its first standing frame matches the idle animation's first-frame character height and foot position.
