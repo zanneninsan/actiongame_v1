@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.18";
+const DEBUG_VERSION = "v0.1.19";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -67,6 +67,10 @@ type StreetLampPlacement = { x: number; key: StreetLampKey; scale: number };
 type StageDecorationPlacement = { x: number; y: number; key: string; scale: number };
 type ItemPlacement = { type: ItemType; x: number; y: number };
 type ControlMode = "pc" | "mobile";
+type FullscreenTarget = HTMLElement & {
+  msRequestFullscreen?: () => Promise<void> | void;
+  webkitRequestFullscreen?: () => Promise<void> | void;
+};
 type StageDefinition = {
   name: string;
   worldWidth: number;
@@ -758,6 +762,7 @@ class PrototypeScene extends Phaser.Scene {
     const form = overlay.querySelector("form")!;
     const input = overlay.querySelector<HTMLInputElement>("input[name='playerName']")!;
     const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
+    overlay.querySelector<HTMLButtonElement>("[data-mode='mobile']")!.textContent = "MOBILE";
     let selectedMode: ControlMode = "pc";
 
     const selectMode = (mode: ControlMode) => {
@@ -779,11 +784,30 @@ class PrototypeScene extends Phaser.Scene {
       this.playerName = name || "PLAYER";
       this.controlMode = selectedMode;
       this.setupComplete = true;
+      if (this.controlMode === "mobile") {
+        this.requestMobileFullscreen();
+      }
       this.startRun();
     });
 
     input.focus();
     input.select();
+  }
+
+  private requestMobileFullscreen() {
+    if (document.fullscreenElement) {
+      return;
+    }
+
+    const target = document.documentElement as FullscreenTarget;
+    const requestFullscreen =
+      target.requestFullscreen ?? target.webkitRequestFullscreen ?? target.msRequestFullscreen;
+
+    if (!requestFullscreen) {
+      return;
+    }
+
+    void Promise.resolve(requestFullscreen.call(target)).catch(() => undefined);
   }
 
   private removeStartModal() {
