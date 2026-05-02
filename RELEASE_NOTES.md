@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.37
+### English
+- Increased the HUD text size by one step.
+- Saved the player name, volume, and mute state in cookies so they are restored on the next visit.
+### 日本語
+- HUD内の文字サイズをもう一段階大きくしました。
+- プレイヤー名、音量、ミュート状態をCookieへ保存し、次回表示時に復元するようにしました。
+
 ## v0.1.36
 ### English
 - Restored the HUD text font sizes after the panel resize.

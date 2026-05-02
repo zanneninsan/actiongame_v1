@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.36";
+const DEBUG_VERSION = "v0.1.37";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -546,6 +546,7 @@ class PrototypeScene extends Phaser.Scene {
 
   create() {
     this.registerRainbowPipeline();
+    this.playerName = this.getCookieValue("actiongame_player_name") || this.playerName;
     this.resetRunState();
     if (!extraTouchPointersAdded) {
       this.input.addPointer(4);
@@ -605,7 +606,7 @@ class PrototypeScene extends Phaser.Scene {
     this.playerNameText = this.add
       .text(58, 40, "", {
         fontFamily: "monospace",
-        fontSize: "18px",
+        fontSize: "20px",
         color: "#e0f2fe",
       })
       .setDepth(100)
@@ -615,7 +616,7 @@ class PrototypeScene extends Phaser.Scene {
     this.scoreText = this.add
       .text(58, 63, "", {
         fontFamily: "monospace",
-        fontSize: "14px",
+        fontSize: "16px",
         color: "#f8fafc",
       })
       .setScrollFactor(0)
@@ -626,7 +627,7 @@ class PrototypeScene extends Phaser.Scene {
     this.timerText = this.add
       .text(58, 87, "", {
         fontFamily: "monospace",
-        fontSize: "14px",
+        fontSize: "16px",
         color: "#fde68a",
       })
       .setScrollFactor(0)
@@ -909,6 +910,7 @@ class PrototypeScene extends Phaser.Scene {
       event.preventDefault();
       const name = input.value.trim();
       this.playerName = name || "PLAYER";
+      this.setCookieValue("actiongame_player_name", this.playerName);
       this.controlMode = selectedMode;
       this.setupComplete = true;
       if (this.controlMode === "mobile") {
@@ -952,6 +954,32 @@ class PrototypeScene extends Phaser.Scene {
       };
       return entities[character];
     });
+  }
+
+  private getCookieValue(name: string) {
+    const prefix = `${encodeURIComponent(name)}=`;
+    const cookie = document.cookie.split("; ").find((entry) => entry.startsWith(prefix));
+    if (!cookie) {
+      return "";
+    }
+    return decodeURIComponent(cookie.slice(prefix.length));
+  }
+
+  private setCookieValue(name: string, value: string) {
+    document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; max-age=31536000; path=/; SameSite=Lax`;
+  }
+
+  private getSavedVolumePercent() {
+    const savedVolume = Number(this.getCookieValue("actiongame_volume"));
+    if (!Number.isFinite(savedVolume)) {
+      return 50;
+    }
+    return Phaser.Math.Clamp(Math.round(savedVolume), 0, 100);
+  }
+
+  private saveVolumeSettings(volume: number, isMuted: boolean) {
+    this.setCookieValue("actiongame_volume", String(Phaser.Math.Clamp(Math.round(volume), 0, 100)));
+    this.setCookieValue("actiongame_muted", isMuted ? "1" : "0");
   }
 
   private buildStage(platforms: Phaser.Physics.Arcade.StaticGroup) {
@@ -1312,9 +1340,11 @@ class PrototypeScene extends Phaser.Scene {
     const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
     const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
 
-    this.sound.volume = 0.5;
-    volumeSlider.value = "50";
-    let isMuted = this.sound.mute;
+    const savedVolume = this.getSavedVolumePercent();
+    volumeSlider.value = String(savedVolume);
+    this.sound.volume = savedVolume / 100;
+    let isMuted = this.getCookieValue("actiongame_muted") === "1";
+    this.sound.mute = isMuted;
 
     const updateIcon = () => {
       const currentVolume = parseInt(volumeSlider.value, 10);
@@ -1333,6 +1363,7 @@ class PrototypeScene extends Phaser.Scene {
         isMuted = !isMuted;
       }
       this.sound.mute = isMuted;
+      this.saveVolumeSettings(parseInt(volumeSlider.value, 10), isMuted);
       updateIcon();
     });
 
@@ -1352,6 +1383,7 @@ class PrototypeScene extends Phaser.Scene {
         isMuted = false;
         this.sound.mute = false;
       }
+      this.saveVolumeSettings(val, isMuted);
       updateIcon();
     });
 
