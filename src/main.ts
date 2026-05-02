@@ -6,9 +6,11 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const WORLD_WIDTH = 8400;
-const WORLD_HEIGHT = 720;
+const WORLD_TOP = -360;
+const WORLD_BOTTOM = 720;
+const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.11";
+const DEBUG_VERSION = "v0.1.12";
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 90;
 const GROUND_TOP_Y = 672;
@@ -168,7 +170,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   create() {
-    this.physics.world.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    this.physics.world.setBounds(0, WORLD_TOP, WORLD_WIDTH, WORLD_HEIGHT);
     this.createBackground();
 
     const platforms = this.physics.add.staticGroup();
@@ -205,7 +207,7 @@ class PrototypeScene extends Phaser.Scene {
       d: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D),
     };
 
-    this.cameras.main.setBounds(0, 0, WORLD_WIDTH, WORLD_HEIGHT);
+    this.cameras.main.setBounds(0, WORLD_TOP, WORLD_WIDTH, WORLD_HEIGHT);
     this.cameras.main.setZoom(CAMERA_ZOOM);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
     this.cameras.main.setDeadzone(260, 140);
@@ -303,7 +305,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.wasOnFloor = onFloor;
 
-    if (this.player.y > WORLD_HEIGHT + 32) {
+    if (this.player.y > WORLD_BOTTOM + 32) {
       this.scene.restart();
     }
   }
@@ -366,6 +368,7 @@ class PrototypeScene extends Phaser.Scene {
   private updateBackground() {
     if (this.cityLoopBackground) {
       this.cityLoopBackground.tilePositionX = this.cameras.main.scrollX * 0.58;
+      this.cityLoopBackground.y = -this.cameras.main.scrollY;
     }
 
   }
