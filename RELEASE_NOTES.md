@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.34
+### English
+- Replaced the top-left HUD panel with the supplied fantasy frame artwork.
+- Processed the HUD artwork as a transparent, cropped game asset and adjusted HUD text placement to fit the new frame.
+### 日本語
+- 左上HUDパネルを、提供されたファンタジー調フレーム素材に差し替えました。
+- HUD素材を透過・トリミングしたゲーム用アセットとして取り込み、新しいフレームに合わせて文字位置を調整しました。
+
 ## v0.1.33
 ### English
 - Fixed corrupted BGM and options button labels.
