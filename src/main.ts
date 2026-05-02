@@ -10,7 +10,10 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.12";
+const DEBUG_VERSION = "v0.1.13";
+const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
+const GAME_TIME_SECONDS = 180;
+const TIME_BONUS_PER_SECOND = 10;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 90;
 const GROUND_TOP_Y = 672;
@@ -49,6 +52,48 @@ type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
 type ScoreState = Record<ItemType, number>;
 type PlatformAsset = (typeof PLATFORM_ASSETS)[keyof typeof PLATFORM_ASSETS];
 type StageObjectAsset = { key: string; path: string };
+
+const RAINBOW_FRAGMENT_SHADER = `
+#define SHADER_NAME RAINBOW_WIN_FS
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+
+uniform sampler2D uMainSampler;
+uniform float uTime;
+varying vec2 outTexCoord;
+varying vec4 outTint;
+
+vec3 rainbow(float t) {
+  vec3 phase = vec3(0.0, 0.33, 0.67);
+  return 0.55 + 0.45 * cos(6.28318 * (t + phase));
+}
+
+void main () {
+  vec4 texture = texture2D(uMainSampler, outTexCoord);
+  float band = fract(outTexCoord.x * 1.85 + uTime * 1.6);
+  float shine = smoothstep(0.18, 0.0, abs(fract(band * 3.0) - 0.5));
+  float luminance = dot(texture.rgb, vec3(0.299, 0.587, 0.114));
+  vec3 rainbowColor = rainbow(band) * (0.58 + luminance * 0.9 + shine * 0.35);
+  vec3 color = mix(texture.rgb, rainbowColor, 0.82);
+  gl_FragColor = vec4(color, texture.a * outTint.a);
+}
+`;
+
+class RainbowWinPipeline extends Phaser.Renderer.WebGL.Pipelines.SinglePipeline {
+  constructor(game: Phaser.Game) {
+    super({
+      game,
+      fragShader: RAINBOW_FRAGMENT_SHADER,
+    });
+  }
+
+  onPreRender() {
+    this.set1f("uTime", this.game.loop.time / 1000);
+  }
+}
 
 const STAGE_OBJECT_ASSETS = [
   { key: "stage-props-traffic-cone", path: "assets/stage_objects/props_traffic_cone.webp" },
@@ -127,7 +172,10 @@ class PrototypeScene extends Phaser.Scene {
   private cityLoopBackground?: Phaser.GameObjects.TileSprite;
   private statusText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
+  private timerText!: Phaser.GameObjects.Text;
+  private finalScoreText?: Phaser.GameObjects.Text;
   private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
+  private startTime = 0;
   private hasWon = false;
   private wasOnFloor = false;
   private isLanding = false;
@@ -170,7 +218,9 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   create() {
+    this.registerRainbowPipeline();
     this.physics.world.setBounds(0, WORLD_TOP, WORLD_WIDTH, WORLD_HEIGHT);
+    this.startTime = this.time.now;
     this.createBackground();
 
     const platforms = this.physics.add.staticGroup();
@@ -216,21 +266,34 @@ class PrototypeScene extends Phaser.Scene {
     this.statusText = this.add
       .text(8, 8, "A/D: move  W/Space: jump  R: restart", {
         fontFamily: "monospace",
-        fontSize: "8px",
+        fontSize: "14px",
         color: "#e5e7eb",
       })
+      .setDepth(100)
+      .setShadow(1, 1, "#020617", 2, true, true)
       .setScrollFactor(0);
 
     this.scoreText = this.add
-      .text(8, 24, "", {
+      .text(8, 30, "", {
         fontFamily: "monospace",
-        fontSize: "12px",
+        fontSize: "16px",
         color: "#f8fafc",
       })
       .setScrollFactor(0)
       .setDepth(100)
       .setShadow(1, 1, "#020617", 2, true, true);
     this.updateScoreText();
+
+    this.timerText = this.add
+      .text(8, 52, "", {
+        fontFamily: "monospace",
+        fontSize: "18px",
+        color: "#fde68a",
+      })
+      .setScrollFactor(0)
+      .setDepth(100)
+      .setShadow(1, 1, "#020617", 2, true, true);
+    this.updateTimerText();
 
     this.add
       .text(GAME_WIDTH - 8, 8, DEBUG_VERSION, {
@@ -249,6 +312,7 @@ class PrototypeScene extends Phaser.Scene {
   update() {
     this.applyPlayerBody();
     this.updateBackground();
+    this.updateTimerText();
 
     const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
     const left = this.keys.a.isDown || this.cursors.left.isDown;
@@ -502,11 +566,28 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private updateScoreText() {
-    const total = Object.values(this.score).reduce((sum, value) => sum + value, 0);
+    const total = this.getItemScore();
     const itemScores = (Object.keys(ITEM_DEFINITIONS) as ItemType[])
       .map((itemType) => `${ITEM_DEFINITIONS[itemType].label}:${this.score[itemType]}`)
       .join("  ");
     this.scoreText.setText(`SCORE:${total}  ${itemScores}`);
+  }
+
+  private updateTimerText() {
+    if (!this.timerText || this.hasWon) {
+      return;
+    }
+
+    this.timerText.setText(`TIME:${this.getRemainingSeconds()}`);
+  }
+
+  private getItemScore() {
+    return Object.values(this.score).reduce((sum, value) => sum + value, 0);
+  }
+
+  private getRemainingSeconds() {
+    const elapsed = Math.floor((this.time.now - this.startTime) / 1000);
+    return Math.max(0, GAME_TIME_SECONDS - elapsed);
   }
 
   private createPixelTexture(key: string, width: number, height: number, fill: number, stroke: number) {
@@ -582,8 +663,51 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.hasWon = true;
-    this.statusText.setText("Goal! Press R to restart");
-    this.player.setTint(0xfef08a);
+    const remaining = this.getRemainingSeconds();
+    const timeBonus = remaining * TIME_BONUS_PER_SECOND;
+    const itemScore = this.getItemScore();
+    const finalScore = itemScore + timeBonus;
+    this.statusText.setText("GOAL!");
+    this.timerText.setText(`TIME:${remaining}  BONUS:${timeBonus}`);
+    this.scoreText.setText(`ITEM SCORE:${itemScore}`);
+    this.startRainbowWinEffect();
+    this.finalScoreText = this.add
+      .text(
+        GAME_WIDTH / 2,
+        GAME_HEIGHT / 2,
+        `CLEAR!\nSCORE ${finalScore}\nTIME BONUS ${timeBonus}`,
+        {
+          fontFamily: "monospace",
+          fontSize: "48px",
+          color: "#f8fafc",
+          align: "center",
+        },
+      )
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(200)
+      .setShadow(3, 3, "#020617", 4, true, true);
+  }
+
+  private registerRainbowPipeline() {
+    if (this.game.renderer.type !== Phaser.WEBGL) {
+      return;
+    }
+
+    const renderer = this.game.renderer as Phaser.Renderer.WebGL.WebGLRenderer;
+    if (renderer.pipelines.get(RAINBOW_PIPELINE_KEY)) {
+      return;
+    }
+
+    renderer.pipelines.add(RAINBOW_PIPELINE_KEY, new RainbowWinPipeline(this.game));
+  }
+
+  private startRainbowWinEffect() {
+    if (this.game.renderer.type === Phaser.WEBGL) {
+      this.player.setPipeline(RAINBOW_PIPELINE_KEY);
+    } else {
+      this.player.setTint(0xff66ff, 0x66ffff, 0xffff66, 0x66ff66);
+    }
   }
 }
 
