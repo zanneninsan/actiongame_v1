@@ -5,14 +5,14 @@ const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
-const WORLD_WIDTH = 8400;
+const WORLD_WIDTH = 16800;
 const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.15";
+const DEBUG_VERSION = "v0.1.16";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
-const GAME_TIME_SECONDS = 180;
+const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
@@ -164,6 +164,27 @@ const ITEM_PLACEMENTS: Array<{ type: ItemType; x: number; y: number }> = [
   { type: "shoppingBag", x: 7465, y: 424 },
   { type: "energyDrink", x: 7775, y: 344 },
   { type: "bubbleTea", x: 8125, y: 504 },
+  { type: "shoppingBag", x: 8460, y: 464 },
+  { type: "energyDrink", x: 8830, y: 384 },
+  { type: "bubbleTea", x: 9140, y: 276 },
+  { type: "shoppingBag", x: 9460, y: 156 },
+  { type: "energyDrink", x: 9810, y: 56 },
+  { type: "bubbleTea", x: 10180, y: 204 },
+  { type: "shoppingBag", x: 10570, y: 364 },
+  { type: "energyDrink", x: 10980, y: 504 },
+  { type: "bubbleTea", x: 11460, y: 412 },
+  { type: "shoppingBag", x: 11820, y: 284 },
+  { type: "energyDrink", x: 12120, y: 132 },
+  { type: "bubbleTea", x: 12540, y: 252 },
+  { type: "shoppingBag", x: 13020, y: 456 },
+  { type: "energyDrink", x: 13440, y: 364 },
+  { type: "bubbleTea", x: 13770, y: 212 },
+  { type: "shoppingBag", x: 14120, y: 72 },
+  { type: "energyDrink", x: 14540, y: 304 },
+  { type: "bubbleTea", x: 15080, y: 492 },
+  { type: "shoppingBag", x: 15560, y: 404 },
+  { type: "energyDrink", x: 15920, y: 284 },
+  { type: "bubbleTea", x: 16320, y: 504 },
 ];
 
 class PrototypeScene extends Phaser.Scene {
@@ -231,7 +252,7 @@ class PrototypeScene extends Phaser.Scene {
     this.createStreetLamps();
     this.createStageObjects();
 
-    const goal = this.physics.add.staticImage(8260, 568, "goal");
+    const goal = this.physics.add.staticImage(16620, 568, "goal");
     goal.setDisplaySize(24, 96);
     goal.setSize(24, 96);
 
@@ -411,6 +432,27 @@ class PrototypeScene extends Phaser.Scene {
     this.addPlatformRun(platforms, 7350, 480, 3);
     this.addPlatformRun(platforms, 7600, 400, 4);
     this.addPlatformRun(platforms, 7900, 560, 6);
+    this.addPlatformRun(platforms, 8380, 520, 5);
+    this.addPlatformRun(platforms, 8740, 440, 4);
+    this.addPlatformRun(platforms, 9060, 332, 3);
+    this.addPlatformRun(platforms, 9360, 212, 4);
+    this.addPlatformRun(platforms, 9720, 112, 3);
+    this.addPlatformRun(platforms, 10080, 260, 5);
+    this.addPlatformRun(platforms, 10480, 420, 4);
+    this.addPlatformRun(platforms, 10820, 560, 8);
+    this.addPlatformRun(platforms, 11380, 468, 4);
+    this.addPlatformRun(platforms, 11720, 340, 3);
+    this.addPlatformRun(platforms, 12020, 188, 4);
+    this.addPlatformRun(platforms, 12460, 308, 3);
+    this.addPlatformRun(platforms, 12860, 512, 7);
+    this.addPlatformRun(platforms, 13380, 420, 3);
+    this.addPlatformRun(platforms, 13680, 268, 4);
+    this.addPlatformRun(platforms, 14040, 128, 3);
+    this.addPlatformRun(platforms, 14460, 360, 5);
+    this.addPlatformRun(platforms, 14920, 548, 9);
+    this.addPlatformRun(platforms, 15480, 460, 4);
+    this.addPlatformRun(platforms, 15840, 340, 3);
+    this.addPlatformRun(platforms, 16240, 560, 6);
   }
 
   private createBackground() {
@@ -488,6 +530,18 @@ class PrototypeScene extends Phaser.Scene {
       { x: 6480, key: PROP_ASSETS.lampSingle, scale: 0.68 },
       { x: 7160, key: PROP_ASSETS.lampDouble, scale: 0.64 },
       { x: 7820, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+      { x: 8460, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+      { x: 9180, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+      { x: 9840, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+      { x: 10560, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+      { x: 11280, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+      { x: 11960, key: PROP_ASSETS.lampSingle, scale: 0.68 },
+      { x: 12640, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+      { x: 13320, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+      { x: 14020, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+      { x: 14740, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+      { x: 15460, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+      { x: 16220, key: PROP_ASSETS.lampSingle, scale: 0.68 },
     ].forEach((lamp) => {
       this.add
         .image(lamp.x, STREET_LAMP_GROUND_Y, lamp.key)
@@ -520,6 +574,24 @@ class PrototypeScene extends Phaser.Scene {
       { x: 7160, y: GROUND_TOP_Y, key: "stage-structures-street-kiosk", scale: 0.62 },
       { x: 7540, y: 480, key: "stage-props-planter-box", scale: 0.62 },
       { x: 7960, y: GROUND_TOP_Y, key: "stage-structures-station-entrance", scale: 0.64 },
+      { x: 8520, y: GROUND_TOP_Y, key: "stage-props-guard-rail", scale: 0.84 },
+      { x: 8820, y: 440, key: "stage-props-trash-bin", scale: 0.58 },
+      { x: 9320, y: 212, key: "stage-props-planter-box", scale: 0.56 },
+      { x: 9800, y: 112, key: "stage-props-sidewalk-sign", scale: 0.52 },
+      { x: 10180, y: GROUND_TOP_Y, key: "stage-structures-chainlink-fence", scale: 0.62 },
+      { x: 10620, y: 420, key: "stage-props-utility-box", scale: 0.54 },
+      { x: 11080, y: GROUND_TOP_Y, key: "stage-structures-bus-shelter", scale: 0.68 },
+      { x: 11520, y: 468, key: "stage-props-bike-rack", scale: 0.58 },
+      { x: 12080, y: 188, key: "stage-props-roadwork-sign", scale: 0.5 },
+      { x: 12490, y: GROUND_TOP_Y, key: "stage-structures-shutter-storefront", scale: 0.64 },
+      { x: 13080, y: 512, key: "stage-props-construction-barricade", scale: 0.56 },
+      { x: 13680, y: 268, key: "stage-props-planter-box", scale: 0.54 },
+      { x: 14110, y: 128, key: "stage-props-bus-stop-sign", scale: 0.58 },
+      { x: 14580, y: GROUND_TOP_Y, key: "stage-structures-concrete-pillar", scale: 0.62 },
+      { x: 15120, y: 548, key: "stage-props-vending-machine", scale: 0.62 },
+      { x: 15560, y: GROUND_TOP_Y, key: "stage-structures-vending-kiosk", scale: 0.72 },
+      { x: 15920, y: 340, key: "stage-props-traffic-cone", scale: 0.54 },
+      { x: 16420, y: GROUND_TOP_Y, key: "stage-structures-station-wall-railing", scale: 0.68 },
     ].forEach((object) => {
       this.add
         .image(object.x, object.y, object.key)
@@ -543,10 +615,10 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createMobileControls() {
-    const buttonSize = 64;
-    const gap = 10;
-    const baseX = 48;
-    const baseY = GAME_HEIGHT - 170;
+    const buttonSize = 82;
+    const gap = 12;
+    const baseX = 58;
+    const baseY = GAME_HEIGHT - 204;
     const positions: Array<{ key: MobileInputKey; x: number; y: number }> = [
       { key: "w", x: baseX + buttonSize + gap, y: baseY },
       { key: "a", x: baseX, y: baseY + buttonSize + gap },
@@ -563,7 +635,15 @@ class PrototypeScene extends Phaser.Scene {
       });
     });
 
-    this.createTouchButton(GAME_WIDTH - 116, GAME_HEIGHT - 106, buttonSize, "R", (pressed) => {
+    const rightX = GAME_WIDTH - 106;
+    this.createTouchButton(rightX, GAME_HEIGHT - 190, buttonSize, "W", (pressed) => {
+      this.mobileInput.w = pressed;
+      if (pressed) {
+        this.mobileJumpQueued = true;
+      }
+    });
+
+    this.createTouchButton(rightX, GAME_HEIGHT - 96, buttonSize, "R", (pressed) => {
       if (pressed) {
         this.scene.restart();
       }
@@ -585,7 +665,7 @@ class PrototypeScene extends Phaser.Scene {
     const text = this.add
       .text(0, 0, label, {
         fontFamily: "monospace",
-        fontSize: "24px",
+        fontSize: "30px",
         color: "#f8fafc",
       })
       .setOrigin(0.5);
