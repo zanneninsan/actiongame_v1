@@ -8,12 +8,12 @@ const TILE = 32;
 const WORLD_WIDTH = 4200;
 const WORLD_HEIGHT = 720;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.8";
-const FOOTPATH_SOURCE_HEIGHT = 204;
-const FOOTPATH_DISPLAY_HEIGHT = 204;
-const FOOTPATH_SCALE = FOOTPATH_DISPLAY_HEIGHT / FOOTPATH_SOURCE_HEIGHT;
+const DEBUG_VERSION = "v0.1.9";
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 90;
+const GROUND_TOP_Y = 672;
+const GROUND_VISUAL_Y = 650;
+const STREET_LAMP_GROUND_Y = 672;
 const PLAYER_DISPLAY_WIDTH = 320;
 const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
@@ -36,6 +36,10 @@ const PLATFORM_ASSETS = {
   middle: "platform-unit-middle",
   right: "platform-unit-right",
   single: "platform-unit-single",
+} as const;
+const PROP_ASSETS = {
+  lampSingle: "street-lamp-single",
+  lampDouble: "street-lamp-double",
 } as const;
 type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
 type ScoreState = Record<ItemType, number>;
@@ -79,7 +83,6 @@ class PrototypeScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
   private cityLoopBackground?: Phaser.GameObjects.TileSprite;
-  private footpathBackground?: Phaser.GameObjects.TileSprite;
   private statusText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
   private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
@@ -94,11 +97,12 @@ class PrototypeScene extends Phaser.Scene {
   preload() {
     this.load.image("background-stars", `${ASSET_BASE}assets/backgrounds/starry_sky.webp`);
     this.load.image("background-city-loop", `${ASSET_BASE}assets/backgrounds/city_loop_strip.webp`);
-    this.load.image("background-footpath", `${ASSET_BASE}assets/backgrounds/footpath_loop.webp`);
     this.load.image(PLATFORM_ASSETS.left, `${ASSET_BASE}assets/platforms/platform_unit_left.webp`);
     this.load.image(PLATFORM_ASSETS.middle, `${ASSET_BASE}assets/platforms/platform_unit_middle.webp`);
     this.load.image(PLATFORM_ASSETS.right, `${ASSET_BASE}assets/platforms/platform_unit_right.webp`);
     this.load.image(PLATFORM_ASSETS.single, `${ASSET_BASE}assets/platforms/platform_unit_single.webp`);
+    this.load.image(PROP_ASSETS.lampSingle, `${ASSET_BASE}assets/props/street_lamp_single.webp`);
+    this.load.image(PROP_ASSETS.lampDouble, `${ASSET_BASE}assets/props/street_lamp_double.webp`);
     Object.values(ITEM_DEFINITIONS).forEach((item) => {
       this.load.image(item.key, `${ASSET_BASE}${item.assetPath}`);
     });
@@ -126,6 +130,7 @@ class PrototypeScene extends Phaser.Scene {
 
     const platforms = this.physics.add.staticGroup();
     this.buildStage(platforms);
+    this.createStreetLamps();
 
     const goal = this.physics.add.staticImage(4020, 568, "goal");
     goal.setDisplaySize(24, 96);
@@ -261,9 +266,10 @@ class PrototypeScene extends Phaser.Scene {
 
   private buildStage(platforms: Phaser.Physics.Arcade.StaticGroup) {
     for (let x = 0; x < WORLD_WIDTH; x += TILE) {
-      this.addBlock(platforms, x, 672, "ground", false);
+      this.addBlock(platforms, x, GROUND_TOP_Y, "ground", false);
     }
 
+    this.addPlatformRun(platforms, 0, GROUND_VISUAL_Y, Math.ceil(WORLD_WIDTH / PLATFORM_UNIT_WIDTH) + 1, false);
     this.addPlatformRun(platforms, 360, 548, 4);
     this.addPlatformRun(platforms, 744, 488, 7);
     this.addPlatformRun(platforms, 1160, 548, 3);
@@ -299,13 +305,6 @@ class PrototypeScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setScrollFactor(0)
       .setDepth(-15);
-
-    this.footpathBackground = this.add
-      .tileSprite(0, GAME_HEIGHT - FOOTPATH_DISPLAY_HEIGHT, GAME_WIDTH, FOOTPATH_DISPLAY_HEIGHT, "background-footpath")
-      .setOrigin(0, 0)
-      .setScrollFactor(0)
-      .setDepth(-5);
-    this.footpathBackground.setTileScale(FOOTPATH_SCALE, FOOTPATH_SCALE);
   }
 
   private updateBackground() {
@@ -313,9 +312,6 @@ class PrototypeScene extends Phaser.Scene {
       this.cityLoopBackground.tilePositionX = this.cameras.main.scrollX * 0.58;
     }
 
-    if (this.footpathBackground) {
-      this.footpathBackground.tilePositionX = this.cameras.main.scrollX / FOOTPATH_SCALE;
-    }
   }
 
   private addBlock(platforms: Phaser.Physics.Arcade.StaticGroup, x: number, y: number, texture: string, visible = true) {
@@ -324,7 +320,13 @@ class PrototypeScene extends Phaser.Scene {
     block.refreshBody();
   }
 
-  private addPlatformRun(platforms: Phaser.Physics.Arcade.StaticGroup, x: number, y: number, units: number) {
+  private addPlatformRun(
+    platforms: Phaser.Physics.Arcade.StaticGroup,
+    x: number,
+    y: number,
+    units: number,
+    collides = true,
+  ) {
     for (let i = 0; i < units; i += 1) {
       let texture: PlatformAsset = PLATFORM_ASSETS.middle;
       if (units === 1) {
@@ -337,8 +339,28 @@ class PrototypeScene extends Phaser.Scene {
 
       const unitX = x + i * PLATFORM_UNIT_WIDTH;
       this.add.image(unitX, y, texture).setOrigin(0, 0).setDepth(-1);
-      this.addPlatformHitbox(platforms, unitX, y, PLATFORM_UNIT_WIDTH, PLATFORM_UNIT_HEIGHT);
+      if (collides) {
+        this.addPlatformHitbox(platforms, unitX, y, PLATFORM_UNIT_WIDTH, PLATFORM_UNIT_HEIGHT);
+      }
     }
+  }
+
+  private createStreetLamps() {
+    [
+      { x: 260, key: PROP_ASSETS.lampSingle, scale: 0.68 },
+      { x: 910, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+      { x: 1500, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+      { x: 2140, key: PROP_ASSETS.lampDouble, scale: 0.66 },
+      { x: 2860, key: PROP_ASSETS.lampSingle, scale: 0.68 },
+      { x: 3440, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+      { x: 4040, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+    ].forEach((lamp) => {
+      this.add
+        .image(lamp.x, STREET_LAMP_GROUND_Y, lamp.key)
+        .setOrigin(0.5, 1)
+        .setScale(lamp.scale)
+        .setDepth(-0.5);
+    });
   }
 
   private addPlatformHitbox(
