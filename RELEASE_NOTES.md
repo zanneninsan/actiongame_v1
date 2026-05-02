@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.40
+### English
+- Doubled the remaining landing animation playback speed when the player starts moving left or right during the landing animation.
+### 日本語
+- 着地モーション中に左右移動を始めた場合、残りの着地アニメーション再生速度が2倍になるようにしました。
+
 ## v0.1.39
 ### English
 - Increased the control hint text size and aligned it horizontally with the version display.

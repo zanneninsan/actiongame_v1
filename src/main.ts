@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.39";
+const DEBUG_VERSION = "v0.1.40";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -502,6 +502,7 @@ class PrototypeScene extends Phaser.Scene {
   private hasWon = false;
   private wasOnFloor = false;
   private isLanding = false;
+  private landingFastForwarded = false;
   private bgm?: Phaser.Sound.BaseSound;
 
   constructor() {
@@ -574,6 +575,8 @@ class PrototypeScene extends Phaser.Scene {
     this.wasOnFloor = true;
     this.player.on(`${Phaser.Animations.Events.ANIMATION_COMPLETE_KEY}player-land`, () => {
       this.isLanding = false;
+      this.landingFastForwarded = false;
+      this.player.anims.timeScale = 1;
     });
 
     this.physics.add.collider(this.player, this.platforms);
@@ -703,6 +706,8 @@ class PrototypeScene extends Phaser.Scene {
         Math.abs(this.player.body.velocity.x) >= BOOST_JUMP_SPEED_THRESHOLD ? BOOSTED_JUMP_VELOCITY : JUMP_VELOCITY;
       this.player.setVelocityY(jumpVelocity);
       this.isLanding = false;
+      this.landingFastForwarded = false;
+      this.player.anims.timeScale = 1;
       startedJump = true;
       this.player.anims.play("player-jump-start", true);
     }
@@ -712,10 +717,18 @@ class PrototypeScene extends Phaser.Scene {
 
     if (landedThisFrame) {
       this.isLanding = true;
+      this.landingFastForwarded = false;
+      this.player.anims.timeScale = 1;
       this.player.anims.play("player-land", true);
     } else if (this.isLanding) {
+      if ((left || right) && !this.landingFastForwarded) {
+        this.landingFastForwarded = true;
+        this.player.anims.timeScale = 2;
+      }
       if (!this.player.anims.isPlaying) {
         this.isLanding = false;
+        this.landingFastForwarded = false;
+        this.player.anims.timeScale = 1;
       }
     } else if (startedJump) {
       this.player.anims.play("player-jump-start", true);
@@ -758,6 +771,7 @@ class PrototypeScene extends Phaser.Scene {
     this.hasWon = false;
     this.wasOnFloor = false;
     this.isLanding = false;
+    this.landingFastForwarded = false;
     this.finalScoreText = undefined;
   }
 
