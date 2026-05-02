@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.47
+### English
+- Reduced the player collision box while crouching, keeping the feet anchored to the same bottom position.
+### 日本語
+- しゃがみ中のプレイヤー当たり判定を小さくし、足元位置は通常時と同じ高さに揃えました。
+
 ## v0.1.46
 ### English
 - Added a `HIT` debug toggle that displays collision rectangles for the player, platforms, items, and goal.

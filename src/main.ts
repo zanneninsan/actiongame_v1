@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.46";
+const DEBUG_VERSION = "v0.1.47";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -28,6 +28,10 @@ const PLAYER_BODY_WIDTH = 52;
 const PLAYER_BODY_HEIGHT = 164;
 const PLAYER_BODY_OFFSET_X = 134;
 const PLAYER_BODY_OFFSET_Y = 86;
+const PLAYER_CROUCH_BODY_WIDTH = 58;
+const PLAYER_CROUCH_BODY_HEIGHT = 94;
+const PLAYER_CROUCH_BODY_OFFSET_X = 131;
+const PLAYER_CROUCH_BODY_OFFSET_Y = PLAYER_BODY_OFFSET_Y + PLAYER_BODY_HEIGHT - PLAYER_CROUCH_BODY_HEIGHT;
 const PLAYER_IDLE_FRAME_COUNT = 8;
 const PLAYER_FRAME_COUNT = 13;
 const PLAYER_CROUCH_FRAME_COUNT = 27;
@@ -669,11 +673,11 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   update() {
-    this.applyPlayerBody();
     this.updateBackground();
     this.updateTimerText();
-    this.updateCollisionDebug();
     if (!this.isRunActive) {
+      this.applyPlayerBody(false);
+      this.updateCollisionDebug();
       this.player.setAcceleration(0, 0);
       this.player.setVelocity(0, 0);
       return;
@@ -683,6 +687,8 @@ class PrototypeScene extends Phaser.Scene {
     const left = this.keys.a.isDown || this.cursors.left.isDown || this.mobileInput.a;
     const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
     const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
+    this.applyPlayerBody(down && onFloor);
+    this.updateCollisionDebug();
     const debugJump = Phaser.Input.Keyboard.JustDown(this.keys.w) || this.mobileJumpQueued;
     this.mobileJumpQueued = false;
     const normalJump = Phaser.Input.Keyboard.JustDown(this.cursors.space);
@@ -1736,7 +1742,13 @@ class PrototypeScene extends Phaser.Scene {
     });
   }
 
-  private applyPlayerBody() {
+  private applyPlayerBody(isCrouching = false) {
+    if (isCrouching) {
+      this.player.setSize(PLAYER_CROUCH_BODY_WIDTH, PLAYER_CROUCH_BODY_HEIGHT);
+      this.player.setOffset(PLAYER_CROUCH_BODY_OFFSET_X, PLAYER_CROUCH_BODY_OFFSET_Y);
+      return;
+    }
+
     this.player.setSize(PLAYER_BODY_WIDTH, PLAYER_BODY_HEIGHT);
     this.player.setOffset(PLAYER_BODY_OFFSET_X, PLAYER_BODY_OFFSET_Y);
   }
