@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.20";
+const DEBUG_VERSION = "v0.1.21";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -1035,13 +1035,13 @@ class PrototypeScene extends Phaser.Scene {
     controls.id = "mobile-controls";
     controls.innerHTML = `
       <div class="mobile-pad">
-        <button class="mobile-button pad-up" data-key="w" type="button">W</button>
-        <button class="mobile-button pad-left" data-key="a" type="button">A</button>
-        <button class="mobile-button pad-down" data-key="s" type="button">S</button>
-        <button class="mobile-button pad-right" data-key="d" type="button">D</button>
+        <button class="mobile-button pad-up" data-key="w" type="button" aria-label="Jump">↑</button>
+        <button class="mobile-button pad-left" data-key="a" type="button" aria-label="Move left">←</button>
+        <button class="mobile-button pad-down" data-key="s" type="button" aria-label="Down">↓</button>
+        <button class="mobile-button pad-right" data-key="d" type="button" aria-label="Move right">→</button>
       </div>
       <div class="mobile-actions">
-        <button class="mobile-button" data-key="w" type="button">W</button>
+        <button class="mobile-button" data-key="w" type="button" aria-label="Jump">↑</button>
         <button class="mobile-button restart-button" data-action="restart" type="button">R</button>
       </div>
     `;
