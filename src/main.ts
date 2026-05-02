@@ -5,13 +5,13 @@ const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
-const WORLD_WIDTH = 16800;
 const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
 const DEBUG_VERSION = "v0.1.16";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
+const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
 const PLATFORM_UNIT_WIDTH = 64;
@@ -21,6 +21,8 @@ const GROUND_VISUAL_Y = GROUND_TOP_Y;
 const STREET_LAMP_GROUND_Y = 672;
 const PLATFORM_DEPTH = -0.55;
 const DECORATION_DEPTH = -1.2;
+const STREET_LAMP_LIGHT_DEPTH = DECORATION_DEPTH - 0.08;
+const STREET_LAMP_GROUND_LIGHT_DEPTH = PLATFORM_DEPTH + 0.02;
 const PLAYER_DISPLAY_WIDTH = 320;
 const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
@@ -48,11 +50,33 @@ const PROP_ASSETS = {
   lampSingle: "street-lamp-single",
   lampDouble: "street-lamp-double",
 } as const;
+type StreetLampKey = (typeof PROP_ASSETS)[keyof typeof PROP_ASSETS];
 type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
+const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
+const ITEM_GLOW_COLORS: Record<ItemType, number> = {
+  energyDrink: 0x8cffd2,
+  shoppingBag: 0xffd166,
+  bubbleTea: 0xf9a8ff,
+};
 type ScoreState = Record<ItemType, number>;
 type PlatformAsset = (typeof PLATFORM_ASSETS)[keyof typeof PLATFORM_ASSETS];
 type StageObjectAsset = { key: string; path: string };
 type MobileInputKey = "w" | "a" | "s" | "d";
+type PlatformRunPlacement = { x: number; y: number; units: number; collides?: boolean };
+type StreetLampPlacement = { x: number; key: StreetLampKey; scale: number };
+type StageDecorationPlacement = { x: number; y: number; key: string; scale: number };
+type ItemPlacement = { type: ItemType; x: number; y: number };
+type ControlMode = "pc" | "mobile";
+type StageDefinition = {
+  name: string;
+  worldWidth: number;
+  playerStart: { x: number; y: number };
+  goal: { x: number; y: number };
+  platforms: PlatformRunPlacement[];
+  streetLamps: StreetLampPlacement[];
+  decorations: StageDecorationPlacement[];
+  items: ItemPlacement[];
+};
 
 const RAINBOW_FRAGMENT_SHADER = `
 #define SHADER_NAME RAINBOW_WIN_FS
@@ -74,12 +98,17 @@ vec3 rainbow(float t) {
 
 void main () {
   vec4 texture = texture2D(uMainSampler, outTexCoord);
+  if (texture.a < 0.08) {
+    discard;
+  }
+
   float band = fract(outTexCoord.x * 1.85 + uTime * 1.6);
   float shine = smoothstep(0.18, 0.0, abs(fract(band * 3.0) - 0.5));
   float luminance = dot(texture.rgb, vec3(0.299, 0.587, 0.114));
   vec3 rainbowColor = rainbow(band) * (0.58 + luminance * 0.9 + shine * 0.35);
   vec3 color = mix(texture.rgb, rainbowColor, 0.82);
-  gl_FragColor = vec4(color, texture.a * outTint.a);
+  float alpha = smoothstep(0.08, 0.42, texture.a) * texture.a * outTint.a;
+  gl_FragColor = vec4(color * outTint.rgb, alpha);
 }
 `;
 
@@ -143,55 +172,286 @@ const ITEM_DEFINITIONS: Record<ItemType, { key: string; label: string; points: n
   },
 };
 
-const ITEM_PLACEMENTS: Array<{ type: ItemType; x: number; y: number }> = [
-  { type: "energyDrink", x: 475, y: 492 },
-  { type: "bubbleTea", x: 915, y: 432 },
-  { type: "shoppingBag", x: 1285, y: 492 },
-  { type: "energyDrink", x: 1750, y: 400 },
-  { type: "bubbleTea", x: 2345, y: 288 },
-  { type: "shoppingBag", x: 2720, y: 204 },
-  { type: "energyDrink", x: 3185, y: 132 },
-  { type: "bubbleTea", x: 3575, y: 236 },
-  { type: "shoppingBag", x: 3925, y: 504 },
-  { type: "energyDrink", x: 4385, y: 464 },
-  { type: "bubbleTea", x: 4825, y: 404 },
-  { type: "shoppingBag", x: 5085, y: 504 },
-  { type: "energyDrink", x: 5485, y: 364 },
-  { type: "bubbleTea", x: 5975, y: 244 },
-  { type: "shoppingBag", x: 6425, y: 444 },
-  { type: "energyDrink", x: 6745, y: 364 },
-  { type: "bubbleTea", x: 7125, y: 492 },
-  { type: "shoppingBag", x: 7465, y: 424 },
-  { type: "energyDrink", x: 7775, y: 344 },
-  { type: "bubbleTea", x: 8125, y: 504 },
-  { type: "shoppingBag", x: 8460, y: 464 },
-  { type: "energyDrink", x: 8830, y: 384 },
-  { type: "bubbleTea", x: 9140, y: 276 },
-  { type: "shoppingBag", x: 9460, y: 156 },
-  { type: "energyDrink", x: 9810, y: 56 },
-  { type: "bubbleTea", x: 10180, y: 204 },
-  { type: "shoppingBag", x: 10570, y: 364 },
-  { type: "energyDrink", x: 10980, y: 504 },
-  { type: "bubbleTea", x: 11460, y: 412 },
-  { type: "shoppingBag", x: 11820, y: 284 },
-  { type: "energyDrink", x: 12120, y: 132 },
-  { type: "bubbleTea", x: 12540, y: 252 },
-  { type: "shoppingBag", x: 13020, y: 456 },
-  { type: "energyDrink", x: 13440, y: 364 },
-  { type: "bubbleTea", x: 13770, y: 212 },
-  { type: "shoppingBag", x: 14120, y: 72 },
-  { type: "energyDrink", x: 14540, y: 304 },
-  { type: "bubbleTea", x: 15080, y: 492 },
-  { type: "shoppingBag", x: 15560, y: 404 },
-  { type: "energyDrink", x: 15920, y: 284 },
-  { type: "bubbleTea", x: 16320, y: 504 },
-];
+const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
+  name: "Original Downtown",
+  worldWidth: 16800,
+  playerStart: { x: 120, y: 552 },
+  goal: { x: 16620, y: 568 },
+  platforms: [
+    { x: 360, y: 548, units: 4 },
+    { x: 744, y: 488, units: 7 },
+    { x: 1160, y: 548, units: 3 },
+    { x: 1288, y: 500, units: 3 },
+    { x: 1580, y: 456, units: 6 },
+    { x: 1980, y: 548, units: 10 },
+    { x: 2200, y: 420, units: 3 },
+    { x: 2392, y: 372, units: 3 },
+    { x: 2584, y: 324, units: 4 },
+    { x: 2920, y: 292, units: 3 },
+    { x: 3112, y: 244, units: 3 },
+    { x: 3304, y: 196, units: 4 },
+    { x: 3540, y: 300, units: 1 },
+    { x: 3720, y: 560, units: 7 },
+    { x: 4280, y: 520, units: 5 },
+    { x: 4700, y: 460, units: 4 },
+    { x: 5000, y: 560, units: 7 },
+    { x: 5380, y: 420, units: 3 },
+    { x: 5600, y: 360, units: 3 },
+    { x: 5880, y: 300, units: 4 },
+    { x: 6260, y: 500, units: 5 },
+    { x: 6620, y: 420, units: 4 },
+    { x: 6960, y: 548, units: 8 },
+    { x: 7350, y: 480, units: 3 },
+    { x: 7600, y: 400, units: 4 },
+    { x: 7900, y: 560, units: 6 },
+    { x: 8380, y: 520, units: 5 },
+    { x: 8740, y: 440, units: 4 },
+    { x: 9060, y: 332, units: 3 },
+    { x: 9360, y: 212, units: 4 },
+    { x: 9720, y: 112, units: 3 },
+    { x: 10080, y: 260, units: 5 },
+    { x: 10480, y: 420, units: 4 },
+    { x: 10820, y: 560, units: 8 },
+    { x: 11380, y: 468, units: 4 },
+    { x: 11720, y: 340, units: 3 },
+    { x: 12020, y: 188, units: 4 },
+    { x: 12460, y: 308, units: 3 },
+    { x: 12860, y: 512, units: 7 },
+    { x: 13380, y: 420, units: 3 },
+    { x: 13680, y: 268, units: 4 },
+    { x: 14040, y: 128, units: 3 },
+    { x: 14460, y: 360, units: 5 },
+    { x: 14920, y: 548, units: 9 },
+    { x: 15480, y: 460, units: 4 },
+    { x: 15840, y: 340, units: 3 },
+    { x: 16240, y: 560, units: 6 },
+  ],
+  streetLamps: [
+    { x: 260, key: PROP_ASSETS.lampSingle, scale: 0.68 },
+    { x: 910, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 1500, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+    { x: 2140, key: PROP_ASSETS.lampDouble, scale: 0.66 },
+    { x: 2860, key: PROP_ASSETS.lampSingle, scale: 0.68 },
+    { x: 3440, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 4040, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+    { x: 4540, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 5200, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+    { x: 5850, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 6480, key: PROP_ASSETS.lampSingle, scale: 0.68 },
+    { x: 7160, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 7820, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+    { x: 8460, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 9180, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+    { x: 9840, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 10560, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+    { x: 11280, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 11960, key: PROP_ASSETS.lampSingle, scale: 0.68 },
+    { x: 12640, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 13320, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+    { x: 14020, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 14740, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+    { x: 15460, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 16220, key: PROP_ASSETS.lampSingle, scale: 0.68 },
+  ],
+  decorations: [
+    { x: 540, y: GROUND_TOP_Y, key: "stage-props-park-bench", scale: 0.9 },
+    { x: 705, y: GROUND_TOP_Y, key: "stage-props-trash-bin", scale: 0.9 },
+    { x: 1050, y: GROUND_TOP_Y, key: "stage-props-guard-rail", scale: 0.9 },
+    { x: 1320, y: 548, key: "stage-props-traffic-cone", scale: 0.72 },
+    { x: 1710, y: 456, key: "stage-props-planter-box", scale: 0.72 },
+    { x: 2065, y: GROUND_TOP_Y, key: "stage-structures-bus-shelter", scale: 0.72 },
+    { x: 2460, y: GROUND_TOP_Y, key: "stage-props-bus-stop-sign", scale: 0.85 },
+    { x: 2705, y: 324, key: "stage-props-construction-barricade", scale: 0.64 },
+    { x: 3020, y: GROUND_TOP_Y, key: "stage-props-vending-machine", scale: 0.8 },
+    { x: 3360, y: GROUND_TOP_Y, key: "stage-structures-phone-booth", scale: 0.78 },
+    { x: 3860, y: GROUND_TOP_Y, key: "stage-structures-subway-stairs", scale: 0.68 },
+    { x: 4380, y: GROUND_TOP_Y, key: "stage-props-bike-rack", scale: 0.82 },
+    { x: 4740, y: GROUND_TOP_Y, key: "stage-structures-vending-kiosk", scale: 0.78 },
+    { x: 5140, y: 560, key: "stage-props-utility-box", scale: 0.58 },
+    { x: 5520, y: 420, key: "stage-props-roadwork-sign", scale: 0.58 },
+    { x: 5910, y: GROUND_TOP_Y, key: "stage-structures-station-wall-railing", scale: 0.72 },
+    { x: 6360, y: GROUND_TOP_Y, key: "stage-structures-construction-fence", scale: 0.62 },
+    { x: 6800, y: 420, key: "stage-props-sidewalk-sign", scale: 0.58 },
+    { x: 7160, y: GROUND_TOP_Y, key: "stage-structures-street-kiosk", scale: 0.62 },
+    { x: 7540, y: 480, key: "stage-props-planter-box", scale: 0.62 },
+    { x: 7960, y: GROUND_TOP_Y, key: "stage-structures-station-entrance", scale: 0.64 },
+    { x: 8520, y: GROUND_TOP_Y, key: "stage-props-guard-rail", scale: 0.84 },
+    { x: 8820, y: 440, key: "stage-props-trash-bin", scale: 0.58 },
+    { x: 9320, y: 212, key: "stage-props-planter-box", scale: 0.56 },
+    { x: 9800, y: 112, key: "stage-props-sidewalk-sign", scale: 0.52 },
+    { x: 10180, y: GROUND_TOP_Y, key: "stage-structures-chainlink-fence", scale: 0.62 },
+    { x: 10620, y: 420, key: "stage-props-utility-box", scale: 0.54 },
+    { x: 11080, y: GROUND_TOP_Y, key: "stage-structures-bus-shelter", scale: 0.68 },
+    { x: 11520, y: 468, key: "stage-props-bike-rack", scale: 0.58 },
+    { x: 12080, y: 188, key: "stage-props-roadwork-sign", scale: 0.5 },
+    { x: 12490, y: GROUND_TOP_Y, key: "stage-structures-shutter-storefront", scale: 0.64 },
+    { x: 13080, y: 512, key: "stage-props-construction-barricade", scale: 0.56 },
+    { x: 13680, y: 268, key: "stage-props-planter-box", scale: 0.54 },
+    { x: 14110, y: 128, key: "stage-props-bus-stop-sign", scale: 0.58 },
+    { x: 14580, y: GROUND_TOP_Y, key: "stage-structures-concrete-pillar", scale: 0.62 },
+    { x: 15120, y: 548, key: "stage-props-vending-machine", scale: 0.62 },
+    { x: 15560, y: GROUND_TOP_Y, key: "stage-structures-vending-kiosk", scale: 0.72 },
+    { x: 15920, y: 340, key: "stage-props-traffic-cone", scale: 0.54 },
+    { x: 16420, y: GROUND_TOP_Y, key: "stage-structures-station-wall-railing", scale: 0.68 },
+  ],
+  items: [
+    { type: "energyDrink", x: 475, y: 492 },
+    { type: "bubbleTea", x: 915, y: 432 },
+    { type: "shoppingBag", x: 1285, y: 492 },
+    { type: "energyDrink", x: 1750, y: 400 },
+    { type: "bubbleTea", x: 2345, y: 288 },
+    { type: "shoppingBag", x: 2720, y: 204 },
+    { type: "energyDrink", x: 3185, y: 132 },
+    { type: "bubbleTea", x: 3575, y: 236 },
+    { type: "shoppingBag", x: 3925, y: 504 },
+    { type: "energyDrink", x: 4385, y: 464 },
+    { type: "bubbleTea", x: 4825, y: 404 },
+    { type: "shoppingBag", x: 5085, y: 504 },
+    { type: "energyDrink", x: 5485, y: 364 },
+    { type: "bubbleTea", x: 5975, y: 244 },
+    { type: "shoppingBag", x: 6425, y: 444 },
+    { type: "energyDrink", x: 6745, y: 364 },
+    { type: "bubbleTea", x: 7125, y: 492 },
+    { type: "shoppingBag", x: 7465, y: 424 },
+    { type: "energyDrink", x: 7775, y: 344 },
+    { type: "bubbleTea", x: 8125, y: 504 },
+    { type: "shoppingBag", x: 8460, y: 464 },
+    { type: "energyDrink", x: 8830, y: 384 },
+    { type: "bubbleTea", x: 9140, y: 276 },
+    { type: "shoppingBag", x: 9460, y: 156 },
+    { type: "energyDrink", x: 9810, y: 56 },
+    { type: "bubbleTea", x: 10180, y: 204 },
+    { type: "shoppingBag", x: 10570, y: 364 },
+    { type: "energyDrink", x: 10980, y: 504 },
+    { type: "bubbleTea", x: 11460, y: 412 },
+    { type: "shoppingBag", x: 11820, y: 284 },
+    { type: "energyDrink", x: 12120, y: 132 },
+    { type: "bubbleTea", x: 12540, y: 252 },
+    { type: "shoppingBag", x: 13020, y: 456 },
+    { type: "energyDrink", x: 13440, y: 364 },
+    { type: "bubbleTea", x: 13770, y: 212 },
+    { type: "shoppingBag", x: 14120, y: 72 },
+    { type: "energyDrink", x: 14540, y: 304 },
+    { type: "bubbleTea", x: 15080, y: 492 },
+    { type: "shoppingBag", x: 15560, y: 404 },
+    { type: "energyDrink", x: 15920, y: 284 },
+    { type: "bubbleTea", x: 16320, y: 504 },
+  ],
+};
+
+const NEON_CANAL_STAGE: StageDefinition = {
+  name: "Neon Canal",
+  worldWidth: 12800,
+  playerStart: { x: 120, y: 552 },
+  goal: { x: 12580, y: 568 },
+  platforms: [
+    { x: 340, y: 548, units: 5 },
+    { x: 760, y: 500, units: 4 },
+    { x: 1100, y: 452, units: 3 },
+    { x: 1430, y: 388, units: 4 },
+    { x: 1880, y: 548, units: 6 },
+    { x: 2320, y: 472, units: 3 },
+    { x: 2620, y: 392, units: 5 },
+    { x: 3120, y: 304, units: 4 },
+    { x: 3580, y: 548, units: 8 },
+    { x: 4300, y: 480, units: 4 },
+    { x: 4700, y: 404, units: 3 },
+    { x: 5020, y: 328, units: 3 },
+    { x: 5380, y: 252, units: 4 },
+    { x: 5900, y: 548, units: 7 },
+    { x: 6480, y: 456, units: 5 },
+    { x: 7040, y: 356, units: 4 },
+    { x: 7480, y: 548, units: 5 },
+    { x: 7960, y: 484, units: 3 },
+    { x: 8320, y: 420, units: 3 },
+    { x: 8700, y: 356, units: 4 },
+    { x: 9240, y: 548, units: 8 },
+    { x: 10040, y: 468, units: 4 },
+    { x: 10480, y: 388, units: 3 },
+    { x: 10880, y: 292, units: 5 },
+    { x: 11580, y: 548, units: 10 },
+  ],
+  streetLamps: [
+    { x: 260, key: PROP_ASSETS.lampSingle, scale: 0.68 },
+    { x: 980, key: PROP_ASSETS.lampDouble, scale: 0.66 },
+    { x: 1760, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+    { x: 2780, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 3740, key: PROP_ASSETS.lampSingle, scale: 0.68 },
+    { x: 4780, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 6060, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+    { x: 7180, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 8200, key: PROP_ASSETS.lampSingle, scale: 0.68 },
+    { x: 9440, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+    { x: 10880, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+    { x: 12100, key: PROP_ASSETS.lampDouble, scale: 0.66 },
+  ],
+  decorations: [
+    { x: 560, y: GROUND_TOP_Y, key: "stage-props-bike-rack", scale: 0.82 },
+    { x: 900, y: GROUND_TOP_Y, key: "stage-structures-bus-shelter", scale: 0.72 },
+    { x: 1320, y: 452, key: "stage-props-planter-box", scale: 0.62 },
+    { x: 1710, y: 388, key: "stage-props-sidewalk-sign", scale: 0.58 },
+    { x: 2200, y: GROUND_TOP_Y, key: "stage-props-vending-machine", scale: 0.78 },
+    { x: 2980, y: 392, key: "stage-props-roadwork-sign", scale: 0.56 },
+    { x: 3440, y: 304, key: "stage-props-construction-barricade", scale: 0.62 },
+    { x: 3950, y: GROUND_TOP_Y, key: "stage-structures-phone-booth", scale: 0.76 },
+    { x: 4520, y: GROUND_TOP_Y, key: "stage-structures-vending-kiosk", scale: 0.76 },
+    { x: 5200, y: 328, key: "stage-props-utility-box", scale: 0.56 },
+    { x: 5680, y: 252, key: "stage-props-trash-bin", scale: 0.54 },
+    { x: 6260, y: GROUND_TOP_Y, key: "stage-structures-chainlink-fence", scale: 0.64 },
+    { x: 6800, y: 456, key: "stage-props-park-bench", scale: 0.68 },
+    { x: 7340, y: 356, key: "stage-props-bus-stop-sign", scale: 0.62 },
+    { x: 7740, y: GROUND_TOP_Y, key: "stage-structures-station-entrance", scale: 0.62 },
+    { x: 8480, y: 420, key: "stage-props-planter-box", scale: 0.58 },
+    { x: 9000, y: 356, key: "stage-props-traffic-cone", scale: 0.56 },
+    { x: 9620, y: GROUND_TOP_Y, key: "stage-structures-street-kiosk", scale: 0.64 },
+    { x: 10240, y: 468, key: "stage-props-guard-rail", scale: 0.72 },
+    { x: 10680, y: 388, key: "stage-props-roadwork-sign", scale: 0.52 },
+    { x: 11240, y: 292, key: "stage-structures-concrete-pillar", scale: 0.58 },
+    { x: 11860, y: GROUND_TOP_Y, key: "stage-structures-station-wall-railing", scale: 0.68 },
+    { x: 12320, y: GROUND_TOP_Y, key: "stage-structures-shutter-storefront", scale: 0.64 },
+  ],
+  items: [
+    { type: "energyDrink", x: 480, y: 492 },
+    { type: "bubbleTea", x: 900, y: 444 },
+    { type: "shoppingBag", x: 1230, y: 396 },
+    { type: "energyDrink", x: 1580, y: 332 },
+    { type: "bubbleTea", x: 2140, y: 492 },
+    { type: "shoppingBag", x: 2460, y: 416 },
+    { type: "energyDrink", x: 2860, y: 336 },
+    { type: "bubbleTea", x: 3260, y: 248 },
+    { type: "shoppingBag", x: 3860, y: 492 },
+    { type: "energyDrink", x: 4480, y: 424 },
+    { type: "bubbleTea", x: 4840, y: 348 },
+    { type: "shoppingBag", x: 5160, y: 272 },
+    { type: "energyDrink", x: 5580, y: 196 },
+    { type: "bubbleTea", x: 6120, y: 492 },
+    { type: "shoppingBag", x: 6680, y: 400 },
+    { type: "energyDrink", x: 7180, y: 300 },
+    { type: "bubbleTea", x: 7640, y: 492 },
+    { type: "shoppingBag", x: 8080, y: 428 },
+    { type: "energyDrink", x: 8420, y: 364 },
+    { type: "bubbleTea", x: 8860, y: 300 },
+    { type: "shoppingBag", x: 9460, y: 492 },
+    { type: "energyDrink", x: 10180, y: 412 },
+    { type: "bubbleTea", x: 10600, y: 332 },
+    { type: "shoppingBag", x: 11020, y: 236 },
+    { type: "energyDrink", x: 11720, y: 492 },
+    { type: "bubbleTea", x: 12240, y: 492 },
+  ],
+};
+
+const STAGES = {
+  originalDowntown: ORIGINAL_DOWNTOWN_STAGE,
+  neonCanal: NEON_CANAL_STAGE,
+};
+const ACTIVE_STAGE = STAGES.neonCanal;
 
 class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
   private cityLoopBackground?: Phaser.GameObjects.TileSprite;
+  private playerNameText!: Phaser.GameObjects.Text;
   private statusText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
@@ -200,6 +460,10 @@ class PrototypeScene extends Phaser.Scene {
   private mobileJumpQueued = false;
   private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
   private startTime = 0;
+  private isRunActive = false;
+  private setupComplete = false;
+  private playerName = "PLAYER";
+  private controlMode: ControlMode = "pc";
   private hasWon = false;
   private wasOnFloor = false;
   private isLanding = false;
@@ -209,6 +473,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   preload() {
+    this.load.image(HUD_PANEL_TEXTURE_KEY, `${ASSET_BASE}assets/ui/hud_panel.png`);
     this.load.image("background-stars", `${ASSET_BASE}assets/backgrounds/starry_sky.webp`);
     this.load.image("background-city-loop", `${ASSET_BASE}assets/backgrounds/city_loop_strip.webp`);
     this.load.image(PLATFORM_ASSETS.left, `${ASSET_BASE}assets/platforms/platform_unit_left.webp`);
@@ -243,8 +508,9 @@ class PrototypeScene extends Phaser.Scene {
 
   create() {
     this.registerRainbowPipeline();
-    this.physics.world.setBounds(0, WORLD_TOP, WORLD_WIDTH, WORLD_HEIGHT);
-    this.startTime = this.time.now;
+    this.resetRunState();
+    this.input.addPointer(4);
+    this.physics.world.setBounds(0, WORLD_TOP, ACTIVE_STAGE.worldWidth, WORLD_HEIGHT);
     this.createBackground();
 
     const platforms = this.physics.add.staticGroup();
@@ -252,13 +518,13 @@ class PrototypeScene extends Phaser.Scene {
     this.createStreetLamps();
     this.createStageObjects();
 
-    const goal = this.physics.add.staticImage(16620, 568, "goal");
+    const goal = this.physics.add.staticImage(ACTIVE_STAGE.goal.x, ACTIVE_STAGE.goal.y, "goal");
     goal.setDisplaySize(24, 96);
     goal.setSize(24, 96);
 
     this.createPlayerAnimations();
 
-    this.player = this.physics.add.sprite(120, 552, "player-idle");
+    this.player = this.physics.add.sprite(ACTIVE_STAGE.playerStart.x, ACTIVE_STAGE.playerStart.y, "player-idle");
     this.player.setDisplaySize(PLAYER_DISPLAY_WIDTH, PLAYER_DISPLAY_HEIGHT);
     this.player.setCollideWorldBounds(true);
     this.applyPlayerBody();
@@ -281,16 +547,33 @@ class PrototypeScene extends Phaser.Scene {
       d: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D),
     };
 
-    this.cameras.main.setBounds(0, WORLD_TOP, WORLD_WIDTH, WORLD_HEIGHT);
+    this.cameras.main.setBounds(0, WORLD_TOP, ACTIVE_STAGE.worldWidth, WORLD_HEIGHT);
     this.cameras.main.setZoom(CAMERA_ZOOM);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
     this.cameras.main.setDeadzone(260, 140);
     this.cameras.main.setBackgroundColor("#080b16");
 
-    this.statusText = this.add
-      .text(8, 8, "A/D: move  W/Space: jump  R: restart", {
+    this.add
+      .image(10, 8, HUD_PANEL_TEXTURE_KEY)
+      .setOrigin(0, 0)
+      .setDisplaySize(560, 164)
+      .setScrollFactor(0)
+      .setDepth(96);
+
+    this.playerNameText = this.add
+      .text(34, 28, "", {
         fontFamily: "monospace",
-        fontSize: "14px",
+        fontSize: "18px",
+        color: "#e0f2fe",
+      })
+      .setDepth(100)
+      .setShadow(0, 0, "#22d3ee", 8, true, true)
+      .setScrollFactor(0);
+
+    this.statusText = this.add
+      .text(34, 112, "A/D: move  W/Space: jump  R: restart", {
+        fontFamily: "monospace",
+        fontSize: "13px",
         color: "#e5e7eb",
       })
       .setDepth(100)
@@ -298,9 +581,9 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0);
 
     this.scoreText = this.add
-      .text(8, 30, "", {
+      .text(34, 56, "", {
         fontFamily: "monospace",
-        fontSize: "16px",
+        fontSize: "15px",
         color: "#f8fafc",
       })
       .setScrollFactor(0)
@@ -309,7 +592,7 @@ class PrototypeScene extends Phaser.Scene {
     this.updateScoreText();
 
     this.timerText = this.add
-      .text(8, 52, "", {
+      .text(34, 82, "", {
         fontFamily: "monospace",
         fontSize: "18px",
         color: "#fde68a",
@@ -330,14 +613,26 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(100)
       .setShadow(1, 1, "#020617", 2, true, true);
 
-    this.input.keyboard!.on("keydown-R", () => this.scene.restart());
-    this.createMobileControls();
+    this.input.keyboard!.off("keydown-R");
+    this.input.keyboard!.on("keydown-R", () => this.restartStage());
+
+    if (this.setupComplete) {
+      this.startRun();
+    } else {
+      this.physics.pause();
+      this.showStartModal();
+    }
   }
 
   update() {
     this.applyPlayerBody();
     this.updateBackground();
     this.updateTimerText();
+    if (!this.isRunActive) {
+      this.player.setAcceleration(0, 0);
+      this.player.setVelocity(0, 0);
+      return;
+    }
 
     const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
     const left = this.keys.a.isDown || this.cursors.left.isDown || this.mobileInput.a;
@@ -396,63 +691,121 @@ class PrototypeScene extends Phaser.Scene {
     this.wasOnFloor = onFloor;
 
     if (this.player.y > WORLD_BOTTOM + 32) {
-      this.scene.restart();
+      this.restartStage();
     }
   }
 
+  private resetRunState() {
+    this.removeStartModal();
+    this.mobileInput = { w: false, a: false, s: false, d: false };
+    this.mobileJumpQueued = false;
+    this.score = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
+    this.startTime = 0;
+    this.isRunActive = false;
+    this.hasWon = false;
+    this.wasOnFloor = false;
+    this.isLanding = false;
+    this.finalScoreText = undefined;
+  }
+
+  private restartStage() {
+    this.resetRunState();
+    this.scene.restart();
+  }
+
+  private startRun() {
+    this.removeStartModal();
+    this.isRunActive = true;
+    this.startTime = this.time.now;
+    this.physics.resume();
+    this.playerNameText.setText(`PLAYER:${this.playerName}`);
+    this.statusText.setText(
+      this.controlMode === "mobile" ? "TOUCH: move/jump  R: restart" : "A/D: move  W/Space: jump  R: restart",
+    );
+    if (this.controlMode === "mobile") {
+      this.createMobileControls();
+    }
+    this.updateTimerText();
+  }
+
+  private showStartModal() {
+    this.removeStartModal();
+
+    const overlay = document.createElement("div");
+    overlay.id = "start-modal";
+    overlay.innerHTML = `
+      <form class="start-dialog">
+        <h1>Action Game</h1>
+        <label>
+          <span>Player Name</span>
+          <input name="playerName" type="text" maxlength="16" autocomplete="off" value="${this.escapeHtml(this.playerName)}" />
+        </label>
+        <div class="mode-row" role="group" aria-label="Control mode">
+          <button type="button" data-mode="pc" class="mode-button is-selected">PC</button>
+          <button type="button" data-mode="mobile" class="mode-button">スマホ</button>
+        </div>
+        <button type="submit" class="start-button">START</button>
+      </form>
+    `;
+
+    document.body.appendChild(overlay);
+    const form = overlay.querySelector("form")!;
+    const input = overlay.querySelector<HTMLInputElement>("input[name='playerName']")!;
+    const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
+    let selectedMode: ControlMode = "pc";
+
+    const selectMode = (mode: ControlMode) => {
+      selectedMode = mode;
+      modeButtons.forEach((button) => {
+        button.classList.toggle("is-selected", button.dataset.mode === mode);
+      });
+    };
+
+    modeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        selectMode(button.dataset.mode === "mobile" ? "mobile" : "pc");
+      });
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const name = input.value.trim();
+      this.playerName = name || "PLAYER";
+      this.controlMode = selectedMode;
+      this.setupComplete = true;
+      this.startRun();
+    });
+
+    input.focus();
+    input.select();
+  }
+
+  private removeStartModal() {
+    document.getElementById("start-modal")?.remove();
+  }
+
+  private escapeHtml(value: string) {
+    return value.replace(/[&<>"']/g, (character) => {
+      const entities: Record<string, string> = {
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      };
+      return entities[character];
+    });
+  }
+
   private buildStage(platforms: Phaser.Physics.Arcade.StaticGroup) {
-    for (let x = 0; x < WORLD_WIDTH; x += TILE) {
+    for (let x = 0; x < ACTIVE_STAGE.worldWidth; x += TILE) {
       this.addBlock(platforms, x, GROUND_TOP_Y, "ground", false);
     }
 
-    this.addPlatformRun(platforms, 0, GROUND_VISUAL_Y, Math.ceil(WORLD_WIDTH / PLATFORM_UNIT_WIDTH) + 1, false);
-    this.addPlatformRun(platforms, 360, 548, 4);
-    this.addPlatformRun(platforms, 744, 488, 7);
-    this.addPlatformRun(platforms, 1160, 548, 3);
-    this.addPlatformRun(platforms, 1288, 500, 3);
-    this.addPlatformRun(platforms, 1580, 456, 6);
-    this.addPlatformRun(platforms, 1980, 548, 10);
-    this.addPlatformRun(platforms, 2200, 420, 3);
-    this.addPlatformRun(platforms, 2392, 372, 3);
-    this.addPlatformRun(platforms, 2584, 324, 4);
-    this.addPlatformRun(platforms, 2920, 292, 3);
-    this.addPlatformRun(platforms, 3112, 244, 3);
-    this.addPlatformRun(platforms, 3304, 196, 4);
-    this.addPlatformRun(platforms, 3540, 300, 1);
-    this.addPlatformRun(platforms, 3720, 560, 7);
-    this.addPlatformRun(platforms, 4280, 520, 5);
-    this.addPlatformRun(platforms, 4700, 460, 4);
-    this.addPlatformRun(platforms, 5000, 560, 7);
-    this.addPlatformRun(platforms, 5380, 420, 3);
-    this.addPlatformRun(platforms, 5600, 360, 3);
-    this.addPlatformRun(platforms, 5880, 300, 4);
-    this.addPlatformRun(platforms, 6260, 500, 5);
-    this.addPlatformRun(platforms, 6620, 420, 4);
-    this.addPlatformRun(platforms, 6960, 548, 8);
-    this.addPlatformRun(platforms, 7350, 480, 3);
-    this.addPlatformRun(platforms, 7600, 400, 4);
-    this.addPlatformRun(platforms, 7900, 560, 6);
-    this.addPlatformRun(platforms, 8380, 520, 5);
-    this.addPlatformRun(platforms, 8740, 440, 4);
-    this.addPlatformRun(platforms, 9060, 332, 3);
-    this.addPlatformRun(platforms, 9360, 212, 4);
-    this.addPlatformRun(platforms, 9720, 112, 3);
-    this.addPlatformRun(platforms, 10080, 260, 5);
-    this.addPlatformRun(platforms, 10480, 420, 4);
-    this.addPlatformRun(platforms, 10820, 560, 8);
-    this.addPlatformRun(platforms, 11380, 468, 4);
-    this.addPlatformRun(platforms, 11720, 340, 3);
-    this.addPlatformRun(platforms, 12020, 188, 4);
-    this.addPlatformRun(platforms, 12460, 308, 3);
-    this.addPlatformRun(platforms, 12860, 512, 7);
-    this.addPlatformRun(platforms, 13380, 420, 3);
-    this.addPlatformRun(platforms, 13680, 268, 4);
-    this.addPlatformRun(platforms, 14040, 128, 3);
-    this.addPlatformRun(platforms, 14460, 360, 5);
-    this.addPlatformRun(platforms, 14920, 548, 9);
-    this.addPlatformRun(platforms, 15480, 460, 4);
-    this.addPlatformRun(platforms, 15840, 340, 3);
-    this.addPlatformRun(platforms, 16240, 560, 6);
+    this.addPlatformRun(platforms, 0, GROUND_VISUAL_Y, Math.ceil(ACTIVE_STAGE.worldWidth / PLATFORM_UNIT_WIDTH) + 1, false);
+    ACTIVE_STAGE.platforms.forEach((platform) => {
+      this.addPlatformRun(platforms, platform.x, platform.y, platform.units, platform.collides ?? true);
+    });
   }
 
   private createBackground() {
@@ -516,33 +869,8 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createStreetLamps() {
-    [
-      { x: 260, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-      { x: 910, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-      { x: 1500, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-      { x: 2140, key: PROP_ASSETS.lampDouble, scale: 0.66 },
-      { x: 2860, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-      { x: 3440, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-      { x: 4040, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-      { x: 4540, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-      { x: 5200, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-      { x: 5850, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-      { x: 6480, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-      { x: 7160, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-      { x: 7820, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-      { x: 8460, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-      { x: 9180, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-      { x: 9840, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-      { x: 10560, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-      { x: 11280, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-      { x: 11960, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-      { x: 12640, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-      { x: 13320, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-      { x: 14020, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-      { x: 14740, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-      { x: 15460, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-      { x: 16220, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-    ].forEach((lamp) => {
+    ACTIVE_STAGE.streetLamps.forEach((lamp) => {
+      this.createStreetLampLight(lamp.x, lamp.key, lamp.scale);
       this.add
         .image(lamp.x, STREET_LAMP_GROUND_Y, lamp.key)
         .setOrigin(0.5, 1)
@@ -551,48 +879,40 @@ class PrototypeScene extends Phaser.Scene {
     });
   }
 
+  private createStreetLampLight(x: number, key: StreetLampKey, scale: number) {
+    const isDoubleLamp = key === PROP_ASSETS.lampDouble;
+    const sourceY = STREET_LAMP_GROUND_Y - 420 * scale;
+    const groundY = STREET_LAMP_GROUND_Y - 5;
+    const sources = isDoubleLamp ? [-92 * scale, 92 * scale] : [32 * scale];
+
+    sources.forEach((offsetX) => {
+      const sourceX = x + offsetX;
+      const beamHalfWidth = (isDoubleLamp ? 150 : 190) * scale;
+      const poolWidth = (isDoubleLamp ? 210 : 250) * scale;
+      const light = this.add.graphics().setBlendMode(Phaser.BlendModes.ADD);
+
+      light.fillStyle(0xffefad, 0.12);
+      light.fillTriangle(sourceX, sourceY, sourceX - beamHalfWidth, groundY, sourceX + beamHalfWidth, groundY);
+      light.fillStyle(0xfff4c7, 0.07);
+      light.fillTriangle(sourceX, sourceY - 8 * scale, sourceX - beamHalfWidth * 0.72, groundY, sourceX + beamHalfWidth * 0.72, groundY);
+      light.setDepth(STREET_LAMP_LIGHT_DEPTH);
+
+      const groundLight = this.add.graphics().setBlendMode(Phaser.BlendModes.ADD);
+      groundLight.fillStyle(0xffe7a3, 0.17);
+      groundLight.fillEllipse(sourceX, groundY + 2, poolWidth, 26 * scale);
+      groundLight.fillStyle(0xfff8d2, 0.1);
+      groundLight.fillEllipse(sourceX, groundY + 1, poolWidth * 0.58, 12 * scale);
+      groundLight.setDepth(STREET_LAMP_GROUND_LIGHT_DEPTH);
+
+      this.add
+        .circle(sourceX, sourceY, 12 * scale, 0xfff3bd, 0.36)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setDepth(DECORATION_DEPTH + 0.02);
+    });
+  }
+
   private createStageObjects() {
-    [
-      { x: 540, y: GROUND_TOP_Y, key: "stage-props-park-bench", scale: 0.9 },
-      { x: 705, y: GROUND_TOP_Y, key: "stage-props-trash-bin", scale: 0.9 },
-      { x: 1050, y: GROUND_TOP_Y, key: "stage-props-guard-rail", scale: 0.9 },
-      { x: 1320, y: 548, key: "stage-props-traffic-cone", scale: 0.72 },
-      { x: 1710, y: 456, key: "stage-props-planter-box", scale: 0.72 },
-      { x: 2065, y: GROUND_TOP_Y, key: "stage-structures-bus-shelter", scale: 0.72 },
-      { x: 2460, y: GROUND_TOP_Y, key: "stage-props-bus-stop-sign", scale: 0.85 },
-      { x: 2705, y: 324, key: "stage-props-construction-barricade", scale: 0.64 },
-      { x: 3020, y: GROUND_TOP_Y, key: "stage-props-vending-machine", scale: 0.8 },
-      { x: 3360, y: GROUND_TOP_Y, key: "stage-structures-phone-booth", scale: 0.78 },
-      { x: 3860, y: GROUND_TOP_Y, key: "stage-structures-subway-stairs", scale: 0.68 },
-      { x: 4380, y: GROUND_TOP_Y, key: "stage-props-bike-rack", scale: 0.82 },
-      { x: 4740, y: GROUND_TOP_Y, key: "stage-structures-vending-kiosk", scale: 0.78 },
-      { x: 5140, y: 560, key: "stage-props-utility-box", scale: 0.58 },
-      { x: 5520, y: 420, key: "stage-props-roadwork-sign", scale: 0.58 },
-      { x: 5910, y: GROUND_TOP_Y, key: "stage-structures-station-wall-railing", scale: 0.72 },
-      { x: 6360, y: GROUND_TOP_Y, key: "stage-structures-construction-fence", scale: 0.62 },
-      { x: 6800, y: 420, key: "stage-props-sidewalk-sign", scale: 0.58 },
-      { x: 7160, y: GROUND_TOP_Y, key: "stage-structures-street-kiosk", scale: 0.62 },
-      { x: 7540, y: 480, key: "stage-props-planter-box", scale: 0.62 },
-      { x: 7960, y: GROUND_TOP_Y, key: "stage-structures-station-entrance", scale: 0.64 },
-      { x: 8520, y: GROUND_TOP_Y, key: "stage-props-guard-rail", scale: 0.84 },
-      { x: 8820, y: 440, key: "stage-props-trash-bin", scale: 0.58 },
-      { x: 9320, y: 212, key: "stage-props-planter-box", scale: 0.56 },
-      { x: 9800, y: 112, key: "stage-props-sidewalk-sign", scale: 0.52 },
-      { x: 10180, y: GROUND_TOP_Y, key: "stage-structures-chainlink-fence", scale: 0.62 },
-      { x: 10620, y: 420, key: "stage-props-utility-box", scale: 0.54 },
-      { x: 11080, y: GROUND_TOP_Y, key: "stage-structures-bus-shelter", scale: 0.68 },
-      { x: 11520, y: 468, key: "stage-props-bike-rack", scale: 0.58 },
-      { x: 12080, y: 188, key: "stage-props-roadwork-sign", scale: 0.5 },
-      { x: 12490, y: GROUND_TOP_Y, key: "stage-structures-shutter-storefront", scale: 0.64 },
-      { x: 13080, y: 512, key: "stage-props-construction-barricade", scale: 0.56 },
-      { x: 13680, y: 268, key: "stage-props-planter-box", scale: 0.54 },
-      { x: 14110, y: 128, key: "stage-props-bus-stop-sign", scale: 0.58 },
-      { x: 14580, y: GROUND_TOP_Y, key: "stage-structures-concrete-pillar", scale: 0.62 },
-      { x: 15120, y: 548, key: "stage-props-vending-machine", scale: 0.62 },
-      { x: 15560, y: GROUND_TOP_Y, key: "stage-structures-vending-kiosk", scale: 0.72 },
-      { x: 15920, y: 340, key: "stage-props-traffic-cone", scale: 0.54 },
-      { x: 16420, y: GROUND_TOP_Y, key: "stage-structures-station-wall-railing", scale: 0.68 },
-    ].forEach((object) => {
+    ACTIVE_STAGE.decorations.forEach((object) => {
       this.add
         .image(object.x, object.y, object.key)
         .setOrigin(0.5, 1)
@@ -645,7 +965,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.createTouchButton(rightX, GAME_HEIGHT - 96, buttonSize, "R", (pressed) => {
       if (pressed) {
-        this.scene.restart();
+        this.restartStage();
       }
     });
   }
@@ -658,6 +978,7 @@ class PrototypeScene extends Phaser.Scene {
     onPressedChange: (pressed: boolean) => void,
   ) {
     const container = this.add.container(x, y).setScrollFactor(0).setDepth(180);
+    const activePointers = new Set<number>();
     const background = this.add
       .rectangle(0, 0, size, size, 0x0f172a, 0.58)
       .setStrokeStyle(2, 0xe5e7eb, 0.72)
@@ -676,27 +997,75 @@ class PrototypeScene extends Phaser.Scene {
       onPressedChange(pressed);
     };
 
-    background.on("pointerdown", () => setPressed(true));
-    background.on("pointerup", () => setPressed(false));
-    background.on("pointerout", () => setPressed(false));
-    background.on("pointerupoutside", () => setPressed(false));
+    const press = (pointer: Phaser.Input.Pointer) => {
+      activePointers.add(pointer.id);
+      setPressed(true);
+    };
+    const release = (pointer: Phaser.Input.Pointer) => {
+      activePointers.delete(pointer.id);
+      setPressed(activePointers.size > 0);
+    };
+
+    background.on("pointerdown", press);
+    background.on("pointerup", release);
+    background.on("pointerupoutside", release);
     container.add([background, text]);
   }
 
   private createItems() {
     const items = this.physics.add.staticGroup();
+    this.createItemGlowTexture();
 
-    ITEM_PLACEMENTS.forEach((placement) => {
+    ACTIVE_STAGE.items.forEach((placement) => {
       const definition = ITEM_DEFINITIONS[placement.type];
+      const glow = this.add
+        .image(placement.x, placement.y, ITEM_GLOW_TEXTURE_KEY)
+        .setDisplaySize(108, 108)
+        .setTint(ITEM_GLOW_COLORS[placement.type])
+        .setAlpha(0.48)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setDepth(0.1);
       const item = items.create(placement.x, placement.y, definition.key) as Phaser.Physics.Arcade.Sprite;
       item.setData("itemType", placement.type);
+      item.setData("glow", glow);
       item.setDisplaySize(48, 48);
+      item.setDepth(0.2);
       item.refreshBody();
+
+      this.tweens.add({
+        targets: glow,
+        alpha: 0.72,
+        scale: 1.16,
+        duration: 950,
+        ease: "Sine.easeInOut",
+        yoyo: true,
+        repeat: -1,
+        delay: (placement.x % 700) + (placement.y % 180),
+      });
     });
 
     this.physics.add.overlap(this.player, items, (_, itemObject) => {
       this.collectItem(itemObject as Phaser.Physics.Arcade.Sprite);
     });
+  }
+
+  private createItemGlowTexture() {
+    if (this.textures.exists(ITEM_GLOW_TEXTURE_KEY)) {
+      return;
+    }
+
+    const size = 96;
+    const center = size / 2;
+    const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+
+    for (let radius = center; radius > 0; radius -= 3) {
+      const strength = 1 - radius / center;
+      graphics.fillStyle(0xffffff, 0.018 + strength * 0.055);
+      graphics.fillCircle(center, center, radius);
+    }
+
+    graphics.generateTexture(ITEM_GLOW_TEXTURE_KEY, size, size);
+    graphics.destroy();
   }
 
   private collectItem(item: Phaser.Physics.Arcade.Sprite) {
@@ -708,6 +1077,11 @@ class PrototypeScene extends Phaser.Scene {
     const definition = ITEM_DEFINITIONS[itemType];
     this.score[itemType] += definition.points;
     this.updateScoreText();
+    const glow = item.getData("glow") as Phaser.GameObjects.Image | undefined;
+    if (glow) {
+      this.tweens.killTweensOf(glow);
+      glow.destroy();
+    }
     item.disableBody(true, true);
   }
 
@@ -732,6 +1106,10 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private getRemainingSeconds() {
+    if (!this.isRunActive || this.startTime === 0) {
+      return GAME_TIME_SECONDS;
+    }
+
     const elapsed = Math.floor((this.time.now - this.startTime) / 1000);
     return Math.max(0, GAME_TIME_SECONDS - elapsed);
   }
