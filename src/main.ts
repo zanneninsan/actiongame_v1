@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.23";
+const DEBUG_VERSION = "v0.1.24";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -457,7 +457,6 @@ class PrototypeScene extends Phaser.Scene {
   private keys!: Record<"w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
   private cityLoopBackground?: Phaser.GameObjects.TileSprite;
   private playerNameText!: Phaser.GameObjects.Text;
-  private statusText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
   private countdownText?: Phaser.GameObjects.Text;
@@ -473,6 +472,7 @@ class PrototypeScene extends Phaser.Scene {
   private setupComplete = false;
   private playerName = "PLAYER";
   private controlMode: ControlMode = "pc";
+  private controlHint = "A/D: move  W/Space: jump  R: restart";
   private hasWon = false;
   private wasOnFloor = false;
   private isLanding = false;
@@ -573,7 +573,7 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(96);
 
     this.playerNameText = this.add
-      .text(66, 28, "", {
+      .text(66, 56, "", {
         fontFamily: "monospace",
         fontSize: "18px",
         color: "#e0f2fe",
@@ -582,18 +582,8 @@ class PrototypeScene extends Phaser.Scene {
       .setShadow(0, 0, "#22d3ee", 8, true, true)
       .setScrollFactor(0);
 
-    this.statusText = this.add
-      .text(66, 112, "A/D: move  W/Space: jump  R: restart", {
-        fontFamily: "monospace",
-        fontSize: "13px",
-        color: "#e5e7eb",
-      })
-      .setDepth(100)
-      .setShadow(1, 1, "#020617", 2, true, true)
-      .setScrollFactor(0);
-
     this.scoreText = this.add
-      .text(66, 56, "", {
+      .text(66, 84, "", {
         fontFamily: "monospace",
         fontSize: "15px",
         color: "#f8fafc",
@@ -604,9 +594,9 @@ class PrototypeScene extends Phaser.Scene {
     this.updateScoreText();
 
     this.timerText = this.add
-      .text(66, 82, "", {
+      .text(66, 112, "", {
         fontFamily: "monospace",
-        fontSize: "18px",
+        fontSize: "15px",
         color: "#fde68a",
       })
       .setScrollFactor(0)
@@ -735,9 +725,8 @@ class PrototypeScene extends Phaser.Scene {
   private startRun() {
     this.removeStartModal();
     this.playerNameText.setText(`PLAYER:${this.playerName}`);
-    this.statusText.setText(
-      this.controlMode === "mobile" ? "TOUCH: move/jump  R: restart" : "A/D: move  W/Space: jump  R: restart",
-    );
+    this.controlHint =
+      this.controlMode === "mobile" ? "TOUCH: move/jump  R: restart" : "A/D: move  W/Space: jump  R: restart";
     if (this.controlMode === "mobile") {
       this.createMobileControls();
     }
@@ -1203,7 +1192,7 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    this.timerText.setText(`TIME:${this.getRemainingSeconds()}`);
+    this.timerText.setText(`TIME:${this.getRemainingSeconds()}  ${this.controlHint}`);
   }
 
   private getItemScore() {
@@ -1296,7 +1285,6 @@ class PrototypeScene extends Phaser.Scene {
     const timeBonus = remaining * TIME_BONUS_PER_SECOND;
     const itemScore = this.getItemScore();
     const finalScore = itemScore + timeBonus;
-    this.statusText.setText("GOAL!");
     this.timerText.setText(`TIME:${remaining}  BONUS:${timeBonus}`);
     this.scoreText.setText(`ITEM SCORE:${itemScore}`);
     this.startRainbowWinEffect();
