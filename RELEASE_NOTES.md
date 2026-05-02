@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.32
+### English
+- Fixed a bug where interacting with the volume slider caused the BGM toggle icon to become out of sync.
+### 日本語
+- ボリュームバー操作時にBGMアイコンのON/OFFが正しく切り替わらなくなるバグを修正しました。
+
 ## v0.1.31
 ### English
 - Fixed a timing issue in WebAudio state reading that caused the BGM toggle icon to be out of sync.

@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.31";
+const DEBUG_VERSION = "v0.1.32";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -1316,7 +1316,8 @@ class PrototypeScene extends Phaser.Scene {
     let isMuted = this.sound.mute;
     
     const updateIcon = () => {
-      if (isMuted || this.sound.volume === 0) {
+      const currentVolume = parseInt(volumeSlider.value, 10);
+      if (isMuted || currentVolume === 0) {
         bgmToggle.textContent = "🔇";
       } else {
         bgmToggle.textContent = "🔊";
@@ -1326,7 +1327,8 @@ class PrototypeScene extends Phaser.Scene {
     updateIcon();
 
     bgmToggle.addEventListener("click", () => {
-      if (this.sound.volume === 0) {
+      const currentVolume = parseInt(volumeSlider.value, 10);
+      if (currentVolume === 0) {
         this.sound.volume = 0.5;
         volumeSlider.value = "50";
         isMuted = false;
