@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.46
+### English
+- Added a `HIT` debug toggle that displays collision rectangles for the player, platforms, items, and goal.
+### 日本語
+- プレイヤー、足場、アイテム、ゴールの当たり判定矩形を表示できる`HIT`デバッグ切替ボタンを追加しました。
+
 ## v0.1.45
 ### English
 - Cancel the remaining landing animation immediately when crouch input is pressed during landing, then transition directly into the crouch animation.

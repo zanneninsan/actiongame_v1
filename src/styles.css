@@ -313,6 +313,18 @@ canvas {
   background: rgba(30, 41, 59, 0.95);
 }
 
+.debug-toggle {
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.debug-toggle.is-active {
+  border-color: rgba(250, 204, 21, 0.9);
+  background: rgba(113, 63, 18, 0.92);
+  color: #fef3c7;
+}
+
 #options-modal {
   position: fixed;
   inset: 0;

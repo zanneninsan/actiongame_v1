@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.45";
+const DEBUG_VERSION = "v0.1.46";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -465,6 +465,7 @@ const cloneStage = (stage: StageDefinition): StageDefinition => ({
 
 class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  private goal?: Phaser.Types.Physics.Arcade.ImageWithStaticBody;
   private platforms!: Phaser.Physics.Arcade.StaticGroup;
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -504,6 +505,8 @@ class PrototypeScene extends Phaser.Scene {
   private wasOnFloor = false;
   private isLanding = false;
   private landingFastForwarded = false;
+  private collisionDebugEnabled = false;
+  private collisionDebugGraphics?: Phaser.GameObjects.Graphics;
   private bgm?: Phaser.Sound.BaseSound;
 
   constructor() {
@@ -568,6 +571,7 @@ class PrototypeScene extends Phaser.Scene {
     const goal = this.physics.add.staticImage(this.editorStage.goal.x, this.editorStage.goal.y, "goal");
     goal.setDisplaySize(24, 96);
     goal.setSize(24, 96);
+    this.goal = goal;
 
     this.createPlayerAnimations();
 
@@ -601,6 +605,7 @@ class PrototypeScene extends Phaser.Scene {
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
     this.cameras.main.setDeadzone(260, 140);
     this.cameras.main.setBackgroundColor("#080b16");
+    this.collisionDebugGraphics = this.add.graphics().setDepth(300);
 
     this.playerNameText = this.add
       .text(58, 40, "", {
@@ -667,6 +672,7 @@ class PrototypeScene extends Phaser.Scene {
     this.applyPlayerBody();
     this.updateBackground();
     this.updateTimerText();
+    this.updateCollisionDebug();
     if (!this.isRunActive) {
       this.player.setAcceleration(0, 0);
       this.player.setVelocity(0, 0);
@@ -778,6 +784,9 @@ class PrototypeScene extends Phaser.Scene {
     this.wasOnFloor = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
+    this.collisionDebugGraphics?.clear();
+    this.collisionDebugGraphics = undefined;
+    this.goal = undefined;
     this.finalScoreText = undefined;
   }
 
@@ -1341,6 +1350,7 @@ class PrototypeScene extends Phaser.Scene {
     uiContainer.id = "global-ui";
     uiContainer.innerHTML = `
       <span id="version-label">${DEBUG_VERSION}</span>
+      <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Toggle collision boxes">HIT</button>
       <button id="bgm-toggle" class="ui-button" type="button" aria-label="Toggle Sound">&#128266;</button>
       <button id="options-toggle" class="ui-button" type="button" aria-label="Options">&#9881;&#65039;</button>
     `;
@@ -1361,6 +1371,7 @@ class PrototypeScene extends Phaser.Scene {
     document.body.appendChild(optionsModal);
 
     const bgmToggle = document.getElementById("bgm-toggle") as HTMLButtonElement;
+    const collisionDebugToggle = document.getElementById("collision-debug-toggle") as HTMLButtonElement;
     const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
     const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
     const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
@@ -1377,6 +1388,13 @@ class PrototypeScene extends Phaser.Scene {
     };
 
     updateIcon();
+    collisionDebugToggle.classList.toggle("is-active", this.collisionDebugEnabled);
+
+    collisionDebugToggle.addEventListener("click", () => {
+      this.collisionDebugEnabled = !this.collisionDebugEnabled;
+      collisionDebugToggle.classList.toggle("is-active", this.collisionDebugEnabled);
+      this.updateCollisionDebug();
+    });
 
     bgmToggle.addEventListener("click", () => {
       const currentVolume = parseInt(volumeSlider.value, 10);
@@ -1586,6 +1604,51 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.controlHintText.setText(this.controlHint);
+  }
+
+  private updateCollisionDebug() {
+    if (!this.collisionDebugGraphics) {
+      return;
+    }
+
+    this.collisionDebugGraphics.clear();
+    if (!this.collisionDebugEnabled) {
+      return;
+    }
+
+    if (this.player.body) {
+      this.drawCollisionBody(this.player.body, 0x38bdf8, 0.28);
+    }
+
+    this.platforms?.getChildren().forEach((child) => {
+      const body = (child as Phaser.Physics.Arcade.Image).body as Phaser.Physics.Arcade.StaticBody | undefined;
+      if (body) {
+        this.drawCollisionBody(body, 0xfacc15, 0.12);
+      }
+    });
+
+    this.itemsGroup?.getChildren().forEach((child) => {
+      const item = child as Phaser.Physics.Arcade.Sprite;
+      if (item.active && item.body) {
+        this.drawCollisionBody(item.body as Phaser.Physics.Arcade.StaticBody, 0x22c55e, 0.18);
+      }
+    });
+
+    if (this.goal?.body) {
+      this.drawCollisionBody(this.goal.body, 0xfb7185, 0.2);
+    }
+  }
+
+  private drawCollisionBody(
+    body: Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody,
+    color: number,
+    fillAlpha: number,
+  ) {
+    this.collisionDebugGraphics
+      ?.lineStyle(2, color, 0.95)
+      .fillStyle(color, fillAlpha)
+      .fillRect(body.x, body.y, body.width, body.height)
+      .strokeRect(body.x, body.y, body.width, body.height);
   }
 
   private getItemScore() {
