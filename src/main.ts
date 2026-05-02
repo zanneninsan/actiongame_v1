@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.24";
+const DEBUG_VERSION = "v0.1.25";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -459,6 +459,7 @@ class PrototypeScene extends Phaser.Scene {
   private playerNameText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
+  private countdownGlowText?: Phaser.GameObjects.Text;
   private countdownText?: Phaser.GameObjects.Text;
   private finalScoreText?: Phaser.GameObjects.Text;
   private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false };
@@ -704,6 +705,8 @@ class PrototypeScene extends Phaser.Scene {
     this.countdownTimer = undefined;
     this.countdownReleaseTimer?.remove(false);
     this.countdownReleaseTimer = undefined;
+    this.countdownGlowText?.destroy();
+    this.countdownGlowText = undefined;
     this.countdownText?.destroy();
     this.countdownText = undefined;
     this.mobileInput = { w: false, a: false, s: false, d: false };
@@ -741,7 +744,22 @@ class PrototypeScene extends Phaser.Scene {
 
     const sequence = ["3", "2", "1", "GO!!"];
     let index = 0;
+    this.countdownGlowText?.destroy();
     this.countdownText?.destroy();
+    this.countdownGlowText = this.add
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, sequence[index], {
+        fontFamily: "monospace",
+        fontSize: "142px",
+        color: "#ffffff",
+        stroke: "#ffffff",
+        strokeThickness: 28,
+        align: "center",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(219)
+      .setAlpha(0.95)
+      .setShadow(0, 0, "#22d3ee", 30, true, true);
     this.countdownText = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, sequence[index], {
         fontFamily: "monospace",
@@ -756,9 +774,9 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(220)
       .setShadow(0, 0, "#22d3ee", 22, true, true);
     if (this.game.renderer.type === Phaser.WEBGL) {
-      this.countdownText.setPipeline(RAINBOW_PIPELINE_KEY);
+      this.countdownGlowText.setPipeline(RAINBOW_PIPELINE_KEY);
     } else {
-      this.countdownText.setTint(0xff66ff, 0x66ffff, 0xffff66, 0x66ff66);
+      this.countdownGlowText.setTint(0xff66ff, 0x66ffff, 0xffff66, 0x66ff66);
     }
 
     this.countdownTimer?.remove(false);
@@ -767,13 +785,14 @@ class PrototypeScene extends Phaser.Scene {
       repeat: sequence.length - 1,
       callback: () => {
         index += 1;
-        if (!this.countdownText) {
+        if (!this.countdownGlowText || !this.countdownText) {
           return;
         }
 
+        this.countdownGlowText.setText(sequence[index]);
         this.countdownText.setText(sequence[index]);
         this.tweens.add({
-          targets: this.countdownText,
+          targets: [this.countdownGlowText, this.countdownText],
           scale: { from: 1.28, to: 1 },
           alpha: { from: 0.72, to: 1 },
           duration: 220,
@@ -790,6 +809,8 @@ class PrototypeScene extends Phaser.Scene {
   private activateRun() {
     this.countdownTimer = undefined;
     this.countdownReleaseTimer = undefined;
+    this.countdownGlowText?.destroy();
+    this.countdownGlowText = undefined;
     this.countdownText?.destroy();
     this.countdownText = undefined;
     this.startTime = this.time.now;
