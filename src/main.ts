@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.26";
+const DEBUG_VERSION = "v0.1.27";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -502,6 +502,7 @@ class PrototypeScene extends Phaser.Scene {
   private hasWon = false;
   private wasOnFloor = false;
   private isLanding = false;
+  private bgm?: Phaser.Sound.BaseSound;
 
   constructor() {
     super("prototype");
@@ -539,6 +540,7 @@ class PrototypeScene extends Phaser.Scene {
     this.createPixelTexture("platform", TILE, TILE, 0x384257, 0xf6c453);
     this.createPixelTexture("platform-hitbox", 1, 1, 0xffffff, 0xffffff);
     this.createPixelTexture("goal", 12, 48, 0xfb7185, 0x881337);
+    this.load.audio("game-bgm", `${ASSET_BASE}assets/audio/gamebgm_default.mp3`);
   }
 
   create() {
@@ -647,6 +649,8 @@ class PrototypeScene extends Phaser.Scene {
     this.input.on("pointerdown", this.handleEditorPointerDown, this);
     this.createStageEditor();
 
+    this.bgm = this.sound.add("game-bgm", { loop: true, volume: 0.5 });
+
     if (this.setupComplete) {
       this.startRun();
     } else {
@@ -751,6 +755,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private restartStage() {
     this.resetRunState();
+    this.bgm?.stop();
     this.scene.restart();
   }
 
@@ -846,6 +851,9 @@ class PrototypeScene extends Phaser.Scene {
     this.isRunActive = true;
     this.physics.resume();
     this.updateTimerText();
+    if (!this.bgm?.isPlaying) {
+      this.bgm?.play();
+    }
   }
 
   private showStartModal() {
@@ -871,6 +879,11 @@ class PrototypeScene extends Phaser.Scene {
     document.body.appendChild(overlay);
     const form = overlay.querySelector("form")!;
     const input = overlay.querySelector<HTMLInputElement>("input[name='playerName']")!;
+    
+    input.addEventListener("keydown", (e) => e.stopPropagation());
+    input.addEventListener("keyup", (e) => e.stopPropagation());
+    input.addEventListener("keypress", (e) => e.stopPropagation());
+
     const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
     overlay.querySelector<HTMLButtonElement>("[data-mode='mobile']")!.textContent = "MOBILE";
     let selectedMode: ControlMode = "pc";
