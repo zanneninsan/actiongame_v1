@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.27";
+const DEBUG_VERSION = "v0.1.28";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -648,8 +648,9 @@ class PrototypeScene extends Phaser.Scene {
     this.input.off("pointerdown", this.handleEditorPointerDown, this);
     this.input.on("pointerdown", this.handleEditorPointerDown, this);
     this.createStageEditor();
+    this.createGlobalUI();
 
-    this.bgm = this.sound.add("game-bgm", { loop: true, volume: 0.5 });
+    this.bgm = this.sound.add("game-bgm", { loop: true, volume: 1.0 });
 
     if (this.setupComplete) {
       this.startRun();
@@ -1276,6 +1277,68 @@ class PrototypeScene extends Phaser.Scene {
     this.editorEnabled = false;
     this.editorMarkers.forEach((marker) => marker.destroy());
     this.editorMarkers = [];
+  }
+
+  private createGlobalUI() {
+    if (document.getElementById("global-ui")) {
+      return;
+    }
+
+    const uiContainer = document.createElement("div");
+    uiContainer.id = "global-ui";
+    uiContainer.innerHTML = `
+      <button id="bgm-toggle" class="ui-button" type="button" aria-label="Toggle Sound">🔊</button>
+      <button id="options-toggle" class="ui-button" type="button" aria-label="Options">⚙️</button>
+    `;
+    document.body.appendChild(uiContainer);
+
+    const optionsModal = document.createElement("div");
+    optionsModal.id = "options-modal";
+    optionsModal.innerHTML = `
+      <div class="options-dialog">
+        <h2>Options</h2>
+        <label>
+          <span>Volume</span>
+          <input id="volume-slider" type="range" min="0" max="100" />
+        </label>
+        <button id="options-close" class="ui-button" type="button">Close</button>
+      </div>
+    `;
+    document.body.appendChild(optionsModal);
+
+    const bgmToggle = document.getElementById("bgm-toggle") as HTMLButtonElement;
+    const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
+    const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
+    const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
+
+    this.sound.volume = 0.5;
+    volumeSlider.value = "50";
+    bgmToggle.textContent = this.sound.mute ? "🔇" : "🔊";
+
+    bgmToggle.addEventListener("click", () => {
+      this.sound.mute = !this.sound.mute;
+      bgmToggle.textContent = this.sound.mute ? "🔇" : "🔊";
+    });
+
+    optionsToggle.addEventListener("click", () => {
+      optionsModal.style.display = "grid";
+    });
+
+    optionsClose.addEventListener("click", () => {
+      optionsModal.style.display = "none";
+    });
+
+    volumeSlider.addEventListener("input", (e) => {
+      e.stopPropagation();
+      const val = parseInt(volumeSlider.value, 10);
+      this.sound.volume = val / 100;
+    });
+
+    optionsModal.addEventListener("keydown", (e) => e.stopPropagation());
+    optionsModal.addEventListener("keyup", (e) => e.stopPropagation());
+    optionsModal.addEventListener("keypress", (e) => e.stopPropagation());
+    optionsModal.addEventListener("pointerdown", (e) => e.stopPropagation());
+    uiContainer.addEventListener("pointerdown", (e) => e.stopPropagation());
   }
 
   private handleEditorPointerDown(pointer: Phaser.Input.Pointer) {
