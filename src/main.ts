@@ -10,7 +10,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.14";
+const DEBUG_VERSION = "v0.1.15";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 180;
 const TIME_BONUS_PER_SECOND = 10;
@@ -52,6 +52,7 @@ type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
 type ScoreState = Record<ItemType, number>;
 type PlatformAsset = (typeof PLATFORM_ASSETS)[keyof typeof PLATFORM_ASSETS];
 type StageObjectAsset = { key: string; path: string };
+type MobileInputKey = "w" | "a" | "s" | "d";
 
 const RAINBOW_FRAGMENT_SHADER = `
 #define SHADER_NAME RAINBOW_WIN_FS
@@ -174,6 +175,8 @@ class PrototypeScene extends Phaser.Scene {
   private scoreText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
   private finalScoreText?: Phaser.GameObjects.Text;
+  private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false };
+  private mobileJumpQueued = false;
   private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
   private startTime = 0;
   private hasWon = false;
@@ -307,6 +310,7 @@ class PrototypeScene extends Phaser.Scene {
       .setShadow(1, 1, "#020617", 2, true, true);
 
     this.input.keyboard!.on("keydown-R", () => this.scene.restart());
+    this.createMobileControls();
   }
 
   update() {
@@ -315,9 +319,10 @@ class PrototypeScene extends Phaser.Scene {
     this.updateTimerText();
 
     const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
-    const left = this.keys.a.isDown || this.cursors.left.isDown;
-    const right = this.keys.d.isDown || this.cursors.right.isDown;
-    const debugJump = Phaser.Input.Keyboard.JustDown(this.keys.w);
+    const left = this.keys.a.isDown || this.cursors.left.isDown || this.mobileInput.a;
+    const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
+    const debugJump = Phaser.Input.Keyboard.JustDown(this.keys.w) || this.mobileJumpQueued;
+    this.mobileJumpQueued = false;
     const normalJump = Phaser.Input.Keyboard.JustDown(this.cursors.space);
     const jump = debugJump || normalJump;
     const canJump = onFloor || debugJump;
@@ -535,6 +540,67 @@ class PrototypeScene extends Phaser.Scene {
     block.setDisplaySize(width, height);
     block.setVisible(false);
     block.refreshBody();
+  }
+
+  private createMobileControls() {
+    const buttonSize = 64;
+    const gap = 10;
+    const baseX = 48;
+    const baseY = GAME_HEIGHT - 170;
+    const positions: Array<{ key: MobileInputKey; x: number; y: number }> = [
+      { key: "w", x: baseX + buttonSize + gap, y: baseY },
+      { key: "a", x: baseX, y: baseY + buttonSize + gap },
+      { key: "s", x: baseX + buttonSize + gap, y: baseY + buttonSize + gap },
+      { key: "d", x: baseX + (buttonSize + gap) * 2, y: baseY + buttonSize + gap },
+    ];
+
+    positions.forEach(({ key, x, y }) => {
+      this.createTouchButton(x, y, buttonSize, key.toUpperCase(), (pressed) => {
+        this.mobileInput[key] = pressed;
+        if (key === "w" && pressed) {
+          this.mobileJumpQueued = true;
+        }
+      });
+    });
+
+    this.createTouchButton(GAME_WIDTH - 116, GAME_HEIGHT - 106, buttonSize, "R", (pressed) => {
+      if (pressed) {
+        this.scene.restart();
+      }
+    });
+  }
+
+  private createTouchButton(
+    x: number,
+    y: number,
+    size: number,
+    label: string,
+    onPressedChange: (pressed: boolean) => void,
+  ) {
+    const container = this.add.container(x, y).setScrollFactor(0).setDepth(180);
+    const background = this.add
+      .rectangle(0, 0, size, size, 0x0f172a, 0.58)
+      .setStrokeStyle(2, 0xe5e7eb, 0.72)
+      .setInteractive({ useHandCursor: true });
+    const text = this.add
+      .text(0, 0, label, {
+        fontFamily: "monospace",
+        fontSize: "24px",
+        color: "#f8fafc",
+      })
+      .setOrigin(0.5);
+
+    const setPressed = (pressed: boolean) => {
+      background.setFillStyle(pressed ? 0x38bdf8 : 0x0f172a, pressed ? 0.82 : 0.58);
+      background.setStrokeStyle(2, pressed ? 0xfde68a : 0xe5e7eb, pressed ? 0.95 : 0.72);
+      onPressedChange(pressed);
+    };
+
+    background.on("pointerdown", () => setPressed(true));
+    background.on("pointerup", () => setPressed(false));
+    background.on("pointerout", () => setPressed(false));
+    background.on("pointerupoutside", () => setPressed(false));
+    container.add([background, text]);
   }
 
   private createItems() {
