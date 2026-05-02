@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.43
+### English
+- Rescaled the crouch spritesheet so its first standing frame matches the idle animation's first-frame character height and foot position.
+- Applied the same scale and alignment to all crouch frames for consistent character size.
+### 日本語
+- しゃがみスプライトの初期立ちフレームが、待機アニメ初期フレームのキャラクター高さと足元位置に合うように再スケールしました。
+- 同じ倍率と位置合わせを全しゃがみフレームへ適用し、キャラクターサイズ感を統一しました。
+
 ## v0.1.42
 ### English
 - Built a crouch spritesheet from the `mabiki` frame images.
