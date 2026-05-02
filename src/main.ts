@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.22";
+const DEBUG_VERSION = "v0.1.23";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -758,8 +758,8 @@ class PrototypeScene extends Phaser.Scene {
         fontFamily: "monospace",
         fontSize: "132px",
         color: "#ffffff",
-        stroke: "#ffffff",
-        strokeThickness: 12,
+        stroke: "#020617",
+        strokeThickness: 18,
         align: "center",
       })
       .setOrigin(0.5)
