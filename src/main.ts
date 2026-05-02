@@ -9,9 +9,8 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.37";
+const DEBUG_VERSION = "v0.1.38";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
-const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
 const PLATFORM_UNIT_WIDTH = 64;
@@ -473,6 +472,7 @@ class PrototypeScene extends Phaser.Scene {
   private playerNameText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
+  private controlHintText!: Phaser.GameObjects.Text;
   private countdownGlowText?: Phaser.GameObjects.Text;
   private countdownText?: Phaser.GameObjects.Text;
   private finalScoreText?: Phaser.GameObjects.Text;
@@ -509,7 +509,6 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image(HUD_PANEL_TEXTURE_KEY, `${ASSET_BASE}assets/ui/hud_panel_fantasy.png`);
     this.load.image("background-stars", `${ASSET_BASE}assets/backgrounds/starry_sky.webp`);
     this.load.image("background-city-loop", `${ASSET_BASE}assets/backgrounds/city_loop_strip.webp`);
     this.load.image(PLATFORM_ASSETS.left, `${ASSET_BASE}assets/platforms/platform_unit_left.webp`);
@@ -595,14 +594,6 @@ class PrototypeScene extends Phaser.Scene {
     this.cameras.main.setDeadzone(260, 140);
     this.cameras.main.setBackgroundColor("#080b16");
 
-    this.add
-      .image(8, 6, HUD_PANEL_TEXTURE_KEY)
-      .setOrigin(0, 0)
-      .setDisplaySize(396, 146)
-      .setAlpha(0.94)
-      .setScrollFactor(0)
-      .setDepth(96);
-
     this.playerNameText = this.add
       .text(58, 40, "", {
         fontFamily: "monospace",
@@ -614,7 +605,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0);
 
     this.scoreText = this.add
-      .text(58, 63, "", {
+      .text(58, 68, "", {
         fontFamily: "monospace",
         fontSize: "16px",
         color: "#f8fafc",
@@ -625,7 +616,7 @@ class PrototypeScene extends Phaser.Scene {
     this.updateScoreText();
 
     this.timerText = this.add
-      .text(58, 87, "", {
+      .text(178, 68, "", {
         fontFamily: "monospace",
         fontSize: "16px",
         color: "#fde68a",
@@ -634,6 +625,18 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(100)
       .setShadow(1, 1, "#020617", 2, true, true);
     this.updateTimerText();
+
+    this.controlHintText = this.add
+      .text(GAME_WIDTH - 12, 58, "", {
+        fontFamily: "monospace",
+        fontSize: "13px",
+        color: "#fde68a",
+      })
+      .setOrigin(1, 0)
+      .setScrollFactor(0)
+      .setDepth(100)
+      .setShadow(1, 1, "#020617", 2, true, true);
+    this.updateControlHintText();
 
     this.add
       .text(GAME_WIDTH - 8, 8, DEBUG_VERSION, {
@@ -769,6 +772,7 @@ class PrototypeScene extends Phaser.Scene {
     this.playerNameText.setText(`PLAYER:${this.playerName}`);
     this.controlHint =
       this.controlMode === "mobile" ? "TOUCH: move/jump  R: restart" : "A/D: move  W/Space: jump  R: restart";
+    this.updateControlHintText();
     if (this.controlMode === "mobile") {
       this.createMobileControls();
     }
@@ -1544,10 +1548,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private updateScoreText() {
     const total = this.getItemScore();
-    const itemScores = (Object.keys(ITEM_DEFINITIONS) as ItemType[])
-      .map((itemType) => `${ITEM_DEFINITIONS[itemType].label}:${this.score[itemType]}`)
-      .join("  ");
-    this.scoreText.setText(`SCORE:${total}  ${itemScores}`);
+    this.scoreText.setText(`SCORE:${total}`);
   }
 
   private updateTimerText() {
@@ -1555,7 +1556,15 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    this.timerText.setText(`TIME:${this.getRemainingSeconds()}  ${this.controlHint}`);
+    this.timerText.setText(`TIME:${this.getRemainingSeconds()}`);
+  }
+
+  private updateControlHintText() {
+    if (!this.controlHintText) {
+      return;
+    }
+
+    this.controlHintText.setText(this.controlHint);
   }
 
   private getItemScore() {

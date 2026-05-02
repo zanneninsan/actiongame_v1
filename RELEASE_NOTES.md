@@ -1,5 +1,15 @@
 # Release Notes / リリースノート
 
+## v0.1.38
+### English
+- Removed the HUD frame from the in-game display while keeping the artwork asset in the repository.
+- Kept the HUD text display, placed score and timer side by side under the player name, and simplified score to total only.
+- Moved the control hint to the upper right so it does not overlap the version display.
+### 日本語
+- HUDフレームをゲーム画面上の表示から外しつつ、素材アセットはリポジトリ内に残しました。
+- HUD文字表示は維持し、プレイヤー名の下にスコアとタイマーを横並び配置し、スコア表示を合計のみへ簡略化しました。
+- 操作説明を右上へ移動し、バージョン表示と重ならないようにしました。
+
 ## v0.1.37
 ### English
 - Increased the HUD text size by one step.
