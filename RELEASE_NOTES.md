@@ -1,5 +1,15 @@
 # Release Notes / リリースノート
 
+## v0.1.36
+### English
+- Restored the HUD text font sizes after the panel resize.
+- Added a short item pickup sound effect and play it when items are collected.
+- Aligned the EDITOR, BGM, and options buttons in one top-right row, and restored BGM/options emoji icons.
+### 日本語
+- HUDパネル縮小後の文字フォントサイズを元の見やすい大きさに戻しました。
+- アイテム取得時の短い効果音アセットを追加し、取得時に再生するようにしました。
+- EDITOR、BGM、Optionsボタンを右上で横並びに整列し、BGM/Options表示を絵文字アイコンに戻しました。
+
 ## v0.1.35
 ### English
 - Resized the fantasy HUD panel and its text layout to 60% of the previous display size.

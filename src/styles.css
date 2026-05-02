@@ -181,8 +181,8 @@ canvas {
 
 #stage-editor {
   position: fixed;
-  top: 44px;
-  right: 12px;
+  top: 12px;
+  right: 108px;
   z-index: 18;
   width: min(320px, calc(100vw - 24px));
   color: #e5e7eb;
@@ -277,7 +277,7 @@ canvas {
 #global-ui {
   position: fixed;
   top: 12px;
-  right: 140px; /* Leave space for debug text */
+  right: 12px;
   z-index: 18;
   display: flex;
   gap: 8px;

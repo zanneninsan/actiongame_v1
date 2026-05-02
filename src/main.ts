@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.35";
+const DEBUG_VERSION = "v0.1.36";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -541,6 +541,7 @@ class PrototypeScene extends Phaser.Scene {
     this.createPixelTexture("platform-hitbox", 1, 1, 0xffffff, 0xffffff);
     this.createPixelTexture("goal", 12, 48, 0xfb7185, 0x881337);
     this.load.audio("game-bgm", `${ASSET_BASE}assets/audio/gamebgm_default.mp3`);
+    this.load.audio("item-pickup", `${ASSET_BASE}assets/audio/item_pickup.wav`);
   }
 
   create() {
@@ -604,7 +605,7 @@ class PrototypeScene extends Phaser.Scene {
     this.playerNameText = this.add
       .text(58, 40, "", {
         fontFamily: "monospace",
-        fontSize: "11px",
+        fontSize: "18px",
         color: "#e0f2fe",
       })
       .setDepth(100)
@@ -614,7 +615,7 @@ class PrototypeScene extends Phaser.Scene {
     this.scoreText = this.add
       .text(58, 63, "", {
         fontFamily: "monospace",
-        fontSize: "9px",
+        fontSize: "14px",
         color: "#f8fafc",
       })
       .setScrollFactor(0)
@@ -625,7 +626,7 @@ class PrototypeScene extends Phaser.Scene {
     this.timerText = this.add
       .text(58, 87, "", {
         fontFamily: "monospace",
-        fontSize: "9px",
+        fontSize: "14px",
         color: "#fde68a",
       })
       .setScrollFactor(0)
@@ -1287,8 +1288,8 @@ class PrototypeScene extends Phaser.Scene {
     const uiContainer = document.createElement("div");
     uiContainer.id = "global-ui";
     uiContainer.innerHTML = `
-      <button id="bgm-toggle" class="ui-button" type="button" aria-label="Toggle Sound">BGM</button>
-      <button id="options-toggle" class="ui-button" type="button" aria-label="Options">OPT</button>
+      <button id="bgm-toggle" class="ui-button" type="button" aria-label="Toggle Sound">&#128266;</button>
+      <button id="options-toggle" class="ui-button" type="button" aria-label="Options">&#9881;&#65039;</button>
     `;
     document.body.appendChild(uiContainer);
 
@@ -1317,7 +1318,7 @@ class PrototypeScene extends Phaser.Scene {
 
     const updateIcon = () => {
       const currentVolume = parseInt(volumeSlider.value, 10);
-      bgmToggle.textContent = isMuted || currentVolume === 0 ? "OFF" : "BGM";
+      bgmToggle.innerHTML = isMuted || currentVolume === 0 ? "&#128263;" : "&#128266;";
     };
 
     updateIcon();
@@ -1499,6 +1500,7 @@ class PrototypeScene extends Phaser.Scene {
     const itemType = item.getData("itemType") as ItemType;
     const definition = ITEM_DEFINITIONS[itemType];
     this.score[itemType] += definition.points;
+    this.sound.play("item-pickup", { volume: 0.65 });
     this.updateScoreText();
     const glow = item.getData("glow") as Phaser.GameObjects.Image | undefined;
     if (glow) {
