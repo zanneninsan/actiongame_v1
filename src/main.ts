@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.17";
+const DEBUG_VERSION = "v0.1.18";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -459,6 +459,7 @@ class PrototypeScene extends Phaser.Scene {
   private finalScoreText?: Phaser.GameObjects.Text;
   private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false };
   private mobileJumpQueued = false;
+  private mobileControlCleanup: Array<() => void> = [];
   private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
   private startTime = 0;
   private isRunActive = false;
@@ -701,6 +702,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private resetRunState() {
     this.removeStartModal();
+    this.removeMobileControls();
     this.mobileInput = { w: false, a: false, s: false, d: false };
     this.mobileJumpQueued = false;
     this.score = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
@@ -939,19 +941,27 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createMobileControls() {
-    const buttonSize = 82;
-    const gap = 12;
-    const baseX = 58;
-    const baseY = GAME_HEIGHT - 204;
-    const positions: Array<{ key: MobileInputKey; x: number; y: number }> = [
-      { key: "w", x: baseX + buttonSize + gap, y: baseY },
-      { key: "a", x: baseX, y: baseY + buttonSize + gap },
-      { key: "s", x: baseX + buttonSize + gap, y: baseY + buttonSize + gap },
-      { key: "d", x: baseX + (buttonSize + gap) * 2, y: baseY + buttonSize + gap },
-    ];
+    this.removeMobileControls();
 
-    positions.forEach(({ key, x, y }) => {
-      this.createTouchButton(x, y, buttonSize, key.toUpperCase(), (pressed) => {
+    const controls = document.createElement("div");
+    controls.id = "mobile-controls";
+    controls.innerHTML = `
+      <div class="mobile-pad">
+        <button class="mobile-button pad-up" data-key="w" type="button">W</button>
+        <button class="mobile-button pad-left" data-key="a" type="button">A</button>
+        <button class="mobile-button pad-down" data-key="s" type="button">S</button>
+        <button class="mobile-button pad-right" data-key="d" type="button">D</button>
+      </div>
+      <div class="mobile-actions">
+        <button class="mobile-button" data-key="w" type="button">W</button>
+        <button class="mobile-button restart-button" data-action="restart" type="button">R</button>
+      </div>
+    `;
+    document.body.appendChild(controls);
+
+    controls.querySelectorAll<HTMLButtonElement>("[data-key]").forEach((button) => {
+      const key = button.dataset.key as MobileInputKey;
+      this.bindMobileButton(button, (pressed) => {
         this.mobileInput[key] = pressed;
         if (key === "w" && pressed) {
           this.mobileJumpQueued = true;
@@ -959,75 +969,61 @@ class PrototypeScene extends Phaser.Scene {
       });
     });
 
-    const rightX = GAME_WIDTH - 106;
-    this.createTouchButton(rightX, GAME_HEIGHT - 190, buttonSize, "W", (pressed) => {
-      this.mobileInput.w = pressed;
-      if (pressed) {
-        this.mobileJumpQueued = true;
-      }
-    });
-
-    this.createTouchButton(rightX, GAME_HEIGHT - 96, buttonSize, "R", (pressed) => {
-      if (pressed) {
-        this.restartStage();
-      }
-    });
+    const restartButton = controls.querySelector<HTMLButtonElement>("[data-action='restart']");
+    if (restartButton) {
+      this.bindMobileButton(restartButton, (pressed) => {
+        if (pressed) {
+          this.restartStage();
+        }
+      });
+    }
   }
 
-  private createTouchButton(
-    x: number,
-    y: number,
-    size: number,
-    label: string,
-    onPressedChange: (pressed: boolean) => void,
-  ) {
-    const container = this.add.container(x, y).setScrollFactor(0).setDepth(180);
+  private bindMobileButton(button: HTMLButtonElement, onPressedChange: (pressed: boolean) => void) {
     const activePointers = new Set<number>();
-    const background = this.add
-      .rectangle(0, 0, size, size, 0x0f172a, 0.58)
-      .setStrokeStyle(2, 0xe5e7eb, 0.72)
-      .setInteractive({ useHandCursor: true });
-    const text = this.add
-      .text(0, 0, label, {
-        fontFamily: "monospace",
-        fontSize: "30px",
-        color: "#f8fafc",
-      })
-      .setOrigin(0.5);
-
     const setPressed = (pressed: boolean) => {
-      background.setFillStyle(pressed ? 0x38bdf8 : 0x0f172a, pressed ? 0.82 : 0.58);
-      background.setStrokeStyle(2, pressed ? 0xfde68a : 0xe5e7eb, pressed ? 0.95 : 0.72);
+      button.classList.toggle("is-pressed", pressed);
       onPressedChange(pressed);
     };
     const clearPressed = () => {
       activePointers.clear();
       setPressed(false);
     };
-
-    const press = (pointer: Phaser.Input.Pointer) => {
-      pointer.event?.preventDefault();
-      activePointers.add(pointer.id);
+    const press = (event: PointerEvent) => {
+      event.preventDefault();
+      button.setPointerCapture(event.pointerId);
+      activePointers.add(event.pointerId);
       setPressed(true);
     };
-    const release = (pointer: Phaser.Input.Pointer) => {
-      pointer.event?.preventDefault();
-      activePointers.delete(pointer.id);
+    const release = (event: PointerEvent) => {
+      event.preventDefault();
+      if (button.hasPointerCapture(event.pointerId)) {
+        button.releasePointerCapture(event.pointerId);
+      }
+      activePointers.delete(event.pointerId);
       setPressed(activePointers.size > 0);
     };
 
-    background.on("pointerdown", press);
-    background.on("pointerup", release);
-    background.on("pointerupoutside", release);
-    this.input.on("pointerup", release);
-    window.addEventListener("pointercancel", clearPressed);
+    button.addEventListener("pointerdown", press);
+    button.addEventListener("pointerup", release);
+    button.addEventListener("pointercancel", release);
+    button.addEventListener("lostpointercapture", release);
     window.addEventListener("blur", clearPressed);
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.input.off("pointerup", release);
-      window.removeEventListener("pointercancel", clearPressed);
+    document.addEventListener("visibilitychange", clearPressed);
+    this.mobileControlCleanup.push(() => {
+      button.removeEventListener("pointerdown", press);
+      button.removeEventListener("pointerup", release);
+      button.removeEventListener("pointercancel", release);
+      button.removeEventListener("lostpointercapture", release);
       window.removeEventListener("blur", clearPressed);
+      document.removeEventListener("visibilitychange", clearPressed);
     });
-    container.add([background, text]);
+  }
+
+  private removeMobileControls() {
+    this.mobileControlCleanup.forEach((cleanup) => cleanup());
+    this.mobileControlCleanup = [];
+    document.getElementById("mobile-controls")?.remove();
   }
 
   private createItems() {
