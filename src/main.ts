@@ -8,7 +8,7 @@ const TILE = 32;
 const WORLD_WIDTH = 4200;
 const WORLD_HEIGHT = 720;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.9";
+const DEBUG_VERSION = "v0.1.10";
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 90;
 const GROUND_TOP_Y = 672;
@@ -44,6 +44,33 @@ const PROP_ASSETS = {
 type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
 type ScoreState = Record<ItemType, number>;
 type PlatformAsset = (typeof PLATFORM_ASSETS)[keyof typeof PLATFORM_ASSETS];
+type StageObjectAsset = { key: string; path: string };
+
+const STAGE_OBJECT_ASSETS = [
+  { key: "stage-props-traffic-cone", path: "assets/stage_objects/props_traffic_cone.webp" },
+  { key: "stage-props-construction-barricade", path: "assets/stage_objects/props_construction_barricade.webp" },
+  { key: "stage-props-roadwork-sign", path: "assets/stage_objects/props_roadwork_sign.webp" },
+  { key: "stage-props-sidewalk-sign", path: "assets/stage_objects/props_sidewalk_sign.webp" },
+  { key: "stage-props-park-bench", path: "assets/stage_objects/props_park_bench.webp" },
+  { key: "stage-props-trash-bin", path: "assets/stage_objects/props_trash_bin.webp" },
+  { key: "stage-props-planter-box", path: "assets/stage_objects/props_planter_box.webp" },
+  { key: "stage-props-bike-rack", path: "assets/stage_objects/props_bike_rack.webp" },
+  { key: "stage-props-bus-stop-sign", path: "assets/stage_objects/props_bus_stop_sign.webp" },
+  { key: "stage-props-vending-machine", path: "assets/stage_objects/props_vending_machine.webp" },
+  { key: "stage-props-utility-box", path: "assets/stage_objects/props_utility_box.webp" },
+  { key: "stage-props-guard-rail", path: "assets/stage_objects/props_guard_rail.webp" },
+  { key: "stage-structures-bus-shelter", path: "assets/stage_objects/structures_bus_shelter.webp" },
+  { key: "stage-structures-phone-booth", path: "assets/stage_objects/structures_phone_booth.webp" },
+  { key: "stage-structures-street-kiosk", path: "assets/stage_objects/structures_street_kiosk.webp" },
+  { key: "stage-structures-shutter-storefront", path: "assets/stage_objects/structures_shutter_storefront.webp" },
+  { key: "stage-structures-subway-stairs", path: "assets/stage_objects/structures_subway_stairs.webp" },
+  { key: "stage-structures-concrete-pillar", path: "assets/stage_objects/structures_concrete_pillar.webp" },
+  { key: "stage-structures-construction-fence", path: "assets/stage_objects/structures_construction_fence.webp" },
+  { key: "stage-structures-chainlink-fence", path: "assets/stage_objects/structures_chainlink_fence.webp" },
+  { key: "stage-structures-vending-kiosk", path: "assets/stage_objects/structures_vending_kiosk.webp" },
+  { key: "stage-structures-station-wall-railing", path: "assets/stage_objects/structures_station_wall_railing.webp" },
+  { key: "stage-structures-station-entrance", path: "assets/stage_objects/structures_station_entrance.webp" },
+] as const satisfies readonly StageObjectAsset[];
 
 const ITEM_DEFINITIONS: Record<ItemType, { key: string; label: string; points: number; assetPath: string }> = {
   energyDrink: {
@@ -103,6 +130,9 @@ class PrototypeScene extends Phaser.Scene {
     this.load.image(PLATFORM_ASSETS.single, `${ASSET_BASE}assets/platforms/platform_unit_single.webp`);
     this.load.image(PROP_ASSETS.lampSingle, `${ASSET_BASE}assets/props/street_lamp_single.webp`);
     this.load.image(PROP_ASSETS.lampDouble, `${ASSET_BASE}assets/props/street_lamp_double.webp`);
+    STAGE_OBJECT_ASSETS.forEach((asset) => {
+      this.load.image(asset.key, `${ASSET_BASE}${asset.path}`);
+    });
     Object.values(ITEM_DEFINITIONS).forEach((item) => {
       this.load.image(item.key, `${ASSET_BASE}${item.assetPath}`);
     });
@@ -131,6 +161,7 @@ class PrototypeScene extends Phaser.Scene {
     const platforms = this.physics.add.staticGroup();
     this.buildStage(platforms);
     this.createStreetLamps();
+    this.createStageObjects();
 
     const goal = this.physics.add.staticImage(4020, 568, "goal");
     goal.setDisplaySize(24, 96);
@@ -360,6 +391,28 @@ class PrototypeScene extends Phaser.Scene {
         .setOrigin(0.5, 1)
         .setScale(lamp.scale)
         .setDepth(-0.5);
+    });
+  }
+
+  private createStageObjects() {
+    [
+      { x: 540, y: GROUND_TOP_Y, key: "stage-props-park-bench", scale: 0.9 },
+      { x: 705, y: GROUND_TOP_Y, key: "stage-props-trash-bin", scale: 0.9 },
+      { x: 1050, y: GROUND_TOP_Y, key: "stage-props-guard-rail", scale: 0.9 },
+      { x: 1320, y: 548, key: "stage-props-traffic-cone", scale: 0.72 },
+      { x: 1710, y: 456, key: "stage-props-planter-box", scale: 0.72 },
+      { x: 2065, y: GROUND_TOP_Y, key: "stage-structures-bus-shelter", scale: 0.72 },
+      { x: 2460, y: GROUND_TOP_Y, key: "stage-props-bus-stop-sign", scale: 0.85 },
+      { x: 2705, y: 324, key: "stage-props-construction-barricade", scale: 0.64 },
+      { x: 3020, y: GROUND_TOP_Y, key: "stage-props-vending-machine", scale: 0.8 },
+      { x: 3360, y: GROUND_TOP_Y, key: "stage-structures-phone-booth", scale: 0.78 },
+      { x: 3860, y: GROUND_TOP_Y, key: "stage-structures-subway-stairs", scale: 0.68 },
+    ].forEach((object) => {
+      this.add
+        .image(object.x, object.y, object.key)
+        .setOrigin(0.5, 1)
+        .setScale(object.scale)
+        .setDepth(-0.35);
     });
   }
 
