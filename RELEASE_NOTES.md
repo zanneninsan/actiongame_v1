@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.41
+### English
+- Moved the version display into the same top-right DOM layout as the BGM and options buttons to prevent overlap at 16:9 resolutions.
+### 日本語
+- 16:9解像度で重ならないよう、バージョン表示をBGM/Optionsボタンと同じ右上DOMレイアウト内へ移動しました。
+
 ## v0.1.40
 ### English
 - Doubled the remaining landing animation playback speed when the player starts moving left or right during the landing animation.

@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.40";
+const DEBUG_VERSION = "v0.1.41";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -640,17 +640,6 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(100)
       .setShadow(1, 1, "#020617", 2, true, true);
     this.updateControlHintText();
-
-    this.add
-      .text(GAME_WIDTH - 8, 8, DEBUG_VERSION, {
-        fontFamily: "monospace",
-        fontSize: "10px",
-        color: "#cbd5e1",
-      })
-      .setOrigin(1, 0)
-      .setScrollFactor(0)
-      .setDepth(100)
-      .setShadow(1, 1, "#020617", 2, true, true);
 
     this.input.keyboard!.off("keydown-R");
     this.input.keyboard!.on("keydown-R", () => this.restartStage());
@@ -1334,6 +1323,7 @@ class PrototypeScene extends Phaser.Scene {
     const uiContainer = document.createElement("div");
     uiContainer.id = "global-ui";
     uiContainer.innerHTML = `
+      <span id="version-label">${DEBUG_VERSION}</span>
       <button id="bgm-toggle" class="ui-button" type="button" aria-label="Toggle Sound">&#128266;</button>
       <button id="options-toggle" class="ui-button" type="button" aria-label="Options">&#9881;&#65039;</button>
     `;

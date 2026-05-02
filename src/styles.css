@@ -182,7 +182,7 @@ canvas {
 #stage-editor {
   position: fixed;
   top: 12px;
-  right: 108px;
+  right: 180px;
   z-index: 18;
   width: min(320px, calc(100vw - 24px));
   color: #e5e7eb;
@@ -280,8 +280,18 @@ canvas {
   right: 12px;
   z-index: 18;
   display: flex;
+  align-items: center;
   gap: 8px;
   pointer-events: none;
+}
+
+#version-label {
+  color: #cbd5e1;
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1;
+  text-shadow: 1px 1px 2px #020617;
+  white-space: nowrap;
 }
 
 .ui-button {
