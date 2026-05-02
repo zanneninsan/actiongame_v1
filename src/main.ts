@@ -5,15 +5,17 @@ const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
-const WORLD_WIDTH = 4200;
+const WORLD_WIDTH = 8400;
 const WORLD_HEIGHT = 720;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.10";
+const DEBUG_VERSION = "v0.1.11";
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 90;
 const GROUND_TOP_Y = 672;
 const GROUND_VISUAL_Y = 650;
 const STREET_LAMP_GROUND_Y = 672;
+const PLATFORM_DEPTH = -0.55;
+const DECORATION_DEPTH = -1.2;
 const PLAYER_DISPLAY_WIDTH = 320;
 const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
@@ -103,6 +105,17 @@ const ITEM_PLACEMENTS: Array<{ type: ItemType; x: number; y: number }> = [
   { type: "energyDrink", x: 3185, y: 132 },
   { type: "bubbleTea", x: 3575, y: 236 },
   { type: "shoppingBag", x: 3925, y: 504 },
+  { type: "energyDrink", x: 4385, y: 464 },
+  { type: "bubbleTea", x: 4825, y: 404 },
+  { type: "shoppingBag", x: 5085, y: 504 },
+  { type: "energyDrink", x: 5485, y: 364 },
+  { type: "bubbleTea", x: 5975, y: 244 },
+  { type: "shoppingBag", x: 6425, y: 444 },
+  { type: "energyDrink", x: 6745, y: 364 },
+  { type: "bubbleTea", x: 7125, y: 492 },
+  { type: "shoppingBag", x: 7465, y: 424 },
+  { type: "energyDrink", x: 7775, y: 344 },
+  { type: "bubbleTea", x: 8125, y: 504 },
 ];
 
 class PrototypeScene extends Phaser.Scene {
@@ -163,7 +176,7 @@ class PrototypeScene extends Phaser.Scene {
     this.createStreetLamps();
     this.createStageObjects();
 
-    const goal = this.physics.add.staticImage(4020, 568, "goal");
+    const goal = this.physics.add.staticImage(8260, 568, "goal");
     goal.setDisplaySize(24, 96);
     goal.setSize(24, 96);
 
@@ -315,6 +328,18 @@ class PrototypeScene extends Phaser.Scene {
     this.addPlatformRun(platforms, 3304, 196, 4);
     this.addPlatformRun(platforms, 3540, 300, 1);
     this.addPlatformRun(platforms, 3720, 560, 7);
+    this.addPlatformRun(platforms, 4280, 520, 5);
+    this.addPlatformRun(platforms, 4700, 460, 4);
+    this.addPlatformRun(platforms, 5000, 560, 7);
+    this.addPlatformRun(platforms, 5380, 420, 3);
+    this.addPlatformRun(platforms, 5600, 360, 3);
+    this.addPlatformRun(platforms, 5880, 300, 4);
+    this.addPlatformRun(platforms, 6260, 500, 5);
+    this.addPlatformRun(platforms, 6620, 420, 4);
+    this.addPlatformRun(platforms, 6960, 548, 8);
+    this.addPlatformRun(platforms, 7350, 480, 3);
+    this.addPlatformRun(platforms, 7600, 400, 4);
+    this.addPlatformRun(platforms, 7900, 560, 6);
   }
 
   private createBackground() {
@@ -369,7 +394,7 @@ class PrototypeScene extends Phaser.Scene {
       }
 
       const unitX = x + i * PLATFORM_UNIT_WIDTH;
-      this.add.image(unitX, y, texture).setOrigin(0, 0).setDepth(-1);
+      this.add.image(unitX, y, texture).setOrigin(0, 0).setDepth(PLATFORM_DEPTH);
       if (collides) {
         this.addPlatformHitbox(platforms, unitX, y, PLATFORM_UNIT_WIDTH, PLATFORM_UNIT_HEIGHT);
       }
@@ -385,12 +410,18 @@ class PrototypeScene extends Phaser.Scene {
       { x: 2860, key: PROP_ASSETS.lampSingle, scale: 0.68 },
       { x: 3440, key: PROP_ASSETS.lampDouble, scale: 0.64 },
       { x: 4040, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+      { x: 4540, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+      { x: 5200, key: PROP_ASSETS.lampSingle, scale: 0.66 },
+      { x: 5850, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+      { x: 6480, key: PROP_ASSETS.lampSingle, scale: 0.68 },
+      { x: 7160, key: PROP_ASSETS.lampDouble, scale: 0.64 },
+      { x: 7820, key: PROP_ASSETS.lampSingle, scale: 0.66 },
     ].forEach((lamp) => {
       this.add
         .image(lamp.x, STREET_LAMP_GROUND_Y, lamp.key)
         .setOrigin(0.5, 1)
         .setScale(lamp.scale)
-        .setDepth(-0.5);
+        .setDepth(DECORATION_DEPTH);
     });
   }
 
@@ -407,12 +438,22 @@ class PrototypeScene extends Phaser.Scene {
       { x: 3020, y: GROUND_TOP_Y, key: "stage-props-vending-machine", scale: 0.8 },
       { x: 3360, y: GROUND_TOP_Y, key: "stage-structures-phone-booth", scale: 0.78 },
       { x: 3860, y: GROUND_TOP_Y, key: "stage-structures-subway-stairs", scale: 0.68 },
+      { x: 4380, y: GROUND_TOP_Y, key: "stage-props-bike-rack", scale: 0.82 },
+      { x: 4740, y: GROUND_TOP_Y, key: "stage-structures-vending-kiosk", scale: 0.78 },
+      { x: 5140, y: 560, key: "stage-props-utility-box", scale: 0.58 },
+      { x: 5520, y: 420, key: "stage-props-roadwork-sign", scale: 0.58 },
+      { x: 5910, y: GROUND_TOP_Y, key: "stage-structures-station-wall-railing", scale: 0.72 },
+      { x: 6360, y: GROUND_TOP_Y, key: "stage-structures-construction-fence", scale: 0.62 },
+      { x: 6800, y: 420, key: "stage-props-sidewalk-sign", scale: 0.58 },
+      { x: 7160, y: GROUND_TOP_Y, key: "stage-structures-street-kiosk", scale: 0.62 },
+      { x: 7540, y: 480, key: "stage-props-planter-box", scale: 0.62 },
+      { x: 7960, y: GROUND_TOP_Y, key: "stage-structures-station-entrance", scale: 0.64 },
     ].forEach((object) => {
       this.add
         .image(object.x, object.y, object.key)
         .setOrigin(0.5, 1)
         .setScale(object.scale)
-        .setDepth(-0.35);
+        .setDepth(DECORATION_DEPTH);
     });
   }
 
