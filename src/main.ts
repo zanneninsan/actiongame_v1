@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.34";
+const DEBUG_VERSION = "v0.1.35";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const HUD_PANEL_TEXTURE_KEY = "hud-panel";
 const GAME_TIME_SECONDS = 360;
@@ -596,15 +596,15 @@ class PrototypeScene extends Phaser.Scene {
     this.add
       .image(8, 6, HUD_PANEL_TEXTURE_KEY)
       .setOrigin(0, 0)
-      .setDisplaySize(660, 243)
+      .setDisplaySize(396, 146)
       .setAlpha(0.94)
       .setScrollFactor(0)
       .setDepth(96);
 
     this.playerNameText = this.add
-      .text(96, 64, "", {
+      .text(58, 40, "", {
         fontFamily: "monospace",
-        fontSize: "18px",
+        fontSize: "11px",
         color: "#e0f2fe",
       })
       .setDepth(100)
@@ -612,9 +612,9 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0);
 
     this.scoreText = this.add
-      .text(96, 103, "", {
+      .text(58, 63, "", {
         fontFamily: "monospace",
-        fontSize: "14px",
+        fontSize: "9px",
         color: "#f8fafc",
       })
       .setScrollFactor(0)
@@ -623,9 +623,9 @@ class PrototypeScene extends Phaser.Scene {
     this.updateScoreText();
 
     this.timerText = this.add
-      .text(96, 142, "", {
+      .text(58, 87, "", {
         fontFamily: "monospace",
-        fontSize: "14px",
+        fontSize: "9px",
         color: "#fde68a",
       })
       .setScrollFactor(0)

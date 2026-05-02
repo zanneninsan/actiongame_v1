@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.35
+### English
+- Resized the fantasy HUD panel and its text layout to 60% of the previous display size.
+### 日本語
+- ファンタジー調HUDパネルと文字レイアウトを、前回表示サイズの60%に縮小しました。
+
 ## v0.1.34
 ### English
 - Replaced the top-left HUD panel with the supplied fantasy frame artwork.
