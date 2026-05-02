@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.30
+### English
+- Fixed a bug where the BGM toggle icon didn't sync correctly with the volume slider state.
+### 日本語
+- 音量スライダーの変更とBGMのON/OFFアイコンが正しく連動しないバグを修正しました。
+
 ## v0.1.29
 ### English
 - Added `RELEASE_NOTES.md` to track project updates.
