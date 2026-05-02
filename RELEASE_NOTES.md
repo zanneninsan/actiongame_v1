@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.45
+### English
+- Cancel the remaining landing animation immediately when crouch input is pressed during landing, then transition directly into the crouch animation.
+### 日本語
+- 着地モーション中にしゃがみ入力を押した場合、残りの着地モーションを即キャンセルしてしゃがみアニメーションへ直接遷移するようにしました。
+
 ## v0.1.44
 ### English
 - Rebuilt the crouch spritesheet with horizontal alignment based on each frame's head center to reduce side-to-side sliding.
