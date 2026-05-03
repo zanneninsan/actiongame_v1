@@ -14,7 +14,7 @@ This file is the short context packet for future Codex sessions. Read this first
 
 ## Current State
 
-- Latest known version at handoff creation: `v0.1.59`.
+- Latest known version at handoff creation: `v0.1.60`.
 - Version is displayed in-game through `DEBUG_VERSION` in `src/main.ts`.
 - Build command: `npm run build`.
 - Dev server command: `npm run dev`.
@@ -24,8 +24,8 @@ This file is the short context packet for future Codex sessions. Read this first
 ## Important Files
 
 - `src/main.ts`
-  - Phaser scene, player control, collision, run state, score, timer, stage editor integration.
-  - Still large; avoid reading it all unless needed.
+  - Phaser scene, player control, collision, run state, score, timer, and a thin stage editor hookup.
+  - Keep core game behavior here. Do not add detailed editor workflows here unless they are just integration callbacks.
 - `src/stages.ts`
   - Active stage data: world width, start, goal, platform runs, lamps, decorations, item placements.
   - Most stage layout changes should happen here.
@@ -35,6 +35,8 @@ This file is the short context packet for future Codex sessions. Read this first
   - Default and per-stage world bounds, ground height, visual ground height, street-lamp baseline.
 - `src/stageEditorPanel.ts`
   - DOM panel for in-game stage editing.
+- `src/stageEditor.ts`
+  - In-game stage editor behavior: tool state, selection, add/move/delete, Undo/Redo history, input binding, and JSON export.
 - `src/startModal.ts`
   - Start modal, player name, PC/mobile mode, sound on/off.
 - `src/countdown.ts`
@@ -55,6 +57,7 @@ This file is the short context packet for future Codex sessions. Read this first
   - Do not read all of `src/main.ts` unless the task requires it.
 - Prefer editing the smallest relevant module:
   - Stage placement: `src/stages.ts`
+  - Stage editor behavior: `src/stageEditor.ts`
   - UI style only: `src/styles.css`
   - Start screen: `src/startModal.ts`
   - Editor panel: `src/stageEditorPanel.ts`
@@ -65,19 +68,20 @@ This file is the short context packet for future Codex sessions. Read this first
   - `git status --short`
   - `git diff --stat`
 - If pushing, bump `DEBUG_VERSION` and add release notes.
+- Also bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` for large or user-visible updates, even when not pushing yet.
 - Do not revert user or external changes unless explicitly asked.
 
 ## Version Rule
 
-When pushing changes:
+When pushing changes, or when making a large/user-visible update even before pushing:
 
 1. Increment `DEBUG_VERSION` in `src/main.ts`.
 2. Add a matching section to `RELEASE_NOTES.md`.
 3. Run `npm run build`.
-4. Commit with a concise message.
-5. Push `main`.
+4. If pushing, commit with a concise message.
+5. If pushing, push `main`.
 
-If only making local notes and not pushing, version bump is not required.
+If only making small local notes, documentation tweaks, or internal refactors with no user-visible behavior change, version bump is not required.
 
 ## Common Tasks
 
@@ -114,8 +118,10 @@ Mobile controls are DOM-based in `src/main.ts` and styled in `src/styles.css`.
 
 - Debug UI is created in `src/main.ts`.
 - `HIT` toggles collision rectangles.
-- `EDITOR` opens the stage editor panel.
-- Stage editor can select, move, delete, add platform/item/lamp/decoration/start/goal, then export JSON.
+- `EDITOR` opens the stage editor panel through the thin hook in `src/main.ts`.
+- Stage editor behavior lives in `src/stageEditor.ts`.
+- Stage editor UI markup/events live in `src/stageEditorPanel.ts`.
+- Stage editor can select, move, delete, add platform/item/lamp/decoration/start/goal, Undo/Redo edits, then export JSON.
 
 ### Assets
 
@@ -135,8 +141,10 @@ Use Japanese for conversation with the user.
 Do not scan the whole repo. Only inspect files directly relevant to my next request.
 For stage layout changes, start with `src/stages.ts`.
 For gameplay changes, search exact symbols in `src/main.ts` before reading large ranges.
+For stage editor behavior changes, start with `src/stageEditor.ts`; use `src/stageEditorPanel.ts` for panel UI only.
 Run `npm run build` after code edits.
 If pushing, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md`.
+For large or user-visible updates, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` even before pushing.
 ```
 
 ## Notes For Future Codex

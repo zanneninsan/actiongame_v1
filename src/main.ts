@@ -10,7 +10,6 @@ import {
   type ItemPlacement,
   type ItemType,
   type PlatformAsset,
-  type PlatformRunPlacement,
   type ScoreState,
   type StageDecorationPlacement,
   type StreetLampKey,
@@ -20,7 +19,7 @@ import { ACTIVE_STAGE, cloneStage } from "./stages";
 import { RainbowWinPipeline } from "./rainbowPipeline";
 import { StartCountdownOverlay } from "./countdown";
 import { StartModal, type ControlMode } from "./startModal";
-import { StageEditorPanel, type EditorTool } from "./stageEditorPanel";
+import { StageEditor } from "./stageEditor";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
 
 const GAME_WIDTH = 1280;
@@ -28,7 +27,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.59";
+const DEBUG_VERSION = "v0.1.60";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -63,13 +62,6 @@ const JUMP_VELOCITY = -575;
 const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
 type MobileInputKey = "w" | "a" | "s" | "d";
-type EditorSelection =
-  | { kind: "platform"; index: number }
-  | { kind: "item"; index: number }
-  | { kind: "streetLamp"; index: number }
-  | { kind: "decoration"; index: number }
-  | { kind: "playerStart" }
-  | { kind: "goal" };
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
   webkitRequestFullscreen?: () => Promise<void> | void;
@@ -97,6 +89,7 @@ class PrototypeScene extends Phaser.Scene {
   private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
   private startTime = 0;
   private isRunActive = false;
+  private isRestarting = false;
   private setupComplete = false;
   private playerName = "PLAYER";
   private controlMode: ControlMode = "pc";
@@ -106,15 +99,7 @@ class PrototypeScene extends Phaser.Scene {
   private controlHint = "A/D: move  W/Space: jump  R: restart";
   private editorStage = cloneStage(ACTIVE_STAGE);
   private stageConstants: ResolvedStageConstants = resolveStageConstants(ACTIVE_STAGE);
-  private editorEnabled = false;
-  private editorTool: EditorTool = "select";
-  private editorPanel?: StageEditorPanel;
-  private editorMarkers: Phaser.GameObjects.GameObject[] = [];
-  private editorSelected?: EditorSelection;
-  private editorSelectionMarker?: Phaser.GameObjects.Rectangle;
-  private editorDraggingSelection = false;
-  private editorLastDragX?: number;
-  private editorLastDragY?: number;
+  private stageEditor?: StageEditor;
   private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
   private hasWon = false;
   private wasOnFloor = false;
@@ -174,6 +159,7 @@ class PrototypeScene extends Phaser.Scene {
     this.soundMuted = this.getCookieValue("actiongame_muted") === "1";
     this.applySoundSettings();
     this.resetRunState();
+    this.isRestarting = false;
     this.stageConstants = resolveStageConstants(this.editorStage);
     if (!extraTouchPointersAdded) {
       this.input.addPointer(4);
@@ -269,17 +255,12 @@ class PrototypeScene extends Phaser.Scene {
     this.updateControlHintText();
 
     this.input.keyboard!.off("keydown-R");
-    this.input.keyboard!.on("keydown-R", () => this.restartStage());
-    this.input.keyboard!.off("keydown-DELETE");
-    this.input.keyboard!.on("keydown-DELETE", () => this.deleteEditorSelection());
-    this.input.off("pointerdown", this.handleEditorPointerDown, this);
-    this.input.off("pointermove", this.handleEditorPointerMove, this);
-    this.input.off("pointerup", this.handleEditorPointerUp, this);
-    this.input.off("pointerupoutside", this.handleEditorPointerUp, this);
-    this.input.on("pointerdown", this.handleEditorPointerDown, this);
-    this.input.on("pointermove", this.handleEditorPointerMove, this);
-    this.input.on("pointerup", this.handleEditorPointerUp, this);
-    this.input.on("pointerupoutside", this.handleEditorPointerUp, this);
+    this.input.keyboard!.on("keydown-R", () => {
+      if (this.stageEditor?.isEnabled) {
+        return;
+      }
+      this.restartStage();
+    });
     this.createStageEditor();
     this.createGlobalUI();
 
@@ -413,11 +394,17 @@ class PrototypeScene extends Phaser.Scene {
     this.landingFastForwarded = false;
     this.collisionDebugGraphics?.clear();
     this.collisionDebugGraphics = undefined;
+    this.itemsGroup = undefined;
     this.goal = undefined;
     this.finalScoreText = undefined;
   }
 
   private restartStage() {
+    if (this.isRestarting) {
+      return;
+    }
+
+    this.isRestarting = true;
     this.resetRunState();
     this.bgm?.stop();
     this.scene.restart();
@@ -569,16 +556,25 @@ class PrototypeScene extends Phaser.Scene {
     this.stageConstants = resolveStageConstants(this.editorStage);
     this.stageRenderObjects.forEach((object) => object.destroy());
     this.stageRenderObjects = [];
-    this.platforms?.clear(true, true);
-    this.itemsGroup?.clear(true, true);
+    this.clearStaticGroup(this.platforms);
+    this.clearStaticGroup(this.itemsGroup);
 
     this.buildStage(this.platforms);
     this.createStreetLamps();
     this.createStageObjects();
     this.populateItems();
     this.moveGoalTo(this.editorStage.goal.x, this.editorStage.goal.y);
-    this.refreshEditorSelectionMarker();
     this.updateCollisionDebug();
+  }
+
+  private clearStaticGroup(group?: Phaser.Physics.Arcade.StaticGroup) {
+    const children = (group as Phaser.Physics.Arcade.StaticGroup & { children?: Phaser.Structs.Set<Phaser.GameObjects.GameObject> } | undefined)
+      ?.children;
+    if (!children) {
+      return;
+    }
+
+    group?.clear(true, true);
   }
 
   private buildStage(platforms: Phaser.Physics.Arcade.StaticGroup) {
@@ -824,35 +820,24 @@ class PrototypeScene extends Phaser.Scene {
   private createStageEditor() {
     this.removeStageEditor();
 
-    this.editorPanel = new StageEditorPanel({
-      initialTool: this.editorTool,
-      onToggle: (enabled) => {
-        this.editorEnabled = enabled;
+    this.stageEditor = new StageEditor(this, {
+      tile: TILE,
+      platformUnitWidth: PLATFORM_UNIT_WIDTH,
+      platformUnitHeight: PLATFORM_UNIT_HEIGHT,
+      getStage: () => this.editorStage,
+      setStage: (stage) => {
+        this.editorStage = stage;
       },
-      onToolChange: (tool) => {
-        this.editorTool = tool;
-      },
-      onExport: () => {
-        this.refreshEditorExport();
-        this.editorPanel?.copyExportToClipboard();
-      },
+      getStageConstants: () => this.stageConstants,
+      rebuildStageObjects: () => this.rebuildEditableStageObjects(),
+      moveGoalTo: (x, y) => this.moveGoalTo(x, y),
     });
-    this.editorPanel.show();
-    this.refreshEditorExport();
+    this.stageEditor.show();
   }
 
   private removeStageEditor() {
-    this.editorPanel?.remove();
-    this.editorPanel = undefined;
-    this.editorEnabled = false;
-    this.editorMarkers.forEach((marker) => marker.destroy());
-    this.editorMarkers = [];
-    this.editorSelected = undefined;
-    this.editorDraggingSelection = false;
-    this.editorLastDragX = undefined;
-    this.editorLastDragY = undefined;
-    this.editorSelectionMarker?.destroy();
-    this.editorSelectionMarker = undefined;
+    this.stageEditor?.remove();
+    this.stageEditor = undefined;
   }
 
   private createGlobalUI() {
@@ -938,314 +923,6 @@ class PrototypeScene extends Phaser.Scene {
     document.getElementById("options-modal")?.remove();
   }
 
-  private handleEditorPointerDown(pointer: Phaser.Input.Pointer) {
-    if (!this.editorEnabled || pointer.event?.target !== this.game.canvas) {
-      return;
-    }
-
-    const point = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-    const x = Math.round(point.x / TILE) * TILE;
-    const y = Math.round(point.y / TILE) * TILE;
-
-    if (this.startEditorSelectionDrag(point.x, point.y, x, y)) {
-      return;
-    }
-
-    if (this.editorTool === "select") {
-      this.selectEditorObjectAt(point.x, point.y);
-    } else if (this.editorTool === "move") {
-      if (!this.editorSelected) {
-        this.selectEditorObjectAt(point.x, point.y);
-      } else {
-        this.moveEditorSelectionTo(x, y);
-      }
-    } else if (this.editorTool === "delete") {
-      this.deleteEditorObjectAt(point.x, point.y);
-    } else if (this.editorTool === "platform") {
-      const units = Phaser.Math.Clamp(this.editorPanel?.platformUnits ?? 3, 1, 16);
-      const placement: PlatformRunPlacement = { x, y, units };
-      this.editorStage.platforms.push(placement);
-      this.editorSelected = { kind: "platform", index: this.editorStage.platforms.length - 1 };
-      this.rebuildEditableStageObjects();
-    } else if (this.editorTool === "item") {
-      const type = this.editorPanel?.itemType ?? "energyDrink";
-      const placement: ItemPlacement = { type, x, y };
-      this.editorStage.items.push(placement);
-      this.editorSelected = { kind: "item", index: this.editorStage.items.length - 1 };
-      this.rebuildEditableStageObjects();
-    } else if (this.editorTool === "streetLamp") {
-      const key = this.editorPanel?.lampType ?? PROP_ASSETS.lampSingle;
-      const placement: StreetLampPlacement = { x, key, scale: key === PROP_ASSETS.lampDouble ? 0.64 : 0.66 };
-      this.editorStage.streetLamps.push(placement);
-      this.editorSelected = { kind: "streetLamp", index: this.editorStage.streetLamps.length - 1 };
-      this.rebuildEditableStageObjects();
-    } else if (this.editorTool === "decoration") {
-      const key = this.editorPanel?.decorationKey ?? STAGE_OBJECT_ASSETS[0].key;
-      const placement: StageDecorationPlacement = { x, y, key, scale: 0.68 };
-      this.editorStage.decorations.push(placement);
-      this.editorSelected = { kind: "decoration", index: this.editorStage.decorations.length - 1 };
-      this.rebuildEditableStageObjects();
-    } else if (this.editorTool === "playerStart") {
-      this.editorStage.playerStart = { x, y };
-      this.editorSelected = { kind: "playerStart" };
-      this.addEditorMarker(x, y, 0x38bdf8, "START");
-      this.refreshEditorSelectionMarker();
-    } else if (this.editorTool === "goal") {
-      this.editorStage.goal = { x, y };
-      this.editorSelected = { kind: "goal" };
-      this.moveGoalTo(x, y);
-      this.addEditorMarker(x, y, 0xfb7185, "GOAL");
-      this.refreshEditorSelectionMarker();
-    }
-
-    this.refreshEditorExport();
-  }
-
-  private handleEditorPointerMove(pointer: Phaser.Input.Pointer) {
-    if (!this.editorEnabled || !this.editorDraggingSelection || pointer.event?.target !== this.game.canvas) {
-      return;
-    }
-
-    const point = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
-    const x = Math.round(point.x / TILE) * TILE;
-    const y = Math.round(point.y / TILE) * TILE;
-    if (x === this.editorLastDragX && y === this.editorLastDragY) {
-      return;
-    }
-
-    this.editorLastDragX = x;
-    this.editorLastDragY = y;
-    this.moveEditorSelectionTo(x, y);
-  }
-
-  private handleEditorPointerUp() {
-    this.editorDraggingSelection = false;
-    this.editorLastDragX = undefined;
-    this.editorLastDragY = undefined;
-  }
-
-  private startEditorSelectionDrag(worldX: number, worldY: number, snappedX: number, snappedY: number) {
-    if (this.editorTool === "delete" || !this.editorSelected || !this.isPointInsideEditorSelection(worldX, worldY)) {
-      return false;
-    }
-
-    this.editorDraggingSelection = true;
-    this.editorLastDragX = snappedX;
-    this.editorLastDragY = snappedY;
-    return true;
-  }
-
-  private isPointInsideEditorSelection(worldX: number, worldY: number) {
-    if (!this.editorSelected) {
-      return false;
-    }
-
-    const bounds = this.getEditorSelectionBounds(this.editorSelected);
-    if (!bounds) {
-      return false;
-    }
-
-    return (
-      worldX >= bounds.x - bounds.width / 2 &&
-      worldX <= bounds.x + bounds.width / 2 &&
-      worldY >= bounds.y - bounds.height / 2 &&
-      worldY <= bounds.y + bounds.height / 2
-    );
-  }
-
-  private selectEditorObjectAt(worldX: number, worldY: number) {
-    const selection = this.findEditorObjectAt(worldX, worldY);
-    this.editorSelected = selection;
-    this.refreshEditorSelectionMarker();
-  }
-
-  private deleteEditorObjectAt(worldX: number, worldY: number) {
-    const selection = this.findEditorObjectAt(worldX, worldY);
-    if (!selection) {
-      this.editorSelected = undefined;
-      this.refreshEditorSelectionMarker();
-      return;
-    }
-
-    this.deleteEditorSelection(selection);
-  }
-
-  private deleteEditorSelection(selection = this.editorSelected) {
-    if (!this.editorEnabled || !selection) {
-      return;
-    }
-
-    if (selection.kind === "platform") {
-      this.editorStage.platforms.splice(selection.index, 1);
-    } else if (selection.kind === "item") {
-      this.editorStage.items.splice(selection.index, 1);
-    } else if (selection.kind === "streetLamp") {
-      this.editorStage.streetLamps.splice(selection.index, 1);
-    } else if (selection.kind === "decoration") {
-      this.editorStage.decorations.splice(selection.index, 1);
-    } else {
-      this.editorSelected = selection;
-      this.refreshEditorSelectionMarker();
-      return;
-    }
-
-    this.editorSelected = undefined;
-    this.editorDraggingSelection = false;
-    this.rebuildEditableStageObjects();
-    this.refreshEditorExport();
-  }
-
-  private moveEditorSelectionTo(x: number, y: number) {
-    if (!this.editorSelected) {
-      return;
-    }
-
-    const selection = this.editorSelected;
-    if (selection.kind === "platform") {
-      const placement = this.editorStage.platforms[selection.index];
-      if (placement) {
-        placement.x = x;
-        placement.y = y;
-      }
-    } else if (selection.kind === "item") {
-      const placement = this.editorStage.items[selection.index];
-      if (placement) {
-        placement.x = x;
-        placement.y = y;
-      }
-    } else if (selection.kind === "streetLamp") {
-      const placement = this.editorStage.streetLamps[selection.index];
-      if (placement) {
-        placement.x = x;
-      }
-    } else if (selection.kind === "decoration") {
-      const placement = this.editorStage.decorations[selection.index];
-      if (placement) {
-        placement.x = x;
-        placement.y = y;
-      }
-    } else if (selection.kind === "playerStart") {
-      this.editorStage.playerStart = { x, y };
-    } else if (selection.kind === "goal") {
-      this.editorStage.goal = { x, y };
-    }
-
-    this.rebuildEditableStageObjects();
-    this.refreshEditorExport();
-  }
-
-  private findEditorObjectAt(worldX: number, worldY: number): EditorSelection | undefined {
-    let best: { selection: EditorSelection; distance: number } | undefined;
-    const consider = (selection: EditorSelection, distance: number, threshold: number) => {
-      if (distance > threshold) {
-        return;
-      }
-      if (!best || distance < best.distance) {
-        best = { selection, distance };
-      }
-    };
-
-    this.editorStage.platforms.forEach((platform, index) => {
-      consider(
-        { kind: "platform", index },
-        this.getDistanceToRect(worldX, worldY, platform.x, platform.y, platform.units * PLATFORM_UNIT_WIDTH, PLATFORM_UNIT_HEIGHT),
-        54,
-      );
-    });
-    this.editorStage.items.forEach((item, index) => {
-      consider({ kind: "item", index }, Phaser.Math.Distance.Between(worldX, worldY, item.x, item.y), 58);
-    });
-    this.editorStage.streetLamps.forEach((lamp, index) => {
-      const scale = lamp.scale ?? 1;
-      consider(
-        { kind: "streetLamp", index },
-        this.getDistanceToRect(
-          worldX,
-          worldY,
-          lamp.x - 42,
-          this.stageConstants.streetLampGroundY - 280 * scale,
-          84,
-          280 * scale,
-        ),
-        64,
-      );
-    });
-    this.editorStage.decorations.forEach((decoration, index) => {
-      const y = decoration.y ?? this.stageConstants.groundTopY;
-      consider({ kind: "decoration", index }, Phaser.Math.Distance.Between(worldX, worldY, decoration.x, y), 84);
-    });
-    consider(
-      { kind: "playerStart" },
-      Phaser.Math.Distance.Between(worldX, worldY, this.editorStage.playerStart.x, this.editorStage.playerStart.y),
-      70,
-    );
-    consider({ kind: "goal" }, Phaser.Math.Distance.Between(worldX, worldY, this.editorStage.goal.x, this.editorStage.goal.y), 70);
-
-    return best?.selection;
-  }
-
-  private getDistanceToRect(x: number, y: number, rectX: number, rectY: number, rectWidth: number, rectHeight: number) {
-    const nearestX = Phaser.Math.Clamp(x, rectX, rectX + rectWidth);
-    const nearestY = Phaser.Math.Clamp(y, rectY, rectY + rectHeight);
-    return Phaser.Math.Distance.Between(x, y, nearestX, nearestY);
-  }
-
-  private refreshEditorSelectionMarker() {
-    this.editorSelectionMarker?.destroy();
-    this.editorSelectionMarker = undefined;
-    if (!this.editorSelected) {
-      return;
-    }
-
-    const bounds = this.getEditorSelectionBounds(this.editorSelected);
-    if (!bounds) {
-      this.editorSelected = undefined;
-      return;
-    }
-
-    this.editorSelectionMarker = this.add
-      .rectangle(bounds.x, bounds.y, bounds.width, bounds.height)
-      .setStrokeStyle(3, 0x22d3ee, 0.96)
-      .setFillStyle(0x22d3ee, 0.08)
-      .setDepth(302);
-  }
-
-  private getEditorSelectionBounds(selection: EditorSelection) {
-    if (selection.kind === "platform") {
-      const platform = this.editorStage.platforms[selection.index];
-      if (!platform) {
-        return undefined;
-      }
-      return {
-        x: platform.x + (platform.units * PLATFORM_UNIT_WIDTH) / 2,
-        y: platform.y + PLATFORM_UNIT_HEIGHT / 2,
-        width: platform.units * PLATFORM_UNIT_WIDTH + 10,
-        height: PLATFORM_UNIT_HEIGHT + 10,
-      };
-    }
-    if (selection.kind === "item") {
-      const item = this.editorStage.items[selection.index];
-      return item ? { x: item.x, y: item.y, width: 72, height: 72 } : undefined;
-    }
-    if (selection.kind === "streetLamp") {
-      const lamp = this.editorStage.streetLamps[selection.index];
-      const scale = lamp?.scale ?? 1;
-      return lamp
-        ? { x: lamp.x, y: this.stageConstants.streetLampGroundY - 140 * scale, width: 110, height: 290 * scale }
-        : undefined;
-    }
-    if (selection.kind === "decoration") {
-      const decoration = this.editorStage.decorations[selection.index];
-      return decoration
-        ? { x: decoration.x, y: (decoration.y ?? this.stageConstants.groundTopY) - 36, width: 96, height: 96 }
-        : undefined;
-    }
-    if (selection.kind === "playerStart") {
-      return { x: this.editorStage.playerStart.x, y: this.editorStage.playerStart.y, width: 88, height: 40 };
-    }
-    return { x: this.editorStage.goal.x, y: this.editorStage.goal.y, width: 48, height: 112 };
-  }
-
   private moveGoalTo(x: number, y: number) {
     if (!this.goal) {
       return;
@@ -1253,24 +930,6 @@ class PrototypeScene extends Phaser.Scene {
 
     this.goal.setPosition(x, y);
     this.goal.refreshBody();
-  }
-
-  private addEditorMarker(x: number, y: number, color: number, label: string) {
-    const marker = this.add
-      .text(x, y, label, {
-        fontFamily: "monospace",
-        fontSize: "18px",
-        color: "#ffffff",
-        backgroundColor: `#${color.toString(16).padStart(6, "0")}`,
-        padding: { x: 6, y: 4 },
-      })
-      .setOrigin(0.5)
-      .setDepth(20);
-    this.editorMarkers.push(marker);
-  }
-
-  private refreshEditorExport() {
-    this.editorPanel?.setExport(JSON.stringify(this.editorStage, null, 2));
   }
 
   private createItems() {
@@ -1445,6 +1104,10 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createPixelTexture(key: string, width: number, height: number, fill: number, stroke: number) {
+    if (this.textures.exists(key)) {
+      return;
+    }
+
     const graphics = this.make.graphics({ x: 0, y: 0 }, false);
     graphics.fillStyle(fill);
     graphics.fillRect(0, 0, width, height);
@@ -1455,6 +1118,10 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createPlayerAnimations() {
+    if (this.anims.exists("player-idle")) {
+      return;
+    }
+
     this.anims.create({
       key: "player-idle",
       frames: this.anims.generateFrameNumbers("player-idle", {

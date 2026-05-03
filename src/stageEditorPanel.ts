@@ -15,6 +15,8 @@ type StageEditorPanelOptions = {
   initialTool: EditorTool;
   onToggle: (enabled: boolean) => void;
   onToolChange: (tool: EditorTool) => void;
+  onUndo: () => void;
+  onRedo: () => void;
   onExport: () => void;
 };
 
@@ -26,6 +28,8 @@ export class StageEditorPanel {
   private itemTypeSelect?: HTMLSelectElement;
   private lampTypeSelect?: HTMLSelectElement;
   private decorationSelect?: HTMLSelectElement;
+  private undoButton?: HTMLButtonElement;
+  private redoButton?: HTMLButtonElement;
   private cleanup: Array<() => void> = [];
   private enabled = false;
 
@@ -99,7 +103,12 @@ export class StageEditorPanel {
             ${STAGE_OBJECT_ASSETS.map((asset) => `<option value="${asset.key}">${asset.key.replace("stage-", "")}</option>`).join("")}
           </select>
         </div>
+        <div class="editor-history-row">
+          <button data-editor-undo type="button" disabled>UNDO</button>
+          <button data-editor-redo type="button" disabled>REDO</button>
+        </div>
         <p class="editor-help">Select picks the nearest object. Move relocates the selected object. Delete removes clicked objects.</p>
+        <p class="editor-help">Keys: Z undo. R redo. Delete removes the selected object.</p>
         <button class="editor-export-button" type="button">EXPORT JSON</button>
         <textarea data-editor-export readonly spellcheck="false"></textarea>
       </div>
@@ -112,6 +121,8 @@ export class StageEditorPanel {
     this.itemTypeSelect = panel.querySelector<HTMLSelectElement>("[data-item-type]")!;
     this.lampTypeSelect = panel.querySelector<HTMLSelectElement>("[data-lamp-type]")!;
     this.decorationSelect = panel.querySelector<HTMLSelectElement>("[data-decoration-key]")!;
+    this.undoButton = panel.querySelector<HTMLButtonElement>("[data-editor-undo]")!;
+    this.redoButton = panel.querySelector<HTMLButtonElement>("[data-editor-redo]")!;
 
     const toggleButton = panel.querySelector<HTMLButtonElement>(".editor-toggle")!;
     const toolSelect = panel.querySelector<HTMLSelectElement>("[data-editor-tool]")!;
@@ -130,10 +141,14 @@ export class StageEditorPanel {
 
     toggleButton.addEventListener("click", toggleEditor);
     toolSelect.addEventListener("change", setTool);
+    this.undoButton.addEventListener("click", this.options.onUndo);
+    this.redoButton.addEventListener("click", this.options.onRedo);
     exportButton.addEventListener("click", this.options.onExport);
     this.cleanup.push(() => {
       toggleButton.removeEventListener("click", toggleEditor);
       toolSelect.removeEventListener("change", setTool);
+      this.undoButton?.removeEventListener("click", this.options.onUndo);
+      this.redoButton?.removeEventListener("click", this.options.onRedo);
       exportButton.removeEventListener("click", this.options.onExport);
     });
     this.bindDrag(panel);
@@ -142,6 +157,15 @@ export class StageEditorPanel {
   setExport(value: string) {
     if (this.exportTextarea) {
       this.exportTextarea.value = value;
+    }
+  }
+
+  setHistoryState(canUndo: boolean, canRedo: boolean) {
+    if (this.undoButton) {
+      this.undoButton.disabled = !canUndo;
+    }
+    if (this.redoButton) {
+      this.redoButton.disabled = !canRedo;
     }
   }
 
@@ -160,6 +184,8 @@ export class StageEditorPanel {
     this.itemTypeSelect = undefined;
     this.lampTypeSelect = undefined;
     this.decorationSelect = undefined;
+    this.undoButton = undefined;
+    this.redoButton = undefined;
     this.enabled = false;
     document.getElementById("stage-editor")?.remove();
   }

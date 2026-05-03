@@ -1,5 +1,17 @@
 # Release Notes / リリースノート
 
+## v0.1.60
+### English
+- Added Undo and Redo support to the in-game stage editor.
+- Added editor keyboard shortcuts: `Z` for Undo, `R` for Redo, and `Delete` for removing the selected object.
+- Split detailed stage editor behavior into `src/stageEditor.ts`, keeping `src/main.ts` focused on core game behavior and thin editor integration.
+- Updated editor guidance docs so future large or user-visible updates bump `DEBUG_VERSION` and `RELEASE_NOTES.md` even before pushing.
+### Japanese
+- In-game stage editor ni Undo / Redo wo tsuika.
+- Editor shortcut wo tsuika: `Z` de Undo, `R` de Redo, `Delete` de sentakuchu object wo sakujo.
+- Stage editor no shosai logic wo `src/stageEditor.ts` ni bunkatsu shi, `src/main.ts` wo game kihon kinou to usui renkei ni seiri.
+- Kongo no ookina / user-visible na koushin de wa push mae demo `DEBUG_VERSION` to `RELEASE_NOTES.md` wo koushin suru rule wo docs ni tsuika.
+
 ## v0.1.59
 ### English
 - Made decoration `y` optional in stage definitions.
