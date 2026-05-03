@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.104
+### English
+- Recut the start and options UI frame, title, input, select, and button art with safer transparent padding so right-side ornaments do not clip.
+- Updated the start and options windows to use the safer UI assets.
+### Japanese
+- 開始画面と設定画面で使う枠、タイトル、入力欄、セレクト欄、ボタン素材を、右側の装飾が切れないように余白付きで切り直しました。
+- 開始画面と設定画面を、切り直した安全余白付きUI素材へ差し替えました。
+
 ## v0.1.103
 ### English
 - Changed the player name field to use a plain fantasy input plate instead of the dropdown-style field art.

@@ -48,8 +48,8 @@ canvas {
   gap: 12px;
   padding: 0 clamp(10px, 3vw, 20px) 14px;
   border: var(--fantasy-window-border) solid transparent;
-  border-image-source: url("../assets/ui/fantasy/frame_parts/frame_window_9slice.png");
-  border-image-slice: 84 fill;
+  border-image-source: url("../assets/ui/fantasy/frame_parts/frame_window_9slice_safe.png");
+  border-image-slice: 110 fill;
   border-image-width: var(--fantasy-window-border);
   border-image-repeat: stretch;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
@@ -61,7 +61,7 @@ canvas {
   display: grid;
   place-items: center;
   padding: 0 22px;
-  background: url("../assets/ui/fantasy/title_plate.png") center / 100% 100% no-repeat;
+  background: url("../assets/ui/fantasy/title_plate_safe.png") center / 100% 100% no-repeat;
   font-size: clamp(18px, 3.4vw, 25px);
   font-weight: 800;
   line-height: 1.1;
@@ -94,11 +94,11 @@ canvas {
 }
 
 .start-dialog input {
-  background: url("../assets/ui/fantasy/label_plate.png") center / 100% 100% no-repeat;
+  background: url("../assets/ui/fantasy/label_plate_safe.png") center / 100% 100% no-repeat;
 }
 
 .start-dialog select {
-  background: url("../assets/ui/fantasy/select_field.png") center / 100% 100% no-repeat;
+  background: url("../assets/ui/fantasy/select_field_safe.png") center / 100% 100% no-repeat;
 }
 
 .mode-row,
@@ -115,7 +115,7 @@ canvas {
   min-width: 0;
   height: 42px;
   border: 0;
-  background: url("../assets/ui/fantasy/button_primary.png") center / 100% 100% no-repeat;
+  background: url("../assets/ui/fantasy/button_primary_safe.png") center / 100% 100% no-repeat;
   color: #f8fafc;
   font: inherit;
   font-weight: 800;
@@ -125,13 +125,13 @@ canvas {
 
 .mode-button.is-selected,
 .sound-button.is-selected {
-  background-image: url("../assets/ui/fantasy/button_primary_selected.png");
+  background-image: url("../assets/ui/fantasy/button_primary_selected_safe.png");
   color: #fef3c7;
 }
 
 .start-button {
   height: 48px;
-  background-image: url("../assets/ui/fantasy/button_primary_selected.png");
+  background-image: url("../assets/ui/fantasy/button_primary_selected_safe.png");
   color: #fff7d6;
   font-size: 18px;
 }
@@ -512,8 +512,8 @@ canvas {
   gap: 14px;
   padding: 0 clamp(8px, 3vw, 16px) 14px;
   border: var(--fantasy-window-border) solid transparent;
-  border-image-source: url("../assets/ui/fantasy/frame_parts/frame_window_9slice.png");
-  border-image-slice: 84 fill;
+  border-image-source: url("../assets/ui/fantasy/frame_parts/frame_window_9slice_safe.png");
+  border-image-slice: 110 fill;
   border-image-width: var(--fantasy-window-border);
   border-image-repeat: stretch;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
@@ -525,7 +525,7 @@ canvas {
   display: grid;
   place-items: center;
   padding: 0 20px;
-  background: url("../assets/ui/fantasy/title_plate.png") center / 100% 100% no-repeat;
+  background: url("../assets/ui/fantasy/title_plate_safe.png") center / 100% 100% no-repeat;
   font-size: clamp(18px, 5vw, 24px);
   font-weight: 800;
   text-align: center;
@@ -553,7 +553,7 @@ canvas {
   height: 40px;
   border: 0;
   padding: 0 16px;
-  background: url("../assets/ui/fantasy/select_field.png") center / 100% 100% no-repeat;
+  background: url("../assets/ui/fantasy/select_field_safe.png") center / 100% 100% no-repeat;
   color: #f8fafc;
   font: inherit;
   font-weight: 800;
@@ -564,7 +564,7 @@ canvas {
 #options-close {
   width: 100%;
   margin-top: 8px;
-  background-image: url("../assets/ui/fantasy/button_primary.png");
+  background-image: url("../assets/ui/fantasy/button_primary_safe.png");
   font-size: 16px;
   font-weight: 800;
 }
