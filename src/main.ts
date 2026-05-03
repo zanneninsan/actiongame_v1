@@ -7,7 +7,6 @@ import {
   PLATFORM_ASSETS,
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
-  type EnemyPlacement,
   type ItemPlacement,
   type ItemType,
   type PlatformAsset,
@@ -30,6 +29,7 @@ import {
 } from "./storyDialogue";
 import { getBrowserLocale, isLocale, LOCALE_OPTIONS, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
 import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-assets";
+import { createEnemies, createEnemyTexture, populateEnemies, updateEnemies } from "./enemies";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
@@ -44,16 +44,8 @@ const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
 const PLATFORM_DEPTH = -0.55;
 const GOAL_TEXTURE_KEY = "goal-gate";
-const ENEMY_TEXTURE_KEY = "enemy-neon-bouncer";
 const GOAL_DISPLAY_WIDTH = 58;
 const GOAL_DISPLAY_HEIGHT = 192;
-const ENEMY_DISPLAY_WIDTH = 76;
-const ENEMY_DISPLAY_HEIGHT = 64;
-const ENEMY_BODY_WIDTH = 56;
-const ENEMY_BODY_HEIGHT = 42;
-const ENEMY_BODY_OFFSET_X = 10;
-const ENEMY_BODY_OFFSET_Y = 16;
-const ENEMY_DEFAULT_SPEED = 92;
 const DAMAGE_INVULNERABLE_MS = 1150;
 const DAMAGE_INPUT_LOCK_MS = 280;
 const DAMAGE_KNOCKBACK_X = 430;
@@ -203,7 +195,7 @@ class PrototypeScene extends Phaser.Scene {
     this.createPixelTexture("ground", TILE, TILE, 0x263244, 0x8bd3ff);
     this.createPixelTexture("platform", TILE, TILE, 0x384257, 0xf6c453);
     this.createPixelTexture("platform-hitbox", 1, 1, 0xffffff, 0xffffff);
-    this.createEnemyTexture();
+    createEnemyTexture(this);
     this.load.image(GOAL_TEXTURE_KEY, `${ASSET_BASE}assets/stage_objects/goal_gate.png`);
     this.load.audio("game-bgm", `${ASSET_BASE}assets/audio/gamebgm_default.mp3`);
     this.load.audio("item-pickup", `${ASSET_BASE}assets/audio/item_pickup.wav`);
@@ -254,7 +246,9 @@ class PrototypeScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.decorationPlatforms, undefined, this.canLandOnDecorationPlatform, this);
     this.physics.add.overlap(this.player, goal, () => this.win());
     this.createItems();
-    this.createEnemies();
+    this.enemiesGroup = createEnemies(this, this.player, this.editorStage.enemies ?? [], (enemy) =>
+      this.damagePlayer(enemy),
+    );
 
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.keys = {
@@ -346,7 +340,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.refreshDropThroughDecorationPlatform();
-    this.updateEnemies();
+    updateEnemies(this, this.enemiesGroup);
     const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
     if (this.time.now < this.hurtUntil) {
       this.updateCollisionDebug();
@@ -755,7 +749,7 @@ class PrototypeScene extends Phaser.Scene {
     this.createStreetLamps();
     this.createStageObjects();
     this.populateItems();
-    this.populateEnemies();
+    populateEnemies(this.enemiesGroup, this.editorStage.enemies ?? []);
     this.moveGoalTo(this.editorStage.goal.x, this.editorStage.goal.y);
     this.updateCollisionDebug();
   }
@@ -1411,76 +1405,6 @@ class PrototypeScene extends Phaser.Scene {
     item.disableBody(true, true);
   }
 
-  private createEnemies() {
-    const enemies = this.physics.add.group({
-      allowGravity: false,
-      immovable: true,
-    });
-    this.enemiesGroup = enemies;
-    this.populateEnemies();
-
-    this.physics.add.overlap(this.player, enemies, (_, enemyObject) => {
-      this.damagePlayer(enemyObject as Phaser.Physics.Arcade.Sprite);
-    });
-  }
-
-  private populateEnemies() {
-    if (!this.enemiesGroup) {
-      return;
-    }
-
-    (this.editorStage.enemies ?? []).forEach((placement) => {
-      this.createEnemySprite(placement);
-    });
-  }
-
-  private createEnemySprite(placement: EnemyPlacement) {
-    if (!this.enemiesGroup) {
-      return;
-    }
-
-    const enemy = this.enemiesGroup.create(placement.x, placement.y, ENEMY_TEXTURE_KEY) as Phaser.Physics.Arcade.Sprite;
-    const speed = placement.speed ?? ENEMY_DEFAULT_SPEED;
-    const direction = speed >= 0 ? 1 : -1;
-    enemy.setDisplaySize(ENEMY_DISPLAY_WIDTH, ENEMY_DISPLAY_HEIGHT);
-    enemy.setDepth(0.18);
-    enemy.setData("patrolLeft", Math.min(placement.patrolLeft, placement.patrolRight));
-    enemy.setData("patrolRight", Math.max(placement.patrolLeft, placement.patrolRight));
-    enemy.setData("speed", Math.abs(speed));
-    enemy.setData("spawnY", placement.y);
-    enemy.setSize(ENEMY_BODY_WIDTH, ENEMY_BODY_HEIGHT);
-    enemy.setOffset(ENEMY_BODY_OFFSET_X, ENEMY_BODY_OFFSET_Y);
-    enemy.setVelocityX(Math.abs(speed) * direction);
-    enemy.setFlipX(direction < 0);
-    const body = enemy.body as Phaser.Physics.Arcade.Body;
-    body.setAllowGravity(false);
-    body.setImmovable(true);
-  }
-
-  private updateEnemies() {
-    this.enemiesGroup?.getChildren().forEach((child) => {
-      const enemy = child as Phaser.Physics.Arcade.Sprite;
-      if (!enemy.active || !enemy.body) {
-        return;
-      }
-
-      const patrolLeft = enemy.getData("patrolLeft") as number;
-      const patrolRight = enemy.getData("patrolRight") as number;
-      const speed = enemy.getData("speed") as number;
-      const spawnY = enemy.getData("spawnY") as number;
-      if (enemy.x <= patrolLeft && enemy.body.velocity.x < 0) {
-        enemy.setVelocityX(speed);
-        enemy.setFlipX(false);
-      } else if (enemy.x >= patrolRight && enemy.body.velocity.x > 0) {
-        enemy.setVelocityX(-speed);
-        enemy.setFlipX(true);
-      }
-
-      enemy.y = spawnY + Math.sin((this.time.now + enemy.x * 8) / 260) * 4;
-      enemy.body.updateFromGameObject();
-    });
-  }
-
   private damagePlayer(enemy: Phaser.Physics.Arcade.Sprite) {
     if (!this.isRunActive || this.stageEditor?.isEnabled || this.time.now < this.invulnerableUntil || !enemy.active) {
       return;
@@ -1635,37 +1559,6 @@ class PrototypeScene extends Phaser.Scene {
     graphics.lineStyle(1, stroke);
     graphics.strokeRect(0.5, 0.5, width - 1, height - 1);
     graphics.generateTexture(key, width, height);
-    graphics.destroy();
-  }
-
-  private createEnemyTexture() {
-    if (this.textures.exists(ENEMY_TEXTURE_KEY)) {
-      return;
-    }
-
-    const graphics = this.make.graphics({ x: 0, y: 0 }, false);
-    graphics.fillStyle(0x111827, 0.92);
-    graphics.fillRoundedRect(6, 18, 64, 38, 14);
-    graphics.fillStyle(0x7c2d12, 0.98);
-    graphics.fillRoundedRect(12, 12, 52, 40, 12);
-    graphics.fillStyle(0xff4d6d, 0.94);
-    graphics.fillCircle(24, 29, 7);
-    graphics.fillCircle(52, 29, 7);
-    graphics.fillStyle(0xfff1f2, 0.96);
-    graphics.fillCircle(26, 28, 2);
-    graphics.fillCircle(54, 28, 2);
-    graphics.lineStyle(4, 0xfacc15, 0.95);
-    graphics.beginPath();
-    graphics.moveTo(28, 46);
-    graphics.lineTo(35, 40);
-    graphics.lineTo(42, 46);
-    graphics.lineTo(49, 40);
-    graphics.strokePath();
-    graphics.lineStyle(3, 0x22d3ee, 0.8);
-    graphics.strokeRoundedRect(10, 10, 56, 44, 14);
-    graphics.fillStyle(0x22d3ee, 0.22);
-    graphics.fillEllipse(38, 58, 54, 10);
-    graphics.generateTexture(ENEMY_TEXTURE_KEY, ENEMY_DISPLAY_WIDTH, ENEMY_DISPLAY_HEIGHT);
     graphics.destroy();
   }
 
