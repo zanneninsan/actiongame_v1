@@ -1,5 +1,14 @@
 # Release Notes / リリースノート
 
+## v0.1.71
+### English
+- Generate rear and midground background lists from their asset folders at Vite startup/build time.
+- Removed the need to manually register each new background image in `src/main.ts`.
+- Reload the dev server page when background files are added to or removed from the managed folders.
+### Japanese
+- Viteの起動時またはビルド時に、後景と中景の背景リストを各アセットフォルダから生成するようにしました。
+- 新しい背景画像を追加するたびに `src/main.ts` へ手動登録する必要をなくしました。
+- 管理対象フォルダ内で背景画像が追加または削除されたとき、開発サーバーのページを再読み込みするようにしました。
 ## v0.1.70
 ### English
 - Added the new normalized midground image to the in-game midground debug switcher.

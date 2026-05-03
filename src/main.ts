@@ -22,39 +22,19 @@ import { StartModal, type ControlMode } from "./startModal";
 import { StageEditor } from "./stageEditor";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
 import { getBrowserLocale, isLocale, LOCALE_OPTIONS, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
+import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-assets";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.70";
+const DEBUG_VERSION = "v0.1.71";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
-const REAR_BACKGROUNDS = [
-  { key: "rear-background-img-4202", path: "assets/backgrounds/rear/IMG_4202.webp", label: "4202" },
-  { key: "rear-background-stars", path: "assets/backgrounds/rear/starry_sky.webp", label: "STAR" },
-  {
-    key: "rear-background-ed96a7",
-    path: "assets/backgrounds/rear/ED96A78D-7F78-4486-8F37-8004120CB7FC.png",
-    label: "ED9",
-  },
-] as const;
-const MIDGROUND_BACKGROUNDS = [
-  { key: "midground-city-loop", path: "assets/backgrounds/midground/city_loop_strip.webp", label: "CITY" },
-  { key: "midground-img-4177", path: "assets/backgrounds/midground/IMG_4177.png", label: "IMG" },
-  { key: "midground-photoroom", path: "assets/backgrounds/midground/Photoroom_20260504_012811.jpg", label: "PHT" },
-  { key: "midground-499e22", path: "assets/backgrounds/midground/499E22EB-6997-4AA5-9F56-632444037B97.png", label: "499" },
-  { key: "midground-1ddb46", path: "assets/backgrounds/midground/1DDB4605-251B-4937-8216-C55ECAD3EC4C.png", label: "1DD" },
-  { key: "midground-7a7945", path: "assets/backgrounds/midground/7A7945F2-BFCA-4F4A-A1C2-69B85472C66B.webp", label: "7A7" },
-  { key: "midground-87ba4b", path: "assets/backgrounds/midground/87BA4BFC-CCAC-431D-B49B-53DC681A5C5A.png", label: "87B" },
-  { key: "midground-ae2c4a", path: "assets/backgrounds/midground/AE2C4AF0-F4D9-4213-84BB-460C7C3281FE.png", label: "AE2" },
-  { key: "midground-d1eac5", path: "assets/backgrounds/midground/D1EAC529-23C5-4524-B23D-FC8B4B0DB5A7.png", label: "D1E" },
-  { key: "midground-e719f5", path: "assets/backgrounds/midground/E719F549-E202-4B16-8F32-D3CA2806892E.png", label: "E71" },
-] as const;
 const PLATFORM_DEPTH = -0.55;
 const DECORATION_DEPTH = -1.2;
 const STREET_LAMP_LIGHT_DEPTH = DECORATION_DEPTH - 0.08;
