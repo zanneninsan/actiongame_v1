@@ -19,12 +19,17 @@ import {
   DEFAULT_STORY_DIALOGUE_LINES,
   type StoryDialogueController,
 } from "./storyDialogue";
-import { getBrowserLocale, isLocale, LOCALE_OPTIONS, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
+import { getBrowserLocale, isLocale, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
 import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-assets";
 import { createEnemies, createEnemyTexture, populateEnemies, updateEnemies } from "./enemies";
 import { createItems, populateItems } from "./items";
 import { renderStageObjects } from "./stageRenderer";
 import { BackgroundController } from "./backgrounds";
+import {
+  createGlobalUI as createGlobalUIElements,
+  removeGlobalUI as removeGlobalUIElements,
+  setGlobalSoundUI,
+} from "./globalUi";
 import {
   createMobileControls as createMobileControlElements,
   type MobileInputKey,
@@ -720,14 +725,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private refreshGlobalSoundUI() {
-    const bgmToggle = document.getElementById("bgm-toggle") as HTMLButtonElement | null;
-    const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement | null;
-    if (volumeSlider) {
-      volumeSlider.value = String(this.soundVolumePercent);
-    }
-    if (bgmToggle) {
-      bgmToggle.innerHTML = this.soundMuted || this.soundVolumePercent === 0 ? "&#128263;" : "&#128266;";
-    }
+    setGlobalSoundUI(this.soundVolumePercent, this.soundMuted);
   }
 
   private trackStageObject<T extends Phaser.GameObjects.GameObject>(object: T) {
@@ -913,125 +911,37 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createGlobalUI() {
-    this.removeGlobalUI();
-
-    const uiContainer = document.createElement("div");
-    uiContainer.id = "global-ui";
-    uiContainer.innerHTML = `
-      <span id="version-label">${DEBUG_VERSION}</span>
-      <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(this.locale, "aria.toggleCollision")}">HIT</button>
-      <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch rear background">RB1</button>
-      <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">MG1</button>
-      <button id="bgm-toggle" class="ui-button" type="button" aria-label="${t(this.locale, "aria.toggleSound")}">&#128266;</button>
-      <button id="options-toggle" class="ui-button" type="button" aria-label="${t(this.locale, "aria.options")}">&#9881;&#65039;</button>
-    `;
-    document.body.appendChild(uiContainer);
-
-    const optionsModal = document.createElement("div");
-    optionsModal.id = "options-modal";
-    optionsModal.innerHTML = `
-      <div class="options-dialog">
-        <h2>${t(this.locale, "options.title")}</h2>
-        <label>
-          <span>${t(this.locale, "options.volume")}</span>
-          <input id="volume-slider" type="range" min="0" max="100" />
-        </label>
-        <label>
-          <span>${t(this.locale, "options.language")}</span>
-          <select id="language-select">
-            ${LOCALE_OPTIONS.map(
-              (option) => `<option value="${option.locale}"${option.locale === this.locale ? " selected" : ""}>${option.label}</option>`,
-            ).join("")}
-          </select>
-        </label>
-        <button id="options-close" class="ui-button" type="button">${t(this.locale, "options.close")}</button>
-      </div>
-    `;
-    document.body.appendChild(optionsModal);
-
-    const bgmToggle = document.getElementById("bgm-toggle") as HTMLButtonElement;
-    const collisionDebugToggle = document.getElementById("collision-debug-toggle") as HTMLButtonElement;
-    const rearDebugToggle = document.getElementById("rear-debug-toggle") as HTMLButtonElement;
-    const midgroundDebugToggle = document.getElementById("midground-debug-toggle") as HTMLButtonElement;
-    const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
-    const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
-    const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
-    const languageSelect = document.getElementById("language-select") as HTMLSelectElement;
-
-    this.applySoundSettings();
-    collisionDebugToggle.classList.toggle("is-active", this.collisionDebugEnabled);
-    this.backgrounds?.updateRearDebugToggle(rearDebugToggle);
-    this.backgrounds?.updateMidgroundDebugToggle(midgroundDebugToggle);
-
-    collisionDebugToggle.addEventListener("click", () => {
-      this.collisionDebugEnabled = !this.collisionDebugEnabled;
-      collisionDebugToggle.classList.toggle("is-active", this.collisionDebugEnabled);
-      this.updateCollisionDebug();
+    createGlobalUIElements({
+      version: DEBUG_VERSION,
+      locale: this.locale,
+      soundVolumePercent: this.soundVolumePercent,
+      soundMuted: this.soundMuted,
+      collisionDebugEnabled: this.collisionDebugEnabled,
+      onCollisionToggle: (button) => {
+        this.collisionDebugEnabled = !this.collisionDebugEnabled;
+        button.classList.toggle("is-active", this.collisionDebugEnabled);
+        this.updateCollisionDebug();
+      },
+      onRearBackgroundToggle: (button) => this.backgrounds?.cycleRearBackground(button),
+      onMidgroundBackgroundToggle: (button) => this.backgrounds?.cycleMidgroundBackground(button),
+      updateRearBackgroundToggle: (button) => this.backgrounds?.updateRearDebugToggle(button),
+      updateMidgroundBackgroundToggle: (button) => this.backgrounds?.updateMidgroundDebugToggle(button),
+      onSoundChange: (volumePercent, muted) => {
+        this.soundVolumePercent = volumePercent;
+        this.soundMuted = muted;
+        this.applySoundSettings();
+      },
+      onLocaleChange: (locale) => {
+        this.setLocale(locale);
+        this.removeStageEditor();
+        this.createStageEditor();
+        this.createGlobalUI();
+      },
     });
-
-    rearDebugToggle.addEventListener("click", () => {
-      this.backgrounds?.cycleRearBackground(rearDebugToggle);
-    });
-
-    midgroundDebugToggle.addEventListener("click", () => {
-      this.backgrounds?.cycleMidgroundBackground(midgroundDebugToggle);
-    });
-
-    bgmToggle.addEventListener("click", () => {
-      const currentVolume = parseInt(volumeSlider.value, 10);
-      if (currentVolume === 0) {
-        this.soundVolumePercent = 50;
-        this.soundMuted = false;
-      } else {
-        this.soundMuted = !this.soundMuted;
-      }
-      this.applySoundSettings();
-    });
-
-    optionsToggle.addEventListener("click", () => {
-      optionsModal.style.display = "grid";
-    });
-
-    optionsClose.addEventListener("click", () => {
-      optionsModal.style.display = "none";
-    });
-
-    volumeSlider.addEventListener("input", (e) => {
-      e.stopPropagation();
-      const val = parseInt(volumeSlider.value, 10);
-      this.soundVolumePercent = val;
-      if (val > 0 && this.soundMuted) {
-        this.soundMuted = false;
-      }
-      this.applySoundSettings();
-    });
-
-    languageSelect.addEventListener("change", (e) => {
-      e.stopPropagation();
-      const nextLocale = languageSelect.value;
-      if (!isLocale(nextLocale)) {
-        return;
-      }
-      this.setLocale(nextLocale);
-      this.removeStageEditor();
-      this.createStageEditor();
-      this.createGlobalUI();
-      const nextOptionsModal = document.getElementById("options-modal");
-      if (nextOptionsModal) {
-        nextOptionsModal.style.display = "grid";
-      }
-    });
-
-    optionsModal.addEventListener("keydown", (e) => e.stopPropagation());
-    optionsModal.addEventListener("keyup", (e) => e.stopPropagation());
-    optionsModal.addEventListener("keypress", (e) => e.stopPropagation());
-    optionsModal.addEventListener("pointerdown", (e) => e.stopPropagation());
-    uiContainer.addEventListener("pointerdown", (e) => e.stopPropagation());
   }
 
   private removeGlobalUI() {
-    document.getElementById("global-ui")?.remove();
-    document.getElementById("options-modal")?.remove();
+    removeGlobalUIElements();
   }
 
   private moveGoalTo(x: number, y: number) {
