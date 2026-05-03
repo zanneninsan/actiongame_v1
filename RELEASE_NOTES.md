@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.53
+### English
+- Moved the stage editor panel DOM, form controls, export field, and drag handling into a dedicated `stageEditorPanel.ts` module.
+- Added a draggable MOVE handle so the editor panel can be repositioned on screen.
+### 日本語
+- ステージエディタのパネルDOM、フォーム操作、エクスポート欄、ドラッグ処理を専用の`stageEditorPanel.ts`へ分割しました。
+- エディタパネルにドラッグ用のMOVEハンドルを追加し、画面上の好きな位置へ移動できるようにしました。
 ## v0.1.52
 ### English
 - Centered the control hint text at the top of the game screen.

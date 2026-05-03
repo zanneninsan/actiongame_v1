@@ -195,8 +195,14 @@ canvas {
   pointer-events: none;
 }
 
-.editor-toggle {
+.editor-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
   pointer-events: auto;
+}
+
+.editor-toggle {
   width: 112px;
   height: 36px;
   border: 1px solid rgba(34, 211, 238, 0.65);
@@ -207,6 +213,25 @@ canvas {
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
+}
+
+.editor-drag-handle {
+  width: 68px;
+  height: 36px;
+  border: 1px solid rgba(253, 230, 138, 0.55);
+  border-radius: 6px;
+  background: rgba(2, 6, 23, 0.88);
+  color: #fde68a;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: grab;
+  touch-action: none;
+}
+
+#stage-editor.is-dragging .editor-drag-handle {
+  cursor: grabbing;
+  border-color: rgba(253, 230, 138, 0.95);
 }
 
 .editor-body {

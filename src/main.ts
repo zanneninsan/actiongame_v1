@@ -20,6 +20,7 @@ import { ACTIVE_STAGE, cloneStage } from "./stages";
 import { RainbowWinPipeline } from "./rainbowPipeline";
 import { StartCountdownOverlay } from "./countdown";
 import { StartModal, type ControlMode } from "./startModal";
+import { StageEditorPanel, type EditorTool } from "./stageEditorPanel";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
@@ -29,7 +30,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.52";
+const DEBUG_VERSION = "v0.1.53";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -67,7 +68,6 @@ const JUMP_VELOCITY = -575;
 const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
 type MobileInputKey = "w" | "a" | "s" | "d";
-type EditorTool = "select" | "move" | "delete" | "platform" | "item" | "streetLamp" | "decoration" | "playerStart" | "goal";
 type EditorSelection =
   | { kind: "platform"; index: number }
   | { kind: "item"; index: number }
@@ -112,16 +112,10 @@ class PrototypeScene extends Phaser.Scene {
   private editorStage = cloneStage(ACTIVE_STAGE);
   private editorEnabled = false;
   private editorTool: EditorTool = "select";
-  private editorPanel?: HTMLDivElement;
-  private editorExport?: HTMLTextAreaElement;
-  private editorPlatformUnitsInput?: HTMLInputElement;
-  private editorItemTypeSelect?: HTMLSelectElement;
-  private editorLampTypeSelect?: HTMLSelectElement;
-  private editorDecorationSelect?: HTMLSelectElement;
+  private editorPanel?: StageEditorPanel;
   private editorMarkers: Phaser.GameObjects.GameObject[] = [];
   private editorSelected?: EditorSelection;
   private editorSelectionMarker?: Phaser.GameObjects.Rectangle;
-  private editorCleanup: Array<() => void> = [];
   private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
   private hasWon = false;
   private wasOnFloor = false;
@@ -812,102 +806,26 @@ class PrototypeScene extends Phaser.Scene {
   private createStageEditor() {
     this.removeStageEditor();
 
-    const panel = document.createElement("div");
-    panel.id = "stage-editor";
-    panel.innerHTML = `
-      <button class="editor-toggle" type="button">EDITOR</button>
-      <div class="editor-body">
-        <div class="editor-row">
-          <label>Tool</label>
-          <select data-editor-tool>
-            <option value="select">Select</option>
-            <option value="move">Move Selected</option>
-            <option value="delete">Delete</option>
-            <option value="platform">Platform</option>
-            <option value="item">Item</option>
-            <option value="streetLamp">Street Lamp</option>
-            <option value="decoration">Decoration</option>
-            <option value="playerStart">Player Start</option>
-            <option value="goal">Goal</option>
-          </select>
-        </div>
-        <div class="editor-row">
-          <label>Units</label>
-          <input data-platform-units type="number" min="1" max="16" value="3" />
-        </div>
-        <div class="editor-row">
-          <label>Item</label>
-          <select data-item-type>
-            <option value="energyDrink">Energy</option>
-            <option value="bubbleTea">Tea</option>
-            <option value="shoppingBag">Bag</option>
-          </select>
-        </div>
-        <div class="editor-row">
-          <label>Lamp</label>
-          <select data-lamp-type>
-            <option value="${PROP_ASSETS.lampSingle}">Single</option>
-            <option value="${PROP_ASSETS.lampDouble}">Double</option>
-          </select>
-        </div>
-        <div class="editor-row">
-          <label>Object</label>
-          <select data-decoration-key>
-            ${STAGE_OBJECT_ASSETS.map((asset) => `<option value="${asset.key}">${asset.key.replace("stage-", "")}</option>`).join("")}
-          </select>
-        </div>
-        <p class="editor-help">Select picks the nearest object. Move relocates the selected object. Delete removes clicked objects.</p>
-        <button class="editor-export-button" type="button">EXPORT JSON</button>
-        <textarea data-editor-export readonly spellcheck="false"></textarea>
-      </div>
-    `;
-
-    document.body.appendChild(panel);
-    this.editorPanel = panel;
-    this.editorExport = panel.querySelector<HTMLTextAreaElement>("[data-editor-export]")!;
-    this.editorPlatformUnitsInput = panel.querySelector<HTMLInputElement>("[data-platform-units]")!;
-    this.editorItemTypeSelect = panel.querySelector<HTMLSelectElement>("[data-item-type]")!;
-    this.editorLampTypeSelect = panel.querySelector<HTMLSelectElement>("[data-lamp-type]")!;
-    this.editorDecorationSelect = panel.querySelector<HTMLSelectElement>("[data-decoration-key]")!;
-
-    const toggleButton = panel.querySelector<HTMLButtonElement>(".editor-toggle")!;
-    const toolSelect = panel.querySelector<HTMLSelectElement>("[data-editor-tool]")!;
-    const exportButton = panel.querySelector<HTMLButtonElement>(".editor-export-button")!;
-    const toggleEditor = () => {
-      this.editorEnabled = !this.editorEnabled;
-      panel.classList.toggle("is-open", this.editorEnabled);
-      toggleButton.textContent = this.editorEnabled ? "EDITOR ON" : "EDITOR";
-    };
-    const setTool = () => {
-      this.editorTool = toolSelect.value as EditorTool;
-    };
-    const exportStage = () => {
-      this.refreshEditorExport();
-      this.editorExport?.select();
-      void navigator.clipboard?.writeText(this.editorExport?.value ?? "").catch(() => undefined);
-    };
-
-    toggleButton.addEventListener("click", toggleEditor);
-    toolSelect.addEventListener("change", setTool);
-    exportButton.addEventListener("click", exportStage);
-    this.editorCleanup.push(() => {
-      toggleButton.removeEventListener("click", toggleEditor);
-      toolSelect.removeEventListener("change", setTool);
-      exportButton.removeEventListener("click", exportStage);
+    this.editorPanel = new StageEditorPanel({
+      initialTool: this.editorTool,
+      onToggle: (enabled) => {
+        this.editorEnabled = enabled;
+      },
+      onToolChange: (tool) => {
+        this.editorTool = tool;
+      },
+      onExport: () => {
+        this.refreshEditorExport();
+        this.editorPanel?.copyExportToClipboard();
+      },
     });
+    this.editorPanel.show();
     this.refreshEditorExport();
   }
 
   private removeStageEditor() {
-    this.editorCleanup.forEach((cleanup) => cleanup());
-    this.editorCleanup = [];
     this.editorPanel?.remove();
     this.editorPanel = undefined;
-    this.editorExport = undefined;
-    this.editorPlatformUnitsInput = undefined;
-    this.editorItemTypeSelect = undefined;
-    this.editorLampTypeSelect = undefined;
-    this.editorDecorationSelect = undefined;
     this.editorEnabled = false;
     this.editorMarkers.forEach((marker) => marker.destroy());
     this.editorMarkers = [];
@@ -1019,25 +937,25 @@ class PrototypeScene extends Phaser.Scene {
     } else if (this.editorTool === "delete") {
       this.deleteEditorObjectAt(point.x, point.y);
     } else if (this.editorTool === "platform") {
-      const units = Phaser.Math.Clamp(Number(this.editorPlatformUnitsInput?.value) || 3, 1, 16);
+      const units = Phaser.Math.Clamp(this.editorPanel?.platformUnits ?? 3, 1, 16);
       const placement: PlatformRunPlacement = { x, y, units };
       this.editorStage.platforms.push(placement);
       this.editorSelected = { kind: "platform", index: this.editorStage.platforms.length - 1 };
       this.rebuildEditableStageObjects();
     } else if (this.editorTool === "item") {
-      const type = (this.editorItemTypeSelect?.value ?? "energyDrink") as ItemType;
+      const type = this.editorPanel?.itemType ?? "energyDrink";
       const placement: ItemPlacement = { type, x, y };
       this.editorStage.items.push(placement);
       this.editorSelected = { kind: "item", index: this.editorStage.items.length - 1 };
       this.rebuildEditableStageObjects();
     } else if (this.editorTool === "streetLamp") {
-      const key = (this.editorLampTypeSelect?.value ?? PROP_ASSETS.lampSingle) as StreetLampKey;
+      const key = this.editorPanel?.lampType ?? PROP_ASSETS.lampSingle;
       const placement: StreetLampPlacement = { x, key, scale: key === PROP_ASSETS.lampDouble ? 0.64 : 0.66 };
       this.editorStage.streetLamps.push(placement);
       this.editorSelected = { kind: "streetLamp", index: this.editorStage.streetLamps.length - 1 };
       this.rebuildEditableStageObjects();
     } else if (this.editorTool === "decoration") {
-      const key = this.editorDecorationSelect?.value ?? STAGE_OBJECT_ASSETS[0].key;
+      const key = this.editorPanel?.decorationKey ?? STAGE_OBJECT_ASSETS[0].key;
       const placement: StageDecorationPlacement = { x, y, key, scale: 0.68 };
       this.editorStage.decorations.push(placement);
       this.editorSelected = { kind: "decoration", index: this.editorStage.decorations.length - 1 };
@@ -1253,9 +1171,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private refreshEditorExport() {
-    if (this.editorExport) {
-      this.editorExport.value = JSON.stringify(this.editorStage, null, 2);
-    }
+    this.editorPanel?.setExport(JSON.stringify(this.editorStage, null, 2));
   }
 
   private createItems() {
