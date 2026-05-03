@@ -29,7 +29,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.74";
+const DEBUG_VERSION = "v0.1.75";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -310,6 +310,7 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
+    this.refreshDropThroughDecorationPlatform();
     const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
     const left = this.keys.a.isDown || this.cursors.left.isDown || this.mobileInput.a;
     const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
@@ -932,9 +933,6 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     if (platformBody === this.dropThroughDecorationPlatformBody) {
-      if (playerBody.y > platformBody.y + platformBody.height) {
-        this.dropThroughDecorationPlatformBody = undefined;
-      }
       return false;
     }
 
@@ -961,6 +959,21 @@ class PrototypeScene extends Phaser.Scene {
     this.dropThroughDecorationPlatformBody = standingPlatformBody;
     this.decorationPlatformCrouchStartedAt = 0;
     this.player.setVelocityY(Math.max(this.player.body.velocity.y, DECORATION_PLATFORM_DROP_VELOCITY));
+  }
+
+  private refreshDropThroughDecorationPlatform() {
+    const platformBody = this.dropThroughDecorationPlatformBody;
+    if (!platformBody) {
+      return;
+    }
+
+    const playerBody = this.player.body;
+    const overlapsHorizontally = playerBody.right > platformBody.x && playerBody.x < platformBody.x + platformBody.width;
+    const hasDroppedBelow = playerBody.y > platformBody.y + platformBody.height;
+    const isClearlyAbove = playerBody.y + playerBody.height < platformBody.y - DECORATION_PLATFORM_LAND_TOLERANCE;
+    if (hasDroppedBelow || isClearlyAbove || !overlapsHorizontally) {
+      this.dropThroughDecorationPlatformBody = undefined;
+    }
   }
 
   private getStandingDecorationPlatformBody() {

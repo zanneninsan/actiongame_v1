@@ -1,5 +1,10 @@
 # Release Notes / リリースノート
 
+## v0.1.75
+### English
+- Fixed bus shelter roof drop-through so the roof becomes landable again after the player passes below it.
+### Japanese
+- バス停の屋根をすり抜けたあと、下まで抜けたら再び屋根に乗れるように修正しました。
 ## v0.1.74
 ### English
 - Allow the player to drop through the bus shelter roof after crouching on it for one second.
