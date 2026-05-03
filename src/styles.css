@@ -33,20 +33,20 @@ canvas {
   z-index: 20;
   display: grid;
   place-items: center;
-  padding: 24px 36px;
+  padding: 24px 56px;
   background: rgba(4, 8, 18, 0.78);
   color: #f8fafc;
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
 }
 
 .start-dialog {
-  --fantasy-window-border: clamp(32px, 5.2vw, 46px);
+  --fantasy-window-border: clamp(30px, 4.8vw, 42px);
   box-sizing: border-box;
-  width: min(600px, calc(100vw - 72px));
+  width: min(560px, calc(100vw - 112px));
   max-height: calc(100dvh - 48px);
   display: grid;
   gap: 12px;
-  padding: 0 clamp(10px, 3vw, 20px) 14px;
+  padding: 0 clamp(14px, 3vw, 24px) 14px;
   border: var(--fantasy-window-border) solid transparent;
   border-image-source: url("../assets/ui/fantasy/frame_parts/frame_window_9slice_safe.png");
   border-image-slice: 132 fill;
@@ -57,6 +57,8 @@ canvas {
 
 .start-dialog h1 {
   margin: 0;
+  width: min(100%, calc(100% - 28px));
+  justify-self: center;
   min-height: 52px;
   display: grid;
   place-items: center;
@@ -70,6 +72,8 @@ canvas {
 }
 
 .start-dialog label {
+  width: min(100%, calc(100% - 34px));
+  justify-self: center;
   display: grid;
   gap: 5px;
   font-size: 13px;
@@ -84,7 +88,7 @@ canvas {
   width: 100%;
   height: 40px;
   border: 0;
-  padding: 0 18px;
+  padding: 0 34px;
   color: #f8fafc;
   font: inherit;
   font-size: 18px;
@@ -94,15 +98,21 @@ canvas {
 }
 
 .start-dialog input {
+  margin-top: 2px;
   background: url("../assets/ui/fantasy/label_plate_safe.png") center / 100% 100% no-repeat;
 }
 
 .start-dialog select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 62px;
   background: url("../assets/ui/fantasy/select_field_safe.png") center / 100% 100% no-repeat;
 }
 
 .mode-row,
 .sound-row {
+  width: min(100%, calc(100% - 34px));
+  justify-self: center;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
@@ -130,6 +140,8 @@ canvas {
 }
 
 .start-button {
+  width: min(100%, calc(100% - 34px));
+  justify-self: center;
   height: 48px;
   background-image: url("../assets/ui/fantasy/button_primary_selected_safe.png");
   color: #fff7d6;
@@ -138,12 +150,12 @@ canvas {
 
 @media (max-width: 560px) {
   #start-modal {
-    padding: 18px 24px;
+    padding: 18px 32px;
   }
 
   .start-dialog {
-    --fantasy-window-border: 32px;
-    width: min(100%, calc(100vw - 48px));
+    --fantasy-window-border: 30px;
+    width: min(100%, calc(100vw - 64px));
     gap: 10px;
     padding: 0 8px 10px;
   }

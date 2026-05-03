@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.106
+### English
+- Narrowed the start modal and centered its internal controls with extra side margin to avoid right-edge clipping.
+- Added more padding inside the player name field and removed the native select arrow from the language field.
+### Japanese
+- 開始モーダルを少し狭くし、内部の操作部品に左右余白を持たせて右端が見切れないようにしました。
+- プレイヤー名入力欄の内側余白を増やし、言語欄のブラウザ標準矢印を消しました。
+
 ## v0.1.105
 ### English
 - Rebuilt the safe-padded fantasy window frame from the single modal frame so neighboring sheet art no longer appears on the left side.
