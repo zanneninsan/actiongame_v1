@@ -155,7 +155,7 @@ class PrototypeScene extends Phaser.Scene {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
-    this.load.spritesheet("player-crouch", `${ASSET_BASE}assets/sprites/player_crouch_27_320x260.png`, {
+    this.load.spritesheet("player-crouch", `${ASSET_BASE}assets/sprites/player_crouch_27_9x3_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
