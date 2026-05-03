@@ -40,7 +40,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.84";
+const DEBUG_VERSION = "v0.1.85";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -256,6 +256,7 @@ class PrototypeScene extends Phaser.Scene {
     this.enemiesGroup = createEnemies(this, this.player, this.editorStage.enemies ?? [], (enemy) =>
       this.damagePlayer(enemy),
     );
+    this.physics.add.collider(this.enemiesGroup, this.platforms);
 
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.keys = {
@@ -347,7 +348,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.refreshDropThroughDecorationPlatform();
-    updateEnemies(this, this.enemiesGroup);
+    updateEnemies(this.enemiesGroup);
     const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
     if (this.time.now < this.hurtUntil) {
       this.updateCollisionDebug();

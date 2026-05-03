@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.85
+### English
+- Changed enemies to spawn in midair and fall under Arcade Physics gravity before landing on the stage ground.
+- Kept enemy patrol movement active after landing while preserving player damage overlap behavior.
+### Japanese
+- 敵キャラクターを地面配置ではなく中空配置に変更し、Arcade Physics の重力でステージの地面へ落下するようにしました。
+- 着地後も敵の巡回移動とプレイヤーへのダメージ判定が続くようにしました。
+
 ## v0.1.84
 ### English
 - Refreshed the goal static body after resizing so the collision box lines up with the displayed goal gate.

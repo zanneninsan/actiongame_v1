@@ -48,7 +48,7 @@ export const createEnemies = (
   onPlayerDamage: (enemy: Phaser.Physics.Arcade.Sprite) => void,
 ) => {
   const enemies = scene.physics.add.group({
-    allowGravity: false,
+    allowGravity: true,
     immovable: true,
   });
 
@@ -73,7 +73,7 @@ export const populateEnemies = (
   });
 };
 
-export const updateEnemies = (scene: Phaser.Scene, enemiesGroup?: Phaser.Physics.Arcade.Group) => {
+export const updateEnemies = (enemiesGroup?: Phaser.Physics.Arcade.Group) => {
   enemiesGroup?.getChildren().forEach((child) => {
     const enemy = child as Phaser.Physics.Arcade.Sprite;
     if (!enemy.active || !enemy.body) {
@@ -83,7 +83,6 @@ export const updateEnemies = (scene: Phaser.Scene, enemiesGroup?: Phaser.Physics
     const patrolLeft = enemy.getData("patrolLeft") as number;
     const patrolRight = enemy.getData("patrolRight") as number;
     const speed = enemy.getData("speed") as number;
-    const spawnY = enemy.getData("spawnY") as number;
     if (enemy.x <= patrolLeft && enemy.body.velocity.x < 0) {
       enemy.setVelocityX(speed);
       enemy.setFlipX(false);
@@ -91,9 +90,6 @@ export const updateEnemies = (scene: Phaser.Scene, enemiesGroup?: Phaser.Physics
       enemy.setVelocityX(-speed);
       enemy.setFlipX(true);
     }
-
-    enemy.y = spawnY + Math.sin((scene.time.now + enemy.x * 8) / 260) * 4;
-    enemy.body.updateFromGameObject();
   });
 };
 
@@ -106,12 +102,11 @@ const createEnemySprite = (enemiesGroup: Phaser.Physics.Arcade.Group, placement:
   enemy.setData("patrolLeft", Math.min(placement.patrolLeft, placement.patrolRight));
   enemy.setData("patrolRight", Math.max(placement.patrolLeft, placement.patrolRight));
   enemy.setData("speed", Math.abs(speed));
-  enemy.setData("spawnY", placement.y);
   enemy.setSize(ENEMY_BODY_WIDTH, ENEMY_BODY_HEIGHT);
   enemy.setOffset(ENEMY_BODY_OFFSET_X, ENEMY_BODY_OFFSET_Y);
   enemy.setVelocityX(Math.abs(speed) * direction);
   enemy.setFlipX(direction < 0);
   const body = enemy.body as Phaser.Physics.Arcade.Body;
-  body.setAllowGravity(false);
+  body.setAllowGravity(true);
   body.setImmovable(true);
 };
