@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.76
+### English
+- Added one-way top platforms to the single and double street lamps so the player can land on their lamp heads from above.
+- Reused the decoration platform drop-through behavior, allowing the player to crouch for one second to descend from street lamps.
+### Japanese
+- シングル街灯とダブル街灯の上部に、上からだけ乗れる当たり判定を追加しました。
+- バス停の屋根と同じように、街灯の上でも1秒しゃがむと下に降りられるようにしました。
 ## v0.1.75
 ### English
 - Fixed bus shelter roof drop-through so the roof becomes landable again after the player passes below it.

@@ -29,7 +29,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.75";
+const DEBUG_VERSION = "v0.1.76";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -67,8 +67,13 @@ const MOBILE_FULLSCREEN_MIN_LANDSCAPE_HEIGHT = 430;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 1000;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
-const DECORATION_TOP_PLATFORMS: Record<string, { x: number; y: number; width: number; height: number }> = {
-  "stage-structures-bus-shelter": { x: 76, y: 6, width: 462, height: 12 },
+const DECORATION_TOP_PLATFORMS: Record<string, Array<{ x: number; y: number; width: number; height: number }>> = {
+  "stage-structures-bus-shelter": [{ x: 76, y: 6, width: 462, height: 12 }],
+  [PROP_ASSETS.lampSingle]: [{ x: 90, y: 2, width: 58, height: 10 }],
+  [PROP_ASSETS.lampDouble]: [
+    { x: 0, y: 2, width: 58, height: 10 },
+    { x: 171, y: 2, width: 56, height: 10 },
+  ],
 };
 type MobileInputKey = "w" | "a" | "s" | "d";
 type FullscreenTarget = HTMLElement & {
@@ -855,6 +860,7 @@ class PrototypeScene extends Phaser.Scene {
         .setScale(scale)
         .setDepth(DECORATION_DEPTH),
     );
+    this.addDecorationTopPlatform(lamp.x, this.stageConstants.streetLampGroundY, lamp.key, scale);
   }
 
   private createStreetLampLight(x: number, key: StreetLampKey, scale: number) {
@@ -905,21 +911,23 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private addDecorationTopPlatform(x: number, y: number, key: string, scale: number) {
-    const platform = DECORATION_TOP_PLATFORMS[key];
-    if (!platform) {
+    const platforms = DECORATION_TOP_PLATFORMS[key];
+    if (!platforms) {
       return;
     }
 
     const source = this.textures.get(key).getSourceImage() as { width: number; height: number };
-    const platformX = x - (source.width * scale) / 2 + platform.x * scale;
-    const platformY = y - source.height * scale + platform.y * scale;
-    this.addPlatformHitbox(
-      this.decorationPlatforms,
-      platformX,
-      platformY,
-      platform.width * scale,
-      platform.height * scale,
-    );
+    platforms.forEach((platform) => {
+      const platformX = x - (source.width * scale) / 2 + platform.x * scale;
+      const platformY = y - source.height * scale + platform.y * scale;
+      this.addPlatformHitbox(
+        this.decorationPlatforms,
+        platformX,
+        platformY,
+        platform.width * scale,
+        platform.height * scale,
+      );
+    });
   }
 
   private canLandOnDecorationPlatform(
