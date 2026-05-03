@@ -28,17 +28,24 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.66";
+const DEBUG_VERSION = "v0.1.67";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
+const REAR_BACKGROUND = { key: "background-stars", path: "assets/backgrounds/starry_sky.webp" } as const;
 const MIDGROUND_BACKGROUNDS = [
   { key: "background-city-loop", path: "assets/backgrounds/city_loop_strip.webp", label: "CITY" },
   { key: "background-img-4177", path: "assets/backgrounds/IMG_4177.png", label: "IMG" },
   { key: "background-photoroom", path: "assets/backgrounds/Photoroom_20260504_012811.jpg", label: "PHT" },
   { key: "background-499e22", path: "assets/backgrounds/499E22EB-6997-4AA5-9F56-632444037B97.png", label: "499" },
+  { key: "background-1ddb46", path: "assets/backgrounds/1DDB4605-251B-4937-8216-C55ECAD3EC4C.png", label: "1DD" },
+  { key: "background-87ba4b", path: "assets/backgrounds/87BA4BFC-CCAC-431D-B49B-53DC681A5C5A.png", label: "87B" },
+  { key: "background-ae2c4a", path: "assets/backgrounds/AE2C4AF0-F4D9-4213-84BB-460C7C3281FE.png", label: "AE2" },
+  { key: "background-d1eac5", path: "assets/backgrounds/D1EAC529-23C5-4524-B23D-FC8B4B0DB5A7.png", label: "D1E" },
+  { key: "background-e719f5", path: "assets/backgrounds/E719F549-E202-4B16-8F32-D3CA2806892E.png", label: "E71" },
+  { key: "background-ed96a7", path: "assets/backgrounds/ED96A78D-7F78-4486-8F37-8004120CB7FC.png", label: "ED9" },
 ] as const;
 const PLATFORM_DEPTH = -0.55;
 const DECORATION_DEPTH = -1.2;
@@ -83,7 +90,7 @@ class PrototypeScene extends Phaser.Scene {
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
-  private cityLoopBackground?: Phaser.GameObjects.TileSprite;
+  private midgroundBackground?: Phaser.GameObjects.TileSprite;
   private midgroundBackgroundIndex = 0;
   private playerNameText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
@@ -123,7 +130,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image("background-stars", `${ASSET_BASE}assets/backgrounds/starry_sky.webp`);
+    this.load.image(REAR_BACKGROUND.key, `${ASSET_BASE}${REAR_BACKGROUND.path}`);
     MIDGROUND_BACKGROUNDS.forEach((background) => {
       this.load.image(background.key, `${ASSET_BASE}${background.path}`);
     });
@@ -635,8 +642,13 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createBackground() {
+    this.createRearBackground();
+    this.createMidgroundBackground();
+  }
+
+  private createRearBackground() {
     this.add
-      .image(0, 0, "background-stars")
+      .image(0, 0, REAR_BACKGROUND.key)
       .setOrigin(0, 0)
       .setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
       .setScrollFactor(0)
@@ -647,8 +659,10 @@ class PrototypeScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setScrollFactor(0)
       .setDepth(-35);
+  }
 
-    this.cityLoopBackground = this.add
+  private createMidgroundBackground() {
+    this.midgroundBackground = this.add
       .tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, this.getCurrentMidgroundBackground().key)
       .setOrigin(0, 0)
       .setScrollFactor(0)
@@ -662,7 +676,7 @@ class PrototypeScene extends Phaser.Scene {
   private cycleMidgroundBackground(toggleButton?: HTMLButtonElement) {
     this.midgroundBackgroundIndex = (this.midgroundBackgroundIndex + 1) % MIDGROUND_BACKGROUNDS.length;
     const background = this.getCurrentMidgroundBackground();
-    this.cityLoopBackground?.setTexture(background.key);
+    this.midgroundBackground?.setTexture(background.key);
     this.updateMidgroundDebugToggle(toggleButton);
   }
 
@@ -677,9 +691,9 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private updateBackground() {
-    if (this.cityLoopBackground) {
-      this.cityLoopBackground.tilePositionX = this.cameras.main.scrollX * 0.58;
-      this.cityLoopBackground.y = -this.cameras.main.scrollY;
+    if (this.midgroundBackground) {
+      this.midgroundBackground.tilePositionX = this.cameras.main.scrollX * 0.58;
+      this.midgroundBackground.y = -this.cameras.main.scrollY;
     }
 
   }

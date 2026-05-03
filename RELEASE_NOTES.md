@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.67
+### English
+- Split rear background and midground background definitions so `starry_sky.webp` is managed as the fixed rear layer.
+- Added the remaining non-`starry_sky.webp` background images to the midground debug cycle.
+### Japanese
+- `starry_sky.webp` を固定の後景レイヤーとして扱うように、後景と中景の定義を分けました。
+- `starry_sky.webp` 以外の背景画像を、中景のデバッグ切り替え候補に追加しました。
 ## v0.1.66
 ### English
 - Fixed the stage editor panel so dragging it keeps the compact editor width instead of expanding from its contents.
