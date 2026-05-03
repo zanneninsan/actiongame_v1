@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.65
+### English
+- Normalized the existing midground background candidates to 720px high while preserving their aspect ratios.
+- Added a debug `BG` button for cycling the game's midground background during play.
+### Japanese
+- 既存の中景背景候補を、縦横比を保ったまま高さ720pxにそろえました。
+- プレイ中に中景背景を切り替えられるデバッグ用の `BG` ボタンを追加しました。
 ## v0.1.64
 ### English
 - Added an English/Japanese localization dictionary for player-facing UI text.

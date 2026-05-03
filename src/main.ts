@@ -28,12 +28,18 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.64";
+const DEBUG_VERSION = "v0.1.65";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
+const MIDGROUND_BACKGROUNDS = [
+  { key: "background-city-loop", path: "assets/backgrounds/city_loop_strip.webp", label: "CITY" },
+  { key: "background-img-4177", path: "assets/backgrounds/IMG_4177.png", label: "IMG" },
+  { key: "background-photoroom", path: "assets/backgrounds/Photoroom_20260504_012811.jpg", label: "PHT" },
+  { key: "background-499e22", path: "assets/backgrounds/499E22EB-6997-4AA5-9F56-632444037B97.png", label: "499" },
+] as const;
 const PLATFORM_DEPTH = -0.55;
 const DECORATION_DEPTH = -1.2;
 const STREET_LAMP_LIGHT_DEPTH = DECORATION_DEPTH - 0.08;
@@ -78,6 +84,7 @@ class PrototypeScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
   private cityLoopBackground?: Phaser.GameObjects.TileSprite;
+  private midgroundBackgroundIndex = 0;
   private playerNameText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
@@ -117,7 +124,9 @@ class PrototypeScene extends Phaser.Scene {
 
   preload() {
     this.load.image("background-stars", `${ASSET_BASE}assets/backgrounds/starry_sky.webp`);
-    this.load.image("background-city-loop", `${ASSET_BASE}assets/backgrounds/city_loop_strip.webp`);
+    MIDGROUND_BACKGROUNDS.forEach((background) => {
+      this.load.image(background.key, `${ASSET_BASE}${background.path}`);
+    });
     this.load.image(PLATFORM_ASSETS.left, `${ASSET_BASE}assets/platforms/platform_unit_left.webp`);
     this.load.image(PLATFORM_ASSETS.middle, `${ASSET_BASE}assets/platforms/platform_unit_middle.webp`);
     this.load.image(PLATFORM_ASSETS.right, `${ASSET_BASE}assets/platforms/platform_unit_right.webp`);
@@ -640,10 +649,31 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(-35);
 
     this.cityLoopBackground = this.add
-      .tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, "background-city-loop")
+      .tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, this.getCurrentMidgroundBackground().key)
       .setOrigin(0, 0)
       .setScrollFactor(0)
       .setDepth(-15);
+  }
+
+  private getCurrentMidgroundBackground() {
+    return MIDGROUND_BACKGROUNDS[this.midgroundBackgroundIndex];
+  }
+
+  private cycleMidgroundBackground(toggleButton?: HTMLButtonElement) {
+    this.midgroundBackgroundIndex = (this.midgroundBackgroundIndex + 1) % MIDGROUND_BACKGROUNDS.length;
+    const background = this.getCurrentMidgroundBackground();
+    this.cityLoopBackground?.setTexture(background.key);
+    this.updateMidgroundDebugToggle(toggleButton);
+  }
+
+  private updateMidgroundDebugToggle(toggleButton?: HTMLButtonElement) {
+    if (!toggleButton) {
+      return;
+    }
+    const background = this.getCurrentMidgroundBackground();
+    toggleButton.textContent = `BG${this.midgroundBackgroundIndex + 1}`;
+    toggleButton.title = background.path;
+    toggleButton.setAttribute("aria-label", `Switch midground background. Current: ${background.label}`);
   }
 
   private updateBackground() {
@@ -881,6 +911,7 @@ class PrototypeScene extends Phaser.Scene {
     uiContainer.innerHTML = `
       <span id="version-label">${DEBUG_VERSION}</span>
       <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(this.locale, "aria.toggleCollision")}">HIT</button>
+      <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">BG1</button>
       <button id="bgm-toggle" class="ui-button" type="button" aria-label="${t(this.locale, "aria.toggleSound")}">&#128266;</button>
       <button id="options-toggle" class="ui-button" type="button" aria-label="${t(this.locale, "aria.options")}">&#9881;&#65039;</button>
     `;
@@ -910,6 +941,7 @@ class PrototypeScene extends Phaser.Scene {
 
     const bgmToggle = document.getElementById("bgm-toggle") as HTMLButtonElement;
     const collisionDebugToggle = document.getElementById("collision-debug-toggle") as HTMLButtonElement;
+    const midgroundDebugToggle = document.getElementById("midground-debug-toggle") as HTMLButtonElement;
     const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
     const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
     const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
@@ -917,11 +949,16 @@ class PrototypeScene extends Phaser.Scene {
 
     this.applySoundSettings();
     collisionDebugToggle.classList.toggle("is-active", this.collisionDebugEnabled);
+    this.updateMidgroundDebugToggle(midgroundDebugToggle);
 
     collisionDebugToggle.addEventListener("click", () => {
       this.collisionDebugEnabled = !this.collisionDebugEnabled;
       collisionDebugToggle.classList.toggle("is-active", this.collisionDebugEnabled);
       this.updateCollisionDebug();
+    });
+
+    midgroundDebugToggle.addEventListener("click", () => {
+      this.cycleMidgroundBackground(midgroundDebugToggle);
     });
 
     bgmToggle.addEventListener("click", () => {
