@@ -6,18 +6,13 @@ import {
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
   type ItemType,
-  type PlatformAsset,
   type ScoreState,
-  type StageDecorationPlacement,
-  type StreetLampKey,
-  type StreetLampPlacement,
 } from "./assets";
 import { ACTIVE_STAGE, cloneStage } from "./stages";
 import { RainbowWinPipeline } from "./rainbowPipeline";
 import { StartCountdownOverlay } from "./countdown";
 import { StartModal, type ControlMode } from "./startModal";
 import { StageEditor } from "./stageEditor";
-import { STAGE_OBJECT_TOP_PLATFORMS } from "./stageObjectPlatforms";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
 import {
   createStoryDialogue,
@@ -28,6 +23,7 @@ import { getBrowserLocale, isLocale, LOCALE_OPTIONS, LOCALE_STORAGE_KEY, t, type
 import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-assets";
 import { createEnemies, createEnemyTexture, populateEnemies, updateEnemies } from "./enemies";
 import { createItems, populateItems } from "./items";
+import { renderStageObjects } from "./stageRenderer";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
@@ -40,7 +36,6 @@ const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
-const PLATFORM_DEPTH = -0.55;
 const GOAL_TEXTURE_KEY = "goal-gate";
 const GOAL_DISPLAY_WIDTH = 58;
 const GOAL_DISPLAY_HEIGHT = 192;
@@ -48,9 +43,6 @@ const DAMAGE_INVULNERABLE_MS = 1150;
 const DAMAGE_INPUT_LOCK_MS = 280;
 const DAMAGE_KNOCKBACK_X = 430;
 const DAMAGE_KNOCKBACK_Y = -245;
-const DECORATION_DEPTH = -1.2;
-const STREET_LAMP_LIGHT_DEPTH = DECORATION_DEPTH - 0.08;
-const STREET_LAMP_GROUND_LIGHT_DEPTH = PLATFORM_DEPTH + 0.02;
 const PLAYER_DISPLAY_WIDTH = 320;
 const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
@@ -753,9 +745,14 @@ class PrototypeScene extends Phaser.Scene {
     this.clearStaticGroup(this.itemsGroup);
     this.clearDynamicGroup(this.enemiesGroup);
 
-    this.buildStage(this.platforms);
-    this.createStreetLamps();
-    this.createStageObjects();
+    renderStageObjects({
+      scene: this,
+      stage: this.editorStage,
+      stageConstants: this.stageConstants,
+      platforms: this.platforms,
+      decorationPlatforms: this.decorationPlatforms,
+      trackStageObject: (object) => this.trackStageObject(object),
+    });
     populateItems({
       scene: this,
       itemsGroup: this.itemsGroup,
@@ -779,23 +776,6 @@ class PrototypeScene extends Phaser.Scene {
 
   private clearDynamicGroup(group?: Phaser.Physics.Arcade.Group) {
     group?.clear(true, true);
-  }
-
-  private buildStage(platforms: Phaser.Physics.Arcade.StaticGroup) {
-    for (let x = 0; x < this.editorStage.worldWidth; x += TILE) {
-      this.addBlock(platforms, x, this.stageConstants.groundTopY, "ground", false);
-    }
-
-    this.addPlatformRun(
-      platforms,
-      0,
-      this.stageConstants.groundVisualY,
-      Math.ceil(this.editorStage.worldWidth / PLATFORM_UNIT_WIDTH) + 1,
-      false,
-    );
-    this.editorStage.platforms.forEach((platform) => {
-      this.addPlatformRun(platforms, platform.x, platform.y, platform.units, platform.collides ?? true);
-    });
   }
 
   private createBackground() {
@@ -876,123 +856,6 @@ class PrototypeScene extends Phaser.Scene {
 
   }
 
-  private addBlock(platforms: Phaser.Physics.Arcade.StaticGroup, x: number, y: number, texture: string, visible = true) {
-    const block = platforms.create(x + TILE / 2, y + TILE / 2, texture);
-    block.setVisible(visible);
-    block.refreshBody();
-  }
-
-  private addPlatformRun(
-    platforms: Phaser.Physics.Arcade.StaticGroup,
-    x: number,
-    y: number,
-    units: number,
-    collides = true,
-  ) {
-    for (let i = 0; i < units; i += 1) {
-      let texture: PlatformAsset = PLATFORM_ASSETS.middle;
-      if (units === 1) {
-        texture = PLATFORM_ASSETS.single;
-      } else if (i === 0) {
-        texture = PLATFORM_ASSETS.left;
-      } else if (i === units - 1) {
-        texture = PLATFORM_ASSETS.right;
-      }
-
-      const unitX = x + i * PLATFORM_UNIT_WIDTH;
-      this.trackStageObject(this.add.image(unitX, y, texture).setOrigin(0, 0).setDepth(PLATFORM_DEPTH));
-      if (collides) {
-        this.addPlatformHitbox(platforms, unitX, y, PLATFORM_UNIT_WIDTH, PLATFORM_UNIT_HEIGHT);
-      }
-    }
-  }
-
-  private createStreetLamps() {
-    this.editorStage.streetLamps.forEach((lamp) => {
-      this.createStreetLamp(lamp);
-    });
-  }
-
-  private createStreetLamp(lamp: StreetLampPlacement) {
-    const scale = lamp.scale ?? 1;
-    this.createStreetLampLight(lamp.x, lamp.key, scale);
-    this.trackStageObject(
-      this.add
-        .image(lamp.x, this.stageConstants.streetLampGroundY, lamp.key)
-        .setOrigin(0.5, 1)
-        .setScale(scale)
-        .setDepth(DECORATION_DEPTH),
-    );
-    this.addDecorationTopPlatform(lamp.x, this.stageConstants.streetLampGroundY, lamp.key, scale);
-  }
-
-  private createStreetLampLight(x: number, key: StreetLampKey, scale: number) {
-    const isDoubleLamp = key === PROP_ASSETS.lampDouble;
-    const sourceY = this.stageConstants.streetLampGroundY - 420 * scale;
-    const groundY = this.stageConstants.streetLampGroundY - 5;
-    const sources = isDoubleLamp ? [-92 * scale, 92 * scale] : [32 * scale];
-
-    sources.forEach((offsetX) => {
-      const sourceX = x + offsetX;
-      const beamHalfWidth = (isDoubleLamp ? 150 : 190) * scale;
-      const poolWidth = (isDoubleLamp ? 210 : 250) * scale;
-      const light = this.trackStageObject(this.add.graphics().setBlendMode(Phaser.BlendModes.ADD));
-
-      light.fillStyle(0xffefad, 0.12);
-      light.fillTriangle(sourceX, sourceY, sourceX - beamHalfWidth, groundY, sourceX + beamHalfWidth, groundY);
-      light.fillStyle(0xfff4c7, 0.07);
-      light.fillTriangle(sourceX, sourceY - 8 * scale, sourceX - beamHalfWidth * 0.72, groundY, sourceX + beamHalfWidth * 0.72, groundY);
-      light.setDepth(STREET_LAMP_LIGHT_DEPTH);
-
-      const groundLight = this.trackStageObject(this.add.graphics().setBlendMode(Phaser.BlendModes.ADD));
-      groundLight.fillStyle(0xffe7a3, 0.17);
-      groundLight.fillEllipse(sourceX, groundY + 2, poolWidth, 26 * scale);
-      groundLight.fillStyle(0xfff8d2, 0.1);
-      groundLight.fillEllipse(sourceX, groundY + 1, poolWidth * 0.58, 12 * scale);
-      groundLight.setDepth(STREET_LAMP_GROUND_LIGHT_DEPTH);
-
-    });
-  }
-
-  private createStageObjects() {
-    this.editorStage.decorations.forEach((object) => {
-      this.createStageDecoration(object);
-    });
-  }
-
-  private createStageDecoration(object: StageDecorationPlacement) {
-    const scale = object.scale ?? 1;
-    const y = object.y ?? this.stageConstants.groundTopY;
-    this.trackStageObject(
-      this.add
-        .image(object.x, y, object.key)
-        .setOrigin(0.5, 1)
-        .setScale(scale)
-        .setDepth(DECORATION_DEPTH),
-    );
-    this.addDecorationTopPlatform(object.x, y, object.key, scale);
-  }
-
-  private addDecorationTopPlatform(x: number, y: number, key: string, scale: number) {
-    const platforms = STAGE_OBJECT_TOP_PLATFORMS[key];
-    if (!platforms) {
-      return;
-    }
-
-    const source = this.textures.get(key).getSourceImage() as { width: number; height: number };
-    platforms.forEach((platform) => {
-      const platformX = x - (source.width * scale) / 2 + platform.x * scale;
-      const platformY = y - source.height * scale + platform.y * scale;
-      this.addPlatformHitbox(
-        this.decorationPlatforms,
-        platformX,
-        platformY,
-        platform.width * scale,
-        platform.height * scale,
-      );
-    });
-  }
-
   private canLandOnDecorationPlatform(
     playerObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile,
     platformObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile,
@@ -1069,19 +932,6 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     return undefined;
-  }
-
-  private addPlatformHitbox(
-    platforms: Phaser.Physics.Arcade.StaticGroup,
-    x: number,
-    y: number,
-    width: number,
-    height: number,
-  ) {
-    const block = platforms.create(x + width / 2, y + height / 2, "platform-hitbox");
-    block.setDisplaySize(width, height);
-    block.setVisible(false);
-    block.refreshBody();
   }
 
   private createMobileControls() {
