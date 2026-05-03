@@ -28,7 +28,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.57";
+const DEBUG_VERSION = "v0.1.58";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -665,12 +665,13 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createStreetLamp(lamp: StreetLampPlacement) {
-    this.createStreetLampLight(lamp.x, lamp.key, lamp.scale);
+    const scale = lamp.scale ?? 1;
+    this.createStreetLampLight(lamp.x, lamp.key, scale);
     this.trackStageObject(
       this.add
         .image(lamp.x, this.stageConstants.streetLampGroundY, lamp.key)
         .setOrigin(0.5, 1)
-        .setScale(lamp.scale)
+        .setScale(scale)
         .setDepth(DECORATION_DEPTH),
     );
   }
@@ -710,11 +711,12 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createStageDecoration(object: StageDecorationPlacement) {
+    const scale = object.scale ?? 1;
     this.trackStageObject(
       this.add
         .image(object.x, object.y, object.key)
         .setOrigin(0.5, 1)
-        .setScale(object.scale)
+        .setScale(scale)
         .setDepth(DECORATION_DEPTH),
     );
   }
@@ -1153,15 +1155,16 @@ class PrototypeScene extends Phaser.Scene {
       consider({ kind: "item", index }, Phaser.Math.Distance.Between(worldX, worldY, item.x, item.y), 58);
     });
     this.editorStage.streetLamps.forEach((lamp, index) => {
+      const scale = lamp.scale ?? 1;
       consider(
         { kind: "streetLamp", index },
         this.getDistanceToRect(
           worldX,
           worldY,
           lamp.x - 42,
-          this.stageConstants.streetLampGroundY - 280 * lamp.scale,
+          this.stageConstants.streetLampGroundY - 280 * scale,
           84,
-          280 * lamp.scale,
+          280 * scale,
         ),
         64,
       );
@@ -1224,8 +1227,9 @@ class PrototypeScene extends Phaser.Scene {
     }
     if (selection.kind === "streetLamp") {
       const lamp = this.editorStage.streetLamps[selection.index];
+      const scale = lamp?.scale ?? 1;
       return lamp
-        ? { x: lamp.x, y: this.stageConstants.streetLampGroundY - 140 * lamp.scale, width: 110, height: 290 * lamp.scale }
+        ? { x: lamp.x, y: this.stageConstants.streetLampGroundY - 140 * scale, width: 110, height: 290 * scale }
         : undefined;
     }
     if (selection.kind === "decoration") {

@@ -20,8 +20,8 @@ export type ScoreState = Record<ItemType, number>;
 export type PlatformAsset = (typeof PLATFORM_ASSETS)[keyof typeof PLATFORM_ASSETS];
 export type StageObjectAsset = { key: string; path: string };
 export type PlatformRunPlacement = { x: number; y: number; units: number; collides?: boolean };
-export type StreetLampPlacement = { x: number; key: StreetLampKey; scale: number };
-export type StageDecorationPlacement = { x: number; y: number; key: string; scale: number };
+export type StreetLampPlacement = { x: number; key: StreetLampKey; scale?: number };
+export type StageDecorationPlacement = { x: number; y: number; key: string; scale?: number };
 export type ItemPlacement = { type: ItemType; x: number; y: number };
 export type StageDefinition = {
   name: string;

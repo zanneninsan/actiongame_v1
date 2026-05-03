@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.58
+### English
+- Made street lamp and decoration `scale` optional in stage definitions.
+- Applied a default scale of `1` when stage objects omit `scale`.
+### 日本語
+- ステージ定義の街灯と装飾オブジェクトの`scale`を省略可能にしました。
+- `scale`が未指定の場合はデフォルトで`1`を適用するようにしました。
 ## v0.1.57
 ### English
 - Added optional per-stage overrides for world top, world bottom, ground top, ground visual, and street lamp ground height.
