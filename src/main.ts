@@ -40,7 +40,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.91";
+const DEBUG_VERSION = "v0.1.92";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -913,12 +913,8 @@ class PrototypeScene extends Phaser.Scene {
       getStageConstants: () => this.stageConstants,
       rebuildStageObjects: () => this.rebuildEditableStageObjects(),
       moveGoalTo: (x, y) => this.moveGoalTo(x, y),
-      onToggle: (enabled) => {
-        if (enabled) {
-          freezeEnemies(this.enemiesGroup);
-        } else {
-          this.rebuildEditableStageObjects();
-        }
+      onToggle: () => {
+        this.rebuildEditableStageObjects();
         this.updateControlHintText();
       },
     });

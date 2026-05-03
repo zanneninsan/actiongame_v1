@@ -73,6 +73,8 @@ export class StageEditor {
       onToggle: (enabled) => {
         this.enabled = enabled;
         this.options.onToggle?.(enabled);
+        this.refreshExport();
+        this.refreshSelectionMarker();
       },
       onToolChange: (tool) => {
         this.tool = tool;

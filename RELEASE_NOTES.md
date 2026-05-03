@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.92
+### English
+- Rebuild enemies from their stage placement data when enabling the stage editor so editor selection matches the intended initial positions.
+- Keep rebuilt editor enemies frozen while editing, preventing live patrol movement from drifting away from placement data.
+### Japanese
+- ステージエディタを有効にした瞬間、敵をステージ配置データから作り直し、選択判定が本来の初期位置と合うようにしました。
+- 作り直した敵は編集中に停止させ、巡回移動で配置データからズレないようにしました。
+
 ## v0.1.91
 ### English
 - Destroy enemies after they fall below the stage reset line so they do not keep simulating off-screen.
