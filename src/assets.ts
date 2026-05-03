@@ -10,6 +10,7 @@ export const PROP_ASSETS = {
 } as const;
 export type StreetLampKey = (typeof PROP_ASSETS)[keyof typeof PROP_ASSETS];
 export type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
+export type EnemyType = "neonBouncer";
 export const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
 export const ITEM_GLOW_COLORS: Record<ItemType, number> = {
   energyDrink: 0x8cffd2,
@@ -23,7 +24,7 @@ export type PlatformRunPlacement = { x: number; y: number; units: number; collid
 export type StreetLampPlacement = { x: number; key: StreetLampKey; scale?: number };
 export type StageDecorationPlacement = { x: number; y?: number; key: string; scale?: number };
 export type ItemPlacement = { type: ItemType; x: number; y: number };
-export type EnemyPlacement = { x: number; y: number; patrolLeft: number; patrolRight: number; speed?: number };
+export type EnemyPlacement = { type?: EnemyType; x: number; y: number; patrolLeft: number; patrolRight: number; speed?: number };
 export type StageDefinition = {
   name: string;
   worldWidth: number;
@@ -85,5 +86,12 @@ export const ITEM_DEFINITIONS: Record<ItemType, { key: string; label: string; po
     label: "TEA",
     points: 150,
     assetPath: "assets/items/bubble_tea.png",
+  },
+};
+
+export const ENEMY_DEFINITIONS: Record<EnemyType, { key: string; label: string }> = {
+  neonBouncer: {
+    key: "enemy-neon-bouncer",
+    label: "Neon Bouncer",
   },
 };

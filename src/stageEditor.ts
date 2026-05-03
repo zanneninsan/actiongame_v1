@@ -1,8 +1,10 @@
 import Phaser from "phaser";
 import {
+  ENEMY_DEFINITIONS,
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
   ITEM_DEFINITIONS,
+  type EnemyPlacement,
   type ItemPlacement,
   type PlatformRunPlacement,
   type StageDecorationPlacement,
@@ -17,6 +19,7 @@ import { t, type Locale } from "./i18n";
 type EditorSelection =
   | { kind: "platform"; index: number }
   | { kind: "item"; index: number }
+  | { kind: "enemy"; index: number }
   | { kind: "streetLamp"; index: number }
   | { kind: "decoration"; index: number }
   | { kind: "playerStart" }
@@ -117,6 +120,8 @@ export class StageEditor {
       this.stage.platforms.splice(selection.index, 1);
     } else if (selection.kind === "item") {
       this.stage.items.splice(selection.index, 1);
+    } else if (selection.kind === "enemy") {
+      this.stage.enemies?.splice(selection.index, 1);
     } else if (selection.kind === "streetLamp") {
       this.stage.streetLamps.splice(selection.index, 1);
     } else if (selection.kind === "decoration") {
@@ -221,6 +226,20 @@ export class StageEditor {
       const placement: ItemPlacement = { type, x, y };
       this.stage.items.push(placement);
       this.selected = { kind: "item", index: this.stage.items.length - 1 };
+      this.rebuildStageObjects();
+      this.recordChange(historySnapshot);
+    } else if (this.tool === "enemy") {
+      const type = this.panel?.enemyType ?? "neonBouncer";
+      const placement: EnemyPlacement = {
+        type,
+        x,
+        y,
+        patrolLeft: x - this.options.platformUnitWidth * 2,
+        patrolRight: x + this.options.platformUnitWidth * 2,
+      };
+      this.stage.enemies = this.stage.enemies ?? [];
+      this.stage.enemies.push(placement);
+      this.selected = { kind: "enemy", index: this.stage.enemies.length - 1 };
       this.rebuildStageObjects();
       this.recordChange(historySnapshot);
     } else if (this.tool === "streetLamp") {
@@ -347,6 +366,15 @@ export class StageEditor {
         placement.x = x;
         placement.y = y;
       }
+    } else if (selection.kind === "enemy") {
+      const placement = this.stage.enemies?.[selection.index];
+      if (placement) {
+        const deltaX = x - placement.x;
+        placement.x = x;
+        placement.y = y;
+        placement.patrolLeft += deltaX;
+        placement.patrolRight += deltaX;
+      }
     } else if (selection.kind === "streetLamp") {
       const placement = this.stage.streetLamps[selection.index];
       if (placement) {
@@ -398,6 +426,9 @@ export class StageEditor {
     });
     this.stage.items.forEach((item, index) => {
       consider({ kind: "item", index }, Phaser.Math.Distance.Between(worldX, worldY, item.x, item.y), 58);
+    });
+    (this.stage.enemies ?? []).forEach((enemy, index) => {
+      consider({ kind: "enemy", index }, Phaser.Math.Distance.Between(worldX, worldY, enemy.x, enemy.y), 64);
     });
     this.stage.streetLamps.forEach((lamp, index) => {
       const scale = lamp.scale ?? 1;
@@ -468,6 +499,10 @@ export class StageEditor {
       const item = this.stage.items[selection.index];
       return item ? ITEM_DEFINITIONS[item.type].key : "item";
     }
+    if (selection.kind === "enemy") {
+      const enemy = this.stage.enemies?.[selection.index];
+      return enemy ? ENEMY_DEFINITIONS[enemy.type ?? "neonBouncer"].key : "enemy";
+    }
     if (selection.kind === "streetLamp") {
       return this.stage.streetLamps[selection.index]?.key ?? "streetLamp";
     }
@@ -493,6 +528,10 @@ export class StageEditor {
     if (selection.kind === "item") {
       const item = this.stage.items[selection.index];
       return item ? { x: item.x, y: item.y, width: 72, height: 72 } : undefined;
+    }
+    if (selection.kind === "enemy") {
+      const enemy = this.stage.enemies?.[selection.index];
+      return enemy ? { x: enemy.x, y: enemy.y, width: 86, height: 74 } : undefined;
     }
     if (selection.kind === "streetLamp") {
       const lamp = this.stage.streetLamps[selection.index];
@@ -649,7 +688,9 @@ export class StageEditor {
       Array.isArray(value.decorations) &&
       value.decorations.every((decoration) => this.isDecorationPlacement(decoration)) &&
       Array.isArray(value.items) &&
-      value.items.every((item) => this.isItemPlacement(item))
+      value.items.every((item) => this.isItemPlacement(item)) &&
+      (value.enemies === undefined ||
+        (Array.isArray(value.enemies) && value.enemies.every((enemy) => this.isEnemyPlacement(enemy))))
     );
   }
 
@@ -690,6 +731,18 @@ export class StageEditor {
       this.isNumber(value.y) &&
       typeof value.type === "string" &&
       value.type in ITEM_DEFINITIONS
+    );
+  }
+
+  private isEnemyPlacement(value: unknown): value is EnemyPlacement {
+    return (
+      this.isRecord(value) &&
+      this.isNumber(value.x) &&
+      this.isNumber(value.y) &&
+      this.isNumber(value.patrolLeft) &&
+      this.isNumber(value.patrolRight) &&
+      (value.type === undefined || (typeof value.type === "string" && value.type in ENEMY_DEFINITIONS)) &&
+      this.isOptionalNumber(value.speed)
     );
   }
 

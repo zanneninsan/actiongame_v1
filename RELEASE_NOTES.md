@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.90
+### English
+- Added enemies as editable stage editor objects with add, select, move, delete, export, and import support.
+- Added enemy type metadata so future enemy assets can be registered without changing the stage placement shape.
+### Japanese
+- ステージエディタで敵を追加、選択、移動、削除、エクスポート、インポートできるようにしました。
+- 今後複数の敵アセットを追加しやすいよう、敵配置に種類情報を持てるようにしました。
+
 ## v0.1.89
 ### English
 - Extended the physics world below the visible stage so falling into floor gaps reaches the reset threshold instead of catching on the world bottom.

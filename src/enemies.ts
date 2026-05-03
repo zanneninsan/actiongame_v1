@@ -1,7 +1,7 @@
 import Phaser from "phaser";
-import type { EnemyPlacement } from "./assets";
+import { ENEMY_DEFINITIONS, type EnemyPlacement } from "./assets";
 
-export const ENEMY_TEXTURE_KEY = "enemy-neon-bouncer";
+export const ENEMY_TEXTURE_KEY = ENEMY_DEFINITIONS.neonBouncer.key;
 export const ENEMY_DISPLAY_WIDTH = 76;
 export const ENEMY_DISPLAY_HEIGHT = 64;
 const ENEMY_BODY_WIDTH = 56;
@@ -93,11 +93,13 @@ export const updateEnemies = (enemiesGroup?: Phaser.Physics.Arcade.Group) => {
 };
 
 const createEnemySprite = (enemiesGroup: Phaser.Physics.Arcade.Group, placement: EnemyPlacement) => {
-  const enemy = enemiesGroup.create(placement.x, placement.y, ENEMY_TEXTURE_KEY) as Phaser.Physics.Arcade.Sprite;
+  const definition = ENEMY_DEFINITIONS[placement.type ?? "neonBouncer"];
+  const enemy = enemiesGroup.create(placement.x, placement.y, definition.key) as Phaser.Physics.Arcade.Sprite;
   const speed = placement.speed ?? ENEMY_DEFAULT_SPEED;
   const direction = speed >= 0 ? 1 : -1;
   enemy.setDisplaySize(ENEMY_DISPLAY_WIDTH, ENEMY_DISPLAY_HEIGHT);
   enemy.setDepth(0.18);
+  enemy.setData("enemyType", placement.type ?? "neonBouncer");
   enemy.setData("patrolLeft", Math.min(placement.patrolLeft, placement.patrolRight));
   enemy.setData("patrolRight", Math.max(placement.patrolLeft, placement.patrolRight));
   enemy.setData("speed", Math.abs(speed));

@@ -1,4 +1,4 @@
-import { PROP_ASSETS, STAGE_OBJECT_ASSETS, type ItemType, type StreetLampKey } from "./assets";
+import { ENEMY_DEFINITIONS, PROP_ASSETS, STAGE_OBJECT_ASSETS, type EnemyType, type ItemType, type StreetLampKey } from "./assets";
 import { t, type Locale } from "./i18n";
 
 export type EditorTool =
@@ -7,6 +7,7 @@ export type EditorTool =
   | "delete"
   | "platform"
   | "item"
+  | "enemy"
   | "streetLamp"
   | "decoration"
   | "playerStart"
@@ -29,6 +30,7 @@ export class StageEditorPanel {
   private exportTextarea?: HTMLTextAreaElement;
   private platformUnitsInput?: HTMLInputElement;
   private itemTypeSelect?: HTMLSelectElement;
+  private enemyTypeSelect?: HTMLSelectElement;
   private lampTypeSelect?: HTMLSelectElement;
   private decorationSelect?: HTMLSelectElement;
   private undoButton?: HTMLButtonElement;
@@ -48,6 +50,10 @@ export class StageEditorPanel {
 
   get itemType() {
     return (this.itemTypeSelect?.value ?? "energyDrink") as ItemType;
+  }
+
+  get enemyType() {
+    return (this.enemyTypeSelect?.value ?? "neonBouncer") as EnemyType;
   }
 
   get lampType() {
@@ -77,6 +83,7 @@ export class StageEditorPanel {
             <option value="delete">${t(this.options.locale, "editor.tool.delete")}</option>
             <option value="platform">${t(this.options.locale, "editor.tool.platform")}</option>
             <option value="item">${t(this.options.locale, "editor.tool.item")}</option>
+            <option value="enemy">${t(this.options.locale, "editor.tool.enemy")}</option>
             <option value="streetLamp">${t(this.options.locale, "editor.tool.streetLamp")}</option>
             <option value="decoration">${t(this.options.locale, "editor.tool.decoration")}</option>
             <option value="playerStart">${t(this.options.locale, "editor.tool.playerStart")}</option>
@@ -93,6 +100,12 @@ export class StageEditorPanel {
             <option value="energyDrink">${t(this.options.locale, "editor.item.energy")}</option>
             <option value="bubbleTea">${t(this.options.locale, "editor.item.tea")}</option>
             <option value="shoppingBag">${t(this.options.locale, "editor.item.bag")}</option>
+          </select>
+        </div>
+        <div class="editor-row">
+          <label>${t(this.options.locale, "editor.enemy")}</label>
+          <select data-enemy-type>
+            ${Object.entries(ENEMY_DEFINITIONS).map(([type, definition]) => `<option value="${type}">${definition.label}</option>`).join("")}
           </select>
         </div>
         <div class="editor-row">
@@ -130,6 +143,7 @@ export class StageEditorPanel {
     this.exportTextarea = panel.querySelector<HTMLTextAreaElement>("[data-editor-export]")!;
     this.platformUnitsInput = panel.querySelector<HTMLInputElement>("[data-platform-units]")!;
     this.itemTypeSelect = panel.querySelector<HTMLSelectElement>("[data-item-type]")!;
+    this.enemyTypeSelect = panel.querySelector<HTMLSelectElement>("[data-enemy-type]")!;
     this.lampTypeSelect = panel.querySelector<HTMLSelectElement>("[data-lamp-type]")!;
     this.decorationSelect = panel.querySelector<HTMLSelectElement>("[data-decoration-key]")!;
     this.undoButton = panel.querySelector<HTMLButtonElement>("[data-editor-undo]")!;
@@ -247,6 +261,7 @@ export class StageEditorPanel {
     this.exportTextarea = undefined;
     this.platformUnitsInput = undefined;
     this.itemTypeSelect = undefined;
+    this.enemyTypeSelect = undefined;
     this.lampTypeSelect = undefined;
     this.decorationSelect = undefined;
     this.undoButton = undefined;
