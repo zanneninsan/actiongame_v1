@@ -1,5 +1,10 @@
 # Release Notes / リリースノート
 
+## v0.1.66
+### English
+- Fixed the stage editor panel so dragging it keeps the compact editor width instead of expanding from its contents.
+### Japanese
+- ステージエディターパネルを移動しても、中身に合わせて横幅が広がらず、コンパクトな幅を保つように修正しました。
 ## v0.1.65
 ### English
 - Normalized the existing midground background candidates to 720px high while preserving their aspect ratios.

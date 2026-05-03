@@ -267,13 +267,16 @@ export class StageEditorPanel {
     let dragging = false;
     let offsetX = 0;
     let offsetY = 0;
+    let panelWidth = 0;
 
     const movePanel = (clientX: number, clientY: number) => {
-      const width = body.offsetWidth;
+      const width = panelWidth || body.offsetWidth;
       const height = body.offsetHeight;
       const left = Math.min(Math.max(8, clientX - offsetX), window.innerWidth - width - 8);
       const top = Math.min(Math.max(8, clientY - offsetY), window.innerHeight - height - 8);
       body.style.position = "fixed";
+      body.style.width = `${width}px`;
+      body.style.boxSizing = "border-box";
       body.style.left = `${left}px`;
       body.style.top = `${top}px`;
       body.style.marginTop = "0";
@@ -283,6 +286,7 @@ export class StageEditorPanel {
       event.preventDefault();
       event.stopPropagation();
       const rect = body.getBoundingClientRect();
+      panelWidth = rect.width;
       offsetX = event.clientX - rect.left;
       offsetY = event.clientY - rect.top;
       dragging = true;
