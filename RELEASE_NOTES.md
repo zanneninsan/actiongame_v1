@@ -1,5 +1,10 @@
 # Release Notes / リリースノート
 
+## v0.1.70
+### English
+- Added the new normalized midground image to the in-game midground debug switcher.
+### Japanese
+- 新しく正規化した中景画像を、ゲーム内の中景デバッグ切り替え候補に追加しました。
 ## v0.1.69
 ### English
 - Split background asset storage into `rear` and `midground` folders.
