@@ -6,6 +6,7 @@
 - For stage layout changes, start with `src/stages.ts`.
 - For gameplay changes, search exact symbols in `src/main.ts` before reading large ranges.
 - Keep `src/main.ts` focused on core game behavior and thin integration hooks.
+- For HUD and rich in-game UI visuals, do not rely on CSS decoration as the primary look. Generate polished raster UI assets with GPT Image2, place them under `public/assets`, and keep DOM/CSS usage limited to positioning, text overlays, and interaction hooks.
 - For stage editor behavior changes, start with `src/stageEditor.ts`; use `src/stageEditorPanel.ts` for editor panel DOM/UI only.
 - Run `npm run build` after code edits.
 - Commit each completed, coherent fix or feature chunk after verification. Do not leave finished work uncommitted unless the user explicitly asks not to commit.

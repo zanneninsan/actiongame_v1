@@ -64,6 +64,7 @@ This file is the short context packet for future Codex sessions. Read this first
   - Start screen: `src/startModal.ts`
   - Editor panel: `src/stageEditorPanel.ts`
   - Asset catalog: `src/assets.ts`
+- For HUD and rich in-game UI visuals, use GPT Image2-generated raster assets in `public/assets` as the baseline visual layer. Keep CSS/DOM styling limited to positioning, text overlays, and interaction hooks.
 - Use `apply_patch` for manual edits.
 - Run `npm run build` after code changes.
 - Commit each completed, coherent fix or feature chunk after verification. Do not leave finished work uncommitted unless the user explicitly asks not to commit.

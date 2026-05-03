@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.78
+### English
+- Reworked the story dialogue window to use a GPT Image2-generated ornate HUD frame asset instead of CSS-driven decoration.
+- Added the HUD asset production rule so rich in-game UI visuals start from generated raster assets, with DOM/CSS limited to positioning and text overlays.
+### Japanese
+- ストーリー会話ウィンドウを、CSS 装飾ではなく GPT Image2 で生成したリッチな HUD フレーム画像を土台にする形へ作り直しました。
+- リッチなゲーム内 HUD は生成画像アセットを基本にし、DOM と CSS は配置やテキスト重ねに絞る制作方針を追加しました。
 ## v0.1.77
 ### English
 - Added a top-left story dialogue window with a generated character portrait, name plate, translucent message area, and click-through story progression.

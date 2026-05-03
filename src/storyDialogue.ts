@@ -20,6 +20,7 @@ export type StoryDialogueController = {
 };
 
 const ASSET_BASE = import.meta.env.BASE_URL;
+const FRAME_ASPECT_RATIO = 417 / 1931;
 
 export const DEFAULT_STORY_DIALOGUE_LINES: StoryDialogueLine[] = [
   {
@@ -41,89 +42,85 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
 
   document.getElementById("story-dialogue")?.remove();
 
+  const width = options.width ?? 980;
   const wrapper = document.createElement("section");
   wrapper.id = "story-dialogue";
   wrapper.setAttribute("aria-live", "polite");
   applyStyle(wrapper, {
     position: "fixed",
     top: `${options.top ?? 18}px`,
-    left: `${options.left ?? 18}px`,
-    width: `min(${options.width ?? 760}px, calc(100vw - 36px))`,
-    minHeight: "132px",
+    left: `${options.left ?? 12}px`,
+    width: `min(${width}px, calc(100vw - 24px))`,
+    aspectRatio: `${1 / FRAME_ASPECT_RATIO}`,
     zIndex: "11",
-    display: "grid",
-    gridTemplateColumns: "132px 1fr",
-    columnGap: "10px",
     color: "#f8fafc",
     fontFamily: `"Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif`,
     pointerEvents: "auto",
     userSelect: "none",
-    filter: "drop-shadow(0 14px 22px rgba(0, 0, 0, 0.54))",
+    filter: "drop-shadow(0 16px 22px rgba(0, 0, 0, 0.58))",
   });
 
-  const portraitFrame = document.createElement("div");
-  applyStyle(portraitFrame, {
-    position: "relative",
-    height: "132px",
-    border: "2px solid #c7a76b",
-    background: "linear-gradient(180deg, rgba(13, 18, 27, 0.95), rgba(2, 6, 23, 0.92))",
-    boxSizing: "border-box",
-    overflow: "hidden",
+  const frame = document.createElement("img");
+  frame.src = `${ASSET_BASE}assets/story/dialogue_frame.png`;
+  frame.alt = "";
+  applyStyle(frame, {
+    position: "absolute",
+    inset: "0",
+    width: "100%",
+    height: "100%",
+    display: "block",
+    pointerEvents: "none",
   });
 
   const portrait = document.createElement("img");
   portrait.alt = "";
   applyStyle(portrait, {
-    width: "100%",
-    height: "100%",
+    position: "absolute",
+    left: "3.2%",
+    top: "14.5%",
+    width: "15.2%",
+    height: "67.5%",
     objectFit: "cover",
     display: "block",
-  });
-
-  const textPanel = document.createElement("div");
-  applyStyle(textPanel, {
-    position: "relative",
-    minHeight: "132px",
-    border: "2px solid #c7a76b",
-    background: "rgba(2, 8, 18, 0.68)",
-    boxSizing: "border-box",
-    padding: "50px 64px 28px 28px",
-    boxShadow: "inset 0 0 0 1px rgba(255, 237, 176, 0.18), inset 0 18px 32px rgba(15, 23, 42, 0.46)",
+    pointerEvents: "none",
   });
 
   const namePlate = document.createElement("div");
   applyStyle(namePlate, {
     position: "absolute",
-    top: "-2px",
-    left: "-2px",
-    minWidth: "260px",
-    maxWidth: "calc(100% - 28px)",
-    height: "34px",
+    left: "23.2%",
+    top: "10.5%",
+    width: "25.8%",
+    height: "13.5%",
     display: "flex",
     alignItems: "center",
-    padding: "0 22px",
-    border: "2px solid #c7a76b",
-    background: "linear-gradient(180deg, rgba(11, 22, 34, 0.98), rgba(2, 8, 18, 0.94))",
-    color: "#f7c96c",
-    fontSize: "22px",
-    fontWeight: "800",
-    letterSpacing: "0",
-    textShadow: "0 2px 0 rgba(0, 0, 0, 0.8)",
+    paddingLeft: "2.1%",
+    paddingRight: "1.4%",
     boxSizing: "border-box",
+    color: "#f5c76a",
+    fontSize: "22px",
+    fontWeight: "900",
+    lineHeight: "1",
+    letterSpacing: "0",
     whiteSpace: "nowrap",
     overflow: "hidden",
     textOverflow: "ellipsis",
+    textShadow: "0 2px 0 rgba(0, 0, 0, 0.86), 0 0 8px rgba(247, 201, 106, 0.18)",
   });
 
   const message = document.createElement("p");
   applyStyle(message, {
+    position: "absolute",
+    left: "23.8%",
+    top: "34%",
+    width: "66.5%",
     margin: "0",
     color: "#f8fafc",
     fontSize: "22px",
-    fontWeight: "800",
+    fontWeight: "900",
     lineHeight: "1.55",
     letterSpacing: "0",
-    textShadow: "0 2px 2px rgba(0, 0, 0, 0.85)",
+    textShadow: "0 2px 2px rgba(0, 0, 0, 0.9), 0 0 8px rgba(255, 255, 255, 0.12)",
   });
 
   const nextButton = document.createElement("button");
@@ -131,23 +128,17 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
   nextButton.ariaLabel = "次のメッセージ";
   applyStyle(nextButton, {
     position: "absolute",
-    right: "24px",
-    bottom: "18px",
-    width: "0",
-    height: "0",
+    right: "4.8%",
+    bottom: "18.5%",
+    width: "8%",
+    height: "22%",
+    border: "0",
     padding: "0",
-    borderTop: "13px solid #ffd579",
-    borderRight: "17px solid transparent",
-    borderBottom: "0",
-    borderLeft: "17px solid transparent",
     background: "transparent",
     cursor: "pointer",
-    filter: "drop-shadow(0 2px 0 rgba(0, 0, 0, 0.82))",
   });
 
-  portraitFrame.appendChild(portrait);
-  textPanel.append(namePlate, message, nextButton);
-  wrapper.append(portraitFrame, textPanel);
+  wrapper.append(frame, portrait, namePlate, message, nextButton);
   root.appendChild(wrapper);
 
   const stopPropagation = (event: Event) => event.stopPropagation();
