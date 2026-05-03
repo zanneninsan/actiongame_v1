@@ -5,6 +5,7 @@ __pycache__/
 *.py[cod]
 tmp/
 .codex-vite*.log
+tmp-vite-ui.*.log
 
 # Generated/intermediate sprite extraction workspace.
 public/assets/sprites/video_extract/
