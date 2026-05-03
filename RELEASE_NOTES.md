@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.84
+### English
+- Refreshed the goal static body after resizing so the collision box lines up with the displayed goal gate.
+- Shortened decoration-platform crouch drop-through timing from 1.0 seconds to 0.5 seconds.
+### Japanese
+- ゴール画像のリサイズ後に静的ボディを更新し、表示されているゴールゲートと当たり判定が合うようにしました。
+- 装飾足場からしゃがみですり抜けるまでの時間を1.0秒から0.5秒に短縮しました。
+
 ## v0.1.83
 ### English
 - Added simple patrolling enemy characters to the stage.

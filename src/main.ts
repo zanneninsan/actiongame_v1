@@ -40,7 +40,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.83";
+const DEBUG_VERSION = "v0.1.84";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -80,7 +80,7 @@ const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
 const MOBILE_FULLSCREEN_MIN_LANDSCAPE_HEIGHT = 430;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
-const DECORATION_PLATFORM_DROP_CROUCH_MS = 1000;
+const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
@@ -221,6 +221,7 @@ class PrototypeScene extends Phaser.Scene {
     const goal = this.physics.add.staticImage(this.editorStage.goal.x, this.editorStage.goal.y, GOAL_TEXTURE_KEY);
     goal.setDisplaySize(GOAL_DISPLAY_WIDTH, GOAL_DISPLAY_HEIGHT);
     goal.setSize(GOAL_DISPLAY_WIDTH, GOAL_DISPLAY_HEIGHT);
+    goal.refreshBody();
     this.goal = goal;
 
     this.createPlayerAnimations();
