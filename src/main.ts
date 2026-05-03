@@ -21,21 +21,14 @@ import { RainbowWinPipeline } from "./rainbowPipeline";
 import { StartCountdownOverlay } from "./countdown";
 import { StartModal, type ControlMode } from "./startModal";
 import { StageEditorPanel, type EditorTool } from "./stageEditorPanel";
-import {
-  GROUND_TOP_Y,
-  GROUND_VISUAL_Y,
-  STREET_LAMP_GROUND_Y,
-  WORLD_BOTTOM,
-  WORLD_HEIGHT,
-  WORLD_TOP,
-} from "./stageConstants";
+import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.56";
+const DEBUG_VERSION = "v0.1.57";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -112,6 +105,7 @@ class PrototypeScene extends Phaser.Scene {
   private startModal?: StartModal;
   private controlHint = "A/D: move  W/Space: jump  R: restart";
   private editorStage = cloneStage(ACTIVE_STAGE);
+  private stageConstants: ResolvedStageConstants = resolveStageConstants(ACTIVE_STAGE);
   private editorEnabled = false;
   private editorTool: EditorTool = "select";
   private editorPanel?: StageEditorPanel;
@@ -180,11 +174,12 @@ class PrototypeScene extends Phaser.Scene {
     this.soundMuted = this.getCookieValue("actiongame_muted") === "1";
     this.applySoundSettings();
     this.resetRunState();
+    this.stageConstants = resolveStageConstants(this.editorStage);
     if (!extraTouchPointersAdded) {
       this.input.addPointer(4);
       extraTouchPointersAdded = true;
     }
-    this.physics.world.setBounds(0, WORLD_TOP, this.editorStage.worldWidth, WORLD_HEIGHT);
+    this.physics.world.setBounds(0, this.stageConstants.worldTop, this.editorStage.worldWidth, this.stageConstants.worldHeight);
     this.createBackground();
 
     this.platforms = this.physics.add.staticGroup();
@@ -222,7 +217,7 @@ class PrototypeScene extends Phaser.Scene {
       d: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D),
     };
 
-    this.cameras.main.setBounds(0, WORLD_TOP, this.editorStage.worldWidth, WORLD_HEIGHT);
+    this.cameras.main.setBounds(0, this.stageConstants.worldTop, this.editorStage.worldWidth, this.stageConstants.worldHeight);
     this.cameras.main.setZoom(CAMERA_ZOOM);
     this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
     this.cameras.main.setDeadzone(260, 140);
@@ -395,7 +390,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.wasOnFloor = onFloor;
 
-    if (this.player.y > WORLD_BOTTOM + 32) {
+    if (this.player.y > this.stageConstants.worldBottom + 32) {
       this.restartStage();
     }
   }
@@ -571,6 +566,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private rebuildEditableStageObjects() {
+    this.stageConstants = resolveStageConstants(this.editorStage);
     this.stageRenderObjects.forEach((object) => object.destroy());
     this.stageRenderObjects = [];
     this.platforms?.clear(true, true);
@@ -587,10 +583,16 @@ class PrototypeScene extends Phaser.Scene {
 
   private buildStage(platforms: Phaser.Physics.Arcade.StaticGroup) {
     for (let x = 0; x < this.editorStage.worldWidth; x += TILE) {
-      this.addBlock(platforms, x, GROUND_TOP_Y, "ground", false);
+      this.addBlock(platforms, x, this.stageConstants.groundTopY, "ground", false);
     }
 
-    this.addPlatformRun(platforms, 0, GROUND_VISUAL_Y, Math.ceil(this.editorStage.worldWidth / PLATFORM_UNIT_WIDTH) + 1, false);
+    this.addPlatformRun(
+      platforms,
+      0,
+      this.stageConstants.groundVisualY,
+      Math.ceil(this.editorStage.worldWidth / PLATFORM_UNIT_WIDTH) + 1,
+      false,
+    );
     this.editorStage.platforms.forEach((platform) => {
       this.addPlatformRun(platforms, platform.x, platform.y, platform.units, platform.collides ?? true);
     });
@@ -666,7 +668,7 @@ class PrototypeScene extends Phaser.Scene {
     this.createStreetLampLight(lamp.x, lamp.key, lamp.scale);
     this.trackStageObject(
       this.add
-        .image(lamp.x, STREET_LAMP_GROUND_Y, lamp.key)
+        .image(lamp.x, this.stageConstants.streetLampGroundY, lamp.key)
         .setOrigin(0.5, 1)
         .setScale(lamp.scale)
         .setDepth(DECORATION_DEPTH),
@@ -675,8 +677,8 @@ class PrototypeScene extends Phaser.Scene {
 
   private createStreetLampLight(x: number, key: StreetLampKey, scale: number) {
     const isDoubleLamp = key === PROP_ASSETS.lampDouble;
-    const sourceY = STREET_LAMP_GROUND_Y - 420 * scale;
-    const groundY = STREET_LAMP_GROUND_Y - 5;
+    const sourceY = this.stageConstants.streetLampGroundY - 420 * scale;
+    const groundY = this.stageConstants.streetLampGroundY - 5;
     const sources = isDoubleLamp ? [-92 * scale, 92 * scale] : [32 * scale];
 
     sources.forEach((offsetX) => {
@@ -1153,7 +1155,14 @@ class PrototypeScene extends Phaser.Scene {
     this.editorStage.streetLamps.forEach((lamp, index) => {
       consider(
         { kind: "streetLamp", index },
-        this.getDistanceToRect(worldX, worldY, lamp.x - 42, STREET_LAMP_GROUND_Y - 280 * lamp.scale, 84, 280 * lamp.scale),
+        this.getDistanceToRect(
+          worldX,
+          worldY,
+          lamp.x - 42,
+          this.stageConstants.streetLampGroundY - 280 * lamp.scale,
+          84,
+          280 * lamp.scale,
+        ),
         64,
       );
     });
@@ -1216,7 +1225,7 @@ class PrototypeScene extends Phaser.Scene {
     if (selection.kind === "streetLamp") {
       const lamp = this.editorStage.streetLamps[selection.index];
       return lamp
-        ? { x: lamp.x, y: STREET_LAMP_GROUND_Y - 140 * lamp.scale, width: 110, height: 290 * lamp.scale }
+        ? { x: lamp.x, y: this.stageConstants.streetLampGroundY - 140 * lamp.scale, width: 110, height: 290 * lamp.scale }
         : undefined;
     }
     if (selection.kind === "decoration") {

@@ -1,8 +1,11 @@
-import { PROP_ASSETS, type StageDefinition } from "./assets";
+import type { StageDefinition } from "./assets";
 
 export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
   "name": "Neon Canal",
   "worldWidth": 12800,
+  "worldTop": -720,
+  "worldBottom": 720,
+  "groundTopY": 672,
   "playerStart": {
     "x": 120,
     "y": 552
@@ -461,6 +464,11 @@ export const ACTIVE_STAGE = STAGES.neonCanal;
 export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   name: stage.name,
   worldWidth: stage.worldWidth,
+  worldTop: stage.worldTop,
+  worldBottom: stage.worldBottom,
+  groundTopY: stage.groundTopY,
+  groundVisualY: stage.groundVisualY,
+  streetLampGroundY: stage.streetLampGroundY,
   playerStart: { ...stage.playerStart },
   goal: { ...stage.goal },
   platforms: stage.platforms.map((platform) => ({ ...platform })),

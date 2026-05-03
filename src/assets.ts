@@ -26,6 +26,11 @@ export type ItemPlacement = { type: ItemType; x: number; y: number };
 export type StageDefinition = {
   name: string;
   worldWidth: number;
+  worldTop?: number;
+  worldBottom?: number;
+  groundTopY?: number;
+  groundVisualY?: number;
+  streetLampGroundY?: number;
   playerStart: { x: number; y: number };
   goal: { x: number; y: number };
   platforms: PlatformRunPlacement[];
@@ -80,4 +85,3 @@ export const ITEM_DEFINITIONS: Record<ItemType, { key: string; label: string; po
     assetPath: "assets/items/bubble_tea.png",
   },
 };
-

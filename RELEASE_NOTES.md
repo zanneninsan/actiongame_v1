@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.57
+### English
+- Added optional per-stage overrides for world top, world bottom, ground top, ground visual, and street lamp ground height.
+- Updated stage rendering and bounds logic to resolve stage-specific constants with shared defaults.
+### 日本語
+- ステージごとに空上限、下限、地面高さ、地面描画位置、街灯の地面基準を上書きできるようにしました。
+- ステージ描画とワールド境界処理が、ステージ固有値と共通デフォルトを合成して参照するようにしました。
 ## v0.1.56
 ### English
 - Centralized world bounds and ground-height constants in `stageConstants.ts`.
