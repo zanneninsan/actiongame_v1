@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.55
+### English
+- Fixed the swapped stage file by restoring the missing `NEON_CANAL_STAGE` export reference.
+- Kept the newly imported stage data intact while allowing `ACTIVE_STAGE` to resolve again.
+### 日本語
+- 差し替えたステージファイルで不足していた`NEON_CANAL_STAGE`の参照を復旧しました。
+- 取り込まれたステージデータ自体は維持しつつ、`ACTIVE_STAGE`が再び解決できるようにしました。
 ## v0.1.54
 ### English
 - Moved the editor panel MOVE handle inside the expanded editor body so the EDITOR toggle button stays out of the drag target.
