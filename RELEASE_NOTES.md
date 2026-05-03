@@ -1,5 +1,14 @@
 # Release Notes / リリースノート
 
+## v0.1.96
+### English
+- Kept the story dialogue panel inside the game canvas, in the top-left area below the player and score HUD.
+- Scaled the dialogue panel and text with the rendered game size so it stays compact on mobile screens.
+- Reduced the top HUD text to roughly two-thirds of its previous size.
+### Japanese
+- ストーリーメッセージ枠をゲームキャンバス内に収め、左上のままプレイヤー名とスコア表示の下に配置するようにしました。
+- 表示中のゲームサイズに合わせてメッセージ枠と文字を縮小し、スマホ画面で大きくなりすぎないようにしました。
+- 上部HUDの文字サイズを以前の約3分の2に小さくしました。
 ## v0.1.95
 ### English
 - Changed the HUD timer to count down with millisecond precision.

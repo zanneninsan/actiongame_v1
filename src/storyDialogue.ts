@@ -21,6 +21,12 @@ export type StoryDialogueController = {
 
 const ASSET_BASE = import.meta.env.BASE_URL;
 const FRAME_ASPECT_RATIO = 417 / 1931;
+const GAME_DESIGN_WIDTH = 1280;
+const GAME_DESIGN_HEIGHT = 720;
+const DEFAULT_DIALOGUE_LEFT = 12;
+const DEFAULT_DIALOGUE_TOP = 96;
+const DEFAULT_DIALOGUE_WIDTH = 820;
+const MIN_DIALOGUE_WIDTH = 220;
 
 export const DEFAULT_STORY_DIALOGUE_LINES: StoryDialogueLine[] = [
   {
@@ -42,15 +48,15 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
 
   document.getElementById("story-dialogue")?.remove();
 
-  const width = options.width ?? 980;
   const wrapper = document.createElement("section");
   wrapper.id = "story-dialogue";
+  wrapper.className = "story-dialogue";
   wrapper.setAttribute("aria-live", "polite");
   applyStyle(wrapper, {
     position: "fixed",
-    top: `${options.top ?? 18}px`,
-    left: `${options.left ?? 12}px`,
-    width: `min(${width}px, calc(100vw - 24px))`,
+    top: "96px",
+    left: "12px",
+    width: "820px",
     aspectRatio: `${1 / FRAME_ASPECT_RATIO}`,
     zIndex: "11",
     color: "#f8fafc",
@@ -98,7 +104,7 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
     paddingRight: "1.4%",
     boxSizing: "border-box",
     color: "#f5c76a",
-    fontSize: "22px",
+    fontSize: "var(--story-dialogue-font-size, 22px)",
     fontWeight: "900",
     lineHeight: "1",
     letterSpacing: "0",
@@ -116,7 +122,7 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
     width: "66.5%",
     margin: "0",
     color: "#f8fafc",
-    fontSize: "22px",
+    fontSize: "var(--story-dialogue-font-size, 22px)",
     fontWeight: "900",
     lineHeight: "1.55",
     letterSpacing: "0",
@@ -140,6 +146,38 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
 
   wrapper.append(frame, portrait, namePlate, message, nextButton);
   root.appendChild(wrapper);
+
+  const syncToGameFrame = () => {
+    const canvas = document.querySelector<HTMLCanvasElement>("#game canvas") ?? document.querySelector<HTMLCanvasElement>("canvas");
+    const rect = canvas?.getBoundingClientRect();
+    const frameLeft = rect?.left ?? 0;
+    const frameTop = rect?.top ?? 0;
+    const frameWidth = rect?.width ?? window.innerWidth;
+    const scale = rect ? Math.min(rect.width / GAME_DESIGN_WIDTH, rect.height / GAME_DESIGN_HEIGHT) : 1;
+    const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
+    const logicalLeft = options.left ?? DEFAULT_DIALOGUE_LEFT;
+    const logicalTop = options.top ?? DEFAULT_DIALOGUE_TOP;
+    const logicalWidth = options.width ?? DEFAULT_DIALOGUE_WIDTH;
+    const left = frameLeft + logicalLeft * safeScale;
+    const top = frameTop + logicalTop * safeScale;
+    const maxWidth = Math.max(MIN_DIALOGUE_WIDTH, frameWidth - logicalLeft * safeScale - DEFAULT_DIALOGUE_LEFT * safeScale);
+    const width = Math.max(MIN_DIALOGUE_WIDTH, Math.min(logicalWidth * safeScale, maxWidth));
+    const fontSize = Math.min(22, Math.max(12, 22 * safeScale));
+
+    wrapper.style.left = `${Math.round(left)}px`;
+    wrapper.style.top = `${Math.round(top)}px`;
+    wrapper.style.width = `${Math.round(width)}px`;
+    wrapper.style.setProperty("--story-dialogue-font-size", `${fontSize.toFixed(1)}px`);
+  };
+
+  syncToGameFrame();
+  window.addEventListener("resize", syncToGameFrame);
+  window.visualViewport?.addEventListener("resize", syncToGameFrame);
+  const canvas = document.querySelector<HTMLCanvasElement>("#game canvas") ?? document.querySelector<HTMLCanvasElement>("canvas");
+  const resizeObserver = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(syncToGameFrame);
+  if (canvas && resizeObserver) {
+    resizeObserver.observe(canvas);
+  }
 
   const stopPropagation = (event: Event) => event.stopPropagation();
   wrapper.addEventListener("pointerdown", stopPropagation);
@@ -174,6 +212,9 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
   const remove = () => {
     wrapper.removeEventListener("pointerdown", stopPropagation);
     wrapper.removeEventListener("keydown", stopPropagation);
+    window.removeEventListener("resize", syncToGameFrame);
+    window.visualViewport?.removeEventListener("resize", syncToGameFrame);
+    resizeObserver?.disconnect();
     wrapper.remove();
   };
 

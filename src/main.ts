@@ -48,7 +48,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.95";
+const DEBUG_VERSION = "v0.1.96";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
@@ -301,7 +301,7 @@ class PrototypeScene extends Phaser.Scene {
     this.playerNameText = this.add
       .text(58, 40, "", {
         fontFamily: "monospace",
-        fontSize: "20px",
+        fontSize: "13px",
         color: "#e0f2fe",
       })
       .setDepth(100)
@@ -311,7 +311,7 @@ class PrototypeScene extends Phaser.Scene {
     this.scoreText = this.add
       .text(58, 68, "", {
         fontFamily: "monospace",
-        fontSize: "16px",
+        fontSize: "11px",
         color: "#f8fafc",
       })
       .setScrollFactor(0)
@@ -322,7 +322,7 @@ class PrototypeScene extends Phaser.Scene {
     this.timerText = this.add
       .text(178, 68, "", {
         fontFamily: "monospace",
-        fontSize: "16px",
+        fontSize: "11px",
         color: "#fde68a",
       })
       .setScrollFactor(0)
@@ -333,7 +333,7 @@ class PrototypeScene extends Phaser.Scene {
     this.controlHintText = this.add
       .text(GAME_WIDTH / 2, 8, "", {
         fontFamily: "monospace",
-        fontSize: "15px",
+        fontSize: "10px",
         color: "#fde68a",
         align: "center",
       })
