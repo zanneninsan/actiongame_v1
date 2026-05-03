@@ -40,7 +40,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.85";
+const DEBUG_VERSION = "v0.1.86";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -188,8 +188,6 @@ class PrototypeScene extends Phaser.Scene {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
-    this.createPixelTexture("ground", TILE, TILE, 0x263244, 0x8bd3ff);
-    this.createPixelTexture("platform", TILE, TILE, 0x384257, 0xf6c453);
     this.createPixelTexture("platform-hitbox", 1, 1, 0xffffff, 0xffffff);
     createEnemyTexture(this);
     this.load.image(GOAL_TEXTURE_KEY, `${ASSET_BASE}assets/stage_objects/goal_gate.png`);
@@ -356,7 +354,7 @@ class PrototypeScene extends Phaser.Scene {
       this.player.setDragX(AIR_DRAG);
       this.wasOnFloor = onFloor;
       if (this.player.y > this.stageConstants.worldBottom + 32) {
-        this.playDefeatSequence();
+        this.restartStage();
       }
       return;
     }
@@ -448,7 +446,7 @@ class PrototypeScene extends Phaser.Scene {
     this.wasOnFloor = onFloor;
 
     if (this.player.y > this.stageConstants.worldBottom + 32) {
-      this.playDefeatSequence();
+      this.restartStage();
     }
   }
 

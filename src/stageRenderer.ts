@@ -11,7 +11,6 @@ import {
 import type { ResolvedStageConstants } from "./stageConstants";
 import { STAGE_OBJECT_TOP_PLATFORMS } from "./stageObjectPlatforms";
 
-const TILE = 32;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
 const PLATFORM_DEPTH = -0.55;
@@ -35,33 +34,9 @@ export const renderStageObjects = (options: StageRenderOptions) => {
 };
 
 const buildStage = (options: StageRenderOptions) => {
-  for (let x = 0; x < options.stage.worldWidth; x += TILE) {
-    addBlock(options.platforms, x, options.stageConstants.groundTopY, "ground", false);
-  }
-
-  addPlatformRun(
-    options,
-    options.platforms,
-    0,
-    options.stageConstants.groundVisualY,
-    Math.ceil(options.stage.worldWidth / PLATFORM_UNIT_WIDTH) + 1,
-    false,
-  );
   options.stage.platforms.forEach((platform) => {
     addPlatformRun(options, options.platforms, platform.x, platform.y, platform.units, platform.collides ?? true);
   });
-};
-
-const addBlock = (
-  platforms: Phaser.Physics.Arcade.StaticGroup,
-  x: number,
-  y: number,
-  texture: string,
-  visible = true,
-) => {
-  const block = platforms.create(x + TILE / 2, y + TILE / 2, texture);
-  block.setVisible(visible);
-  block.refreshBody();
 };
 
 const addPlatformRun = (

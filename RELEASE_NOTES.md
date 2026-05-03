@@ -1,5 +1,15 @@
 # Release Notes / リリースノート
 
+## v0.1.86
+### English
+- Removed the automatically generated full-width baseline floor from stage rendering.
+- Added explicit ground platform runs to the stage layout with several gaps that reset the run when the player falls.
+- Changed falling below the stage to immediately restart the stage without playing the defeat animation.
+### Japanese
+- ステージ描画で全幅のベースライン床を自動生成しないようにしました。
+- ステージ定義に明示的な地面足場を追加し、途中にいくつか穴を用意しました。
+- ステージ下へ落ちたときは失敗演出を挟まず、すぐにステージを最初からやり直すようにしました。
+
 ## v0.1.85
 ### English
 - Changed enemies to spawn in midair and fall under Arcade Physics gravity before landing on the stage ground.
