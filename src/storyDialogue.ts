@@ -24,12 +24,12 @@ const FRAME_ASPECT_RATIO = 417 / 1931;
 
 export const DEFAULT_STORY_DIALOGUE_LINES: StoryDialogueLine[] = [
   {
-    characterName: "エリス",
+    characterName: "残念院さん",
     message: "人が多いですね……ここが渋谷。",
     portraitUrl: `${ASSET_BASE}assets/story/elis_portrait.png`,
   },
   {
-    characterName: "エリス",
+    characterName: "残念院さん",
     message: "先へ進みましょう。何か手がかりが見つかるはずです。",
     portraitUrl: `${ASSET_BASE}assets/story/elis_portrait.png`,
   },

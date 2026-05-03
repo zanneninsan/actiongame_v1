@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.88
+### English
+- Fixed enemies falling through platforms by allowing their dynamic physics bodies to be separated by stage floor collisions.
+### Japanese
+- 敵の動的ボディが足場との衝突で押し戻されるようにし、足場をすり抜けて落ち続ける問題を修正しました。
+
 ## v0.1.87
 ### English
 - Added an enemy near the player start so one is visible within the initial camera area.

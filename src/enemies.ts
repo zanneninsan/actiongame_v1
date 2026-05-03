@@ -49,7 +49,6 @@ export const createEnemies = (
 ) => {
   const enemies = scene.physics.add.group({
     allowGravity: true,
-    immovable: true,
   });
 
   populateEnemies(enemies, placements);
@@ -108,5 +107,5 @@ const createEnemySprite = (enemiesGroup: Phaser.Physics.Arcade.Group, placement:
   enemy.setFlipX(direction < 0);
   const body = enemy.body as Phaser.Physics.Arcade.Body;
   body.setAllowGravity(true);
-  body.setImmovable(true);
+  body.setImmovable(false);
 };
