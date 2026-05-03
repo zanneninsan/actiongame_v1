@@ -1,5 +1,10 @@
 # Release Notes / リリースノート
 
+## v0.1.97
+### English
+- Reduced the top HUD text to roughly two-thirds of the v0.1.96 size.
+### Japanese
+- 上部HUDの文字サイズを v0.1.96 からさらに約3分の2に小さくしました。
 ## v0.1.96
 ### English
 - Kept the story dialogue panel inside the game canvas, in the top-left area below the player and score HUD.
