@@ -40,10 +40,11 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.88";
+const DEBUG_VERSION = "v0.1.89";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
+const FALL_RESET_WORLD_MARGIN = 640;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
 const GOAL_TEXTURE_KEY = "goal-gate";
@@ -209,7 +210,12 @@ class PrototypeScene extends Phaser.Scene {
       this.input.addPointer(4);
       extraTouchPointersAdded = true;
     }
-    this.physics.world.setBounds(0, this.stageConstants.worldTop, this.editorStage.worldWidth, this.stageConstants.worldHeight);
+    this.physics.world.setBounds(
+      0,
+      this.stageConstants.worldTop,
+      this.editorStage.worldWidth,
+      this.stageConstants.worldHeight + FALL_RESET_WORLD_MARGIN,
+    );
     this.createBackground();
 
     this.platforms = this.physics.add.staticGroup();

@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.89
+### English
+- Extended the physics world below the visible stage so falling into floor gaps reaches the reset threshold instead of catching on the world bottom.
+### Japanese
+- 床の穴へ落ちたときに物理ワールド下端で止まらないよう、表示ステージの下に余白を追加し、リセット判定まで落下できるようにしました。
+
 ## v0.1.88
 ### English
 - Fixed enemies falling through platforms by allowing their dynamic physics bodies to be separated by stage floor collisions.
