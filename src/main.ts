@@ -48,7 +48,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.106";
+const DEBUG_VERSION = "v0.1.107";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
@@ -74,9 +74,11 @@ const PLAYER_CROUCH_BODY_HEIGHT = 94;
 const PLAYER_CROUCH_BODY_OFFSET_X = 131;
 const PLAYER_CROUCH_BODY_OFFSET_Y = PLAYER_BODY_OFFSET_Y + PLAYER_BODY_HEIGHT - PLAYER_CROUCH_BODY_HEIGHT;
 const PLAYER_IDLE_FRAME_COUNT = 8;
+const PLAYER_LONG_IDLE_FRAME_COUNT = 29;
 const PLAYER_FRAME_COUNT = 13;
 const PLAYER_CROUCH_FRAME_COUNT = 27;
 const PLAYER_DEFEAT_FRAME_COUNT = 8;
+const PLAYER_LONG_IDLE_TRIGGER_MS = 5000;
 const GROUND_ACCELERATION = 2400;
 const CROUCH_GROUND_ACCELERATION = 1600;
 const AIR_ACCELERATION = 720;
@@ -145,6 +147,8 @@ class PrototypeScene extends Phaser.Scene {
   private wasOnFloor = false;
   private isLanding = false;
   private landingFastForwarded = false;
+  private idleStartedAt = 0;
+  private isLongIdlePlaying = false;
   private isDefeatSequenceActive = false;
   private hurtUntil = 0;
   private invulnerableUntil = 0;
@@ -190,6 +194,10 @@ class PrototypeScene extends Phaser.Scene {
       }
     });
     this.load.spritesheet("player-idle", `${ASSET_BASE}assets/sprites/player_idle_8_320x260.png`, {
+      frameWidth: PLAYER_DISPLAY_WIDTH,
+      frameHeight: PLAYER_DISPLAY_HEIGHT,
+    });
+    this.load.spritesheet("player-longidle", `${ASSET_BASE}assets/sprites/player_longidle_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
@@ -262,6 +270,13 @@ class PrototypeScene extends Phaser.Scene {
       this.isLanding = false;
       this.landingFastForwarded = false;
       this.player.anims.timeScale = 1;
+    });
+    this.player.on(`${Phaser.Animations.Events.ANIMATION_COMPLETE_KEY}player-longidle`, () => {
+      this.isLongIdlePlaying = false;
+      this.idleStartedAt = this.time.now;
+      if (this.isRunActive && this.player.anims.currentAnim?.key === "player-longidle") {
+        this.player.anims.play("player-idle", true);
+      }
     });
 
     this.physics.add.collider(this.player, this.platforms);
@@ -429,6 +444,7 @@ class PrototypeScene extends Phaser.Scene {
       this.landingFastForwarded = false;
       this.player.anims.timeScale = 1;
       startedJump = true;
+      this.resetPlayerIdleState();
       this.player.anims.play("player-jump-start", true);
     }
 
@@ -439,6 +455,7 @@ class PrototypeScene extends Phaser.Scene {
     if (landedThisFrame) {
       this.isLanding = true;
       this.landingFastForwarded = false;
+      this.resetPlayerIdleState();
       this.player.anims.timeScale = 1;
       this.player.anims.play("player-land", true);
     } else if (this.isLanding) {
@@ -457,21 +474,25 @@ class PrototypeScene extends Phaser.Scene {
         this.player.anims.timeScale = 1;
       }
     } else if (startedJump) {
+      this.resetPlayerIdleState();
       this.player.anims.play("player-jump-start", true);
     } else if (!onFloor) {
+      this.resetPlayerIdleState();
       const currentAnimation = this.player.anims.currentAnim?.key;
       if (currentAnimation !== "player-jump-start" || !this.player.anims.isPlaying) {
         this.player.anims.play("player-air", true);
       }
     } else if (isCrouching) {
+      this.resetPlayerIdleState();
       this.player.anims.timeScale = 1;
       if (this.player.anims.currentAnim?.key !== "player-crouch") {
         this.player.anims.play("player-crouch");
       }
-    } else if (isMovingHorizontally) {
+    } else if (left || right || isMovingHorizontally) {
+      this.resetPlayerIdleState();
       this.player.anims.play("player-walk", true);
     } else {
-      this.player.anims.play("player-idle", true);
+      this.updatePlayerIdleAnimation();
     }
 
     this.wasOnFloor = onFloor;
@@ -479,6 +500,33 @@ class PrototypeScene extends Phaser.Scene {
     if (this.player.y > this.stageConstants.worldBottom + 32) {
       this.restartStage();
     }
+  }
+
+  private resetPlayerIdleState(startedAt = 0) {
+    this.idleStartedAt = startedAt;
+    this.isLongIdlePlaying = false;
+  }
+
+  private updatePlayerIdleAnimation() {
+    this.player.anims.timeScale = 1;
+    if (this.isLongIdlePlaying) {
+      if (this.player.anims.currentAnim?.key !== "player-longidle") {
+        this.player.anims.play("player-longidle", true);
+      }
+      return;
+    }
+
+    if (this.idleStartedAt === 0) {
+      this.idleStartedAt = this.time.now;
+    }
+
+    if (this.time.now - this.idleStartedAt >= PLAYER_LONG_IDLE_TRIGGER_MS) {
+      this.isLongIdlePlaying = true;
+      this.player.anims.play("player-longidle", true);
+      return;
+    }
+
+    this.player.anims.play("player-idle", true);
   }
 
   private resetRunState() {
@@ -500,6 +548,8 @@ class PrototypeScene extends Phaser.Scene {
     this.wasOnFloor = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
+    this.idleStartedAt = 0;
+    this.isLongIdlePlaying = false;
     this.isDefeatSequenceActive = false;
     this.hurtUntil = 0;
     this.invulnerableUntil = 0;
@@ -559,6 +609,7 @@ class PrototypeScene extends Phaser.Scene {
     this.countdownOverlay = undefined;
     this.startTime = this.time.now;
     this.isRunActive = true;
+    this.resetPlayerIdleState(this.time.now);
     this.physics.resume();
     this.updateTimerText();
     if (!this.bgm?.isPlaying) {
@@ -1007,6 +1058,7 @@ class PrototypeScene extends Phaser.Scene {
     this.player.setDragX(AIR_DRAG);
     this.player.anims.timeScale = 1;
     this.player.anims.play("player-air", true);
+    this.resetPlayerIdleState();
     this.playDamageMotion(direction);
   }
 
@@ -1171,6 +1223,16 @@ class PrototypeScene extends Phaser.Scene {
     });
 
     this.anims.create({
+      key: "player-longidle",
+      frames: this.anims.generateFrameNumbers("player-longidle", {
+        start: 0,
+        end: PLAYER_LONG_IDLE_FRAME_COUNT - 1,
+      }),
+      frameRate: 8,
+      repeat: 0,
+    });
+
+    this.anims.create({
       key: "player-walk",
       frames: this.anims.generateFrameNumbers("player-walk", {
         start: 0,
@@ -1240,6 +1302,7 @@ class PrototypeScene extends Phaser.Scene {
     this.isRunActive = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
+    this.resetPlayerIdleState();
     this.hurtUntil = 0;
     this.invulnerableUntil = 0;
     this.damageTween?.stop();

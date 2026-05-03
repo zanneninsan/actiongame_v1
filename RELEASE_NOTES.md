@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.107
+### English
+- Added a long-idle player animation that plays once after the player remains idle for 5 seconds, then returns to the normal idle loop.
+### Japanese
+- プレイヤーが5秒間待機し続けたときに長めの待機アニメーションを1回再生し、その後は通常の待機アニメーションへ戻るようにしました。
+
 ## v0.1.106
 ### English
 - Narrowed the start modal and centered its internal controls with extra side margin to avoid right-edge clipping.
