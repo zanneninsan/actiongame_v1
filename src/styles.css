@@ -49,7 +49,7 @@ canvas {
   padding: 0 clamp(10px, 3vw, 20px) 14px;
   border: var(--fantasy-window-border) solid transparent;
   border-image-source: url("../assets/ui/fantasy/frame_parts/frame_window_9slice_safe.png");
-  border-image-slice: 110 fill;
+  border-image-slice: 132 fill;
   border-image-width: var(--fantasy-window-border);
   border-image-repeat: stretch;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
@@ -513,7 +513,7 @@ canvas {
   padding: 0 clamp(8px, 3vw, 16px) 14px;
   border: var(--fantasy-window-border) solid transparent;
   border-image-source: url("../assets/ui/fantasy/frame_parts/frame_window_9slice_safe.png");
-  border-image-slice: 110 fill;
+  border-image-slice: 132 fill;
   border-image-width: var(--fantasy-window-border);
   border-image-repeat: stretch;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));

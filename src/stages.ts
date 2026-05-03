@@ -81,11 +81,6 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "units": 19
     },
     {
-      "x": 768,
-      "y": 416,
-      "units": 4
-    },
-    {
       "x": 1100,
       "y": 452,
       "units": 3
@@ -519,10 +514,10 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
   "enemies": [
     {
       "type": "knifePunk",
-      "x": 520,
-      "y": 360,
-      "patrolLeft": 360,
-      "patrolRight": 660,
+      "x": 544,
+      "y": 512,
+      "patrolLeft": 384,
+      "patrolRight": 684,
       "speed": 72
     },
     {

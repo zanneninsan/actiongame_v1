@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.105
+### English
+- Rebuilt the safe-padded fantasy window frame from the single modal frame so neighboring sheet art no longer appears on the left side.
+### Japanese
+- 安全余白付きのファンタジーウィンドウ枠を単体のモーダル枠から作り直し、左側に隣の素材が出ないようにしました。
+
 ## v0.1.104
 ### English
 - Recut the start and options UI frame, title, input, select, and button art with safer transparent padding so right-side ornaments do not clip.
