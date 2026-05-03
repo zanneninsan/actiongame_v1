@@ -1,5 +1,14 @@
 # Release Notes / リリースノート
 
+## v0.1.69
+### English
+- Split background asset storage into `rear` and `midground` folders.
+- Added rear background candidates for `IMG_4202.webp`, `starry_sky.webp`, and `ED96A78D-7F78-4486-8F37-8004120CB7FC.png`.
+- Added separate debug buttons for cycling fixed rear backgrounds and scrolling midground backgrounds.
+### Japanese
+- 背景アセットの保存先を `rear` と `midground` のフォルダに分けました。
+- `IMG_4202.webp`、`starry_sky.webp`、`ED96A78D-7F78-4486-8F37-8004120CB7FC.png` を後景候補として整理しました。
+- 固定表示の後景とスクロールする中景を、それぞれ別のデバッグボタンで切り替えられるようにしました。
 ## v0.1.68
 ### English
 - Removed the automatic fullscreen request from mobile mode.

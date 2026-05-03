@@ -28,24 +28,31 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.68";
+const DEBUG_VERSION = "v0.1.69";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
-const REAR_BACKGROUND = { key: "background-stars", path: "assets/backgrounds/starry_sky.webp" } as const;
+const REAR_BACKGROUNDS = [
+  { key: "rear-background-img-4202", path: "assets/backgrounds/rear/IMG_4202.webp", label: "4202" },
+  { key: "rear-background-stars", path: "assets/backgrounds/rear/starry_sky.webp", label: "STAR" },
+  {
+    key: "rear-background-ed96a7",
+    path: "assets/backgrounds/rear/ED96A78D-7F78-4486-8F37-8004120CB7FC.png",
+    label: "ED9",
+  },
+] as const;
 const MIDGROUND_BACKGROUNDS = [
-  { key: "background-city-loop", path: "assets/backgrounds/city_loop_strip.webp", label: "CITY" },
-  { key: "background-img-4177", path: "assets/backgrounds/IMG_4177.png", label: "IMG" },
-  { key: "background-photoroom", path: "assets/backgrounds/Photoroom_20260504_012811.jpg", label: "PHT" },
-  { key: "background-499e22", path: "assets/backgrounds/499E22EB-6997-4AA5-9F56-632444037B97.png", label: "499" },
-  { key: "background-1ddb46", path: "assets/backgrounds/1DDB4605-251B-4937-8216-C55ECAD3EC4C.png", label: "1DD" },
-  { key: "background-87ba4b", path: "assets/backgrounds/87BA4BFC-CCAC-431D-B49B-53DC681A5C5A.png", label: "87B" },
-  { key: "background-ae2c4a", path: "assets/backgrounds/AE2C4AF0-F4D9-4213-84BB-460C7C3281FE.png", label: "AE2" },
-  { key: "background-d1eac5", path: "assets/backgrounds/D1EAC529-23C5-4524-B23D-FC8B4B0DB5A7.png", label: "D1E" },
-  { key: "background-e719f5", path: "assets/backgrounds/E719F549-E202-4B16-8F32-D3CA2806892E.png", label: "E71" },
-  { key: "background-ed96a7", path: "assets/backgrounds/ED96A78D-7F78-4486-8F37-8004120CB7FC.png", label: "ED9" },
+  { key: "midground-city-loop", path: "assets/backgrounds/midground/city_loop_strip.webp", label: "CITY" },
+  { key: "midground-img-4177", path: "assets/backgrounds/midground/IMG_4177.png", label: "IMG" },
+  { key: "midground-photoroom", path: "assets/backgrounds/midground/Photoroom_20260504_012811.jpg", label: "PHT" },
+  { key: "midground-499e22", path: "assets/backgrounds/midground/499E22EB-6997-4AA5-9F56-632444037B97.png", label: "499" },
+  { key: "midground-1ddb46", path: "assets/backgrounds/midground/1DDB4605-251B-4937-8216-C55ECAD3EC4C.png", label: "1DD" },
+  { key: "midground-87ba4b", path: "assets/backgrounds/midground/87BA4BFC-CCAC-431D-B49B-53DC681A5C5A.png", label: "87B" },
+  { key: "midground-ae2c4a", path: "assets/backgrounds/midground/AE2C4AF0-F4D9-4213-84BB-460C7C3281FE.png", label: "AE2" },
+  { key: "midground-d1eac5", path: "assets/backgrounds/midground/D1EAC529-23C5-4524-B23D-FC8B4B0DB5A7.png", label: "D1E" },
+  { key: "midground-e719f5", path: "assets/backgrounds/midground/E719F549-E202-4B16-8F32-D3CA2806892E.png", label: "E71" },
 ] as const;
 const PLATFORM_DEPTH = -0.55;
 const DECORATION_DEPTH = -1.2;
@@ -91,6 +98,8 @@ class PrototypeScene extends Phaser.Scene {
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
+  private rearBackground?: Phaser.GameObjects.Image;
+  private rearBackgroundIndex = 0;
   private midgroundBackground?: Phaser.GameObjects.TileSprite;
   private midgroundBackgroundIndex = 0;
   private playerNameText!: Phaser.GameObjects.Text;
@@ -132,7 +141,9 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image(REAR_BACKGROUND.key, `${ASSET_BASE}${REAR_BACKGROUND.path}`);
+    REAR_BACKGROUNDS.forEach((background) => {
+      this.load.image(background.key, `${ASSET_BASE}${background.path}`);
+    });
     MIDGROUND_BACKGROUNDS.forEach((background) => {
       this.load.image(background.key, `${ASSET_BASE}${background.path}`);
     });
@@ -695,8 +706,8 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createRearBackground() {
-    this.add
-      .image(0, 0, REAR_BACKGROUND.key)
+    this.rearBackground = this.add
+      .image(0, 0, this.getCurrentRearBackground().key)
       .setOrigin(0, 0)
       .setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
       .setScrollFactor(0)
@@ -707,6 +718,27 @@ class PrototypeScene extends Phaser.Scene {
       .setOrigin(0, 0)
       .setScrollFactor(0)
       .setDepth(-35);
+  }
+
+  private getCurrentRearBackground() {
+    return REAR_BACKGROUNDS[this.rearBackgroundIndex];
+  }
+
+  private cycleRearBackground(toggleButton?: HTMLButtonElement) {
+    this.rearBackgroundIndex = (this.rearBackgroundIndex + 1) % REAR_BACKGROUNDS.length;
+    const background = this.getCurrentRearBackground();
+    this.rearBackground?.setTexture(background.key).setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
+    this.updateRearDebugToggle(toggleButton);
+  }
+
+  private updateRearDebugToggle(toggleButton?: HTMLButtonElement) {
+    if (!toggleButton) {
+      return;
+    }
+    const background = this.getCurrentRearBackground();
+    toggleButton.textContent = `RB${this.rearBackgroundIndex + 1}`;
+    toggleButton.title = background.path;
+    toggleButton.setAttribute("aria-label", `Switch rear background. Current: ${background.label}`);
   }
 
   private createMidgroundBackground() {
@@ -733,7 +765,7 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
     const background = this.getCurrentMidgroundBackground();
-    toggleButton.textContent = `BG${this.midgroundBackgroundIndex + 1}`;
+    toggleButton.textContent = `MG${this.midgroundBackgroundIndex + 1}`;
     toggleButton.title = background.path;
     toggleButton.setAttribute("aria-label", `Switch midground background. Current: ${background.label}`);
   }
@@ -973,7 +1005,8 @@ class PrototypeScene extends Phaser.Scene {
     uiContainer.innerHTML = `
       <span id="version-label">${DEBUG_VERSION}</span>
       <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(this.locale, "aria.toggleCollision")}">HIT</button>
-      <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">BG1</button>
+      <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch rear background">RB1</button>
+      <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">MG1</button>
       <button id="bgm-toggle" class="ui-button" type="button" aria-label="${t(this.locale, "aria.toggleSound")}">&#128266;</button>
       <button id="options-toggle" class="ui-button" type="button" aria-label="${t(this.locale, "aria.options")}">&#9881;&#65039;</button>
     `;
@@ -1003,6 +1036,7 @@ class PrototypeScene extends Phaser.Scene {
 
     const bgmToggle = document.getElementById("bgm-toggle") as HTMLButtonElement;
     const collisionDebugToggle = document.getElementById("collision-debug-toggle") as HTMLButtonElement;
+    const rearDebugToggle = document.getElementById("rear-debug-toggle") as HTMLButtonElement;
     const midgroundDebugToggle = document.getElementById("midground-debug-toggle") as HTMLButtonElement;
     const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
     const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
@@ -1011,12 +1045,17 @@ class PrototypeScene extends Phaser.Scene {
 
     this.applySoundSettings();
     collisionDebugToggle.classList.toggle("is-active", this.collisionDebugEnabled);
+    this.updateRearDebugToggle(rearDebugToggle);
     this.updateMidgroundDebugToggle(midgroundDebugToggle);
 
     collisionDebugToggle.addEventListener("click", () => {
       this.collisionDebugEnabled = !this.collisionDebugEnabled;
       collisionDebugToggle.classList.toggle("is-active", this.collisionDebugEnabled);
       this.updateCollisionDebug();
+    });
+
+    rearDebugToggle.addEventListener("click", () => {
+      this.cycleRearBackground(rearDebugToggle);
     });
 
     midgroundDebugToggle.addEventListener("click", () => {
