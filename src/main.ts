@@ -28,7 +28,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.67";
+const DEBUG_VERSION = "v0.1.68";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -76,9 +76,10 @@ const JUMP_VELOCITY = -575;
 const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
 type MobileInputKey = "w" | "a" | "s" | "d";
-type FullscreenTarget = HTMLElement & {
-  msRequestFullscreen?: () => Promise<void> | void;
-  webkitRequestFullscreen?: () => Promise<void> | void;
+type OrientationLockScreen = Screen & {
+  orientation?: ScreenOrientation & {
+    lock?: (orientation: OrientationLockType) => Promise<void>;
+  };
 };
 
 let extraTouchPointersAdded = false;
@@ -101,6 +102,7 @@ class PrototypeScene extends Phaser.Scene {
   private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false };
   private mobileJumpQueued = false;
   private mobileControlCleanup: Array<() => void> = [];
+  private mobileOrientationCleanup: Array<() => void> = [];
   private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
   private startTime = 0;
   private isRunActive = false;
@@ -394,6 +396,7 @@ class PrototypeScene extends Phaser.Scene {
   private resetRunState() {
     this.removeStartModal();
     this.removeMobileControls();
+    this.removeMobileOrientationPrompt();
     this.removeStageEditor();
     this.removeGlobalUI();
     this.countdownOverlay?.clear();
@@ -483,7 +486,8 @@ class PrototypeScene extends Phaser.Scene {
         this.setSoundEnabled(soundOn);
         this.setupComplete = true;
         if (this.controlMode === "mobile") {
-          this.requestMobileFullscreen();
+          this.startMobileRunInLandscape();
+          return;
         }
         this.startRun();
       },
@@ -491,20 +495,64 @@ class PrototypeScene extends Phaser.Scene {
     this.startModal.show();
   }
 
-  private requestMobileFullscreen() {
-    if (document.fullscreenElement) {
+  private startMobileRunInLandscape() {
+    this.createMobileOrientationPrompt();
+    this.requestMobileLandscapeLock();
+
+    if (!this.isPortraitViewport()) {
+      this.startRun();
       return;
     }
 
-    const target = document.documentElement as FullscreenTarget;
-    const requestFullscreen =
-      target.requestFullscreen ?? target.webkitRequestFullscreen ?? target.msRequestFullscreen;
+    this.removeStartModal();
+    const startWhenLandscape = () => {
+      if (this.isPortraitViewport()) {
+        return;
+      }
+      cleanup();
+      this.startRun();
+    };
+    const cleanup = () => {
+      window.removeEventListener("resize", startWhenLandscape);
+      window.removeEventListener("orientationchange", startWhenLandscape);
+      screen.orientation?.removeEventListener("change", startWhenLandscape);
+      this.mobileOrientationCleanup = this.mobileOrientationCleanup.filter((entry) => entry !== cleanup);
+    };
 
-    if (!requestFullscreen) {
-      return;
-    }
+    window.addEventListener("resize", startWhenLandscape);
+    window.addEventListener("orientationchange", startWhenLandscape);
+    screen.orientation?.addEventListener("change", startWhenLandscape);
+    this.mobileOrientationCleanup.push(cleanup);
+  }
 
-    void Promise.resolve(requestFullscreen.call(target)).catch(() => undefined);
+  private requestMobileLandscapeLock() {
+    const orientation = (screen as OrientationLockScreen).orientation;
+    void orientation?.lock?.("landscape").catch(() => undefined);
+  }
+
+  private isPortraitViewport() {
+    return window.matchMedia("(orientation: portrait)").matches;
+  }
+
+  private createMobileOrientationPrompt() {
+    document.getElementById("mobile-orientation-prompt")?.remove();
+
+    const prompt = document.createElement("div");
+    prompt.id = "mobile-orientation-prompt";
+    prompt.innerHTML = `
+      <div class="orientation-dialog">
+        <div class="orientation-icon" aria-hidden="true">&#8635;</div>
+        <div class="orientation-title">${this.locale === "ja" ? "横画面にしてください" : "Rotate to landscape"}</div>
+        <div class="orientation-message">${this.locale === "ja" ? "スマホモードは横向きでプレイできます。" : "Mobile mode plays in landscape."}</div>
+      </div>
+    `;
+    document.body.appendChild(prompt);
+  }
+
+  private removeMobileOrientationPrompt() {
+    this.mobileOrientationCleanup.forEach((cleanup) => cleanup());
+    this.mobileOrientationCleanup = [];
+    document.getElementById("mobile-orientation-prompt")?.remove();
   }
 
   private removeStartModal() {

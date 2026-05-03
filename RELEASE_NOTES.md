@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.68
+### English
+- Removed the automatic fullscreen request from mobile mode.
+- Added landscape-only mobile start flow: portrait devices now show a rotate prompt and wait until landscape before starting the run.
+### Japanese
+- モバイルモード開始時に自動で全画面化する処理を削除しました。
+- スマホを縦向きにしている場合は横画面への案内を表示し、横向きになってからプレイを開始するようにしました。
 ## v0.1.67
 ### English
 - Split rear background and midground background definitions so `starry_sky.webp` is managed as the fixed rear layer.
