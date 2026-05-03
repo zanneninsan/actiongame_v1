@@ -1,7 +1,5 @@
 import { PROP_ASSETS, type StageDefinition } from "./assets";
 
-const GROUND_TOP_Y = 672;
-
 export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
   "name": "Neon Canal",
   "worldWidth": 12800,

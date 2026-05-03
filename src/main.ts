@@ -21,24 +21,26 @@ import { RainbowWinPipeline } from "./rainbowPipeline";
 import { StartCountdownOverlay } from "./countdown";
 import { StartModal, type ControlMode } from "./startModal";
 import { StageEditorPanel, type EditorTool } from "./stageEditorPanel";
+import {
+  GROUND_TOP_Y,
+  GROUND_VISUAL_Y,
+  STREET_LAMP_GROUND_Y,
+  WORLD_BOTTOM,
+  WORLD_HEIGHT,
+  WORLD_TOP,
+} from "./stageConstants";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
-const WORLD_TOP = -360;
-const WORLD_BOTTOM = 720;
-const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.55";
+const DEBUG_VERSION = "v0.1.56";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
-const GROUND_TOP_Y = 672;
-const GROUND_VISUAL_Y = GROUND_TOP_Y;
-const STREET_LAMP_GROUND_Y = 672;
 const PLATFORM_DEPTH = -0.55;
 const DECORATION_DEPTH = -1.2;
 const STREET_LAMP_LIGHT_DEPTH = DECORATION_DEPTH - 0.08;

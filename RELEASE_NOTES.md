@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.56
+### English
+- Centralized world bounds and ground-height constants in `stageConstants.ts`.
+- Updated gameplay and stage rendering code to import shared ground and sky limits from one place.
+### 日本語
+- ワールド境界と地面高さの定数を`stageConstants.ts`に一元化しました。
+- ゲーム処理とステージ描画が共通の地面・空上限設定を参照するようにしました。
 ## v0.1.55
 ### English
 - Fixed the swapped stage file by restoring the missing `NEON_CANAL_STAGE` export reference.
