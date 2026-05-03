@@ -1,5 +1,14 @@
 # Release Notes / リリースノート
 
+## v0.1.52
+### English
+- Centered the control hint text at the top of the game screen.
+- Added Select, Move Selected, and Delete tools to the stage editor.
+- Added a visible selection outline and stage redraw flow so edited placements update the preview and exported JSON together.
+### 日本語
+- 操作方法の説明テキストを画面上部中央揃えにしました。
+- ステージ編集機能にSelect、Move Selected、Deleteツールを追加しました。
+- 選択中の枠表示とステージ再描画処理を追加し、編集結果がプレビューとエクスポートJSONに反映されるようにしました。
 ## v0.1.51
 ### English
 - Renamed the start modal title to `SUPER ZANNENIN SISTERS`.

@@ -29,7 +29,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.51";
+const DEBUG_VERSION = "v0.1.52";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -67,7 +67,14 @@ const JUMP_VELOCITY = -575;
 const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
 type MobileInputKey = "w" | "a" | "s" | "d";
-type EditorTool = "platform" | "item" | "streetLamp" | "decoration" | "playerStart" | "goal";
+type EditorTool = "select" | "move" | "delete" | "platform" | "item" | "streetLamp" | "decoration" | "playerStart" | "goal";
+type EditorSelection =
+  | { kind: "platform"; index: number }
+  | { kind: "item"; index: number }
+  | { kind: "streetLamp"; index: number }
+  | { kind: "decoration"; index: number }
+  | { kind: "playerStart" }
+  | { kind: "goal" };
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
   webkitRequestFullscreen?: () => Promise<void> | void;
@@ -104,7 +111,7 @@ class PrototypeScene extends Phaser.Scene {
   private controlHint = "A/D: move  W/Space: jump  R: restart";
   private editorStage = cloneStage(ACTIVE_STAGE);
   private editorEnabled = false;
-  private editorTool: EditorTool = "platform";
+  private editorTool: EditorTool = "select";
   private editorPanel?: HTMLDivElement;
   private editorExport?: HTMLTextAreaElement;
   private editorPlatformUnitsInput?: HTMLInputElement;
@@ -112,7 +119,10 @@ class PrototypeScene extends Phaser.Scene {
   private editorLampTypeSelect?: HTMLSelectElement;
   private editorDecorationSelect?: HTMLSelectElement;
   private editorMarkers: Phaser.GameObjects.GameObject[] = [];
+  private editorSelected?: EditorSelection;
+  private editorSelectionMarker?: Phaser.GameObjects.Rectangle;
   private editorCleanup: Array<() => void> = [];
+  private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
   private hasWon = false;
   private wasOnFloor = false;
   private isLanding = false;
@@ -179,9 +189,7 @@ class PrototypeScene extends Phaser.Scene {
     this.createBackground();
 
     this.platforms = this.physics.add.staticGroup();
-    this.buildStage(this.platforms);
-    this.createStreetLamps();
-    this.createStageObjects();
+    this.rebuildEditableStageObjects();
 
     const goal = this.physics.add.staticImage(this.editorStage.goal.x, this.editorStage.goal.y, "goal");
     goal.setDisplaySize(24, 96);
@@ -255,12 +263,12 @@ class PrototypeScene extends Phaser.Scene {
     this.updateTimerText();
 
     this.controlHintText = this.add
-      .text(GAME_WIDTH - 82, 8, "", {
+      .text(GAME_WIDTH / 2, 8, "", {
         fontFamily: "monospace",
         fontSize: "15px",
         color: "#fde68a",
       })
-      .setOrigin(1, 0)
+      .setOrigin(0.5, 0)
       .setScrollFactor(0)
       .setDepth(100)
       .setShadow(1, 1, "#020617", 2, true, true);
@@ -550,6 +558,26 @@ class PrototypeScene extends Phaser.Scene {
     }
   }
 
+  private trackStageObject<T extends Phaser.GameObjects.GameObject>(object: T) {
+    this.stageRenderObjects.push(object);
+    return object;
+  }
+
+  private rebuildEditableStageObjects() {
+    this.stageRenderObjects.forEach((object) => object.destroy());
+    this.stageRenderObjects = [];
+    this.platforms?.clear(true, true);
+    this.itemsGroup?.clear(true, true);
+
+    this.buildStage(this.platforms);
+    this.createStreetLamps();
+    this.createStageObjects();
+    this.populateItems();
+    this.moveGoalTo(this.editorStage.goal.x, this.editorStage.goal.y);
+    this.refreshEditorSelectionMarker();
+    this.updateCollisionDebug();
+  }
+
   private buildStage(platforms: Phaser.Physics.Arcade.StaticGroup) {
     for (let x = 0; x < this.editorStage.worldWidth; x += TILE) {
       this.addBlock(platforms, x, GROUND_TOP_Y, "ground", false);
@@ -614,7 +642,7 @@ class PrototypeScene extends Phaser.Scene {
       }
 
       const unitX = x + i * PLATFORM_UNIT_WIDTH;
-      this.add.image(unitX, y, texture).setOrigin(0, 0).setDepth(PLATFORM_DEPTH);
+      this.trackStageObject(this.add.image(unitX, y, texture).setOrigin(0, 0).setDepth(PLATFORM_DEPTH));
       if (collides) {
         this.addPlatformHitbox(platforms, unitX, y, PLATFORM_UNIT_WIDTH, PLATFORM_UNIT_HEIGHT);
       }
@@ -629,11 +657,13 @@ class PrototypeScene extends Phaser.Scene {
 
   private createStreetLamp(lamp: StreetLampPlacement) {
     this.createStreetLampLight(lamp.x, lamp.key, lamp.scale);
-    this.add
-      .image(lamp.x, STREET_LAMP_GROUND_Y, lamp.key)
-      .setOrigin(0.5, 1)
-      .setScale(lamp.scale)
-      .setDepth(DECORATION_DEPTH);
+    this.trackStageObject(
+      this.add
+        .image(lamp.x, STREET_LAMP_GROUND_Y, lamp.key)
+        .setOrigin(0.5, 1)
+        .setScale(lamp.scale)
+        .setDepth(DECORATION_DEPTH),
+    );
   }
 
   private createStreetLampLight(x: number, key: StreetLampKey, scale: number) {
@@ -646,7 +676,7 @@ class PrototypeScene extends Phaser.Scene {
       const sourceX = x + offsetX;
       const beamHalfWidth = (isDoubleLamp ? 150 : 190) * scale;
       const poolWidth = (isDoubleLamp ? 210 : 250) * scale;
-      const light = this.add.graphics().setBlendMode(Phaser.BlendModes.ADD);
+      const light = this.trackStageObject(this.add.graphics().setBlendMode(Phaser.BlendModes.ADD));
 
       light.fillStyle(0xffefad, 0.12);
       light.fillTriangle(sourceX, sourceY, sourceX - beamHalfWidth, groundY, sourceX + beamHalfWidth, groundY);
@@ -654,7 +684,7 @@ class PrototypeScene extends Phaser.Scene {
       light.fillTriangle(sourceX, sourceY - 8 * scale, sourceX - beamHalfWidth * 0.72, groundY, sourceX + beamHalfWidth * 0.72, groundY);
       light.setDepth(STREET_LAMP_LIGHT_DEPTH);
 
-      const groundLight = this.add.graphics().setBlendMode(Phaser.BlendModes.ADD);
+      const groundLight = this.trackStageObject(this.add.graphics().setBlendMode(Phaser.BlendModes.ADD));
       groundLight.fillStyle(0xffe7a3, 0.17);
       groundLight.fillEllipse(sourceX, groundY + 2, poolWidth, 26 * scale);
       groundLight.fillStyle(0xfff8d2, 0.1);
@@ -671,11 +701,13 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createStageDecoration(object: StageDecorationPlacement) {
-    this.add
-      .image(object.x, object.y, object.key)
-      .setOrigin(0.5, 1)
-      .setScale(object.scale)
-      .setDepth(DECORATION_DEPTH);
+    this.trackStageObject(
+      this.add
+        .image(object.x, object.y, object.key)
+        .setOrigin(0.5, 1)
+        .setScale(object.scale)
+        .setDepth(DECORATION_DEPTH),
+    );
   }
 
   private addPlatformHitbox(
@@ -788,6 +820,9 @@ class PrototypeScene extends Phaser.Scene {
         <div class="editor-row">
           <label>Tool</label>
           <select data-editor-tool>
+            <option value="select">Select</option>
+            <option value="move">Move Selected</option>
+            <option value="delete">Delete</option>
             <option value="platform">Platform</option>
             <option value="item">Item</option>
             <option value="streetLamp">Street Lamp</option>
@@ -821,7 +856,7 @@ class PrototypeScene extends Phaser.Scene {
             ${STAGE_OBJECT_ASSETS.map((asset) => `<option value="${asset.key}">${asset.key.replace("stage-", "")}</option>`).join("")}
           </select>
         </div>
-        <p class="editor-help">Enable, then click the stage. Export copies current placements as JSON.</p>
+        <p class="editor-help">Select picks the nearest object. Move relocates the selected object. Delete removes clicked objects.</p>
         <button class="editor-export-button" type="button">EXPORT JSON</button>
         <textarea data-editor-export readonly spellcheck="false"></textarea>
       </div>
@@ -876,6 +911,9 @@ class PrototypeScene extends Phaser.Scene {
     this.editorEnabled = false;
     this.editorMarkers.forEach((marker) => marker.destroy());
     this.editorMarkers = [];
+    this.editorSelected = undefined;
+    this.editorSelectionMarker?.destroy();
+    this.editorSelectionMarker = undefined;
   }
 
   private createGlobalUI() {
@@ -970,35 +1008,234 @@ class PrototypeScene extends Phaser.Scene {
     const x = Math.round(point.x / TILE) * TILE;
     const y = Math.round(point.y / TILE) * TILE;
 
-    if (this.editorTool === "platform") {
+    if (this.editorTool === "select") {
+      this.selectEditorObjectAt(point.x, point.y);
+    } else if (this.editorTool === "move") {
+      if (!this.editorSelected) {
+        this.selectEditorObjectAt(point.x, point.y);
+      } else {
+        this.moveEditorSelectionTo(x, y);
+      }
+    } else if (this.editorTool === "delete") {
+      this.deleteEditorObjectAt(point.x, point.y);
+    } else if (this.editorTool === "platform") {
       const units = Phaser.Math.Clamp(Number(this.editorPlatformUnitsInput?.value) || 3, 1, 16);
       const placement: PlatformRunPlacement = { x, y, units };
       this.editorStage.platforms.push(placement);
-      this.addPlatformRun(this.platforms, placement.x, placement.y, placement.units, placement.collides ?? true);
+      this.editorSelected = { kind: "platform", index: this.editorStage.platforms.length - 1 };
+      this.rebuildEditableStageObjects();
     } else if (this.editorTool === "item") {
       const type = (this.editorItemTypeSelect?.value ?? "energyDrink") as ItemType;
       const placement: ItemPlacement = { type, x, y };
       this.editorStage.items.push(placement);
-      this.createItemSprite(placement);
+      this.editorSelected = { kind: "item", index: this.editorStage.items.length - 1 };
+      this.rebuildEditableStageObjects();
     } else if (this.editorTool === "streetLamp") {
       const key = (this.editorLampTypeSelect?.value ?? PROP_ASSETS.lampSingle) as StreetLampKey;
       const placement: StreetLampPlacement = { x, key, scale: key === PROP_ASSETS.lampDouble ? 0.64 : 0.66 };
       this.editorStage.streetLamps.push(placement);
-      this.createStreetLamp(placement);
+      this.editorSelected = { kind: "streetLamp", index: this.editorStage.streetLamps.length - 1 };
+      this.rebuildEditableStageObjects();
     } else if (this.editorTool === "decoration") {
       const key = this.editorDecorationSelect?.value ?? STAGE_OBJECT_ASSETS[0].key;
       const placement: StageDecorationPlacement = { x, y, key, scale: 0.68 };
       this.editorStage.decorations.push(placement);
-      this.createStageDecoration(placement);
+      this.editorSelected = { kind: "decoration", index: this.editorStage.decorations.length - 1 };
+      this.rebuildEditableStageObjects();
     } else if (this.editorTool === "playerStart") {
       this.editorStage.playerStart = { x, y };
+      this.editorSelected = { kind: "playerStart" };
       this.addEditorMarker(x, y, 0x38bdf8, "START");
+      this.refreshEditorSelectionMarker();
     } else if (this.editorTool === "goal") {
       this.editorStage.goal = { x, y };
+      this.editorSelected = { kind: "goal" };
+      this.moveGoalTo(x, y);
       this.addEditorMarker(x, y, 0xfb7185, "GOAL");
+      this.refreshEditorSelectionMarker();
     }
 
     this.refreshEditorExport();
+  }
+
+  private selectEditorObjectAt(worldX: number, worldY: number) {
+    const selection = this.findEditorObjectAt(worldX, worldY);
+    this.editorSelected = selection;
+    this.refreshEditorSelectionMarker();
+  }
+
+  private deleteEditorObjectAt(worldX: number, worldY: number) {
+    const selection = this.findEditorObjectAt(worldX, worldY);
+    if (!selection) {
+      this.editorSelected = undefined;
+      this.refreshEditorSelectionMarker();
+      return;
+    }
+
+    if (selection.kind === "platform") {
+      this.editorStage.platforms.splice(selection.index, 1);
+    } else if (selection.kind === "item") {
+      this.editorStage.items.splice(selection.index, 1);
+    } else if (selection.kind === "streetLamp") {
+      this.editorStage.streetLamps.splice(selection.index, 1);
+    } else if (selection.kind === "decoration") {
+      this.editorStage.decorations.splice(selection.index, 1);
+    } else {
+      this.editorSelected = selection;
+      this.refreshEditorSelectionMarker();
+      return;
+    }
+
+    this.editorSelected = undefined;
+    this.rebuildEditableStageObjects();
+  }
+
+  private moveEditorSelectionTo(x: number, y: number) {
+    if (!this.editorSelected) {
+      return;
+    }
+
+    const selection = this.editorSelected;
+    if (selection.kind === "platform") {
+      const placement = this.editorStage.platforms[selection.index];
+      if (placement) {
+        placement.x = x;
+        placement.y = y;
+      }
+    } else if (selection.kind === "item") {
+      const placement = this.editorStage.items[selection.index];
+      if (placement) {
+        placement.x = x;
+        placement.y = y;
+      }
+    } else if (selection.kind === "streetLamp") {
+      const placement = this.editorStage.streetLamps[selection.index];
+      if (placement) {
+        placement.x = x;
+      }
+    } else if (selection.kind === "decoration") {
+      const placement = this.editorStage.decorations[selection.index];
+      if (placement) {
+        placement.x = x;
+        placement.y = y;
+      }
+    } else if (selection.kind === "playerStart") {
+      this.editorStage.playerStart = { x, y };
+    } else if (selection.kind === "goal") {
+      this.editorStage.goal = { x, y };
+    }
+
+    this.rebuildEditableStageObjects();
+    this.refreshEditorExport();
+  }
+
+  private findEditorObjectAt(worldX: number, worldY: number): EditorSelection | undefined {
+    let best: { selection: EditorSelection; distance: number } | undefined;
+    const consider = (selection: EditorSelection, distance: number, threshold: number) => {
+      if (distance > threshold) {
+        return;
+      }
+      if (!best || distance < best.distance) {
+        best = { selection, distance };
+      }
+    };
+
+    this.editorStage.platforms.forEach((platform, index) => {
+      consider(
+        { kind: "platform", index },
+        this.getDistanceToRect(worldX, worldY, platform.x, platform.y, platform.units * PLATFORM_UNIT_WIDTH, PLATFORM_UNIT_HEIGHT),
+        54,
+      );
+    });
+    this.editorStage.items.forEach((item, index) => {
+      consider({ kind: "item", index }, Phaser.Math.Distance.Between(worldX, worldY, item.x, item.y), 58);
+    });
+    this.editorStage.streetLamps.forEach((lamp, index) => {
+      consider(
+        { kind: "streetLamp", index },
+        this.getDistanceToRect(worldX, worldY, lamp.x - 42, STREET_LAMP_GROUND_Y - 280 * lamp.scale, 84, 280 * lamp.scale),
+        64,
+      );
+    });
+    this.editorStage.decorations.forEach((decoration, index) => {
+      consider({ kind: "decoration", index }, Phaser.Math.Distance.Between(worldX, worldY, decoration.x, decoration.y), 84);
+    });
+    consider(
+      { kind: "playerStart" },
+      Phaser.Math.Distance.Between(worldX, worldY, this.editorStage.playerStart.x, this.editorStage.playerStart.y),
+      70,
+    );
+    consider({ kind: "goal" }, Phaser.Math.Distance.Between(worldX, worldY, this.editorStage.goal.x, this.editorStage.goal.y), 70);
+
+    return best?.selection;
+  }
+
+  private getDistanceToRect(x: number, y: number, rectX: number, rectY: number, rectWidth: number, rectHeight: number) {
+    const nearestX = Phaser.Math.Clamp(x, rectX, rectX + rectWidth);
+    const nearestY = Phaser.Math.Clamp(y, rectY, rectY + rectHeight);
+    return Phaser.Math.Distance.Between(x, y, nearestX, nearestY);
+  }
+
+  private refreshEditorSelectionMarker() {
+    this.editorSelectionMarker?.destroy();
+    this.editorSelectionMarker = undefined;
+    if (!this.editorSelected) {
+      return;
+    }
+
+    const bounds = this.getEditorSelectionBounds(this.editorSelected);
+    if (!bounds) {
+      this.editorSelected = undefined;
+      return;
+    }
+
+    this.editorSelectionMarker = this.add
+      .rectangle(bounds.x, bounds.y, bounds.width, bounds.height)
+      .setStrokeStyle(3, 0x22d3ee, 0.96)
+      .setFillStyle(0x22d3ee, 0.08)
+      .setDepth(302);
+  }
+
+  private getEditorSelectionBounds(selection: EditorSelection) {
+    if (selection.kind === "platform") {
+      const platform = this.editorStage.platforms[selection.index];
+      if (!platform) {
+        return undefined;
+      }
+      return {
+        x: platform.x + (platform.units * PLATFORM_UNIT_WIDTH) / 2,
+        y: platform.y + PLATFORM_UNIT_HEIGHT / 2,
+        width: platform.units * PLATFORM_UNIT_WIDTH + 10,
+        height: PLATFORM_UNIT_HEIGHT + 10,
+      };
+    }
+    if (selection.kind === "item") {
+      const item = this.editorStage.items[selection.index];
+      return item ? { x: item.x, y: item.y, width: 72, height: 72 } : undefined;
+    }
+    if (selection.kind === "streetLamp") {
+      const lamp = this.editorStage.streetLamps[selection.index];
+      return lamp
+        ? { x: lamp.x, y: STREET_LAMP_GROUND_Y - 140 * lamp.scale, width: 110, height: 290 * lamp.scale }
+        : undefined;
+    }
+    if (selection.kind === "decoration") {
+      const decoration = this.editorStage.decorations[selection.index];
+      return decoration ? { x: decoration.x, y: decoration.y - 36, width: 96, height: 96 } : undefined;
+    }
+    if (selection.kind === "playerStart") {
+      return { x: this.editorStage.playerStart.x, y: this.editorStage.playerStart.y, width: 88, height: 40 };
+    }
+    return { x: this.editorStage.goal.x, y: this.editorStage.goal.y, width: 48, height: 112 };
+  }
+
+  private moveGoalTo(x: number, y: number) {
+    if (!this.goal) {
+      return;
+    }
+
+    this.goal.setPosition(x, y);
+    this.goal.refreshBody();
   }
 
   private addEditorMarker(x: number, y: number, color: number, label: string) {
@@ -1025,13 +1262,20 @@ class PrototypeScene extends Phaser.Scene {
     const items = this.physics.add.staticGroup();
     this.itemsGroup = items;
     this.createItemGlowTexture();
-
-    this.editorStage.items.forEach((placement) => {
-      this.createItemSprite(placement);
-    });
+    this.populateItems();
 
     this.physics.add.overlap(this.player, items, (_, itemObject) => {
       this.collectItem(itemObject as Phaser.Physics.Arcade.Sprite);
+    });
+  }
+
+  private populateItems() {
+    if (!this.itemsGroup) {
+      return;
+    }
+
+    this.editorStage.items.forEach((placement) => {
+      this.createItemSprite(placement);
     });
   }
 
@@ -1041,13 +1285,15 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     const definition = ITEM_DEFINITIONS[placement.type];
-    const glow = this.add
-      .image(placement.x, placement.y, ITEM_GLOW_TEXTURE_KEY)
-      .setDisplaySize(108, 108)
-      .setTint(ITEM_GLOW_COLORS[placement.type])
-      .setAlpha(0.48)
-      .setBlendMode(Phaser.BlendModes.ADD)
-      .setDepth(0.1);
+    const glow = this.trackStageObject(
+      this.add
+        .image(placement.x, placement.y, ITEM_GLOW_TEXTURE_KEY)
+        .setDisplaySize(108, 108)
+        .setTint(ITEM_GLOW_COLORS[placement.type])
+        .setAlpha(0.48)
+        .setBlendMode(Phaser.BlendModes.ADD)
+        .setDepth(0.1),
+    );
     const item = this.itemsGroup.create(placement.x, placement.y, definition.key) as Phaser.Physics.Arcade.Sprite;
     item.setData("itemType", placement.type);
     item.setData("glow", glow);
