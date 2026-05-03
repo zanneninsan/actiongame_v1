@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.103
+### English
+- Changed the player name field to use a plain fantasy input plate instead of the dropdown-style field art.
+- Narrowed the start modal and increased side padding so the right edge of the fantasy frame does not clip.
+### Japanese
+- プレイヤー名入力欄を、プルダウン風ではない通常入力用のファンタジーUIプレートに変更しました。
+- 開始モーダルの幅と左右余白を調整し、右側の外枠が見切れないようにしました。
+
 ## v0.1.102
 ### English
 - Split the fantasy window frame into reusable corner, edge, fill, and 9-slice frame assets.
