@@ -2,12 +2,9 @@ import Phaser from "phaser";
 import "./styles.css";
 import {
   ITEM_DEFINITIONS,
-  ITEM_GLOW_COLORS,
-  ITEM_GLOW_TEXTURE_KEY,
   PLATFORM_ASSETS,
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
-  type ItemPlacement,
   type ItemType,
   type PlatformAsset,
   type ScoreState,
@@ -30,6 +27,7 @@ import {
 import { getBrowserLocale, isLocale, LOCALE_OPTIONS, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
 import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-assets";
 import { createEnemies, createEnemyTexture, populateEnemies, updateEnemies } from "./enemies";
+import { createItems, populateItems } from "./items";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
@@ -245,7 +243,17 @@ class PrototypeScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.platforms);
     this.physics.add.collider(this.player, this.decorationPlatforms, undefined, this.canLandOnDecorationPlatform, this);
     this.physics.add.overlap(this.player, goal, () => this.win());
-    this.createItems();
+    this.itemsGroup = createItems({
+      scene: this,
+      player: this.player,
+      placements: this.editorStage.items,
+      canCollect: () => !this.stageEditor?.isEnabled,
+      onCollect: (itemType, points) => {
+        this.score[itemType] += points;
+        this.updateScoreText();
+      },
+      trackStageObject: (object) => this.trackStageObject(object),
+    });
     this.enemiesGroup = createEnemies(this, this.player, this.editorStage.enemies ?? [], (enemy) =>
       this.damagePlayer(enemy),
     );
@@ -748,7 +756,12 @@ class PrototypeScene extends Phaser.Scene {
     this.buildStage(this.platforms);
     this.createStreetLamps();
     this.createStageObjects();
-    this.populateItems();
+    populateItems({
+      scene: this,
+      itemsGroup: this.itemsGroup,
+      placements: this.editorStage.items,
+      trackStageObject: (object) => this.trackStageObject(object),
+    });
     populateEnemies(this.enemiesGroup, this.editorStage.enemies ?? []);
     this.moveGoalTo(this.editorStage.goal.x, this.editorStage.goal.y);
     this.updateCollisionDebug();
@@ -1311,98 +1324,6 @@ class PrototypeScene extends Phaser.Scene {
 
     this.goal.setPosition(x, y);
     this.goal.refreshBody();
-  }
-
-  private createItems() {
-    const items = this.physics.add.staticGroup();
-    this.itemsGroup = items;
-    this.createItemGlowTexture();
-    this.populateItems();
-
-    this.physics.add.overlap(this.player, items, (_, itemObject) => {
-      this.collectItem(itemObject as Phaser.Physics.Arcade.Sprite);
-    });
-  }
-
-  private populateItems() {
-    if (!this.itemsGroup) {
-      return;
-    }
-
-    this.editorStage.items.forEach((placement) => {
-      this.createItemSprite(placement);
-    });
-  }
-
-  private createItemSprite(placement: ItemPlacement) {
-    if (!this.itemsGroup) {
-      return;
-    }
-
-    const definition = ITEM_DEFINITIONS[placement.type];
-    const glow = this.trackStageObject(
-      this.add
-        .image(placement.x, placement.y, ITEM_GLOW_TEXTURE_KEY)
-        .setDisplaySize(108, 108)
-        .setTint(ITEM_GLOW_COLORS[placement.type])
-        .setAlpha(0.48)
-        .setBlendMode(Phaser.BlendModes.ADD)
-        .setDepth(0.1),
-    );
-    const item = this.itemsGroup.create(placement.x, placement.y, definition.key) as Phaser.Physics.Arcade.Sprite;
-    item.setData("itemType", placement.type);
-    item.setData("glow", glow);
-    item.setDisplaySize(48, 48);
-    item.setDepth(0.2);
-    item.refreshBody();
-
-    this.tweens.add({
-      targets: glow,
-      alpha: 0.72,
-      scale: 1.16,
-      duration: 950,
-      ease: "Sine.easeInOut",
-      yoyo: true,
-      repeat: -1,
-      delay: (placement.x % 700) + (placement.y % 180),
-    });
-  }
-
-  private createItemGlowTexture() {
-    if (this.textures.exists(ITEM_GLOW_TEXTURE_KEY)) {
-      return;
-    }
-
-    const size = 96;
-    const center = size / 2;
-    const graphics = this.make.graphics({ x: 0, y: 0 }, false);
-
-    for (let radius = center; radius > 0; radius -= 3) {
-      const strength = 1 - radius / center;
-      graphics.fillStyle(0xffffff, 0.018 + strength * 0.055);
-      graphics.fillCircle(center, center, radius);
-    }
-
-    graphics.generateTexture(ITEM_GLOW_TEXTURE_KEY, size, size);
-    graphics.destroy();
-  }
-
-  private collectItem(item: Phaser.Physics.Arcade.Sprite) {
-    if (!item.active || this.stageEditor?.isEnabled) {
-      return;
-    }
-
-    const itemType = item.getData("itemType") as ItemType;
-    const definition = ITEM_DEFINITIONS[itemType];
-    this.score[itemType] += definition.points;
-    this.sound.play("item-pickup", { volume: 0.65 });
-    this.updateScoreText();
-    const glow = item.getData("glow") as Phaser.GameObjects.Image | undefined;
-    if (glow) {
-      this.tweens.killTweensOf(glow);
-      glow.destroy();
-    }
-    item.disableBody(true, true);
   }
 
   private damagePlayer(enemy: Phaser.Physics.Arcade.Sprite) {
