@@ -34,7 +34,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.80";
+const DEBUG_VERSION = "v0.1.81";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -60,6 +60,7 @@ const PLAYER_CROUCH_BODY_OFFSET_Y = PLAYER_BODY_OFFSET_Y + PLAYER_BODY_HEIGHT - 
 const PLAYER_IDLE_FRAME_COUNT = 8;
 const PLAYER_FRAME_COUNT = 13;
 const PLAYER_CROUCH_FRAME_COUNT = 27;
+const PLAYER_DEFEAT_FRAME_COUNT = 8;
 const GROUND_ACCELERATION = 2400;
 const CROUCH_GROUND_ACCELERATION = 1600;
 const AIR_ACCELERATION = 720;
@@ -139,6 +140,7 @@ class PrototypeScene extends Phaser.Scene {
   private wasOnFloor = false;
   private isLanding = false;
   private landingFastForwarded = false;
+  private isDefeatSequenceActive = false;
   private collisionDebugEnabled = false;
   private collisionDebugGraphics?: Phaser.GameObjects.Graphics;
   private decorationPlatformCrouchStartedAt = 0;
@@ -181,6 +183,10 @@ class PrototypeScene extends Phaser.Scene {
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
     this.load.spritesheet("player-crouch", `${ASSET_BASE}assets/sprites/player_crouch_27_9x3_320x260.png`, {
+      frameWidth: PLAYER_DISPLAY_WIDTH,
+      frameHeight: PLAYER_DISPLAY_HEIGHT,
+    });
+    this.load.spritesheet("player-defeat", `${ASSET_BASE}assets/sprites/player_defeat_8_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
@@ -318,7 +324,9 @@ class PrototypeScene extends Phaser.Scene {
     this.updateBackground();
     this.updateTimerText();
     if (!this.isRunActive) {
-      this.applyPlayerBody(false);
+      if (!this.isDefeatSequenceActive) {
+        this.applyPlayerBody(false);
+      }
       this.updateCollisionDebug();
       this.player.setAcceleration(0, 0);
       this.player.setVelocity(0, 0);
@@ -414,7 +422,7 @@ class PrototypeScene extends Phaser.Scene {
     this.wasOnFloor = onFloor;
 
     if (this.player.y > this.stageConstants.worldBottom + 32) {
-      this.restartStage();
+      this.playDefeatSequence();
     }
   }
 
@@ -437,6 +445,7 @@ class PrototypeScene extends Phaser.Scene {
     this.wasOnFloor = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
+    this.isDefeatSequenceActive = false;
     this.decorationPlatformCrouchStartedAt = 0;
     this.dropThroughDecorationPlatformBody = undefined;
     this.collisionDebugGraphics?.clear();
@@ -1535,6 +1544,39 @@ class PrototypeScene extends Phaser.Scene {
       }),
       frameRate: 16,
       repeat: 0,
+    });
+
+    this.anims.create({
+      key: "player-defeat",
+      frames: this.anims.generateFrameNumbers("player-defeat", {
+        start: 0,
+        end: PLAYER_DEFEAT_FRAME_COUNT - 1,
+      }),
+      frameRate: 11,
+      repeat: 0,
+    });
+  }
+
+  private playDefeatSequence() {
+    if (this.isDefeatSequenceActive || this.isRestarting) {
+      return;
+    }
+
+    this.isDefeatSequenceActive = true;
+    this.isRunActive = false;
+    this.isLanding = false;
+    this.landingFastForwarded = false;
+    this.mobileInput = { w: false, a: false, s: false, d: false };
+    this.mobileJumpQueued = false;
+    this.applyPlayerBody(false);
+    this.player.setAcceleration(0, 0);
+    this.player.setVelocity(0, 0);
+    this.player.setDrag(0, 0);
+    this.player.body.setAllowGravity(false);
+    this.player.anims.timeScale = 1;
+    this.player.anims.play("player-defeat", true);
+    this.player.once(`${Phaser.Animations.Events.ANIMATION_COMPLETE_KEY}player-defeat`, () => {
+      this.time.delayedCall(180, () => this.restartStage());
     });
   }
 

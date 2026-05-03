@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.81
+### English
+- Added a GPT Image2-generated player defeat sprite sheet with an 8-frame non-graphic down animation.
+- Falling below the stage now plays the defeat animation before restarting the stage.
+### Japanese
+- GPT Image2で生成した8コマのやられモーション用スプライトシートを追加しました。
+- ステージ下へ落ちたとき、すぐに再開せず、やられモーションを再生してからリスタートするようにしました。
+
 ## v0.1.80
 ### English
 - Added an in-game key-name label above the selected object in stage edit mode.
