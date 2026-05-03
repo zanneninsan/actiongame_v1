@@ -25,10 +25,10 @@ const GAME_DESIGN_WIDTH = 1280;
 const GAME_DESIGN_HEIGHT = 720;
 const DEFAULT_DIALOGUE_LEFT = 12;
 const DEFAULT_DIALOGUE_TOP = 96;
-const DEFAULT_DIALOGUE_WIDTH = 547;
-const MIN_DIALOGUE_WIDTH = 147;
-const DEFAULT_DIALOGUE_FONT_SIZE = 15;
-const MIN_DIALOGUE_FONT_SIZE = 8;
+const DEFAULT_DIALOGUE_WIDTH = 656;
+const MIN_DIALOGUE_WIDTH = 176;
+const DEFAULT_DIALOGUE_FONT_SIZE = 18;
+const MIN_DIALOGUE_FONT_SIZE = 10;
 
 export const DEFAULT_STORY_DIALOGUE_LINES: StoryDialogueLine[] = [
   {
@@ -58,7 +58,7 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
     position: "fixed",
     top: "96px",
     left: "12px",
-    width: "547px",
+    width: "656px",
     aspectRatio: `${1 / FRAME_ASPECT_RATIO}`,
     zIndex: "11",
     color: "#f8fafc",
