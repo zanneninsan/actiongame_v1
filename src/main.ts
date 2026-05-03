@@ -21,13 +21,14 @@ import { StartCountdownOverlay } from "./countdown";
 import { StartModal, type ControlMode } from "./startModal";
 import { StageEditor } from "./stageEditor";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
+import { getBrowserLocale, isLocale, LOCALE_OPTIONS, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.63";
+const DEBUG_VERSION = "v0.1.64";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -93,10 +94,11 @@ class PrototypeScene extends Phaser.Scene {
   private setupComplete = false;
   private playerName = "PLAYER";
   private controlMode: ControlMode = "pc";
+  private locale: Locale = getBrowserLocale();
   private soundVolumePercent = 50;
   private soundMuted = false;
   private startModal?: StartModal;
-  private controlHint = "A/D: move  W/Space: jump  R: restart";
+  private controlHint = t(this.locale, "hint.pc");
   private editorStage = cloneStage(ACTIVE_STAGE);
   private stageConstants: ResolvedStageConstants = resolveStageConstants(ACTIVE_STAGE);
   private stageEditor?: StageEditor;
@@ -155,6 +157,7 @@ class PrototypeScene extends Phaser.Scene {
   create() {
     this.registerRainbowPipeline();
     this.playerName = this.getCookieValue("actiongame_player_name") || this.playerName;
+    this.locale = this.getSavedLocale();
     this.soundVolumePercent = this.getSavedVolumePercent();
     this.soundMuted = this.getCookieValue("actiongame_muted") === "1";
     this.applySoundSettings();
@@ -408,9 +411,8 @@ class PrototypeScene extends Phaser.Scene {
 
   private startRun() {
     this.removeStartModal();
-    this.playerNameText.setText(`PLAYER:${this.playerName}`);
-    this.controlHint =
-      this.controlMode === "mobile" ? "TOUCH: move/jump  R: restart" : "A/D: move  W/Space: jump  R: restart";
+    this.playerNameText.setText(`${t(this.locale, "hud.player")}:${this.playerName}`);
+    this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
     this.updateControlHintText();
     if (this.controlMode === "mobile") {
       this.createMobileControls();
@@ -428,6 +430,7 @@ class PrototypeScene extends Phaser.Scene {
       scene: this,
       x: GAME_WIDTH / 2,
       y: GAME_HEIGHT / 2,
+      locale: this.locale,
       rainbowPipelineKey: RAINBOW_PIPELINE_KEY,
       onComplete: () => this.activateRun(),
     });
@@ -452,12 +455,15 @@ class PrototypeScene extends Phaser.Scene {
     this.startModal = new StartModal({
       playerName: this.playerName,
       controlMode: this.controlMode,
+      locale: this.locale,
       soundOn: !this.soundMuted && this.soundVolumePercent > 0,
+      onLocaleChange: (locale) => this.setLocale(locale),
       onSoundOnChange: (soundOn) => this.setSoundEnabled(soundOn),
-      onSubmit: ({ playerName, controlMode, soundOn }) => {
+      onSubmit: ({ playerName, controlMode, soundOn, locale }) => {
         this.playerName = playerName;
         this.setCookieValue("actiongame_player_name", this.playerName);
         this.controlMode = controlMode;
+        this.setLocale(locale);
         this.setSoundEnabled(soundOn);
         this.setupComplete = true;
         if (this.controlMode === "mobile") {
@@ -502,6 +508,35 @@ class PrototypeScene extends Phaser.Scene {
 
   private setCookieValue(name: string, value: string) {
     document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; max-age=31536000; path=/; SameSite=Lax`;
+  }
+
+  private getSavedLocale() {
+    try {
+      const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+      return savedLocale && isLocale(savedLocale) ? savedLocale : getBrowserLocale();
+    } catch {
+      return getBrowserLocale();
+    }
+  }
+
+  private setLocale(locale: Locale) {
+    this.locale = locale;
+    try {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+    } catch {
+      // Ignore storage failures; the current session can still use the chosen language.
+    }
+    this.refreshLocalizedUI();
+  }
+
+  private refreshLocalizedUI() {
+    if (this.playerNameText) {
+      this.playerNameText.setText(`${t(this.locale, "hud.player")}:${this.playerName}`);
+    }
+    this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
+    this.updateScoreText();
+    this.updateTimerText();
+    this.updateControlHintText();
   }
 
   private getSavedVolumePercent() {
@@ -734,13 +769,13 @@ class PrototypeScene extends Phaser.Scene {
     controls.id = "mobile-controls";
     controls.innerHTML = `
       <div class="mobile-pad">
-        <button class="mobile-button pad-up" data-key="w" type="button" aria-label="Jump">&uarr;</button>
-        <button class="mobile-button pad-left" data-key="a" type="button" aria-label="Move left">&larr;</button>
-        <button class="mobile-button pad-down" data-key="s" type="button" aria-label="Down">&darr;</button>
-        <button class="mobile-button pad-right" data-key="d" type="button" aria-label="Move right">&rarr;</button>
+        <button class="mobile-button pad-up" data-key="w" type="button" aria-label="${t(this.locale, "aria.jump")}">&uarr;</button>
+        <button class="mobile-button pad-left" data-key="a" type="button" aria-label="${t(this.locale, "aria.moveLeft")}">&larr;</button>
+        <button class="mobile-button pad-down" data-key="s" type="button" aria-label="${t(this.locale, "aria.down")}">&darr;</button>
+        <button class="mobile-button pad-right" data-key="d" type="button" aria-label="${t(this.locale, "aria.moveRight")}">&rarr;</button>
       </div>
       <div class="mobile-actions">
-        <button class="mobile-button" data-key="w" type="button" aria-label="Jump">&uarr;</button>
+        <button class="mobile-button" data-key="w" type="button" aria-label="${t(this.locale, "aria.jump")}">&uarr;</button>
         <button class="mobile-button restart-button" data-action="restart" type="button">R</button>
       </div>
     `;
@@ -824,6 +859,7 @@ class PrototypeScene extends Phaser.Scene {
       setStage: (stage) => {
         this.editorStage = stage;
       },
+      getLocale: () => this.locale,
       getStageConstants: () => this.stageConstants,
       rebuildStageObjects: () => this.rebuildEditableStageObjects(),
       moveGoalTo: (x, y) => this.moveGoalTo(x, y),
@@ -844,9 +880,9 @@ class PrototypeScene extends Phaser.Scene {
     uiContainer.id = "global-ui";
     uiContainer.innerHTML = `
       <span id="version-label">${DEBUG_VERSION}</span>
-      <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Toggle collision boxes">HIT</button>
-      <button id="bgm-toggle" class="ui-button" type="button" aria-label="Toggle Sound">&#128266;</button>
-      <button id="options-toggle" class="ui-button" type="button" aria-label="Options">&#9881;&#65039;</button>
+      <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(this.locale, "aria.toggleCollision")}">HIT</button>
+      <button id="bgm-toggle" class="ui-button" type="button" aria-label="${t(this.locale, "aria.toggleSound")}">&#128266;</button>
+      <button id="options-toggle" class="ui-button" type="button" aria-label="${t(this.locale, "aria.options")}">&#9881;&#65039;</button>
     `;
     document.body.appendChild(uiContainer);
 
@@ -854,12 +890,20 @@ class PrototypeScene extends Phaser.Scene {
     optionsModal.id = "options-modal";
     optionsModal.innerHTML = `
       <div class="options-dialog">
-        <h2>Options</h2>
+        <h2>${t(this.locale, "options.title")}</h2>
         <label>
-          <span>Volume</span>
+          <span>${t(this.locale, "options.volume")}</span>
           <input id="volume-slider" type="range" min="0" max="100" />
         </label>
-        <button id="options-close" class="ui-button" type="button">Close</button>
+        <label>
+          <span>${t(this.locale, "options.language")}</span>
+          <select id="language-select">
+            ${LOCALE_OPTIONS.map(
+              (option) => `<option value="${option.locale}"${option.locale === this.locale ? " selected" : ""}>${option.label}</option>`,
+            ).join("")}
+          </select>
+        </label>
+        <button id="options-close" class="ui-button" type="button">${t(this.locale, "options.close")}</button>
       </div>
     `;
     document.body.appendChild(optionsModal);
@@ -869,6 +913,7 @@ class PrototypeScene extends Phaser.Scene {
     const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
     const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
     const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
+    const languageSelect = document.getElementById("language-select") as HTMLSelectElement;
 
     this.applySoundSettings();
     collisionDebugToggle.classList.toggle("is-active", this.collisionDebugEnabled);
@@ -906,6 +951,22 @@ class PrototypeScene extends Phaser.Scene {
         this.soundMuted = false;
       }
       this.applySoundSettings();
+    });
+
+    languageSelect.addEventListener("change", (e) => {
+      e.stopPropagation();
+      const nextLocale = languageSelect.value;
+      if (!isLocale(nextLocale)) {
+        return;
+      }
+      this.setLocale(nextLocale);
+      this.removeStageEditor();
+      this.createStageEditor();
+      this.createGlobalUI();
+      const nextOptionsModal = document.getElementById("options-modal");
+      if (nextOptionsModal) {
+        nextOptionsModal.style.display = "grid";
+      }
     });
 
     optionsModal.addEventListener("keydown", (e) => e.stopPropagation());
@@ -1022,8 +1083,12 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private updateScoreText() {
+    if (!this.scoreText) {
+      return;
+    }
+
     const total = this.getItemScore();
-    this.scoreText.setText(`SCORE:${total}`);
+    this.scoreText.setText(`${t(this.locale, "hud.score")}:${total}`);
   }
 
   private updateTimerText() {
@@ -1031,7 +1096,7 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    this.timerText.setText(`TIME:${this.getRemainingSeconds()}`);
+    this.timerText.setText(`${t(this.locale, "hud.time")}:${this.getRemainingSeconds()}`);
   }
 
   private updateControlHintText() {
@@ -1039,7 +1104,7 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    const editorHint = this.stageEditor?.isEnabled ? "\nEDITOR: Z Undo  Y Redo  Delete Remove Selected" : "";
+    const editorHint = this.stageEditor?.isEnabled ? `\n${t(this.locale, "hint.editor")}` : "";
     this.controlHintText.setText(`${this.controlHint}${editorHint}`);
   }
 
@@ -1202,14 +1267,14 @@ class PrototypeScene extends Phaser.Scene {
     const timeBonus = remaining * TIME_BONUS_PER_SECOND;
     const itemScore = this.getItemScore();
     const finalScore = itemScore + timeBonus;
-    this.timerText.setText(`TIME:${remaining}  BONUS:${timeBonus}`);
-    this.scoreText.setText(`ITEM SCORE:${itemScore}`);
+    this.timerText.setText(`${t(this.locale, "hud.time")}:${remaining}  ${t(this.locale, "hud.bonus")}:${timeBonus}`);
+    this.scoreText.setText(`${t(this.locale, "hud.itemScore")}:${itemScore}`);
     this.startRainbowWinEffect();
     this.finalScoreText = this.add
       .text(
         GAME_WIDTH / 2,
         GAME_HEIGHT / 2,
-        `CLEAR!\nSCORE ${finalScore}\nTIME BONUS ${timeBonus}`,
+        `${t(this.locale, "hud.clear")}\n${t(this.locale, "hud.score")} ${finalScore}\n${t(this.locale, "hud.timeBonus")} ${timeBonus}`,
         {
           fontFamily: "monospace",
           fontSize: "48px",

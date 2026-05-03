@@ -1,11 +1,15 @@
+import { LOCALE_OPTIONS, t, type Locale } from "./i18n";
+
 export type ControlMode = "pc" | "mobile";
 
 type StartModalOptions = {
   playerName: string;
   controlMode: ControlMode;
   soundOn: boolean;
+  locale: Locale;
+  onLocaleChange: (locale: Locale) => void;
   onSoundOnChange: (soundOn: boolean) => void;
-  onSubmit: (settings: { playerName: string; controlMode: ControlMode; soundOn: boolean }) => void;
+  onSubmit: (settings: { playerName: string; controlMode: ControlMode; soundOn: boolean; locale: Locale }) => void;
 };
 
 export class StartModal {
@@ -25,18 +29,27 @@ export class StartModal {
       <form class="start-dialog">
         <h1>SUPER ZANNENIN SISTERS</h1>
         <label>
-          <span>Player Name</span>
+          <span>${t(this.options.locale, "start.playerName")}</span>
           <input name="playerName" type="text" maxlength="16" autocomplete="off" value="${escapeHtml(this.options.playerName)}" />
         </label>
-        <div class="mode-row" role="group" aria-label="Control mode">
-          <button type="button" data-mode="pc" class="mode-button">PC</button>
-          <button type="button" data-mode="mobile" class="mode-button">MOBILE</button>
+        <label>
+          <span>${t(this.options.locale, "start.language")}</span>
+          <select name="locale">
+            ${LOCALE_OPTIONS.map(
+              (option) =>
+                `<option value="${option.locale}"${option.locale === this.options.locale ? " selected" : ""}>${option.label}</option>`,
+            ).join("")}
+          </select>
+        </label>
+        <div class="mode-row" role="group" aria-label="${t(this.options.locale, "start.controlMode")}">
+          <button type="button" data-mode="pc" class="mode-button">${t(this.options.locale, "start.modePc")}</button>
+          <button type="button" data-mode="mobile" class="mode-button">${t(this.options.locale, "start.modeMobile")}</button>
         </div>
-        <div class="sound-row" role="group" aria-label="Sound setting">
-          <button type="button" data-sound="on" class="sound-button">&#128266; SOUND ON</button>
-          <button type="button" data-sound="off" class="sound-button">&#128263; SOUND OFF</button>
+        <div class="sound-row" role="group" aria-label="${t(this.options.locale, "start.soundSetting")}">
+          <button type="button" data-sound="on" class="sound-button">&#128266; ${t(this.options.locale, "start.soundOn")}</button>
+          <button type="button" data-sound="off" class="sound-button">&#128263; ${t(this.options.locale, "start.soundOff")}</button>
         </div>
-        <button type="submit" class="start-button">START</button>
+        <button type="submit" class="start-button">${t(this.options.locale, "start.start")}</button>
       </form>
     `;
 
@@ -45,14 +58,28 @@ export class StartModal {
 
     const form = overlay.querySelector("form")!;
     const input = overlay.querySelector<HTMLInputElement>("input[name='playerName']")!;
+    const localeSelect = overlay.querySelector<HTMLSelectElement>("select[name='locale']")!;
     const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
     const soundButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-sound]"));
     let selectedMode = this.options.controlMode;
     let soundOn = this.options.soundOn;
+    let selectedLocale = this.options.locale;
 
     input.addEventListener("keydown", (event) => event.stopPropagation());
     input.addEventListener("keyup", (event) => event.stopPropagation());
     input.addEventListener("keypress", (event) => event.stopPropagation());
+    localeSelect.addEventListener("keydown", (event) => event.stopPropagation());
+    localeSelect.addEventListener("keyup", (event) => event.stopPropagation());
+    localeSelect.addEventListener("keypress", (event) => event.stopPropagation());
+    localeSelect.addEventListener("change", () => {
+      selectedLocale = localeSelect.value as Locale;
+      this.options.onLocaleChange(selectedLocale);
+      this.options.playerName = input.value;
+      this.options.controlMode = selectedMode;
+      this.options.soundOn = soundOn;
+      this.options.locale = selectedLocale;
+      this.show();
+    });
 
     const refreshMode = () => {
       modeButtons.forEach((button) => {
@@ -87,6 +114,7 @@ export class StartModal {
         playerName: input.value.trim() || "PLAYER",
         controlMode: selectedMode,
         soundOn,
+        locale: selectedLocale,
       });
     });
 

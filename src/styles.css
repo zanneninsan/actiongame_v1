@@ -65,7 +65,8 @@ canvas {
   color: #cbd5e1;
 }
 
-.start-dialog input {
+.start-dialog input,
+.start-dialog select {
   height: 44px;
   border: 1px solid rgba(148, 163, 184, 0.5);
   border-radius: 6px;
@@ -433,6 +434,16 @@ canvas {
 .options-dialog input[type="range"] {
   width: 100%;
   cursor: pointer;
+}
+
+.options-dialog select {
+  height: 40px;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  border-radius: 6px;
+  padding: 0 10px;
+  background: #020617;
+  color: #f8fafc;
+  font: inherit;
 }
 
 #options-close {

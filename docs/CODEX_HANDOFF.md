@@ -14,7 +14,7 @@ This file is the short context packet for future Codex sessions. Read this first
 
 ## Current State
 
-- Latest known version at handoff creation: `v0.1.63`.
+- Latest known version at handoff creation: `v0.1.64`.
 - Version is displayed in-game through `DEBUG_VERSION` in `src/main.ts`.
 - Build command: `npm run build`.
 - Dev server command: `npm run dev`.
@@ -31,6 +31,8 @@ This file is the short context packet for future Codex sessions. Read this first
   - Most stage layout changes should happen here.
 - `src/assets.ts`
   - Asset keys, item definitions, stage object definitions, shared stage types.
+- `src/i18n.ts`
+  - English/Japanese UI text dictionary and locale helpers.
 - `src/stageConstants.ts`
   - Default and per-stage world bounds, ground height, visual ground height, street-lamp baseline.
 - `src/stageEditorPanel.ts`
@@ -64,6 +66,7 @@ This file is the short context packet for future Codex sessions. Read this first
   - Asset catalog: `src/assets.ts`
 - Use `apply_patch` for manual edits.
 - Run `npm run build` after code changes.
+- Commit each completed, coherent fix or feature chunk after verification. Do not leave finished work uncommitted unless the user explicitly asks not to commit.
 - Before committing, check:
   - `git status --short`
   - `git diff --stat`
@@ -80,7 +83,7 @@ When pushing changes, or when making a large/user-visible update even before pus
 2. Add a matching section to `RELEASE_NOTES.md`.
    - Write `### Japanese` entries in proper Japanese, not romanized Japanese.
 3. Run `npm run build`.
-4. If pushing, commit with a concise message.
+4. Commit the completed chunk with a concise message.
 5. If pushing, push `main`.
 
 If only making small local notes, documentation tweaks, or internal refactors with no user-visible behavior change, version bump is not required.
@@ -145,6 +148,7 @@ For stage layout changes, start with `src/stages.ts`.
 For gameplay changes, search exact symbols in `src/main.ts` before reading large ranges.
 For stage editor behavior changes, start with `src/stageEditor.ts`; use `src/stageEditorPanel.ts` for panel UI only.
 Run `npm run build` after code edits.
+Commit each completed, coherent fix or feature chunk after verification unless I explicitly ask not to commit.
 If pushing, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md`.
 For large or user-visible updates, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` even before pushing.
 When updating `RELEASE_NOTES.md`, write the `### Japanese` section in natural Japanese, not romanized Japanese.

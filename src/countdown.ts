@@ -1,19 +1,22 @@
 import Phaser from "phaser";
+import { t, type Locale } from "./i18n";
 
 type StartCountdownOverlayOptions = {
   scene: Phaser.Scene;
   x: number;
   y: number;
+  locale: Locale;
   rainbowPipelineKey: string;
   onComplete: () => void;
 };
 
-const COUNTDOWN_SEQUENCE = ["3", "2", "1", "GO!!"];
+const getCountdownSequence = (locale: Locale) => ["3", "2", "1", t(locale, "countdown.go")];
 
 export class StartCountdownOverlay {
   private readonly scene: Phaser.Scene;
   private readonly x: number;
   private readonly y: number;
+  private readonly locale: Locale;
   private readonly rainbowPipelineKey: string;
   private readonly onComplete: () => void;
   private glowText?: Phaser.GameObjects.Text;
@@ -25,6 +28,7 @@ export class StartCountdownOverlay {
     this.scene = options.scene;
     this.x = options.x;
     this.y = options.y;
+    this.locale = options.locale;
     this.rainbowPipelineKey = options.rainbowPipelineKey;
     this.onComplete = options.onComplete;
   }
@@ -33,8 +37,9 @@ export class StartCountdownOverlay {
     this.clear();
 
     let index = 0;
+    const sequence = getCountdownSequence(this.locale);
     this.glowText = this.scene.add
-      .text(this.x, this.y, COUNTDOWN_SEQUENCE[index], {
+      .text(this.x, this.y, sequence[index], {
         fontFamily: "monospace",
         fontSize: "142px",
         color: "#ffffff",
@@ -49,7 +54,7 @@ export class StartCountdownOverlay {
       .setShadow(0, 0, "#22d3ee", 30, true, true);
 
     this.text = this.scene.add
-      .text(this.x, this.y, COUNTDOWN_SEQUENCE[index], {
+      .text(this.x, this.y, sequence[index], {
         fontFamily: "monospace",
         fontSize: "132px",
         color: "#ffffff",
@@ -70,15 +75,15 @@ export class StartCountdownOverlay {
 
     this.timer = this.scene.time.addEvent({
       delay: 900,
-      repeat: COUNTDOWN_SEQUENCE.length - 1,
+      repeat: sequence.length - 1,
       callback: () => {
         index += 1;
         if (!this.glowText || !this.text) {
           return;
         }
 
-        this.glowText.setText(COUNTDOWN_SEQUENCE[index]);
-        this.text.setText(COUNTDOWN_SEQUENCE[index]);
+        this.glowText.setText(sequence[index]);
+        this.text.setText(sequence[index]);
         this.scene.tweens.add({
           targets: [this.glowText, this.text],
           scale: { from: 1.28, to: 1 },
@@ -87,7 +92,7 @@ export class StartCountdownOverlay {
           ease: "Sine.easeOut",
         });
 
-        if (index === COUNTDOWN_SEQUENCE.length - 1) {
+        if (index === sequence.length - 1) {
           this.releaseTimer = this.scene.time.delayedCall(420, () => this.onComplete());
         }
       },

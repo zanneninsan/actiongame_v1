@@ -1,4 +1,5 @@
 import { PROP_ASSETS, STAGE_OBJECT_ASSETS, type ItemType, type StreetLampKey } from "./assets";
+import { t, type Locale } from "./i18n";
 
 export type EditorTool =
   | "select"
@@ -13,6 +14,7 @@ export type EditorTool =
 
 type StageEditorPanelOptions = {
   initialTool: EditorTool;
+  locale: Locale;
   onToggle: (enabled: boolean) => void;
   onToolChange: (tool: EditorTool) => void;
   onUndo: () => void;
@@ -63,59 +65,59 @@ export class StageEditorPanel {
     panel.id = "stage-editor";
     panel.innerHTML = `
       <div class="editor-header">
-        <button class="editor-toggle" type="button">EDITOR</button>
+        <button class="editor-toggle" type="button">${t(this.options.locale, "editor.toggle")}</button>
       </div>
       <div class="editor-body">
-        <button class="editor-drag-handle" type="button" aria-label="Move editor panel">MOVE PANEL</button>
+        <button class="editor-drag-handle" type="button" aria-label="${t(this.options.locale, "editor.movePanel")}">${t(this.options.locale, "editor.movePanel")}</button>
         <div class="editor-row">
-          <label>Tool</label>
+          <label>${t(this.options.locale, "editor.tool")}</label>
           <select data-editor-tool>
-            <option value="select">Select</option>
-            <option value="move">Move Selected</option>
-            <option value="delete">Delete</option>
-            <option value="platform">Platform</option>
-            <option value="item">Item</option>
-            <option value="streetLamp">Street Lamp</option>
-            <option value="decoration">Decoration</option>
-            <option value="playerStart">Player Start</option>
-            <option value="goal">Goal</option>
+            <option value="select">${t(this.options.locale, "editor.tool.select")}</option>
+            <option value="move">${t(this.options.locale, "editor.tool.move")}</option>
+            <option value="delete">${t(this.options.locale, "editor.tool.delete")}</option>
+            <option value="platform">${t(this.options.locale, "editor.tool.platform")}</option>
+            <option value="item">${t(this.options.locale, "editor.tool.item")}</option>
+            <option value="streetLamp">${t(this.options.locale, "editor.tool.streetLamp")}</option>
+            <option value="decoration">${t(this.options.locale, "editor.tool.decoration")}</option>
+            <option value="playerStart">${t(this.options.locale, "editor.tool.playerStart")}</option>
+            <option value="goal">${t(this.options.locale, "editor.tool.goal")}</option>
           </select>
         </div>
         <div class="editor-row">
-          <label>Units</label>
+          <label>${t(this.options.locale, "editor.units")}</label>
           <input data-platform-units type="number" min="1" max="16" value="3" />
         </div>
         <div class="editor-row">
-          <label>Item</label>
+          <label>${t(this.options.locale, "editor.item")}</label>
           <select data-item-type>
-            <option value="energyDrink">Energy</option>
-            <option value="bubbleTea">Tea</option>
-            <option value="shoppingBag">Bag</option>
+            <option value="energyDrink">${t(this.options.locale, "editor.item.energy")}</option>
+            <option value="bubbleTea">${t(this.options.locale, "editor.item.tea")}</option>
+            <option value="shoppingBag">${t(this.options.locale, "editor.item.bag")}</option>
           </select>
         </div>
         <div class="editor-row">
-          <label>Lamp</label>
+          <label>${t(this.options.locale, "editor.lamp")}</label>
           <select data-lamp-type>
-            <option value="${PROP_ASSETS.lampSingle}">Single</option>
-            <option value="${PROP_ASSETS.lampDouble}">Double</option>
+            <option value="${PROP_ASSETS.lampSingle}">${t(this.options.locale, "editor.lamp.single")}</option>
+            <option value="${PROP_ASSETS.lampDouble}">${t(this.options.locale, "editor.lamp.double")}</option>
           </select>
         </div>
         <div class="editor-row">
-          <label>Object</label>
+          <label>${t(this.options.locale, "editor.object")}</label>
           <select data-decoration-key>
             ${STAGE_OBJECT_ASSETS.map((asset) => `<option value="${asset.key}">${asset.key.replace("stage-", "")}</option>`).join("")}
           </select>
         </div>
         <div class="editor-history-row">
-          <button data-editor-undo type="button" disabled>UNDO</button>
-          <button data-editor-redo type="button" disabled>REDO</button>
+          <button data-editor-undo type="button" disabled>${t(this.options.locale, "editor.undo")}</button>
+          <button data-editor-redo type="button" disabled>${t(this.options.locale, "editor.redo")}</button>
         </div>
-        <p class="editor-help">Select picks the nearest object. Move relocates the selected object. Delete removes clicked objects.</p>
-        <p class="editor-help">Keys: Z undo. Y redo. Delete removes the selected object.</p>
+        <p class="editor-help">${t(this.options.locale, "editor.help.select")}</p>
+        <p class="editor-help">${t(this.options.locale, "editor.help.keys")}</p>
         <div class="editor-io-row">
-          <button class="editor-export-button" type="button">EXPORT JSON</button>
-          <button data-editor-import type="button">APPLY JSON</button>
-          <button data-editor-load-file type="button">LOAD FILE</button>
+          <button class="editor-export-button" type="button">${t(this.options.locale, "editor.exportJson")}</button>
+          <button data-editor-import type="button">${t(this.options.locale, "editor.applyJson")}</button>
+          <button data-editor-load-file type="button">${t(this.options.locale, "editor.loadFile")}</button>
         </div>
         <textarea data-editor-export spellcheck="false"></textarea>
         <input data-editor-import-file type="file" accept="application/json,.json" />
@@ -145,7 +147,7 @@ export class StageEditorPanel {
     const toggleEditor = () => {
       this.enabled = !this.enabled;
       panel.classList.toggle("is-open", this.enabled);
-      toggleButton.textContent = this.enabled ? "EDITOR ON" : "EDITOR";
+      toggleButton.textContent = this.enabled ? t(this.options.locale, "editor.toggleOn") : t(this.options.locale, "editor.toggle");
       this.options.onToggle(this.enabled);
     };
     const setTool = () => {
@@ -166,7 +168,7 @@ export class StageEditorPanel {
       void file
         .text()
         .then((json) => this.options.onImport(json))
-        .catch(() => this.setImportStatus("Could not read JSON file.", true))
+        .catch(() => this.setImportStatus(t(this.options.locale, "editor.status.readError"), true))
         .finally(() => {
           if (this.importFileInput) {
             this.importFileInput.value = "";

@@ -1,5 +1,17 @@
 # Release Notes / リリースノート
 
+## v0.1.64
+### English
+- Added an English/Japanese localization dictionary for player-facing UI text.
+- Added language selectors to the start modal and options menu, with the selected language saved locally.
+- Localized the start modal, HUD labels, control hints, options menu, mobile control labels, countdown text, and stage editor panel.
+- Refined Japanese labels for control modes, HUD text, and stage editor tools.
+### Japanese
+- プレイヤー向けUIテキスト用に英語・日本語の多言語辞書を追加しました。
+- 開始モーダルとオプションメニューに言語セレクトを追加し、選択した言語をローカルに保存するようにしました。
+- 開始モーダル、HUDラベル、操作ヒント、オプションメニュー、モバイル操作ラベル、カウントダウン、ステージエディタパネルを多言語対応しました。
+- 操作モード、画面UI、ステージ編集ツールの日本語ラベルを調整しました。
+
 ## v0.1.63
 ### English
 - Added stage editor JSON import from pasted text or a `.json` file.

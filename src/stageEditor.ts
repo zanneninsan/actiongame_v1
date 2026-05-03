@@ -12,6 +12,7 @@ import {
 import { cloneStage } from "./stages";
 import { type ResolvedStageConstants } from "./stageConstants";
 import { StageEditorPanel, type EditorTool } from "./stageEditorPanel";
+import { t, type Locale } from "./i18n";
 
 type EditorSelection =
   | { kind: "platform"; index: number }
@@ -27,6 +28,7 @@ type StageEditorOptions = {
   platformUnitHeight: number;
   getStage: () => StageDefinition;
   setStage: (stage: StageDefinition) => void;
+  getLocale: () => Locale;
   getStageConstants: () => ResolvedStageConstants;
   rebuildStageObjects: () => void;
   moveGoalTo: (x: number, y: number) => void;
@@ -63,6 +65,7 @@ export class StageEditor {
 
     this.panel = new StageEditorPanel({
       initialTool: this.tool,
+      locale: this.options.getLocale(),
       onToggle: (enabled) => {
         this.enabled = enabled;
         this.options.onToggle?.(enabled);
@@ -76,7 +79,7 @@ export class StageEditor {
         this.refreshExport();
         this.panel?.copyExportToClipboard();
         this.panel?.downloadExport(this.getExportFilename());
-        this.panel?.setImportStatus("Exported JSON.");
+        this.panel?.setImportStatus(t(this.options.getLocale(), "editor.status.exported"));
       },
       onImport: (json) => this.importStage(json),
     });
@@ -537,7 +540,7 @@ export class StageEditor {
     }
 
     if (!json.trim()) {
-      this.panel?.setImportStatus("Paste JSON or load a JSON file first.", true);
+      this.panel?.setImportStatus(t(this.options.getLocale(), "editor.status.emptyJson"), true);
       return;
     }
 
@@ -545,7 +548,7 @@ export class StageEditor {
     try {
       const parsed = JSON.parse(json) as unknown;
       if (!this.isStageDefinition(parsed)) {
-        throw new Error("Invalid stage JSON shape.");
+        throw new Error(t(this.options.getLocale(), "editor.status.invalidShape"));
       }
 
       this.options.setStage(cloneStage(parsed));
@@ -558,9 +561,9 @@ export class StageEditor {
       this.rebuildStageObjects();
       this.recordChange(previousStage);
       this.refreshExport();
-      this.panel?.setImportStatus("Imported JSON.");
+      this.panel?.setImportStatus(t(this.options.getLocale(), "editor.status.imported"));
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Invalid JSON.";
+      const message = error instanceof Error ? error.message : t(this.options.getLocale(), "editor.status.invalidJson");
       this.panel?.setImportStatus(message, true);
     }
   }
