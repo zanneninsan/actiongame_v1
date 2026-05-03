@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.50
+### English
+- Moved the start countdown visual and timer logic into a dedicated `countdown.ts` module.
+- Kept countdown behavior unchanged while leaving `main.ts` focused on run-state transitions.
+### 日本語
+- 開始時カウントダウンの表示とタイマー処理を専用の`countdown.ts`へ分割しました。
+- カウントダウンの挙動は変えず、`main.ts`側はラン状態の切り替えに集中する形にしました。
 ## v0.1.49
 ### English
 - Split long static definitions out of `main.ts` into focused `assets.ts`, `stages.ts`, and `rainbowPipeline.ts` modules.

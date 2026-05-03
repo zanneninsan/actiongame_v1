@@ -18,6 +18,7 @@ import {
 } from "./assets";
 import { ACTIVE_STAGE, cloneStage } from "./stages";
 import { RainbowWinPipeline } from "./rainbowPipeline";
+import { StartCountdownOverlay } from "./countdown";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
@@ -27,7 +28,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.49";
+const DEBUG_VERSION = "v0.1.50";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -86,15 +87,12 @@ class PrototypeScene extends Phaser.Scene {
   private scoreText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
   private controlHintText!: Phaser.GameObjects.Text;
-  private countdownGlowText?: Phaser.GameObjects.Text;
-  private countdownText?: Phaser.GameObjects.Text;
+  private countdownOverlay?: StartCountdownOverlay;
   private finalScoreText?: Phaser.GameObjects.Text;
   private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false };
   private mobileJumpQueued = false;
   private mobileControlCleanup: Array<() => void> = [];
   private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
-  private countdownTimer?: Phaser.Time.TimerEvent;
-  private countdownReleaseTimer?: Phaser.Time.TimerEvent;
   private startTime = 0;
   private isRunActive = false;
   private setupComplete = false;
@@ -386,14 +384,8 @@ class PrototypeScene extends Phaser.Scene {
     this.removeMobileControls();
     this.removeStageEditor();
     this.removeGlobalUI();
-    this.countdownTimer?.remove(false);
-    this.countdownTimer = undefined;
-    this.countdownReleaseTimer?.remove(false);
-    this.countdownReleaseTimer = undefined;
-    this.countdownGlowText?.destroy();
-    this.countdownGlowText = undefined;
-    this.countdownText?.destroy();
-    this.countdownText = undefined;
+    this.countdownOverlay?.clear();
+    this.countdownOverlay = undefined;
     this.mobileInput = { w: false, a: false, s: false, d: false };
     this.mobileJumpQueued = false;
     this.score = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
@@ -433,77 +425,19 @@ class PrototypeScene extends Phaser.Scene {
     this.startTime = 0;
     this.updateTimerText();
 
-    const sequence = ["3", "2", "1", "GO!!"];
-    let index = 0;
-    this.countdownGlowText?.destroy();
-    this.countdownText?.destroy();
-    this.countdownGlowText = this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, sequence[index], {
-        fontFamily: "monospace",
-        fontSize: "142px",
-        color: "#ffffff",
-        stroke: "#ffffff",
-        strokeThickness: 28,
-        align: "center",
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(219)
-      .setAlpha(0.95)
-      .setShadow(0, 0, "#22d3ee", 30, true, true);
-    this.countdownText = this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, sequence[index], {
-        fontFamily: "monospace",
-        fontSize: "132px",
-        color: "#ffffff",
-        stroke: "#020617",
-        strokeThickness: 18,
-        align: "center",
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(220)
-      .setShadow(0, 0, "#22d3ee", 22, true, true);
-    if (this.game.renderer.type === Phaser.WEBGL) {
-      this.countdownGlowText.setPipeline(RAINBOW_PIPELINE_KEY);
-    } else {
-      this.countdownGlowText.setTint(0xff66ff, 0x66ffff, 0xffff66, 0x66ff66);
-    }
-
-    this.countdownTimer?.remove(false);
-    this.countdownTimer = this.time.addEvent({
-      delay: 900,
-      repeat: sequence.length - 1,
-      callback: () => {
-        index += 1;
-        if (!this.countdownGlowText || !this.countdownText) {
-          return;
-        }
-
-        this.countdownGlowText.setText(sequence[index]);
-        this.countdownText.setText(sequence[index]);
-        this.tweens.add({
-          targets: [this.countdownGlowText, this.countdownText],
-          scale: { from: 1.28, to: 1 },
-          alpha: { from: 0.72, to: 1 },
-          duration: 220,
-          ease: "Sine.easeOut",
-        });
-
-        if (index === sequence.length - 1) {
-          this.countdownReleaseTimer = this.time.delayedCall(420, () => this.activateRun());
-        }
-      },
+    this.countdownOverlay = new StartCountdownOverlay({
+      scene: this,
+      x: GAME_WIDTH / 2,
+      y: GAME_HEIGHT / 2,
+      rainbowPipelineKey: RAINBOW_PIPELINE_KEY,
+      onComplete: () => this.activateRun(),
     });
+    this.countdownOverlay.start();
   }
 
   private activateRun() {
-    this.countdownTimer = undefined;
-    this.countdownReleaseTimer = undefined;
-    this.countdownGlowText?.destroy();
-    this.countdownGlowText = undefined;
-    this.countdownText?.destroy();
-    this.countdownText = undefined;
+    this.countdownOverlay?.clear();
+    this.countdownOverlay = undefined;
     this.startTime = this.time.now;
     this.isRunActive = true;
     this.physics.resume();
