@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.48
+### English
+- Made crouching movement slower by reducing crouch acceleration and max horizontal speed.
+- Slightly increased both normal jump and boosted jump height.
+### 日本語
+- しゃがみ中の加速度と最高横移動速度を下げ、しゃがみ移動を少し遅くしました。
+- 通常ジャンプと加速中ジャンプの高さをそれぞれ少し高くしました。
+
 ## v0.1.47
 ### English
 - Reduced the player collision box while crouching, keeping the feet anchored to the same bottom position.

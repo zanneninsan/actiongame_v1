@@ -9,7 +9,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.47";
+const DEBUG_VERSION = "v0.1.48";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -36,13 +36,15 @@ const PLAYER_IDLE_FRAME_COUNT = 8;
 const PLAYER_FRAME_COUNT = 13;
 const PLAYER_CROUCH_FRAME_COUNT = 27;
 const GROUND_ACCELERATION = 2400;
+const CROUCH_GROUND_ACCELERATION = 1600;
 const AIR_ACCELERATION = 720;
 const GROUND_DRAG = 2400;
 const AIR_DRAG = 120;
 const MAX_RUN_SPEED = 380;
+const CROUCH_MAX_RUN_SPEED = 300;
 const MAX_FALL_SPEED = 680;
-const JUMP_VELOCITY = -560;
-const BOOSTED_JUMP_VELOCITY = -635;
+const JUMP_VELOCITY = -575;
+const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
 const PLATFORM_ASSETS = {
   left: "platform-unit-left",
@@ -687,7 +689,9 @@ class PrototypeScene extends Phaser.Scene {
     const left = this.keys.a.isDown || this.cursors.left.isDown || this.mobileInput.a;
     const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
     const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
-    this.applyPlayerBody(down && onFloor);
+    const isCrouchInputActive = down && onFloor;
+    this.applyPlayerBody(isCrouchInputActive);
+    this.player.setMaxVelocity(isCrouchInputActive ? CROUCH_MAX_RUN_SPEED : MAX_RUN_SPEED, MAX_FALL_SPEED);
     this.updateCollisionDebug();
     const debugJump = Phaser.Input.Keyboard.JustDown(this.keys.w) || this.mobileJumpQueued;
     this.mobileJumpQueued = false;
@@ -695,7 +699,11 @@ class PrototypeScene extends Phaser.Scene {
     const jump = debugJump || normalJump;
     const canJump = onFloor || debugJump;
     let startedJump = false;
-    const horizontalAcceleration = onFloor ? GROUND_ACCELERATION : AIR_ACCELERATION;
+    const horizontalAcceleration = onFloor
+      ? isCrouchInputActive
+        ? CROUCH_GROUND_ACCELERATION
+        : GROUND_ACCELERATION
+      : AIR_ACCELERATION;
     this.player.setDragX(onFloor ? GROUND_DRAG : AIR_DRAG);
 
     if (left) {
