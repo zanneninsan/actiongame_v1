@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.95
+### English
+- Changed the HUD timer to count down with millisecond precision.
+- Included millisecond precision in the goal time bonus and final score calculation.
+### Japanese
+- HUD の残り時間をミリ秒まで表示してカウントするようにしました。
+- ゴール時のタイムボーナスと最終スコアに、ミリ秒単位の残り時間も反映されるようにしました。
+
 ## v0.1.94
 ### English
 - Added a four-frame walking animation spritesheet for the Knife Punk enemy from the provided reference sheet.

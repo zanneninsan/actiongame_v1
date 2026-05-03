@@ -48,9 +48,10 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.94";
+const DEBUG_VERSION = "v0.1.95";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
+const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
 const TIME_BONUS_PER_SECOND = 10;
 const FALL_RESET_WORLD_MARGIN = 640;
 const PLATFORM_UNIT_WIDTH = 64;
@@ -1048,7 +1049,7 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    this.timerText.setText(`${t(this.locale, "hud.time")}:${this.getRemainingSeconds()}`);
+    this.timerText.setText(`${t(this.locale, "hud.time")}:${this.formatTimeSeconds(this.getRemainingMilliseconds())}`);
   }
 
   private updateControlHintText() {
@@ -1123,13 +1124,21 @@ class PrototypeScene extends Phaser.Scene {
     return Object.values(this.score).reduce((sum, value) => sum + value, 0);
   }
 
-  private getRemainingSeconds() {
+  private getRemainingMilliseconds() {
     if (!this.isRunActive || this.startTime === 0) {
-      return GAME_TIME_SECONDS;
+      return GAME_TIME_MS;
     }
 
-    const elapsed = Math.floor((this.time.now - this.startTime) / 1000);
-    return Math.max(0, GAME_TIME_SECONDS - elapsed);
+    const elapsed = Math.max(0, this.time.now - this.startTime);
+    return Math.max(0, GAME_TIME_MS - elapsed);
+  }
+
+  private formatTimeSeconds(milliseconds: number) {
+    return (milliseconds / 1000).toFixed(3);
+  }
+
+  private formatScoreValue(score: number) {
+    return score.toFixed(3);
   }
 
   private createPixelTexture(key: string, width: number, height: number, fill: number, stroke: number) {
@@ -1269,18 +1278,23 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.hasWon = true;
-    const remaining = this.getRemainingSeconds();
-    const timeBonus = remaining * TIME_BONUS_PER_SECOND;
+    const remaining = this.getRemainingMilliseconds();
+    const timeBonus = (remaining / 1000) * TIME_BONUS_PER_SECOND;
     const itemScore = this.getItemScore();
     const finalScore = itemScore + timeBonus;
-    this.timerText.setText(`${t(this.locale, "hud.time")}:${remaining}  ${t(this.locale, "hud.bonus")}:${timeBonus}`);
+    this.timerText.setText(
+      `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,
+    );
     this.scoreText.setText(`${t(this.locale, "hud.itemScore")}:${itemScore}`);
     this.startRainbowWinEffect();
     this.finalScoreText = this.add
       .text(
         GAME_WIDTH / 2,
         GAME_HEIGHT / 2,
-        `${t(this.locale, "hud.clear")}\n${t(this.locale, "hud.score")} ${finalScore}\n${t(this.locale, "hud.timeBonus")} ${timeBonus}`,
+        `${t(this.locale, "hud.clear")}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}\n${t(
+          this.locale,
+          "hud.timeBonus",
+        )} ${this.formatScoreValue(timeBonus)}`,
         {
           fontFamily: "monospace",
           fontSize: "48px",
