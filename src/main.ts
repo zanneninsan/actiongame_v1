@@ -22,7 +22,14 @@ import {
 } from "./storyDialogue";
 import { getBrowserLocale, isLocale, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
 import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-assets";
-import { createEnemies, createEnemyTexture, freezeEnemies, populateEnemies, updateEnemies } from "./enemies";
+import {
+  createEnemies,
+  createEnemyAnimations,
+  createEnemyTexture,
+  freezeEnemies,
+  populateEnemies,
+  updateEnemies,
+} from "./enemies";
 import { createItems, populateItems } from "./items";
 import { renderStageObjects } from "./stageRenderer";
 import { BackgroundController } from "./backgrounds";
@@ -41,7 +48,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.93";
+const DEBUG_VERSION = "v0.1.94";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -174,6 +181,12 @@ class PrototypeScene extends Phaser.Scene {
       if (enemy.assetPath) {
         this.load.image(enemy.key, `${ASSET_BASE}${enemy.assetPath}`);
       }
+      if (enemy.animation) {
+        this.load.spritesheet(enemy.animation.key, `${ASSET_BASE}${enemy.animation.assetPath}`, {
+          frameWidth: enemy.animation.frameWidth,
+          frameHeight: enemy.animation.frameHeight,
+        });
+      }
     });
     this.load.spritesheet("player-idle", `${ASSET_BASE}assets/sprites/player_idle_8_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
@@ -235,6 +248,7 @@ class PrototypeScene extends Phaser.Scene {
     this.goal = goal;
 
     this.createPlayerAnimations();
+    createEnemyAnimations(this);
 
     this.player = this.physics.add.sprite(this.editorStage.playerStart.x, this.editorStage.playerStart.y, "player-idle");
     this.player.setDisplaySize(PLAYER_DISPLAY_WIDTH, PLAYER_DISPLAY_HEIGHT);

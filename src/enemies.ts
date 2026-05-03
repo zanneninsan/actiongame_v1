@@ -37,6 +37,25 @@ export const createEnemyTexture = (scene: Phaser.Scene) => {
   graphics.destroy();
 };
 
+export const createEnemyAnimations = (scene: Phaser.Scene) => {
+  Object.values(ENEMY_DEFINITIONS).forEach((definition) => {
+    const animation = definition.animation;
+    if (!animation || scene.anims.exists(animation.key)) {
+      return;
+    }
+
+    scene.anims.create({
+      key: animation.key,
+      frames: scene.anims.generateFrameNumbers(animation.key, {
+        start: 0,
+        end: animation.frameCount - 1,
+      }),
+      frameRate: animation.frameRate,
+      repeat: -1,
+    });
+  });
+};
+
 export const createEnemies = (
   scene: Phaser.Scene,
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
@@ -108,7 +127,8 @@ export const freezeEnemies = (enemiesGroup?: Phaser.Physics.Arcade.Group) => {
 
 const createEnemySprite = (enemiesGroup: Phaser.Physics.Arcade.Group, placement: EnemyPlacement) => {
   const definition = ENEMY_DEFINITIONS[placement.type ?? "neonBouncer"];
-  const enemy = enemiesGroup.create(placement.x, placement.y, definition.key) as Phaser.Physics.Arcade.Sprite;
+  const animation = definition.animation;
+  const enemy = enemiesGroup.create(placement.x, placement.y, animation?.key ?? definition.key) as Phaser.Physics.Arcade.Sprite;
   const speed = placement.speed ?? ENEMY_DEFAULT_SPEED;
   const direction = speed >= 0 ? 1 : -1;
   enemy.setDisplaySize(definition.displayWidth, definition.displayHeight);
@@ -121,6 +141,9 @@ const createEnemySprite = (enemiesGroup: Phaser.Physics.Arcade.Group, placement:
   enemy.setOffset(definition.bodyOffsetX / Math.abs(enemy.scaleX), definition.bodyOffsetY / Math.abs(enemy.scaleY));
   enemy.setVelocityX(Math.abs(speed) * direction);
   enemy.setFlipX(direction < 0);
+  if (animation) {
+    enemy.play(animation.key);
+  }
   const body = enemy.body as Phaser.Physics.Arcade.Body;
   body.setAllowGravity(true);
   body.setImmovable(false);

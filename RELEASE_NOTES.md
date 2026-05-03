@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.94
+### English
+- Added a four-frame walking animation spritesheet for the Knife Punk enemy from the provided reference sheet.
+- Added enemy animation metadata and playback so image-backed enemies can use looping patrol animations.
+### Japanese
+- 参考シートから「Knife Punk」の4コマ歩行アニメーションを追加しました。
+- 敵ごとにアニメーション情報を持てるようにし、巡回中にループ再生できるようにしました。
+
 ## v0.1.93
 ### English
 - Added a new Knife Punk enemy type based on the provided reference image.

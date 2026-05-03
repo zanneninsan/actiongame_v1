@@ -101,6 +101,14 @@ export const ENEMY_DEFINITIONS: Record<
     bodyHeight: number;
     bodyOffsetX: number;
     bodyOffsetY: number;
+    animation?: {
+      key: string;
+      assetPath: string;
+      frameWidth: number;
+      frameHeight: number;
+      frameCount: number;
+      frameRate: number;
+    };
   }
 > = {
   neonBouncer: {
@@ -123,5 +131,13 @@ export const ENEMY_DEFINITIONS: Record<
     bodyHeight: 46,
     bodyOffsetX: 20,
     bodyOffsetY: 22,
+    animation: {
+      key: "enemy-knife-punk-walk",
+      assetPath: "assets/enemies/knife_punk_walk.png",
+      frameWidth: 280,
+      frameHeight: 250,
+      frameCount: 4,
+      frameRate: 7,
+    },
   },
 };
