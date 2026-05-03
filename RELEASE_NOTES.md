@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.80
+### English
+- Added an in-game key-name label above the selected object in stage edit mode.
+- The label follows the selection marker and shows asset keys for items, street lamps, and decorations.
+### Japanese
+- ステージ編集モードで選択中のオブジェクトの上にキー名ラベルを表示するようにしました。
+- アイテム、街灯、装飾オブジェクトでは実際のアセットキーが選択枠に合わせて表示されます。
 ## v0.1.79
 ### English
 - Replaced the generated placeholder goal marker with the provided polished pixel-art goal gate image.

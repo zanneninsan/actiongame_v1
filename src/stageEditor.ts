@@ -42,6 +42,7 @@ export class StageEditor {
   private markers: Phaser.GameObjects.GameObject[] = [];
   private selected?: EditorSelection;
   private selectionMarker?: Phaser.GameObjects.Rectangle;
+  private selectionLabel?: Phaser.GameObjects.Text;
   private draggingSelection = false;
   private lastDragX?: number;
   private lastDragY?: number;
@@ -102,6 +103,8 @@ export class StageEditor {
     this.dragHistorySnapshot = undefined;
     this.selectionMarker?.destroy();
     this.selectionMarker = undefined;
+    this.selectionLabel?.destroy();
+    this.selectionLabel = undefined;
   }
 
   deleteSelection(selection = this.selected) {
@@ -427,6 +430,8 @@ export class StageEditor {
   private refreshSelectionMarker() {
     this.selectionMarker?.destroy();
     this.selectionMarker = undefined;
+    this.selectionLabel?.destroy();
+    this.selectionLabel = undefined;
     if (!this.selected) {
       return;
     }
@@ -442,6 +447,34 @@ export class StageEditor {
       .setStrokeStyle(3, 0x22d3ee, 0.96)
       .setFillStyle(0x22d3ee, 0.08)
       .setDepth(302);
+
+    this.selectionLabel = this.scene.add
+      .text(bounds.x, bounds.y - bounds.height / 2 - 14, this.getSelectionKeyName(this.selected), {
+        fontFamily: "monospace",
+        fontSize: "14px",
+        color: "#ecfeff",
+        backgroundColor: "#083344",
+        padding: { x: 6, y: 3 },
+      })
+      .setOrigin(0.5, 1)
+      .setDepth(303);
+  }
+
+  private getSelectionKeyName(selection: EditorSelection) {
+    if (selection.kind === "platform") {
+      return "platform";
+    }
+    if (selection.kind === "item") {
+      const item = this.stage.items[selection.index];
+      return item ? ITEM_DEFINITIONS[item.type].key : "item";
+    }
+    if (selection.kind === "streetLamp") {
+      return this.stage.streetLamps[selection.index]?.key ?? "streetLamp";
+    }
+    if (selection.kind === "decoration") {
+      return this.stage.decorations[selection.index]?.key ?? "decoration";
+    }
+    return selection.kind;
   }
 
   private getSelectionBounds(selection: EditorSelection) {
