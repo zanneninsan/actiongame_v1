@@ -28,7 +28,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.58";
+const DEBUG_VERSION = "v0.1.59";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -712,9 +712,10 @@ class PrototypeScene extends Phaser.Scene {
 
   private createStageDecoration(object: StageDecorationPlacement) {
     const scale = object.scale ?? 1;
+    const y = object.y ?? this.stageConstants.groundTopY;
     this.trackStageObject(
       this.add
-        .image(object.x, object.y, object.key)
+        .image(object.x, y, object.key)
         .setOrigin(0.5, 1)
         .setScale(scale)
         .setDepth(DECORATION_DEPTH),
@@ -1170,7 +1171,8 @@ class PrototypeScene extends Phaser.Scene {
       );
     });
     this.editorStage.decorations.forEach((decoration, index) => {
-      consider({ kind: "decoration", index }, Phaser.Math.Distance.Between(worldX, worldY, decoration.x, decoration.y), 84);
+      const y = decoration.y ?? this.stageConstants.groundTopY;
+      consider({ kind: "decoration", index }, Phaser.Math.Distance.Between(worldX, worldY, decoration.x, y), 84);
     });
     consider(
       { kind: "playerStart" },
@@ -1234,7 +1236,9 @@ class PrototypeScene extends Phaser.Scene {
     }
     if (selection.kind === "decoration") {
       const decoration = this.editorStage.decorations[selection.index];
-      return decoration ? { x: decoration.x, y: decoration.y - 36, width: 96, height: 96 } : undefined;
+      return decoration
+        ? { x: decoration.x, y: (decoration.y ?? this.stageConstants.groundTopY) - 36, width: 96, height: 96 }
+        : undefined;
     }
     if (selection.kind === "playerStart") {
       return { x: this.editorStage.playerStart.x, y: this.editorStage.playerStart.y, width: 88, height: 40 };

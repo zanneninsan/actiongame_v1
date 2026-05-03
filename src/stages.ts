@@ -278,7 +278,7 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
     },
     {
       "x": 9000,
-      "y": 356,
+      "y": 672,
       "key": "stage-props-traffic-cone",
       "scale": 0.56
     },

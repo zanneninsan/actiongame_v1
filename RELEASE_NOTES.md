@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.59
+### English
+- Made decoration `y` optional in stage definitions.
+- Applied the resolved stage `groundTopY` as the default decoration Y position when omitted.
+### 日本語
+- ステージ定義の装飾オブジェクトの`y`を省略可能にしました。
+- `y`が未指定の場合は、そのステージの`groundTopY`を初期値として適用するようにしました。
 ## v0.1.58
 ### English
 - Made street lamp and decoration `scale` optional in stage definitions.
