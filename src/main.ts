@@ -21,7 +21,7 @@ import {
 } from "./storyDialogue";
 import { getBrowserLocale, isLocale, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
 import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-assets";
-import { createEnemies, createEnemyTexture, populateEnemies, updateEnemies } from "./enemies";
+import { createEnemies, createEnemyTexture, freezeEnemies, populateEnemies, updateEnemies } from "./enemies";
 import { createItems, populateItems } from "./items";
 import { renderStageObjects } from "./stageRenderer";
 import { BackgroundController } from "./backgrounds";
@@ -40,7 +40,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.90";
+const DEBUG_VERSION = "v0.1.91";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -352,7 +352,11 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.refreshDropThroughDecorationPlatform();
-    updateEnemies(this.enemiesGroup);
+    if (this.stageEditor?.isEnabled) {
+      freezeEnemies(this.enemiesGroup);
+    } else {
+      updateEnemies(this.enemiesGroup, this.stageConstants.worldBottom + 32);
+    }
     const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
     if (this.time.now < this.hurtUntil) {
       this.updateCollisionDebug();
@@ -765,6 +769,9 @@ class PrototypeScene extends Phaser.Scene {
       trackStageObject: (object) => this.trackStageObject(object),
     });
     populateEnemies(this.enemiesGroup, this.editorStage.enemies ?? []);
+    if (this.stageEditor?.isEnabled) {
+      freezeEnemies(this.enemiesGroup);
+    }
     this.moveGoalTo(this.editorStage.goal.x, this.editorStage.goal.y);
     this.updateCollisionDebug();
   }
@@ -906,7 +913,14 @@ class PrototypeScene extends Phaser.Scene {
       getStageConstants: () => this.stageConstants,
       rebuildStageObjects: () => this.rebuildEditableStageObjects(),
       moveGoalTo: (x, y) => this.moveGoalTo(x, y),
-      onToggle: () => this.updateControlHintText(),
+      onToggle: (enabled) => {
+        if (enabled) {
+          freezeEnemies(this.enemiesGroup);
+        } else {
+          this.rebuildEditableStageObjects();
+        }
+        this.updateControlHintText();
+      },
     });
     this.stageEditor.show();
   }

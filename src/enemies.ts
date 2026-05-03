@@ -72,10 +72,15 @@ export const populateEnemies = (
   });
 };
 
-export const updateEnemies = (enemiesGroup?: Phaser.Physics.Arcade.Group) => {
+export const updateEnemies = (enemiesGroup?: Phaser.Physics.Arcade.Group, destroyBelowY?: number) => {
   enemiesGroup?.getChildren().forEach((child) => {
     const enemy = child as Phaser.Physics.Arcade.Sprite;
     if (!enemy.active || !enemy.body) {
+      return;
+    }
+
+    if (destroyBelowY !== undefined && enemy.y > destroyBelowY) {
+      enemy.destroy();
       return;
     }
 
@@ -89,6 +94,19 @@ export const updateEnemies = (enemiesGroup?: Phaser.Physics.Arcade.Group) => {
       enemy.setVelocityX(-speed);
       enemy.setFlipX(true);
     }
+  });
+};
+
+export const freezeEnemies = (enemiesGroup?: Phaser.Physics.Arcade.Group) => {
+  enemiesGroup?.getChildren().forEach((child) => {
+    const enemy = child as Phaser.Physics.Arcade.Sprite;
+    if (!enemy.active || !enemy.body) {
+      return;
+    }
+
+    enemy.setVelocity(0, 0);
+    enemy.setAcceleration(0, 0);
+    (enemy.body as Phaser.Physics.Arcade.Body).setAllowGravity(false);
   });
 };
 

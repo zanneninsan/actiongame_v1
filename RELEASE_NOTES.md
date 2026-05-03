@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.91
+### English
+- Destroy enemies after they fall below the stage reset line so they do not keep simulating off-screen.
+- Freeze enemies while the stage editor is enabled, then rebuild them from edited placements when leaving the editor.
+### Japanese
+- 敵がステージ下のリセットラインより下に落ちたら消えるようにし、画面外で処理され続けないようにしました。
+- ステージエディタ中は敵が動かないようにし、エディタ終了時に編集後の配置から作り直すようにしました。
+
 ## v0.1.90
 ### English
 - Added enemies as editable stage editor objects with add, select, move, delete, export, and import support.
