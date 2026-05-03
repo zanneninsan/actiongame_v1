@@ -1,5 +1,27 @@
 # Release Notes / リリースノート
 
+## v0.1.63
+### English
+- Added stage editor JSON import from pasted text or a `.json` file.
+- Updated stage editor export to copy JSON and download a stage JSON file.
+### Japanese
+- Stage editor de haritsuke text mata wa `.json` file kara stage JSON wo import dekiru you ni shimashita.
+- Stage editor no export de JSON copy to stage JSON file download wo okonau you ni shimashita.
+
+## v0.1.62
+### English
+- Prevented item pickup while the stage editor is enabled.
+### Japanese
+- Stage editor ON chuu wa item wo shutoku shinai you ni shimashita.
+
+## v0.1.61
+### English
+- Changed the stage editor Redo shortcut from `R` to `Y` so `R` can restart during editing.
+- Added a second-line editor key hint to the top control hint while the editor is enabled.
+### Japanese
+- Editor no Redo shortcut wo `R` kara `Y` ni henkou shi, edit chuu demo `R` de restart dekiru you ni shimashita.
+- Editor ON chuu wa gamen jougi no sousa hint ni editor key setsumei no 2 gyoume wo hyouji suru you ni shimashita.
+
 ## v0.1.60
 ### English
 - Added Undo and Redo support to the in-game stage editor.

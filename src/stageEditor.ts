@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import {
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
+  ITEM_DEFINITIONS,
   type ItemPlacement,
   type PlatformRunPlacement,
   type StageDecorationPlacement,
@@ -29,6 +30,7 @@ type StageEditorOptions = {
   getStageConstants: () => ResolvedStageConstants;
   rebuildStageObjects: () => void;
   moveGoalTo: (x: number, y: number) => void;
+  onToggle?: (enabled: boolean) => void;
 };
 
 const EDITOR_HISTORY_LIMIT = 80;
@@ -63,6 +65,7 @@ export class StageEditor {
       initialTool: this.tool,
       onToggle: (enabled) => {
         this.enabled = enabled;
+        this.options.onToggle?.(enabled);
       },
       onToolChange: (tool) => {
         this.tool = tool;
@@ -72,7 +75,10 @@ export class StageEditor {
       onExport: () => {
         this.refreshExport();
         this.panel?.copyExportToClipboard();
+        this.panel?.downloadExport(this.getExportFilename());
+        this.panel?.setImportStatus("Exported JSON.");
       },
+      onImport: (json) => this.importStage(json),
     });
     this.panel.show();
     this.refreshExport();
@@ -134,7 +140,7 @@ export class StageEditor {
     this.unbindInput();
     this.scene.input.keyboard?.on("keydown-DELETE", this.handleDeleteKey, this);
     this.scene.input.keyboard?.on("keydown-Z", this.handleUndoKey, this);
-    this.scene.input.keyboard?.on("keydown-R", this.handleRedoKey, this);
+    this.scene.input.keyboard?.on("keydown-Y", this.handleRedoKey, this);
     this.scene.input.on("pointerdown", this.handlePointerDown, this);
     this.scene.input.on("pointermove", this.handlePointerMove, this);
     this.scene.input.on("pointerup", this.handlePointerUp, this);
@@ -144,7 +150,7 @@ export class StageEditor {
   private unbindInput() {
     this.scene.input.keyboard?.off("keydown-DELETE", this.handleDeleteKey, this);
     this.scene.input.keyboard?.off("keydown-Z", this.handleUndoKey, this);
-    this.scene.input.keyboard?.off("keydown-R", this.handleRedoKey, this);
+    this.scene.input.keyboard?.off("keydown-Y", this.handleRedoKey, this);
     this.scene.input.off("pointerdown", this.handlePointerDown, this);
     this.scene.input.off("pointermove", this.handlePointerMove, this);
     this.scene.input.off("pointerup", this.handlePointerUp, this);
@@ -525,6 +531,40 @@ export class StageEditor {
     this.restoreStage(nextStage);
   }
 
+  private importStage(json: string) {
+    if (!this.enabled) {
+      return;
+    }
+
+    if (!json.trim()) {
+      this.panel?.setImportStatus("Paste JSON or load a JSON file first.", true);
+      return;
+    }
+
+    const previousStage = cloneStage(this.stage);
+    try {
+      const parsed = JSON.parse(json) as unknown;
+      if (!this.isStageDefinition(parsed)) {
+        throw new Error("Invalid stage JSON shape.");
+      }
+
+      this.options.setStage(cloneStage(parsed));
+      this.selected = undefined;
+      this.draggingSelection = false;
+      this.lastDragX = undefined;
+      this.lastDragY = undefined;
+      this.dragHistorySnapshot = undefined;
+      this.clearMarkers();
+      this.rebuildStageObjects();
+      this.recordChange(previousStage);
+      this.refreshExport();
+      this.panel?.setImportStatus("Imported JSON.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Invalid JSON.";
+      this.panel?.setImportStatus(message, true);
+    }
+  }
+
   private restoreStage(stage: StageDefinition) {
     this.options.setStage(cloneStage(stage));
     this.selected = undefined;
@@ -551,6 +591,88 @@ export class StageEditor {
     return JSON.stringify(a) === JSON.stringify(b);
   }
 
+  private isStageDefinition(value: unknown): value is StageDefinition {
+    if (!this.isRecord(value)) {
+      return false;
+    }
+
+    return (
+      typeof value.name === "string" &&
+      this.isNumber(value.worldWidth) &&
+      this.isOptionalNumber(value.worldTop) &&
+      this.isOptionalNumber(value.worldBottom) &&
+      this.isOptionalNumber(value.groundTopY) &&
+      this.isOptionalNumber(value.groundVisualY) &&
+      this.isOptionalNumber(value.streetLampGroundY) &&
+      this.isPoint(value.playerStart) &&
+      this.isPoint(value.goal) &&
+      Array.isArray(value.platforms) &&
+      value.platforms.every((platform) => this.isPlatformPlacement(platform)) &&
+      Array.isArray(value.streetLamps) &&
+      value.streetLamps.every((lamp) => this.isStreetLampPlacement(lamp)) &&
+      Array.isArray(value.decorations) &&
+      value.decorations.every((decoration) => this.isDecorationPlacement(decoration)) &&
+      Array.isArray(value.items) &&
+      value.items.every((item) => this.isItemPlacement(item))
+    );
+  }
+
+  private isPlatformPlacement(value: unknown): value is PlatformRunPlacement {
+    return (
+      this.isRecord(value) &&
+      this.isNumber(value.x) &&
+      this.isNumber(value.y) &&
+      this.isNumber(value.units) &&
+      (value.collides === undefined || typeof value.collides === "boolean")
+    );
+  }
+
+  private isStreetLampPlacement(value: unknown): value is StreetLampPlacement {
+    return (
+      this.isRecord(value) &&
+      this.isNumber(value.x) &&
+      Object.values(PROP_ASSETS).includes(value.key as StreetLampPlacement["key"]) &&
+      this.isOptionalNumber(value.scale)
+    );
+  }
+
+  private isDecorationPlacement(value: unknown): value is StageDecorationPlacement {
+    return (
+      this.isRecord(value) &&
+      this.isNumber(value.x) &&
+      this.isOptionalNumber(value.y) &&
+      typeof value.key === "string" &&
+      STAGE_OBJECT_ASSETS.some((asset) => asset.key === value.key) &&
+      this.isOptionalNumber(value.scale)
+    );
+  }
+
+  private isItemPlacement(value: unknown): value is ItemPlacement {
+    return (
+      this.isRecord(value) &&
+      this.isNumber(value.x) &&
+      this.isNumber(value.y) &&
+      typeof value.type === "string" &&
+      value.type in ITEM_DEFINITIONS
+    );
+  }
+
+  private isPoint(value: unknown): value is { x: number; y: number } {
+    return this.isRecord(value) && this.isNumber(value.x) && this.isNumber(value.y);
+  }
+
+  private isOptionalNumber(value: unknown) {
+    return value === undefined || this.isNumber(value);
+  }
+
+  private isNumber(value: unknown) {
+    return typeof value === "number" && Number.isFinite(value);
+  }
+
+  private isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+
   private clearMarkers() {
     this.markers.forEach((marker) => marker.destroy());
     this.markers = [];
@@ -558,5 +680,10 @@ export class StageEditor {
 
   private refreshExport() {
     this.panel?.setExport(JSON.stringify(this.stage, null, 2));
+  }
+
+  private getExportFilename() {
+    const safeName = this.stage.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "stage";
+    return `${safeName}.stage.json`;
   }
 }

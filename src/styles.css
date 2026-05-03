@@ -280,7 +280,14 @@ canvas {
   gap: 8px;
 }
 
-.editor-history-row button {
+.editor-io-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.editor-history-row button,
+.editor-io-row button {
   height: 30px;
   border: 1px solid rgba(56, 189, 248, 0.58);
   border-radius: 5px;
@@ -306,15 +313,9 @@ canvas {
 }
 
 .editor-export-button {
-  height: 34px;
   border: 1px solid rgba(253, 230, 138, 0.72);
-  border-radius: 6px;
   background: rgba(14, 116, 144, 0.82);
   color: #fefce8;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
 }
 
 [data-editor-export] {
@@ -325,6 +326,21 @@ canvas {
   font-family: monospace;
   font-size: 11px;
   box-sizing: border-box;
+}
+
+[data-editor-import-file] {
+  display: none;
+}
+
+.editor-import-status {
+  min-height: 16px;
+  margin: -2px 0 0;
+  color: #a7f3d0;
+  font-size: 11px;
+}
+
+.editor-import-status.is-error {
+  color: #fecaca;
 }
 
 #global-ui {

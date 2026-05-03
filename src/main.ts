@@ -27,7 +27,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.60";
+const DEBUG_VERSION = "v0.1.63";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -247,6 +247,7 @@ class PrototypeScene extends Phaser.Scene {
         fontFamily: "monospace",
         fontSize: "15px",
         color: "#fde68a",
+        align: "center",
       })
       .setOrigin(0.5, 0)
       .setScrollFactor(0)
@@ -255,12 +256,7 @@ class PrototypeScene extends Phaser.Scene {
     this.updateControlHintText();
 
     this.input.keyboard!.off("keydown-R");
-    this.input.keyboard!.on("keydown-R", () => {
-      if (this.stageEditor?.isEnabled) {
-        return;
-      }
-      this.restartStage();
-    });
+    this.input.keyboard!.on("keydown-R", () => this.restartStage());
     this.createStageEditor();
     this.createGlobalUI();
 
@@ -831,6 +827,7 @@ class PrototypeScene extends Phaser.Scene {
       getStageConstants: () => this.stageConstants,
       rebuildStageObjects: () => this.rebuildEditableStageObjects(),
       moveGoalTo: (x, y) => this.moveGoalTo(x, y),
+      onToggle: () => this.updateControlHintText(),
     });
     this.stageEditor.show();
   }
@@ -1007,7 +1004,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private collectItem(item: Phaser.Physics.Arcade.Sprite) {
-    if (!item.active) {
+    if (!item.active || this.stageEditor?.isEnabled) {
       return;
     }
 
@@ -1042,7 +1039,8 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    this.controlHintText.setText(this.controlHint);
+    const editorHint = this.stageEditor?.isEnabled ? "\nEDITOR: Z Undo  Y Redo  Delete Remove Selected" : "";
+    this.controlHintText.setText(`${this.controlHint}${editorHint}`);
   }
 
   private updateCollisionDebug() {
