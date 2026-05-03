@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.72
+### English
+- Request fullscreen in mobile landscape mode only when the available viewport height is clearly too short.
+- Keep the landscape-only mobile flow unchanged when the browser already has enough vertical room.
+### Japanese
+- モバイルの横画面モードで、表示できる縦幅が明らかに足りない場合だけ全画面表示をリクエストするようにしました。
+- ブラウザ上で十分な縦幅がある場合は、これまで通り横画面モードのまま開始します。
 ## v0.1.71
 ### English
 - Generate rear and midground background lists from their asset folders at Vite startup/build time.

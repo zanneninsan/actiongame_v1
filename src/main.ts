@@ -29,7 +29,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.71";
+const DEBUG_VERSION = "v0.1.72";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -63,7 +63,12 @@ const MAX_FALL_SPEED = 680;
 const JUMP_VELOCITY = -575;
 const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
+const MOBILE_FULLSCREEN_MIN_LANDSCAPE_HEIGHT = 430;
 type MobileInputKey = "w" | "a" | "s" | "d";
+type FullscreenTarget = HTMLElement & {
+  msRequestFullscreen?: () => Promise<void> | void;
+  webkitRequestFullscreen?: () => Promise<void> | void;
+};
 type OrientationLockScreen = Screen & {
   orientation?: ScreenOrientation & {
     lock?: (orientation: OrientationLockType) => Promise<void>;
@@ -478,7 +483,7 @@ class PrototypeScene extends Phaser.Scene {
         this.setSoundEnabled(soundOn);
         this.setupComplete = true;
         if (this.controlMode === "mobile") {
-          this.startMobileRunInLandscape();
+          void this.startMobileRunInLandscape();
           return;
         }
         this.startRun();
@@ -487,11 +492,12 @@ class PrototypeScene extends Phaser.Scene {
     this.startModal.show();
   }
 
-  private startMobileRunInLandscape() {
+  private async startMobileRunInLandscape() {
     this.createMobileOrientationPrompt();
     this.requestMobileLandscapeLock();
 
     if (!this.isPortraitViewport()) {
+      await this.requestMobileFullscreenIfShortLandscape();
       this.startRun();
       return;
     }
@@ -502,7 +508,7 @@ class PrototypeScene extends Phaser.Scene {
         return;
       }
       cleanup();
-      this.startRun();
+      void this.startMobileRunAfterLandscapeReady();
     };
     const cleanup = () => {
       window.removeEventListener("resize", startWhenLandscape);
@@ -517,9 +523,34 @@ class PrototypeScene extends Phaser.Scene {
     this.mobileOrientationCleanup.push(cleanup);
   }
 
+  private async startMobileRunAfterLandscapeReady() {
+    await this.requestMobileFullscreenIfShortLandscape();
+    this.startRun();
+  }
+
   private requestMobileLandscapeLock() {
     const orientation = (screen as OrientationLockScreen).orientation;
     void orientation?.lock?.("landscape").catch(() => undefined);
+  }
+
+  private async requestMobileFullscreenIfShortLandscape() {
+    if (this.isPortraitViewport() || document.fullscreenElement || this.getMobileViewportHeight() >= MOBILE_FULLSCREEN_MIN_LANDSCAPE_HEIGHT) {
+      return;
+    }
+
+    const target = document.documentElement as FullscreenTarget;
+    const requestFullscreen =
+      target.requestFullscreen ?? target.webkitRequestFullscreen ?? target.msRequestFullscreen;
+
+    if (!requestFullscreen) {
+      return;
+    }
+
+    await Promise.resolve(requestFullscreen.call(target)).catch(() => undefined);
+  }
+
+  private getMobileViewportHeight() {
+    return Math.round(window.visualViewport?.height ?? window.innerHeight);
   }
 
   private isPortraitViewport() {
