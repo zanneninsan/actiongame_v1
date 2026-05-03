@@ -24,6 +24,7 @@ import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-asse
 import { createEnemies, createEnemyTexture, populateEnemies, updateEnemies } from "./enemies";
 import { createItems, populateItems } from "./items";
 import { renderStageObjects } from "./stageRenderer";
+import { BackgroundController } from "./backgrounds";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
@@ -94,10 +95,7 @@ class PrototypeScene extends Phaser.Scene {
   private enemiesGroup?: Phaser.Physics.Arcade.Group;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
-  private rearBackground?: Phaser.GameObjects.Image;
-  private rearBackgroundIndex = 0;
-  private midgroundBackground?: Phaser.GameObjects.TileSprite;
-  private midgroundBackgroundIndex = 0;
+  private backgrounds?: BackgroundController;
   private playerNameText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
@@ -779,81 +777,12 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private createBackground() {
-    this.createRearBackground();
-    this.createMidgroundBackground();
-  }
-
-  private createRearBackground() {
-    this.rearBackground = this.add
-      .image(0, 0, this.getCurrentRearBackground().key)
-      .setOrigin(0, 0)
-      .setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
-      .setScrollFactor(0)
-      .setDepth(-40);
-
-    this.add
-      .rectangle(0, 0, GAME_WIDTH, GAME_HEIGHT, 0x070a12, 0.2)
-      .setOrigin(0, 0)
-      .setScrollFactor(0)
-      .setDepth(-35);
-  }
-
-  private getCurrentRearBackground() {
-    return REAR_BACKGROUNDS[this.rearBackgroundIndex];
-  }
-
-  private cycleRearBackground(toggleButton?: HTMLButtonElement) {
-    this.rearBackgroundIndex = (this.rearBackgroundIndex + 1) % REAR_BACKGROUNDS.length;
-    const background = this.getCurrentRearBackground();
-    this.rearBackground?.setTexture(background.key).setDisplaySize(GAME_WIDTH, GAME_HEIGHT);
-    this.updateRearDebugToggle(toggleButton);
-  }
-
-  private updateRearDebugToggle(toggleButton?: HTMLButtonElement) {
-    if (!toggleButton) {
-      return;
-    }
-    const background = this.getCurrentRearBackground();
-    toggleButton.textContent = `RB${this.rearBackgroundIndex + 1}`;
-    toggleButton.title = background.path;
-    toggleButton.setAttribute("aria-label", `Switch rear background. Current: ${background.label}`);
-  }
-
-  private createMidgroundBackground() {
-    this.midgroundBackground = this.add
-      .tileSprite(0, 0, GAME_WIDTH, GAME_HEIGHT, this.getCurrentMidgroundBackground().key)
-      .setOrigin(0, 0)
-      .setScrollFactor(0)
-      .setDepth(-15);
-  }
-
-  private getCurrentMidgroundBackground() {
-    return MIDGROUND_BACKGROUNDS[this.midgroundBackgroundIndex];
-  }
-
-  private cycleMidgroundBackground(toggleButton?: HTMLButtonElement) {
-    this.midgroundBackgroundIndex = (this.midgroundBackgroundIndex + 1) % MIDGROUND_BACKGROUNDS.length;
-    const background = this.getCurrentMidgroundBackground();
-    this.midgroundBackground?.setTexture(background.key);
-    this.updateMidgroundDebugToggle(toggleButton);
-  }
-
-  private updateMidgroundDebugToggle(toggleButton?: HTMLButtonElement) {
-    if (!toggleButton) {
-      return;
-    }
-    const background = this.getCurrentMidgroundBackground();
-    toggleButton.textContent = `MG${this.midgroundBackgroundIndex + 1}`;
-    toggleButton.title = background.path;
-    toggleButton.setAttribute("aria-label", `Switch midground background. Current: ${background.label}`);
+    this.backgrounds = new BackgroundController(this, GAME_WIDTH, GAME_HEIGHT);
+    this.backgrounds.create();
   }
 
   private updateBackground() {
-    if (this.midgroundBackground) {
-      this.midgroundBackground.tilePositionX = this.cameras.main.scrollX * 0.58;
-      this.midgroundBackground.y = -this.cameras.main.scrollY;
-    }
-
+    this.backgrounds?.update(this.cameras.main.scrollX, this.cameras.main.scrollY);
   }
 
   private canLandOnDecorationPlatform(
@@ -1093,8 +1022,8 @@ class PrototypeScene extends Phaser.Scene {
 
     this.applySoundSettings();
     collisionDebugToggle.classList.toggle("is-active", this.collisionDebugEnabled);
-    this.updateRearDebugToggle(rearDebugToggle);
-    this.updateMidgroundDebugToggle(midgroundDebugToggle);
+    this.backgrounds?.updateRearDebugToggle(rearDebugToggle);
+    this.backgrounds?.updateMidgroundDebugToggle(midgroundDebugToggle);
 
     collisionDebugToggle.addEventListener("click", () => {
       this.collisionDebugEnabled = !this.collisionDebugEnabled;
@@ -1103,11 +1032,11 @@ class PrototypeScene extends Phaser.Scene {
     });
 
     rearDebugToggle.addEventListener("click", () => {
-      this.cycleRearBackground(rearDebugToggle);
+      this.backgrounds?.cycleRearBackground(rearDebugToggle);
     });
 
     midgroundDebugToggle.addEventListener("click", () => {
-      this.cycleMidgroundBackground(midgroundDebugToggle);
+      this.backgrounds?.cycleMidgroundBackground(midgroundDebugToggle);
     });
 
     bgmToggle.addEventListener("click", () => {
