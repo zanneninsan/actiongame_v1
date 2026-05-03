@@ -48,7 +48,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.97";
+const DEBUG_VERSION = "v0.1.98";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
@@ -1134,11 +1134,11 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private formatTimeSeconds(milliseconds: number) {
-    return (milliseconds / 1000).toFixed(3);
+    return (milliseconds / 1000).toFixed(2);
   }
 
   private formatScoreValue(score: number) {
-    return score.toFixed(3);
+    return score.toFixed(2);
   }
 
   private createPixelTexture(key: string, width: number, height: number, fill: number, stroke: number) {

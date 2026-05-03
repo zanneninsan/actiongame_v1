@@ -1,5 +1,11 @@
 # Release Notes / リリースノート
 
+## v0.1.98
+### English
+- Limited timer, time bonus, and final score displays to two decimal places while keeping millisecond-based calculations.
+### Japanese
+- タイマー、タイムボーナス、最終スコアの表示を小数2桁に揃えつつ、計算はミリ秒単位のまま維持しました。
+
 ## v0.1.97
 ### English
 - Reduced the top HUD text to roughly two-thirds of the v0.1.96 size.
