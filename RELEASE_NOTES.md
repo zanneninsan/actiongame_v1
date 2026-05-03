@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.49
+### English
+- Split long static definitions out of `main.ts` into focused `assets.ts`, `stages.ts`, and `rainbowPipeline.ts` modules.
+- Kept gameplay behavior unchanged while reducing the amount of code future agents need to read for common gameplay edits.
+### 日本語
+- `main.ts`内の長い静的定義を、`assets.ts`、`stages.ts`、`rainbowPipeline.ts`へ分割しました。
+- ゲーム挙動は変えず、今後のAIエージェントが通常のゲームロジック修正で読むコード量を減らしました。
+
 ## v0.1.48
 ### English
 - Made crouching movement slower by reducing crouch acceleration and max horizontal speed.

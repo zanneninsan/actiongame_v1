@@ -1,5 +1,23 @@
 import Phaser from "phaser";
 import "./styles.css";
+import {
+  ITEM_DEFINITIONS,
+  ITEM_GLOW_COLORS,
+  ITEM_GLOW_TEXTURE_KEY,
+  PLATFORM_ASSETS,
+  PROP_ASSETS,
+  STAGE_OBJECT_ASSETS,
+  type ItemPlacement,
+  type ItemType,
+  type PlatformAsset,
+  type PlatformRunPlacement,
+  type ScoreState,
+  type StageDecorationPlacement,
+  type StreetLampKey,
+  type StreetLampPlacement,
+} from "./assets";
+import { ACTIVE_STAGE, cloneStage } from "./stages";
+import { RainbowWinPipeline } from "./rainbowPipeline";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
@@ -9,7 +27,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.48";
+const DEBUG_VERSION = "v0.1.49";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -46,428 +64,15 @@ const MAX_FALL_SPEED = 680;
 const JUMP_VELOCITY = -575;
 const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
-const PLATFORM_ASSETS = {
-  left: "platform-unit-left",
-  middle: "platform-unit-middle",
-  right: "platform-unit-right",
-  single: "platform-unit-single",
-} as const;
-const PROP_ASSETS = {
-  lampSingle: "street-lamp-single",
-  lampDouble: "street-lamp-double",
-} as const;
-type StreetLampKey = (typeof PROP_ASSETS)[keyof typeof PROP_ASSETS];
-type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
-const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
-const ITEM_GLOW_COLORS: Record<ItemType, number> = {
-  energyDrink: 0x8cffd2,
-  shoppingBag: 0xffd166,
-  bubbleTea: 0xf9a8ff,
-};
-type ScoreState = Record<ItemType, number>;
-type PlatformAsset = (typeof PLATFORM_ASSETS)[keyof typeof PLATFORM_ASSETS];
-type StageObjectAsset = { key: string; path: string };
 type MobileInputKey = "w" | "a" | "s" | "d";
-type PlatformRunPlacement = { x: number; y: number; units: number; collides?: boolean };
-type StreetLampPlacement = { x: number; key: StreetLampKey; scale: number };
-type StageDecorationPlacement = { x: number; y: number; key: string; scale: number };
-type ItemPlacement = { type: ItemType; x: number; y: number };
 type ControlMode = "pc" | "mobile";
 type EditorTool = "platform" | "item" | "streetLamp" | "decoration" | "playerStart" | "goal";
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
   webkitRequestFullscreen?: () => Promise<void> | void;
 };
-type StageDefinition = {
-  name: string;
-  worldWidth: number;
-  playerStart: { x: number; y: number };
-  goal: { x: number; y: number };
-  platforms: PlatformRunPlacement[];
-  streetLamps: StreetLampPlacement[];
-  decorations: StageDecorationPlacement[];
-  items: ItemPlacement[];
-};
 
-const RAINBOW_FRAGMENT_SHADER = `
-#define SHADER_NAME RAINBOW_WIN_FS
-#ifdef GL_FRAGMENT_PRECISION_HIGH
-precision highp float;
-#else
-precision mediump float;
-#endif
-
-uniform sampler2D uMainSampler;
-uniform float uTime;
-varying vec2 outTexCoord;
-varying vec4 outTint;
-
-vec3 rainbow(float t) {
-  vec3 phase = vec3(0.0, 0.33, 0.67);
-  return 0.55 + 0.45 * cos(6.28318 * (t + phase));
-}
-
-void main () {
-  vec4 texture = texture2D(uMainSampler, outTexCoord);
-  if (texture.a < 0.08) {
-    discard;
-  }
-
-  float band = fract(outTexCoord.x * 1.85 + uTime * 1.6);
-  float shine = smoothstep(0.18, 0.0, abs(fract(band * 3.0) - 0.5));
-  float luminance = dot(texture.rgb, vec3(0.299, 0.587, 0.114));
-  vec3 rainbowColor = rainbow(band) * (0.58 + luminance * 0.9 + shine * 0.35);
-  vec3 color = mix(texture.rgb, rainbowColor, 0.82);
-  float alpha = smoothstep(0.08, 0.42, texture.a) * texture.a * outTint.a;
-  gl_FragColor = vec4(color * outTint.rgb, alpha);
-}
-`;
-
-class RainbowWinPipeline extends Phaser.Renderer.WebGL.Pipelines.SinglePipeline {
-  constructor(game: Phaser.Game) {
-    super({
-      game,
-      fragShader: RAINBOW_FRAGMENT_SHADER,
-    });
-  }
-
-  onPreRender() {
-    this.set1f("uTime", this.game.loop.time / 1000);
-  }
-}
-
-const STAGE_OBJECT_ASSETS = [
-  { key: "stage-props-traffic-cone", path: "assets/stage_objects/props_traffic_cone.webp" },
-  { key: "stage-props-construction-barricade", path: "assets/stage_objects/props_construction_barricade.webp" },
-  { key: "stage-props-roadwork-sign", path: "assets/stage_objects/props_roadwork_sign.webp" },
-  { key: "stage-props-sidewalk-sign", path: "assets/stage_objects/props_sidewalk_sign.webp" },
-  { key: "stage-props-park-bench", path: "assets/stage_objects/props_park_bench.webp" },
-  { key: "stage-props-trash-bin", path: "assets/stage_objects/props_trash_bin.webp" },
-  { key: "stage-props-planter-box", path: "assets/stage_objects/props_planter_box.webp" },
-  { key: "stage-props-bike-rack", path: "assets/stage_objects/props_bike_rack.webp" },
-  { key: "stage-props-bus-stop-sign", path: "assets/stage_objects/props_bus_stop_sign.webp" },
-  { key: "stage-props-vending-machine", path: "assets/stage_objects/props_vending_machine.webp" },
-  { key: "stage-props-utility-box", path: "assets/stage_objects/props_utility_box.webp" },
-  { key: "stage-props-guard-rail", path: "assets/stage_objects/props_guard_rail.webp" },
-  { key: "stage-structures-bus-shelter", path: "assets/stage_objects/structures_bus_shelter.webp" },
-  { key: "stage-structures-phone-booth", path: "assets/stage_objects/structures_phone_booth.webp" },
-  { key: "stage-structures-street-kiosk", path: "assets/stage_objects/structures_street_kiosk.webp" },
-  { key: "stage-structures-shutter-storefront", path: "assets/stage_objects/structures_shutter_storefront.webp" },
-  { key: "stage-structures-subway-stairs", path: "assets/stage_objects/structures_subway_stairs.webp" },
-  { key: "stage-structures-concrete-pillar", path: "assets/stage_objects/structures_concrete_pillar.webp" },
-  { key: "stage-structures-construction-fence", path: "assets/stage_objects/structures_construction_fence.webp" },
-  { key: "stage-structures-chainlink-fence", path: "assets/stage_objects/structures_chainlink_fence.webp" },
-  { key: "stage-structures-vending-kiosk", path: "assets/stage_objects/structures_vending_kiosk.webp" },
-  { key: "stage-structures-station-wall-railing", path: "assets/stage_objects/structures_station_wall_railing.webp" },
-  { key: "stage-structures-station-entrance", path: "assets/stage_objects/structures_station_entrance.webp" },
-] as const satisfies readonly StageObjectAsset[];
-
-const ITEM_DEFINITIONS: Record<ItemType, { key: string; label: string; points: number; assetPath: string }> = {
-  energyDrink: {
-    key: "item-energy-drink",
-    label: "ENERGY",
-    points: 100,
-    assetPath: "assets/items/energy_drink.png",
-  },
-  shoppingBag: {
-    key: "item-shopping-bag",
-    label: "BAG",
-    points: 250,
-    assetPath: "assets/items/shopping_bag.png",
-  },
-  bubbleTea: {
-    key: "item-bubble-tea",
-    label: "TEA",
-    points: 150,
-    assetPath: "assets/items/bubble_tea.png",
-  },
-};
-
-const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
-  name: "Original Downtown",
-  worldWidth: 16800,
-  playerStart: { x: 120, y: 552 },
-  goal: { x: 16620, y: 568 },
-  platforms: [
-    { x: 360, y: 548, units: 4 },
-    { x: 744, y: 488, units: 7 },
-    { x: 1160, y: 548, units: 3 },
-    { x: 1288, y: 500, units: 3 },
-    { x: 1580, y: 456, units: 6 },
-    { x: 1980, y: 548, units: 10 },
-    { x: 2200, y: 420, units: 3 },
-    { x: 2392, y: 372, units: 3 },
-    { x: 2584, y: 324, units: 4 },
-    { x: 2920, y: 292, units: 3 },
-    { x: 3112, y: 244, units: 3 },
-    { x: 3304, y: 196, units: 4 },
-    { x: 3540, y: 300, units: 1 },
-    { x: 3720, y: 560, units: 7 },
-    { x: 4280, y: 520, units: 5 },
-    { x: 4700, y: 460, units: 4 },
-    { x: 5000, y: 560, units: 7 },
-    { x: 5380, y: 420, units: 3 },
-    { x: 5600, y: 360, units: 3 },
-    { x: 5880, y: 300, units: 4 },
-    { x: 6260, y: 500, units: 5 },
-    { x: 6620, y: 420, units: 4 },
-    { x: 6960, y: 548, units: 8 },
-    { x: 7350, y: 480, units: 3 },
-    { x: 7600, y: 400, units: 4 },
-    { x: 7900, y: 560, units: 6 },
-    { x: 8380, y: 520, units: 5 },
-    { x: 8740, y: 440, units: 4 },
-    { x: 9060, y: 332, units: 3 },
-    { x: 9360, y: 212, units: 4 },
-    { x: 9720, y: 112, units: 3 },
-    { x: 10080, y: 260, units: 5 },
-    { x: 10480, y: 420, units: 4 },
-    { x: 10820, y: 560, units: 8 },
-    { x: 11380, y: 468, units: 4 },
-    { x: 11720, y: 340, units: 3 },
-    { x: 12020, y: 188, units: 4 },
-    { x: 12460, y: 308, units: 3 },
-    { x: 12860, y: 512, units: 7 },
-    { x: 13380, y: 420, units: 3 },
-    { x: 13680, y: 268, units: 4 },
-    { x: 14040, y: 128, units: 3 },
-    { x: 14460, y: 360, units: 5 },
-    { x: 14920, y: 548, units: 9 },
-    { x: 15480, y: 460, units: 4 },
-    { x: 15840, y: 340, units: 3 },
-    { x: 16240, y: 560, units: 6 },
-  ],
-  streetLamps: [
-    { x: 260, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-    { x: 910, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 1500, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-    { x: 2140, key: PROP_ASSETS.lampDouble, scale: 0.66 },
-    { x: 2860, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-    { x: 3440, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 4040, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-    { x: 4540, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 5200, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-    { x: 5850, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 6480, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-    { x: 7160, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 7820, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-    { x: 8460, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 9180, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-    { x: 9840, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 10560, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-    { x: 11280, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 11960, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-    { x: 12640, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 13320, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-    { x: 14020, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 14740, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-    { x: 15460, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 16220, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-  ],
-  decorations: [
-    { x: 540, y: GROUND_TOP_Y, key: "stage-props-park-bench", scale: 0.9 },
-    { x: 705, y: GROUND_TOP_Y, key: "stage-props-trash-bin", scale: 0.9 },
-    { x: 1050, y: GROUND_TOP_Y, key: "stage-props-guard-rail", scale: 0.9 },
-    { x: 1320, y: 548, key: "stage-props-traffic-cone", scale: 0.72 },
-    { x: 1710, y: 456, key: "stage-props-planter-box", scale: 0.72 },
-    { x: 2065, y: GROUND_TOP_Y, key: "stage-structures-bus-shelter", scale: 0.72 },
-    { x: 2460, y: GROUND_TOP_Y, key: "stage-props-bus-stop-sign", scale: 0.85 },
-    { x: 2705, y: 324, key: "stage-props-construction-barricade", scale: 0.64 },
-    { x: 3020, y: GROUND_TOP_Y, key: "stage-props-vending-machine", scale: 0.8 },
-    { x: 3360, y: GROUND_TOP_Y, key: "stage-structures-phone-booth", scale: 0.78 },
-    { x: 3860, y: GROUND_TOP_Y, key: "stage-structures-subway-stairs", scale: 0.68 },
-    { x: 4380, y: GROUND_TOP_Y, key: "stage-props-bike-rack", scale: 0.82 },
-    { x: 4740, y: GROUND_TOP_Y, key: "stage-structures-vending-kiosk", scale: 0.78 },
-    { x: 5140, y: 560, key: "stage-props-utility-box", scale: 0.58 },
-    { x: 5520, y: 420, key: "stage-props-roadwork-sign", scale: 0.58 },
-    { x: 5910, y: GROUND_TOP_Y, key: "stage-structures-station-wall-railing", scale: 0.72 },
-    { x: 6360, y: GROUND_TOP_Y, key: "stage-structures-construction-fence", scale: 0.62 },
-    { x: 6800, y: 420, key: "stage-props-sidewalk-sign", scale: 0.58 },
-    { x: 7160, y: GROUND_TOP_Y, key: "stage-structures-street-kiosk", scale: 0.62 },
-    { x: 7540, y: 480, key: "stage-props-planter-box", scale: 0.62 },
-    { x: 7960, y: GROUND_TOP_Y, key: "stage-structures-station-entrance", scale: 0.64 },
-    { x: 8520, y: GROUND_TOP_Y, key: "stage-props-guard-rail", scale: 0.84 },
-    { x: 8820, y: 440, key: "stage-props-trash-bin", scale: 0.58 },
-    { x: 9320, y: 212, key: "stage-props-planter-box", scale: 0.56 },
-    { x: 9800, y: 112, key: "stage-props-sidewalk-sign", scale: 0.52 },
-    { x: 10180, y: GROUND_TOP_Y, key: "stage-structures-chainlink-fence", scale: 0.62 },
-    { x: 10620, y: 420, key: "stage-props-utility-box", scale: 0.54 },
-    { x: 11080, y: GROUND_TOP_Y, key: "stage-structures-bus-shelter", scale: 0.68 },
-    { x: 11520, y: 468, key: "stage-props-bike-rack", scale: 0.58 },
-    { x: 12080, y: 188, key: "stage-props-roadwork-sign", scale: 0.5 },
-    { x: 12490, y: GROUND_TOP_Y, key: "stage-structures-shutter-storefront", scale: 0.64 },
-    { x: 13080, y: 512, key: "stage-props-construction-barricade", scale: 0.56 },
-    { x: 13680, y: 268, key: "stage-props-planter-box", scale: 0.54 },
-    { x: 14110, y: 128, key: "stage-props-bus-stop-sign", scale: 0.58 },
-    { x: 14580, y: GROUND_TOP_Y, key: "stage-structures-concrete-pillar", scale: 0.62 },
-    { x: 15120, y: 548, key: "stage-props-vending-machine", scale: 0.62 },
-    { x: 15560, y: GROUND_TOP_Y, key: "stage-structures-vending-kiosk", scale: 0.72 },
-    { x: 15920, y: 340, key: "stage-props-traffic-cone", scale: 0.54 },
-    { x: 16420, y: GROUND_TOP_Y, key: "stage-structures-station-wall-railing", scale: 0.68 },
-  ],
-  items: [
-    { type: "energyDrink", x: 475, y: 492 },
-    { type: "bubbleTea", x: 915, y: 432 },
-    { type: "shoppingBag", x: 1285, y: 492 },
-    { type: "energyDrink", x: 1750, y: 400 },
-    { type: "bubbleTea", x: 2345, y: 288 },
-    { type: "shoppingBag", x: 2720, y: 204 },
-    { type: "energyDrink", x: 3185, y: 132 },
-    { type: "bubbleTea", x: 3575, y: 236 },
-    { type: "shoppingBag", x: 3925, y: 504 },
-    { type: "energyDrink", x: 4385, y: 464 },
-    { type: "bubbleTea", x: 4825, y: 404 },
-    { type: "shoppingBag", x: 5085, y: 504 },
-    { type: "energyDrink", x: 5485, y: 364 },
-    { type: "bubbleTea", x: 5975, y: 244 },
-    { type: "shoppingBag", x: 6425, y: 444 },
-    { type: "energyDrink", x: 6745, y: 364 },
-    { type: "bubbleTea", x: 7125, y: 492 },
-    { type: "shoppingBag", x: 7465, y: 424 },
-    { type: "energyDrink", x: 7775, y: 344 },
-    { type: "bubbleTea", x: 8125, y: 504 },
-    { type: "shoppingBag", x: 8460, y: 464 },
-    { type: "energyDrink", x: 8830, y: 384 },
-    { type: "bubbleTea", x: 9140, y: 276 },
-    { type: "shoppingBag", x: 9460, y: 156 },
-    { type: "energyDrink", x: 9810, y: 56 },
-    { type: "bubbleTea", x: 10180, y: 204 },
-    { type: "shoppingBag", x: 10570, y: 364 },
-    { type: "energyDrink", x: 10980, y: 504 },
-    { type: "bubbleTea", x: 11460, y: 412 },
-    { type: "shoppingBag", x: 11820, y: 284 },
-    { type: "energyDrink", x: 12120, y: 132 },
-    { type: "bubbleTea", x: 12540, y: 252 },
-    { type: "shoppingBag", x: 13020, y: 456 },
-    { type: "energyDrink", x: 13440, y: 364 },
-    { type: "bubbleTea", x: 13770, y: 212 },
-    { type: "shoppingBag", x: 14120, y: 72 },
-    { type: "energyDrink", x: 14540, y: 304 },
-    { type: "bubbleTea", x: 15080, y: 492 },
-    { type: "shoppingBag", x: 15560, y: 404 },
-    { type: "energyDrink", x: 15920, y: 284 },
-    { type: "bubbleTea", x: 16320, y: 504 },
-  ],
-};
-
-const NEON_CANAL_STAGE: StageDefinition = {
-  name: "Neon Canal",
-  worldWidth: 12800,
-  playerStart: { x: 120, y: 552 },
-  goal: { x: 12580, y: 568 },
-  platforms: [
-    { x: 340, y: 548, units: 5 },
-    { x: 760, y: 500, units: 4 },
-    { x: 1100, y: 452, units: 3 },
-    { x: 1430, y: 388, units: 4 },
-    { x: 1880, y: 548, units: 6 },
-    { x: 2320, y: 472, units: 3 },
-    { x: 2620, y: 392, units: 5 },
-    { x: 3120, y: 304, units: 4 },
-    { x: 3580, y: 548, units: 8 },
-    { x: 4300, y: 480, units: 4 },
-    { x: 4700, y: 404, units: 3 },
-    { x: 5020, y: 328, units: 3 },
-    { x: 5380, y: 252, units: 4 },
-    { x: 5900, y: 548, units: 7 },
-    { x: 6480, y: 456, units: 5 },
-    { x: 7040, y: 356, units: 4 },
-    { x: 7480, y: 548, units: 5 },
-    { x: 7960, y: 484, units: 3 },
-    { x: 8320, y: 420, units: 3 },
-    { x: 8700, y: 356, units: 4 },
-    { x: 9240, y: 548, units: 8 },
-    { x: 10040, y: 468, units: 4 },
-    { x: 10480, y: 388, units: 3 },
-    { x: 10880, y: 292, units: 5 },
-    { x: 11580, y: 548, units: 10 },
-  ],
-  streetLamps: [
-    { x: 260, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-    { x: 980, key: PROP_ASSETS.lampDouble, scale: 0.66 },
-    { x: 1760, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-    { x: 2780, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 3740, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-    { x: 4780, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 6060, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-    { x: 7180, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 8200, key: PROP_ASSETS.lampSingle, scale: 0.68 },
-    { x: 9440, key: PROP_ASSETS.lampDouble, scale: 0.64 },
-    { x: 10880, key: PROP_ASSETS.lampSingle, scale: 0.66 },
-    { x: 12100, key: PROP_ASSETS.lampDouble, scale: 0.66 },
-  ],
-  decorations: [
-    { x: 560, y: GROUND_TOP_Y, key: "stage-props-bike-rack", scale: 0.82 },
-    { x: 900, y: GROUND_TOP_Y, key: "stage-structures-bus-shelter", scale: 0.72 },
-    { x: 1320, y: 452, key: "stage-props-planter-box", scale: 0.62 },
-    { x: 1710, y: 388, key: "stage-props-sidewalk-sign", scale: 0.58 },
-    { x: 2200, y: GROUND_TOP_Y, key: "stage-props-vending-machine", scale: 0.78 },
-    { x: 2980, y: 392, key: "stage-props-roadwork-sign", scale: 0.56 },
-    { x: 3440, y: 304, key: "stage-props-construction-barricade", scale: 0.62 },
-    { x: 3950, y: GROUND_TOP_Y, key: "stage-structures-phone-booth", scale: 0.76 },
-    { x: 4520, y: GROUND_TOP_Y, key: "stage-structures-vending-kiosk", scale: 0.76 },
-    { x: 5200, y: 328, key: "stage-props-utility-box", scale: 0.56 },
-    { x: 5680, y: 252, key: "stage-props-trash-bin", scale: 0.54 },
-    { x: 6260, y: GROUND_TOP_Y, key: "stage-structures-chainlink-fence", scale: 0.64 },
-    { x: 6800, y: 456, key: "stage-props-park-bench", scale: 0.68 },
-    { x: 7340, y: 356, key: "stage-props-bus-stop-sign", scale: 0.62 },
-    { x: 7740, y: GROUND_TOP_Y, key: "stage-structures-station-entrance", scale: 0.62 },
-    { x: 8480, y: 420, key: "stage-props-planter-box", scale: 0.58 },
-    { x: 9000, y: 356, key: "stage-props-traffic-cone", scale: 0.56 },
-    { x: 9620, y: GROUND_TOP_Y, key: "stage-structures-street-kiosk", scale: 0.64 },
-    { x: 10240, y: 468, key: "stage-props-guard-rail", scale: 0.72 },
-    { x: 10680, y: 388, key: "stage-props-roadwork-sign", scale: 0.52 },
-    { x: 11240, y: 292, key: "stage-structures-concrete-pillar", scale: 0.58 },
-    { x: 11860, y: GROUND_TOP_Y, key: "stage-structures-station-wall-railing", scale: 0.68 },
-    { x: 12320, y: GROUND_TOP_Y, key: "stage-structures-shutter-storefront", scale: 0.64 },
-  ],
-  items: [
-    { type: "energyDrink", x: 480, y: 492 },
-    { type: "bubbleTea", x: 900, y: 444 },
-    { type: "shoppingBag", x: 1230, y: 396 },
-    { type: "energyDrink", x: 1580, y: 332 },
-    { type: "bubbleTea", x: 2140, y: 492 },
-    { type: "shoppingBag", x: 2460, y: 416 },
-    { type: "energyDrink", x: 2860, y: 336 },
-    { type: "bubbleTea", x: 3260, y: 248 },
-    { type: "shoppingBag", x: 3860, y: 492 },
-    { type: "energyDrink", x: 4480, y: 424 },
-    { type: "bubbleTea", x: 4840, y: 348 },
-    { type: "shoppingBag", x: 5160, y: 272 },
-    { type: "energyDrink", x: 5580, y: 196 },
-    { type: "bubbleTea", x: 6120, y: 492 },
-    { type: "shoppingBag", x: 6680, y: 400 },
-    { type: "energyDrink", x: 7180, y: 300 },
-    { type: "bubbleTea", x: 7640, y: 492 },
-    { type: "shoppingBag", x: 8080, y: 428 },
-    { type: "energyDrink", x: 8420, y: 364 },
-    { type: "bubbleTea", x: 8860, y: 300 },
-    { type: "shoppingBag", x: 9460, y: 492 },
-    { type: "energyDrink", x: 10180, y: 412 },
-    { type: "bubbleTea", x: 10600, y: 332 },
-    { type: "shoppingBag", x: 11020, y: 236 },
-    { type: "energyDrink", x: 11720, y: 492 },
-    { type: "bubbleTea", x: 12240, y: 492 },
-  ],
-};
-
-const STAGES = {
-  originalDowntown: ORIGINAL_DOWNTOWN_STAGE,
-  neonCanal: NEON_CANAL_STAGE,
-};
-const ACTIVE_STAGE = STAGES.neonCanal;
 let extraTouchPointersAdded = false;
-
-const cloneStage = (stage: StageDefinition): StageDefinition => ({
-  name: stage.name,
-  worldWidth: stage.worldWidth,
-  playerStart: { ...stage.playerStart },
-  goal: { ...stage.goal },
-  platforms: stage.platforms.map((platform) => ({ ...platform })),
-  streetLamps: stage.streetLamps.map((lamp) => ({ ...lamp })),
-  decorations: stage.decorations.map((decoration) => ({ ...decoration })),
-  items: stage.items.map((item) => ({ ...item })),
-});
 
 class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
