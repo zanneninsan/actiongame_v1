@@ -10,7 +10,7 @@ export const PROP_ASSETS = {
 } as const;
 export type StreetLampKey = (typeof PROP_ASSETS)[keyof typeof PROP_ASSETS];
 export type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
-export type EnemyType = "neonBouncer";
+export type EnemyType = "neonBouncer" | "knifePunk";
 export const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
 export const ITEM_GLOW_COLORS: Record<ItemType, number> = {
   energyDrink: 0x8cffd2,
@@ -89,9 +89,39 @@ export const ITEM_DEFINITIONS: Record<ItemType, { key: string; label: string; po
   },
 };
 
-export const ENEMY_DEFINITIONS: Record<EnemyType, { key: string; label: string }> = {
+export const ENEMY_DEFINITIONS: Record<
+  EnemyType,
+  {
+    key: string;
+    label: string;
+    assetPath?: string;
+    displayWidth: number;
+    displayHeight: number;
+    bodyWidth: number;
+    bodyHeight: number;
+    bodyOffsetX: number;
+    bodyOffsetY: number;
+  }
+> = {
   neonBouncer: {
     key: "enemy-neon-bouncer",
     label: "Neon Bouncer",
+    displayWidth: 76,
+    displayHeight: 64,
+    bodyWidth: 56,
+    bodyHeight: 42,
+    bodyOffsetX: 10,
+    bodyOffsetY: 16,
+  },
+  knifePunk: {
+    key: "enemy-knife-punk",
+    label: "Knife Punk",
+    assetPath: "assets/enemies/knife_punk.png",
+    displayWidth: 86,
+    displayHeight: 72,
+    bodyWidth: 48,
+    bodyHeight: 46,
+    bodyOffsetX: 20,
+    bodyOffsetY: 22,
   },
 };

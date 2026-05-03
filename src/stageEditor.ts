@@ -533,7 +533,12 @@ export class StageEditor {
     }
     if (selection.kind === "enemy") {
       const enemy = this.stage.enemies?.[selection.index];
-      return enemy ? { x: enemy.x, y: enemy.y, width: 86, height: 74 } : undefined;
+      if (!enemy) {
+        return undefined;
+      }
+
+      const definition = ENEMY_DEFINITIONS[enemy.type ?? "neonBouncer"];
+      return { x: enemy.x, y: enemy.y, width: definition.displayWidth + 10, height: definition.displayHeight + 10 };
     }
     if (selection.kind === "streetLamp") {
       const lamp = this.stage.streetLamps[selection.index];

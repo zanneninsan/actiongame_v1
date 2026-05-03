@@ -518,6 +518,7 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
   ],
   "enemies": [
     {
+      "type": "knifePunk",
       "x": 520,
       "y": 360,
       "patrolLeft": 360,

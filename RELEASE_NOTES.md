@@ -1,5 +1,15 @@
 # Release Notes / リリースノート
 
+## v0.1.93
+### English
+- Added a new Knife Punk enemy type based on the provided reference image.
+- Added image-backed enemy loading and per-enemy display/body sizing so future enemy assets can be registered cleanly.
+- Placed the new enemy type on the first stage enemy and exposed it in the stage editor enemy selector.
+### Japanese
+- 参考画像をもとにした新しい敵タイプ「Knife Punk」を追加しました。
+- 今後の敵アセット追加に備えて、画像読み込みと敵ごとの表示サイズ、当たり判定サイズを定義できるようにしました。
+- ステージ序盤の敵に新しい敵タイプを割り当て、ステージエディタの敵選択にも表示されるようにしました。
+
 ## v0.1.92
 ### English
 - Rebuild enemies from their stage placement data when enabling the stage editor so editor selection matches the intended initial positions.

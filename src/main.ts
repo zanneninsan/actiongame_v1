@@ -2,6 +2,7 @@ import Phaser from "phaser";
 import "./styles.css";
 import {
   ITEM_DEFINITIONS,
+  ENEMY_DEFINITIONS,
   PLATFORM_ASSETS,
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
@@ -40,7 +41,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.92";
+const DEBUG_VERSION = "v0.1.93";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -168,6 +169,11 @@ class PrototypeScene extends Phaser.Scene {
     });
     Object.values(ITEM_DEFINITIONS).forEach((item) => {
       this.load.image(item.key, `${ASSET_BASE}${item.assetPath}`);
+    });
+    Object.values(ENEMY_DEFINITIONS).forEach((enemy) => {
+      if (enemy.assetPath) {
+        this.load.image(enemy.key, `${ASSET_BASE}${enemy.assetPath}`);
+      }
     });
     this.load.spritesheet("player-idle", `${ASSET_BASE}assets/sprites/player_idle_8_320x260.png`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
