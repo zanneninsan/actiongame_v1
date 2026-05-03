@@ -4,9 +4,14 @@
 - Use Japanese for conversation with the user.
 - Do not scan the whole repo. Only inspect files directly relevant to the user's next request.
 - For stage layout changes, start with `src/stages.ts`.
-- For gameplay changes, search exact symbols in `src/main.ts` before reading large ranges.
+- For stage rendering behavior, start with `src/stageRenderer.ts`.
+- For enemy behavior, start with `src/enemies.ts`; use `src/stages.ts` for enemy placement.
+- For item behavior, start with `src/items.ts`; use `src/stages.ts` for item placement.
+- For gameplay changes, search exact symbols in the focused module first; use `src/main.ts` for player movement, run state, collisions, score/timer integration, and scene wiring.
 - Keep `src/main.ts` focused on core game behavior and thin integration hooks.
 - For HUD and rich in-game UI visuals, do not rely on CSS decoration as the primary look. Generate polished raster UI assets with GPT Image2, place them under `public/assets`, and keep DOM/CSS usage limited to positioning, text overlays, and interaction hooks.
+- For debug/global UI behavior, start with `src/globalUi.ts`; use `src/backgrounds.ts` for background switching.
+- For mobile control behavior, start with `src/mobileControls.ts`.
 - For stage editor behavior changes, start with `src/stageEditor.ts`; use `src/stageEditorPanel.ts` for editor panel DOM/UI only.
 - Run `npm run build` after code edits.
 - Commit each completed, coherent fix or feature chunk after verification. Do not leave finished work uncommitted unless the user explicitly asks not to commit.

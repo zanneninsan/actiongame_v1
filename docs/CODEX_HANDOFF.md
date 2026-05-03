@@ -24,13 +24,25 @@ This file is the short context packet for future Codex sessions. Read this first
 ## Important Files
 
 - `src/main.ts`
-  - Phaser scene, player control, collision, run state, score, timer, and a thin stage editor hookup.
-  - Keep core game behavior here. Do not add detailed editor workflows here unless they are just integration callbacks.
+  - Phaser scene lifecycle, player control, player collision/damage, run state, score/timer integration, and thin hooks into extracted modules.
+  - Keep core game behavior and wiring here. Do not move feature-specific rendering, DOM controls, item/enemy internals, or detailed editor workflows back into this file.
 - `src/stages.ts`
-  - Active stage data: world width, start, goal, platform runs, lamps, decorations, item placements.
+  - Active stage data: world width, start, goal, explicit platform runs including ground floors/gaps, lamps, decorations, item placements, and enemy placements.
   - Most stage layout changes should happen here.
 - `src/assets.ts`
   - Asset keys, item definitions, stage object definitions, shared stage types.
+- `src/stageRenderer.ts`
+  - Renders stage platform runs, street lamps, decorations, and decoration top-platform hitboxes from stage data.
+- `src/items.ts`
+  - Item glow creation, item sprite placement, pickup overlap handling, and pickup cleanup. Score updates are passed back into `src/main.ts`.
+- `src/enemies.ts`
+  - Enemy texture generation, enemy sprite creation, patrol movement, and enemy physics setup. Damage response stays in `src/main.ts`.
+- `src/backgrounds.ts`
+  - Rear/midground background creation, scrolling, and debug background cycling.
+- `src/globalUi.ts`
+  - DOM global UI for version, HIT toggle, background toggles, sound toggle, and options modal.
+- `src/mobileControls.ts`
+  - DOM mobile control buttons and pointer binding.
 - `src/i18n.ts`
   - English/Japanese UI text dictionary and locale helpers.
 - `src/stageConstants.ts`
@@ -59,6 +71,14 @@ This file is the short context packet for future Codex sessions. Read this first
   - Do not read all of `src/main.ts` unless the task requires it.
 - Prefer editing the smallest relevant module:
   - Stage placement: `src/stages.ts`
+  - Stage rendering behavior: `src/stageRenderer.ts`
+  - Enemy behavior: `src/enemies.ts`
+  - Enemy placement: `src/stages.ts`
+  - Item behavior: `src/items.ts`
+  - Item placement: `src/stages.ts`
+  - Background switching/rendering: `src/backgrounds.ts`
+  - Global debug/options UI: `src/globalUi.ts`
+  - Mobile controls: `src/mobileControls.ts`
   - Stage editor behavior: `src/stageEditor.ts`
   - UI style only: `src/styles.css`
   - Start screen: `src/startModal.ts`
@@ -109,12 +129,14 @@ Start with `src/stages.ts`.
   - `streetLamps`
   - `decorations`
   - `items`
+  - `enemies`
 - Decorations can omit `y`; default becomes the resolved stage `groundTopY`.
 - Street lamps and decorations can omit `scale`; default is `1`.
+- Baseline ground is no longer auto-generated. Ground floors and holes are explicit `platforms` entries in `src/stages.ts`.
 
 ### Mobile Controls
 
-Mobile controls are DOM-based in `src/main.ts` and styled in `src/styles.css`.
+Mobile controls are DOM-based in `src/mobileControls.ts` and styled in `src/styles.css`.
 
 - Mobile mode is selected from the start modal.
 - Touch buttons update `mobileInput`.
@@ -122,8 +144,9 @@ Mobile controls are DOM-based in `src/main.ts` and styled in `src/styles.css`.
 
 ### Debug / Editor
 
-- Debug UI is created in `src/main.ts`.
+- Debug/global UI is created in `src/globalUi.ts` through a thin hook in `src/main.ts`.
 - `HIT` toggles collision rectangles.
+- Rear/midground background switching lives in `src/backgrounds.ts`.
 - `EDITOR` opens the stage editor panel through the thin hook in `src/main.ts`.
 - Stage editor behavior lives in `src/stageEditor.ts`.
 - Stage editor UI markup/events live in `src/stageEditorPanel.ts`.
@@ -146,7 +169,11 @@ Read `docs/CODEX_HANDOFF.md` first. Then check `git status --short --branch`.
 Use Japanese for conversation with the user.
 Do not scan the whole repo. Only inspect files directly relevant to my next request.
 For stage layout changes, start with `src/stages.ts`.
-For gameplay changes, search exact symbols in `src/main.ts` before reading large ranges.
+For stage rendering behavior, start with `src/stageRenderer.ts`.
+For enemy behavior, start with `src/enemies.ts`; use `src/stages.ts` for enemy placement.
+For item behavior, start with `src/items.ts`; use `src/stages.ts` for item placement.
+For gameplay changes, search exact symbols in the focused module first; use `src/main.ts` for player movement, run state, collisions, score/timer integration, and scene wiring.
+For global/debug UI, start with `src/globalUi.ts`; for mobile controls, start with `src/mobileControls.ts`; for background switching, start with `src/backgrounds.ts`.
 For stage editor behavior changes, start with `src/stageEditor.ts`; use `src/stageEditorPanel.ts` for panel UI only.
 Run `npm run build` after code edits.
 Commit each completed, coherent fix or feature chunk after verification unless I explicitly ask not to commit.
