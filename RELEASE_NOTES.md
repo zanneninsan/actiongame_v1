@@ -1,5 +1,10 @@
 # Release Notes / リリースノート
 
+## v0.1.100
+### English
+- Adjusted the top HUD text to roughly three-quarters of the original size.
+### Japanese
+- 上部HUDの文字サイズを元の約4分の3に調整しました。
 ## v0.1.99
 ### English
 - Restored the top HUD text to its original size.
