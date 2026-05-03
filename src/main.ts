@@ -20,6 +20,7 @@ import { RainbowWinPipeline } from "./rainbowPipeline";
 import { StartCountdownOverlay } from "./countdown";
 import { StartModal, type ControlMode } from "./startModal";
 import { StageEditor } from "./stageEditor";
+import { STAGE_OBJECT_TOP_PLATFORMS } from "./stageObjectPlatforms";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
 import {
   createStoryDialogue,
@@ -34,7 +35,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.81";
+const DEBUG_VERSION = "v0.1.82";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -76,14 +77,6 @@ const MOBILE_FULLSCREEN_MIN_LANDSCAPE_HEIGHT = 430;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 1000;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
-const DECORATION_TOP_PLATFORMS: Record<string, Array<{ x: number; y: number; width: number; height: number }>> = {
-  "stage-structures-bus-shelter": [{ x: 76, y: 6, width: 462, height: 12 }],
-  [PROP_ASSETS.lampSingle]: [{ x: 90, y: 2, width: 58, height: 10 }],
-  [PROP_ASSETS.lampDouble]: [
-    { x: 0, y: 2, width: 58, height: 10 },
-    { x: 171, y: 2, width: 56, height: 10 },
-  ],
-};
 type MobileInputKey = "w" | "a" | "s" | "d";
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
@@ -932,7 +925,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private addDecorationTopPlatform(x: number, y: number, key: string, scale: number) {
-    const platforms = DECORATION_TOP_PLATFORMS[key];
+    const platforms = STAGE_OBJECT_TOP_PLATFORMS[key];
     if (!platforms) {
       return;
     }

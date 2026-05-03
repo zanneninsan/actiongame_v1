@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.82
+### English
+- Moved stage-object top-platform definitions out of `src/main.ts` into a dedicated `src/stageObjectPlatforms.ts` mapping file.
+- Added top-landable surfaces for `street-kiosk`, `guard-rail`, `concrete-pillar`, `station-wall-railing`, and `shutter-storefront`.
+### Japanese
+- ステージオブジェクトの上面当たり判定の定義を `src/main.ts` から `src/stageObjectPlatforms.ts` に切り出しました。
+- `street-kiosk`、`guard-rail`、`concrete-pillar`、`station-wall-railing`、`shutter-storefront` の上にも乗れるようにしました。
 ## v0.1.81
 ### English
 - Added a GPT Image2-generated player defeat sprite sheet with an 8-frame non-graphic down animation.
