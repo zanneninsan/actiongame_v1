@@ -25,6 +25,10 @@ import { createEnemies, createEnemyTexture, populateEnemies, updateEnemies } fro
 import { createItems, populateItems } from "./items";
 import { renderStageObjects } from "./stageRenderer";
 import { BackgroundController } from "./backgrounds";
+import {
+  createMobileControls as createMobileControlElements,
+  type MobileInputKey,
+} from "./mobileControls";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
@@ -73,7 +77,6 @@ const MOBILE_FULLSCREEN_MIN_LANDSCAPE_HEIGHT = 430;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 1000;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
-type MobileInputKey = "w" | "a" | "s" | "d";
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
   webkitRequestFullscreen?: () => Promise<void> | void;
@@ -866,80 +869,15 @@ class PrototypeScene extends Phaser.Scene {
   private createMobileControls() {
     this.removeMobileControls();
 
-    const controls = document.createElement("div");
-    controls.id = "mobile-controls";
-    controls.innerHTML = `
-      <div class="mobile-pad">
-        <button class="mobile-button pad-up" data-key="w" type="button" aria-label="${t(this.locale, "aria.jump")}">&uarr;</button>
-        <button class="mobile-button pad-left" data-key="a" type="button" aria-label="${t(this.locale, "aria.moveLeft")}">&larr;</button>
-        <button class="mobile-button pad-down" data-key="s" type="button" aria-label="${t(this.locale, "aria.down")}">&darr;</button>
-        <button class="mobile-button pad-right" data-key="d" type="button" aria-label="${t(this.locale, "aria.moveRight")}">&rarr;</button>
-      </div>
-      <div class="mobile-actions">
-        <button class="mobile-button" data-key="w" type="button" aria-label="${t(this.locale, "aria.jump")}">&uarr;</button>
-        <button class="mobile-button restart-button" data-action="restart" type="button">R</button>
-      </div>
-    `;
-    document.body.appendChild(controls);
-
-    controls.querySelectorAll<HTMLButtonElement>("[data-key]").forEach((button) => {
-      const key = button.dataset.key as MobileInputKey;
-      this.bindMobileButton(button, (pressed) => {
+    this.mobileControlCleanup = createMobileControlElements({
+      locale: this.locale,
+      onInputChange: (key, pressed) => {
         this.mobileInput[key] = pressed;
-        if (key === "w" && pressed) {
-          this.mobileJumpQueued = true;
-        }
-      });
-    });
-
-    const restartButton = controls.querySelector<HTMLButtonElement>("[data-action='restart']");
-    if (restartButton) {
-      this.bindMobileButton(restartButton, (pressed) => {
-        if (pressed) {
-          this.restartStage();
-        }
-      });
-    }
-  }
-
-  private bindMobileButton(button: HTMLButtonElement, onPressedChange: (pressed: boolean) => void) {
-    const activePointers = new Set<number>();
-    const setPressed = (pressed: boolean) => {
-      button.classList.toggle("is-pressed", pressed);
-      onPressedChange(pressed);
-    };
-    const clearPressed = () => {
-      activePointers.clear();
-      setPressed(false);
-    };
-    const press = (event: PointerEvent) => {
-      event.preventDefault();
-      button.setPointerCapture(event.pointerId);
-      activePointers.add(event.pointerId);
-      setPressed(true);
-    };
-    const release = (event: PointerEvent) => {
-      event.preventDefault();
-      if (button.hasPointerCapture(event.pointerId)) {
-        button.releasePointerCapture(event.pointerId);
-      }
-      activePointers.delete(event.pointerId);
-      setPressed(activePointers.size > 0);
-    };
-
-    button.addEventListener("pointerdown", press);
-    button.addEventListener("pointerup", release);
-    button.addEventListener("pointercancel", release);
-    button.addEventListener("lostpointercapture", release);
-    window.addEventListener("blur", clearPressed);
-    document.addEventListener("visibilitychange", clearPressed);
-    this.mobileControlCleanup.push(() => {
-      button.removeEventListener("pointerdown", press);
-      button.removeEventListener("pointerup", release);
-      button.removeEventListener("pointercancel", release);
-      button.removeEventListener("lostpointercapture", release);
-      window.removeEventListener("blur", clearPressed);
-      document.removeEventListener("visibilitychange", clearPressed);
+      },
+      onJumpQueued: () => {
+        this.mobileJumpQueued = true;
+      },
+      onRestart: () => this.restartStage(),
     });
   }
 
