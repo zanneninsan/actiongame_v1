@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.79
+### English
+- Replaced the generated placeholder goal marker with the provided polished pixel-art goal gate image.
+- Cropped the transparent padding from the supplied goal art so it displays crisply at the stage finish.
+### Japanese
+- 仮のピクセル描画だったゴールを、指定されたドット絵のゴール画像に差し替えました。
+- 受け取った画像の透明な余白を切り詰め、ステージ終端で見やすく表示されるようにしました。
 ## v0.1.78
 ### English
 - Reworked the story dialogue window to use a GPT Image2-generated ornate HUD frame asset instead of CSS-driven decoration.

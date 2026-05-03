@@ -34,13 +34,16 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.78";
+const DEBUG_VERSION = "v0.1.79";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
 const PLATFORM_DEPTH = -0.55;
+const GOAL_TEXTURE_KEY = "goal-gate";
+const GOAL_DISPLAY_WIDTH = 58;
+const GOAL_DISPLAY_HEIGHT = 192;
 const DECORATION_DEPTH = -1.2;
 const STREET_LAMP_LIGHT_DEPTH = DECORATION_DEPTH - 0.08;
 const STREET_LAMP_GROUND_LIGHT_DEPTH = PLATFORM_DEPTH + 0.02;
@@ -184,7 +187,7 @@ class PrototypeScene extends Phaser.Scene {
     this.createPixelTexture("ground", TILE, TILE, 0x263244, 0x8bd3ff);
     this.createPixelTexture("platform", TILE, TILE, 0x384257, 0xf6c453);
     this.createPixelTexture("platform-hitbox", 1, 1, 0xffffff, 0xffffff);
-    this.createPixelTexture("goal", 12, 48, 0xfb7185, 0x881337);
+    this.load.image(GOAL_TEXTURE_KEY, `${ASSET_BASE}assets/stage_objects/goal_gate.png`);
     this.load.audio("game-bgm", `${ASSET_BASE}assets/audio/gamebgm_default.mp3`);
     this.load.audio("item-pickup", `${ASSET_BASE}assets/audio/item_pickup.wav`);
   }
@@ -210,9 +213,9 @@ class PrototypeScene extends Phaser.Scene {
     this.decorationPlatforms = this.physics.add.staticGroup();
     this.rebuildEditableStageObjects();
 
-    const goal = this.physics.add.staticImage(this.editorStage.goal.x, this.editorStage.goal.y, "goal");
-    goal.setDisplaySize(24, 96);
-    goal.setSize(24, 96);
+    const goal = this.physics.add.staticImage(this.editorStage.goal.x, this.editorStage.goal.y, GOAL_TEXTURE_KEY);
+    goal.setDisplaySize(GOAL_DISPLAY_WIDTH, GOAL_DISPLAY_HEIGHT);
+    goal.setSize(GOAL_DISPLAY_WIDTH, GOAL_DISPLAY_HEIGHT);
     this.goal = goal;
 
     this.createPlayerAnimations();
