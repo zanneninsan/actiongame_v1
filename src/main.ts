@@ -30,7 +30,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.53";
+const DEBUG_VERSION = "v0.1.54";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -116,6 +116,9 @@ class PrototypeScene extends Phaser.Scene {
   private editorMarkers: Phaser.GameObjects.GameObject[] = [];
   private editorSelected?: EditorSelection;
   private editorSelectionMarker?: Phaser.GameObjects.Rectangle;
+  private editorDraggingSelection = false;
+  private editorLastDragX?: number;
+  private editorLastDragY?: number;
   private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
   private hasWon = false;
   private wasOnFloor = false;
@@ -270,8 +273,16 @@ class PrototypeScene extends Phaser.Scene {
 
     this.input.keyboard!.off("keydown-R");
     this.input.keyboard!.on("keydown-R", () => this.restartStage());
+    this.input.keyboard!.off("keydown-DELETE");
+    this.input.keyboard!.on("keydown-DELETE", () => this.deleteEditorSelection());
     this.input.off("pointerdown", this.handleEditorPointerDown, this);
+    this.input.off("pointermove", this.handleEditorPointerMove, this);
+    this.input.off("pointerup", this.handleEditorPointerUp, this);
+    this.input.off("pointerupoutside", this.handleEditorPointerUp, this);
     this.input.on("pointerdown", this.handleEditorPointerDown, this);
+    this.input.on("pointermove", this.handleEditorPointerMove, this);
+    this.input.on("pointerup", this.handleEditorPointerUp, this);
+    this.input.on("pointerupoutside", this.handleEditorPointerUp, this);
     this.createStageEditor();
     this.createGlobalUI();
 
@@ -830,6 +841,9 @@ class PrototypeScene extends Phaser.Scene {
     this.editorMarkers.forEach((marker) => marker.destroy());
     this.editorMarkers = [];
     this.editorSelected = undefined;
+    this.editorDraggingSelection = false;
+    this.editorLastDragX = undefined;
+    this.editorLastDragY = undefined;
     this.editorSelectionMarker?.destroy();
     this.editorSelectionMarker = undefined;
   }
@@ -926,6 +940,10 @@ class PrototypeScene extends Phaser.Scene {
     const x = Math.round(point.x / TILE) * TILE;
     const y = Math.round(point.y / TILE) * TILE;
 
+    if (this.startEditorSelectionDrag(point.x, point.y, x, y)) {
+      return;
+    }
+
     if (this.editorTool === "select") {
       this.selectEditorObjectAt(point.x, point.y);
     } else if (this.editorTool === "move") {
@@ -976,6 +994,58 @@ class PrototypeScene extends Phaser.Scene {
     this.refreshEditorExport();
   }
 
+  private handleEditorPointerMove(pointer: Phaser.Input.Pointer) {
+    if (!this.editorEnabled || !this.editorDraggingSelection || pointer.event?.target !== this.game.canvas) {
+      return;
+    }
+
+    const point = this.cameras.main.getWorldPoint(pointer.x, pointer.y);
+    const x = Math.round(point.x / TILE) * TILE;
+    const y = Math.round(point.y / TILE) * TILE;
+    if (x === this.editorLastDragX && y === this.editorLastDragY) {
+      return;
+    }
+
+    this.editorLastDragX = x;
+    this.editorLastDragY = y;
+    this.moveEditorSelectionTo(x, y);
+  }
+
+  private handleEditorPointerUp() {
+    this.editorDraggingSelection = false;
+    this.editorLastDragX = undefined;
+    this.editorLastDragY = undefined;
+  }
+
+  private startEditorSelectionDrag(worldX: number, worldY: number, snappedX: number, snappedY: number) {
+    if (this.editorTool === "delete" || !this.editorSelected || !this.isPointInsideEditorSelection(worldX, worldY)) {
+      return false;
+    }
+
+    this.editorDraggingSelection = true;
+    this.editorLastDragX = snappedX;
+    this.editorLastDragY = snappedY;
+    return true;
+  }
+
+  private isPointInsideEditorSelection(worldX: number, worldY: number) {
+    if (!this.editorSelected) {
+      return false;
+    }
+
+    const bounds = this.getEditorSelectionBounds(this.editorSelected);
+    if (!bounds) {
+      return false;
+    }
+
+    return (
+      worldX >= bounds.x - bounds.width / 2 &&
+      worldX <= bounds.x + bounds.width / 2 &&
+      worldY >= bounds.y - bounds.height / 2 &&
+      worldY <= bounds.y + bounds.height / 2
+    );
+  }
+
   private selectEditorObjectAt(worldX: number, worldY: number) {
     const selection = this.findEditorObjectAt(worldX, worldY);
     this.editorSelected = selection;
@@ -987,6 +1057,14 @@ class PrototypeScene extends Phaser.Scene {
     if (!selection) {
       this.editorSelected = undefined;
       this.refreshEditorSelectionMarker();
+      return;
+    }
+
+    this.deleteEditorSelection(selection);
+  }
+
+  private deleteEditorSelection(selection = this.editorSelected) {
+    if (!this.editorEnabled || !selection) {
       return;
     }
 
@@ -1005,7 +1083,9 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.editorSelected = undefined;
+    this.editorDraggingSelection = false;
     this.rebuildEditableStageObjects();
+    this.refreshEditorExport();
   }
 
   private moveEditorSelectionTo(x: number, y: number) {

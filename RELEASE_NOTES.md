@@ -1,5 +1,14 @@
 # Release Notes / リリースノート
 
+## v0.1.54
+### English
+- Moved the editor panel MOVE handle inside the expanded editor body so the EDITOR toggle button stays out of the drag target.
+- Added Delete-key removal for the currently selected editable object.
+- Added direct drag movement for the currently selected editable object on the stage.
+### 日本語
+- エディタパネルのMOVEハンドルを展開中のエディタ本体内へ移動し、EDITORボタン自体はドラッグ対象から外しました。
+- 選択中の編集対象をDeleteキーで削除できるようにしました。
+- ステージ上の選択中オブジェクトを直接ドラッグ移動できるようにしました。
 ## v0.1.53
 ### English
 - Moved the stage editor panel DOM, form controls, export field, and drag handling into a dedicated `stageEditorPanel.ts` module.

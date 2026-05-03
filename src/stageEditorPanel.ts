@@ -57,9 +57,9 @@ export class StageEditorPanel {
     panel.innerHTML = `
       <div class="editor-header">
         <button class="editor-toggle" type="button">EDITOR</button>
-        <button class="editor-drag-handle" type="button" aria-label="Move editor panel">MOVE</button>
       </div>
       <div class="editor-body">
+        <button class="editor-drag-handle" type="button" aria-label="Move editor panel">MOVE PANEL</button>
         <div class="editor-row">
           <label>Tool</label>
           <select data-editor-tool>
@@ -114,7 +114,6 @@ export class StageEditorPanel {
     this.decorationSelect = panel.querySelector<HTMLSelectElement>("[data-decoration-key]")!;
 
     const toggleButton = panel.querySelector<HTMLButtonElement>(".editor-toggle")!;
-    const dragHandle = panel.querySelector<HTMLButtonElement>(".editor-drag-handle")!;
     const toolSelect = panel.querySelector<HTMLSelectElement>("[data-editor-tool]")!;
     const exportButton = panel.querySelector<HTMLButtonElement>(".editor-export-button")!;
     toolSelect.value = this.options.initialTool;
@@ -137,7 +136,7 @@ export class StageEditorPanel {
       toolSelect.removeEventListener("change", setTool);
       exportButton.removeEventListener("click", this.options.onExport);
     });
-    this.bindDrag(panel, dragHandle);
+    this.bindDrag(panel);
   }
 
   setExport(value: string) {
@@ -165,25 +164,32 @@ export class StageEditorPanel {
     document.getElementById("stage-editor")?.remove();
   }
 
-  private bindDrag(panel: HTMLDivElement, handle: HTMLButtonElement) {
+  private bindDrag(panel: HTMLDivElement) {
+    const handle = panel.querySelector<HTMLButtonElement>(".editor-drag-handle");
+    const body = panel.querySelector<HTMLDivElement>(".editor-body");
+    if (!handle || !body) {
+      return;
+    }
+
     let dragging = false;
     let offsetX = 0;
     let offsetY = 0;
 
     const movePanel = (clientX: number, clientY: number) => {
-      const width = panel.offsetWidth;
-      const height = panel.offsetHeight;
+      const width = body.offsetWidth;
+      const height = body.offsetHeight;
       const left = Math.min(Math.max(8, clientX - offsetX), window.innerWidth - width - 8);
       const top = Math.min(Math.max(8, clientY - offsetY), window.innerHeight - height - 8);
-      panel.style.left = `${left}px`;
-      panel.style.top = `${top}px`;
-      panel.style.right = "auto";
+      body.style.position = "fixed";
+      body.style.left = `${left}px`;
+      body.style.top = `${top}px`;
+      body.style.marginTop = "0";
     };
 
     const startDrag = (event: PointerEvent) => {
       event.preventDefault();
       event.stopPropagation();
-      const rect = panel.getBoundingClientRect();
+      const rect = body.getBoundingClientRect();
       offsetX = event.clientX - rect.left;
       offsetY = event.clientY - rect.top;
       dragging = true;
