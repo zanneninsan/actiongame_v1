@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.74
+### English
+- Allow the player to drop through the bus shelter roof after crouching on it for one second.
+- Keep the drop-through behavior scoped to decoration top platforms, leaving normal platforms unchanged.
+### Japanese
+- バス停の屋根の上で1秒しゃがみ続けると、下に降りられるようにしました。
+- すり抜け動作は装飾オブジェクトの上面床だけに限定し、通常の足場はこれまで通りにしました。
 ## v0.1.73
 ### English
 - Added a one-way roof platform to `stage-structures-bus-shelter` so the player can land on the bus shelter from above.

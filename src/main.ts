@@ -29,7 +29,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.73";
+const DEBUG_VERSION = "v0.1.74";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -65,6 +65,8 @@ const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
 const MOBILE_FULLSCREEN_MIN_LANDSCAPE_HEIGHT = 430;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
+const DECORATION_PLATFORM_DROP_CROUCH_MS = 1000;
+const DECORATION_PLATFORM_DROP_VELOCITY = 140;
 const DECORATION_TOP_PLATFORMS: Record<string, { x: number; y: number; width: number; height: number }> = {
   "stage-structures-bus-shelter": { x: 76, y: 6, width: 462, height: 12 },
 };
@@ -125,6 +127,8 @@ class PrototypeScene extends Phaser.Scene {
   private landingFastForwarded = false;
   private collisionDebugEnabled = false;
   private collisionDebugGraphics?: Phaser.GameObjects.Graphics;
+  private decorationPlatformCrouchStartedAt = 0;
+  private dropThroughDecorationPlatformBody?: Phaser.Physics.Arcade.StaticBody;
   private bgm?: Phaser.Sound.BaseSound;
 
   constructor() {
@@ -311,6 +315,7 @@ class PrototypeScene extends Phaser.Scene {
     const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
     const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
     const isCrouchInputActive = down && onFloor;
+    this.updateDecorationPlatformDrop(down, onFloor);
     this.applyPlayerBody(isCrouchInputActive);
     this.player.setMaxVelocity(isCrouchInputActive ? CROUCH_MAX_RUN_SPEED : MAX_RUN_SPEED, MAX_FALL_SPEED);
     this.updateCollisionDebug();
@@ -414,6 +419,8 @@ class PrototypeScene extends Phaser.Scene {
     this.wasOnFloor = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
+    this.decorationPlatformCrouchStartedAt = 0;
+    this.dropThroughDecorationPlatformBody = undefined;
     this.collisionDebugGraphics?.clear();
     this.collisionDebugGraphics = undefined;
     this.itemsGroup = undefined;
@@ -681,6 +688,8 @@ class PrototypeScene extends Phaser.Scene {
     this.stageConstants = resolveStageConstants(this.editorStage);
     this.stageRenderObjects.forEach((object) => object.destroy());
     this.stageRenderObjects = [];
+    this.decorationPlatformCrouchStartedAt = 0;
+    this.dropThroughDecorationPlatformBody = undefined;
     this.clearStaticGroup(this.platforms);
     this.clearStaticGroup(this.decorationPlatforms);
     this.clearStaticGroup(this.itemsGroup);
@@ -922,8 +931,60 @@ class PrototypeScene extends Phaser.Scene {
       return false;
     }
 
+    if (platformBody === this.dropThroughDecorationPlatformBody) {
+      if (playerBody.y > platformBody.y + platformBody.height) {
+        this.dropThroughDecorationPlatformBody = undefined;
+      }
+      return false;
+    }
+
     const previousBottom = playerBody.prev.y + playerBody.height;
     return playerBody.velocity.y >= 0 && previousBottom <= platformBody.y + DECORATION_PLATFORM_LAND_TOLERANCE;
+  }
+
+  private updateDecorationPlatformDrop(isCrouchInputDown: boolean, onFloor: boolean) {
+    const standingPlatformBody = this.getStandingDecorationPlatformBody();
+    if (!isCrouchInputDown || !onFloor || !standingPlatformBody) {
+      this.decorationPlatformCrouchStartedAt = 0;
+      return;
+    }
+
+    if (this.decorationPlatformCrouchStartedAt === 0) {
+      this.decorationPlatformCrouchStartedAt = this.time.now;
+      return;
+    }
+
+    if (this.time.now - this.decorationPlatformCrouchStartedAt < DECORATION_PLATFORM_DROP_CROUCH_MS) {
+      return;
+    }
+
+    this.dropThroughDecorationPlatformBody = standingPlatformBody;
+    this.decorationPlatformCrouchStartedAt = 0;
+    this.player.setVelocityY(Math.max(this.player.body.velocity.y, DECORATION_PLATFORM_DROP_VELOCITY));
+  }
+
+  private getStandingDecorationPlatformBody() {
+    const playerBody = this.player.body;
+    const playerBottom = playerBody.y + playerBody.height;
+    const platformBody = this.findDecorationPlatformBody((body) => {
+      const overlapsHorizontally = playerBody.right > body.x && playerBody.x < body.x + body.width;
+      const touchesTop = Math.abs(playerBottom - body.y) <= DECORATION_PLATFORM_LAND_TOLERANCE;
+      return overlapsHorizontally && touchesTop;
+    });
+
+    return platformBody;
+  }
+
+  private findDecorationPlatformBody(predicate: (body: Phaser.Physics.Arcade.StaticBody) => boolean) {
+    const children = this.decorationPlatforms?.getChildren() ?? [];
+    for (const child of children) {
+      const body = (child as Phaser.Physics.Arcade.Image).body as Phaser.Physics.Arcade.StaticBody | undefined;
+      if (body && predicate(body)) {
+        return body;
+      }
+    }
+
+    return undefined;
   }
 
   private addPlatformHitbox(
