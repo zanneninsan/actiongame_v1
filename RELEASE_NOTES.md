@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.83
+### English
+- Added simple patrolling enemy characters to the stage.
+- Added player damage behavior: touching an enemy triggers knockback, a brief input lock, camera shake, and blinking invulnerability.
+### Japanese
+- ステージ上に左右へ巡回する簡易的な敵キャラクターを追加しました。
+- 敵に触れたとき、プレイヤーがノックバックし、短時間操作不能になり、点滅しながら無敵になるダメージ演出を追加しました。
+
 ## v0.1.82
 ### English
 - Moved stage-object top-platform definitions out of `src/main.ts` into a dedicated `src/stageObjectPlatforms.ts` mapping file.

@@ -450,6 +450,36 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "x": 12240,
       "y": 492
     }
+  ],
+  "enemies": [
+    {
+      "x": 2080,
+      "y": 640,
+      "patrolLeft": 1920,
+      "patrolRight": 2240,
+      "speed": 84
+    },
+    {
+      "x": 6160,
+      "y": 640,
+      "patrolLeft": 5960,
+      "patrolRight": 6400,
+      "speed": 96
+    },
+    {
+      "x": 9500,
+      "y": 640,
+      "patrolLeft": 9280,
+      "patrolRight": 9840,
+      "speed": 108
+    },
+    {
+      "x": 11880,
+      "y": 640,
+      "patrolLeft": 11620,
+      "patrolRight": 12260,
+      "speed": 116
+    }
   ]
 };
 
@@ -475,4 +505,5 @@ export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   streetLamps: stage.streetLamps.map((lamp) => ({ ...lamp })),
   decorations: stage.decorations.map((decoration) => ({ ...decoration })),
   items: stage.items.map((item) => ({ ...item })),
+  enemies: (stage.enemies ?? []).map((enemy) => ({ ...enemy })),
 });

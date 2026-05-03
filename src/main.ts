@@ -7,6 +7,7 @@ import {
   PLATFORM_ASSETS,
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
+  type EnemyPlacement,
   type ItemPlacement,
   type ItemType,
   type PlatformAsset,
@@ -35,7 +36,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.82";
+const DEBUG_VERSION = "v0.1.83";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -43,8 +44,20 @@ const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
 const PLATFORM_DEPTH = -0.55;
 const GOAL_TEXTURE_KEY = "goal-gate";
+const ENEMY_TEXTURE_KEY = "enemy-neon-bouncer";
 const GOAL_DISPLAY_WIDTH = 58;
 const GOAL_DISPLAY_HEIGHT = 192;
+const ENEMY_DISPLAY_WIDTH = 76;
+const ENEMY_DISPLAY_HEIGHT = 64;
+const ENEMY_BODY_WIDTH = 56;
+const ENEMY_BODY_HEIGHT = 42;
+const ENEMY_BODY_OFFSET_X = 10;
+const ENEMY_BODY_OFFSET_Y = 16;
+const ENEMY_DEFAULT_SPEED = 92;
+const DAMAGE_INVULNERABLE_MS = 1150;
+const DAMAGE_INPUT_LOCK_MS = 280;
+const DAMAGE_KNOCKBACK_X = 430;
+const DAMAGE_KNOCKBACK_Y = -245;
 const DECORATION_DEPTH = -1.2;
 const STREET_LAMP_LIGHT_DEPTH = DECORATION_DEPTH - 0.08;
 const STREET_LAMP_GROUND_LIGHT_DEPTH = PLATFORM_DEPTH + 0.02;
@@ -96,6 +109,7 @@ class PrototypeScene extends Phaser.Scene {
   private platforms!: Phaser.Physics.Arcade.StaticGroup;
   private decorationPlatforms!: Phaser.Physics.Arcade.StaticGroup;
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
+  private enemiesGroup?: Phaser.Physics.Arcade.Group;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
   private rearBackground?: Phaser.GameObjects.Image;
@@ -134,6 +148,9 @@ class PrototypeScene extends Phaser.Scene {
   private isLanding = false;
   private landingFastForwarded = false;
   private isDefeatSequenceActive = false;
+  private hurtUntil = 0;
+  private invulnerableUntil = 0;
+  private damageTween?: Phaser.Tweens.Tween;
   private collisionDebugEnabled = false;
   private collisionDebugGraphics?: Phaser.GameObjects.Graphics;
   private decorationPlatformCrouchStartedAt = 0;
@@ -186,6 +203,7 @@ class PrototypeScene extends Phaser.Scene {
     this.createPixelTexture("ground", TILE, TILE, 0x263244, 0x8bd3ff);
     this.createPixelTexture("platform", TILE, TILE, 0x384257, 0xf6c453);
     this.createPixelTexture("platform-hitbox", 1, 1, 0xffffff, 0xffffff);
+    this.createEnemyTexture();
     this.load.image(GOAL_TEXTURE_KEY, `${ASSET_BASE}assets/stage_objects/goal_gate.png`);
     this.load.audio("game-bgm", `${ASSET_BASE}assets/audio/gamebgm_default.mp3`);
     this.load.audio("item-pickup", `${ASSET_BASE}assets/audio/item_pickup.wav`);
@@ -236,6 +254,7 @@ class PrototypeScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.decorationPlatforms, undefined, this.canLandOnDecorationPlatform, this);
     this.physics.add.overlap(this.player, goal, () => this.win());
     this.createItems();
+    this.createEnemies();
 
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.keys = {
@@ -327,7 +346,19 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.refreshDropThroughDecorationPlatform();
+    this.updateEnemies();
     const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
+    if (this.time.now < this.hurtUntil) {
+      this.updateCollisionDebug();
+      this.player.setAcceleration(0, 0);
+      this.player.setDragX(AIR_DRAG);
+      this.wasOnFloor = onFloor;
+      if (this.player.y > this.stageConstants.worldBottom + 32) {
+        this.playDefeatSequence();
+      }
+      return;
+    }
+
     const left = this.keys.a.isDown || this.cursors.left.isDown || this.mobileInput.a;
     const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
     const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
@@ -439,11 +470,16 @@ class PrototypeScene extends Phaser.Scene {
     this.isLanding = false;
     this.landingFastForwarded = false;
     this.isDefeatSequenceActive = false;
+    this.hurtUntil = 0;
+    this.invulnerableUntil = 0;
+    this.damageTween?.stop();
+    this.damageTween = undefined;
     this.decorationPlatformCrouchStartedAt = 0;
     this.dropThroughDecorationPlatformBody = undefined;
     this.collisionDebugGraphics?.clear();
     this.collisionDebugGraphics = undefined;
     this.itemsGroup = undefined;
+    this.enemiesGroup = undefined;
     this.goal = undefined;
     this.finalScoreText = undefined;
   }
@@ -713,11 +749,13 @@ class PrototypeScene extends Phaser.Scene {
     this.clearStaticGroup(this.platforms);
     this.clearStaticGroup(this.decorationPlatforms);
     this.clearStaticGroup(this.itemsGroup);
+    this.clearDynamicGroup(this.enemiesGroup);
 
     this.buildStage(this.platforms);
     this.createStreetLamps();
     this.createStageObjects();
     this.populateItems();
+    this.populateEnemies();
     this.moveGoalTo(this.editorStage.goal.x, this.editorStage.goal.y);
     this.updateCollisionDebug();
   }
@@ -729,6 +767,10 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
+    group?.clear(true, true);
+  }
+
+  private clearDynamicGroup(group?: Phaser.Physics.Arcade.Group) {
     group?.clear(true, true);
   }
 
@@ -1369,6 +1411,121 @@ class PrototypeScene extends Phaser.Scene {
     item.disableBody(true, true);
   }
 
+  private createEnemies() {
+    const enemies = this.physics.add.group({
+      allowGravity: false,
+      immovable: true,
+    });
+    this.enemiesGroup = enemies;
+    this.populateEnemies();
+
+    this.physics.add.overlap(this.player, enemies, (_, enemyObject) => {
+      this.damagePlayer(enemyObject as Phaser.Physics.Arcade.Sprite);
+    });
+  }
+
+  private populateEnemies() {
+    if (!this.enemiesGroup) {
+      return;
+    }
+
+    (this.editorStage.enemies ?? []).forEach((placement) => {
+      this.createEnemySprite(placement);
+    });
+  }
+
+  private createEnemySprite(placement: EnemyPlacement) {
+    if (!this.enemiesGroup) {
+      return;
+    }
+
+    const enemy = this.enemiesGroup.create(placement.x, placement.y, ENEMY_TEXTURE_KEY) as Phaser.Physics.Arcade.Sprite;
+    const speed = placement.speed ?? ENEMY_DEFAULT_SPEED;
+    const direction = speed >= 0 ? 1 : -1;
+    enemy.setDisplaySize(ENEMY_DISPLAY_WIDTH, ENEMY_DISPLAY_HEIGHT);
+    enemy.setDepth(0.18);
+    enemy.setData("patrolLeft", Math.min(placement.patrolLeft, placement.patrolRight));
+    enemy.setData("patrolRight", Math.max(placement.patrolLeft, placement.patrolRight));
+    enemy.setData("speed", Math.abs(speed));
+    enemy.setData("spawnY", placement.y);
+    enemy.setSize(ENEMY_BODY_WIDTH, ENEMY_BODY_HEIGHT);
+    enemy.setOffset(ENEMY_BODY_OFFSET_X, ENEMY_BODY_OFFSET_Y);
+    enemy.setVelocityX(Math.abs(speed) * direction);
+    enemy.setFlipX(direction < 0);
+    const body = enemy.body as Phaser.Physics.Arcade.Body;
+    body.setAllowGravity(false);
+    body.setImmovable(true);
+  }
+
+  private updateEnemies() {
+    this.enemiesGroup?.getChildren().forEach((child) => {
+      const enemy = child as Phaser.Physics.Arcade.Sprite;
+      if (!enemy.active || !enemy.body) {
+        return;
+      }
+
+      const patrolLeft = enemy.getData("patrolLeft") as number;
+      const patrolRight = enemy.getData("patrolRight") as number;
+      const speed = enemy.getData("speed") as number;
+      const spawnY = enemy.getData("spawnY") as number;
+      if (enemy.x <= patrolLeft && enemy.body.velocity.x < 0) {
+        enemy.setVelocityX(speed);
+        enemy.setFlipX(false);
+      } else if (enemy.x >= patrolRight && enemy.body.velocity.x > 0) {
+        enemy.setVelocityX(-speed);
+        enemy.setFlipX(true);
+      }
+
+      enemy.y = spawnY + Math.sin((this.time.now + enemy.x * 8) / 260) * 4;
+      enemy.body.updateFromGameObject();
+    });
+  }
+
+  private damagePlayer(enemy: Phaser.Physics.Arcade.Sprite) {
+    if (!this.isRunActive || this.stageEditor?.isEnabled || this.time.now < this.invulnerableUntil || !enemy.active) {
+      return;
+    }
+
+    const direction = this.player.x < enemy.x ? -1 : 1;
+    this.hurtUntil = this.time.now + DAMAGE_INPUT_LOCK_MS;
+    this.invulnerableUntil = this.time.now + DAMAGE_INVULNERABLE_MS;
+    this.isLanding = false;
+    this.landingFastForwarded = false;
+    this.mobileInput = { w: false, a: false, s: false, d: false };
+    this.mobileJumpQueued = false;
+    this.player.setAcceleration(0, 0);
+    this.player.setVelocity(direction * DAMAGE_KNOCKBACK_X, DAMAGE_KNOCKBACK_Y);
+    this.player.setDragX(AIR_DRAG);
+    this.player.anims.timeScale = 1;
+    this.player.anims.play("player-air", true);
+    this.playDamageMotion(direction);
+  }
+
+  private playDamageMotion(direction: number) {
+    this.damageTween?.stop();
+    this.player.clearTint();
+    this.player.setAlpha(1);
+    this.player.setAngle(0);
+    this.cameras.main.shake(120, 0.004);
+    this.damageTween = this.tweens.add({
+      targets: this.player,
+      alpha: 0.28,
+      angle: direction * -4,
+      duration: 70,
+      ease: "Sine.easeInOut",
+      yoyo: true,
+      repeat: Math.max(1, Math.floor(DAMAGE_INVULNERABLE_MS / 140) - 1),
+      onYoyo: () => this.player.setTintFill(0xfff1f2),
+      onRepeat: () => this.player.clearTint(),
+      onComplete: () => {
+        this.player.clearTint();
+        this.player.setAlpha(1);
+        this.player.setAngle(0);
+        this.damageTween = undefined;
+      },
+    });
+  }
+
   private updateScoreText() {
     if (!this.scoreText) {
       return;
@@ -1430,6 +1587,13 @@ class PrototypeScene extends Phaser.Scene {
       }
     });
 
+    this.enemiesGroup?.getChildren().forEach((child) => {
+      const enemy = child as Phaser.Physics.Arcade.Sprite;
+      if (enemy.active && enemy.body) {
+        this.drawCollisionBody(enemy.body as Phaser.Physics.Arcade.Body, 0xef4444, 0.2);
+      }
+    });
+
     if (this.goal?.body) {
       this.drawCollisionBody(this.goal.body, 0xfb7185, 0.2);
     }
@@ -1471,6 +1635,37 @@ class PrototypeScene extends Phaser.Scene {
     graphics.lineStyle(1, stroke);
     graphics.strokeRect(0.5, 0.5, width - 1, height - 1);
     graphics.generateTexture(key, width, height);
+    graphics.destroy();
+  }
+
+  private createEnemyTexture() {
+    if (this.textures.exists(ENEMY_TEXTURE_KEY)) {
+      return;
+    }
+
+    const graphics = this.make.graphics({ x: 0, y: 0 }, false);
+    graphics.fillStyle(0x111827, 0.92);
+    graphics.fillRoundedRect(6, 18, 64, 38, 14);
+    graphics.fillStyle(0x7c2d12, 0.98);
+    graphics.fillRoundedRect(12, 12, 52, 40, 12);
+    graphics.fillStyle(0xff4d6d, 0.94);
+    graphics.fillCircle(24, 29, 7);
+    graphics.fillCircle(52, 29, 7);
+    graphics.fillStyle(0xfff1f2, 0.96);
+    graphics.fillCircle(26, 28, 2);
+    graphics.fillCircle(54, 28, 2);
+    graphics.lineStyle(4, 0xfacc15, 0.95);
+    graphics.beginPath();
+    graphics.moveTo(28, 46);
+    graphics.lineTo(35, 40);
+    graphics.lineTo(42, 46);
+    graphics.lineTo(49, 40);
+    graphics.strokePath();
+    graphics.lineStyle(3, 0x22d3ee, 0.8);
+    graphics.strokeRoundedRect(10, 10, 56, 44, 14);
+    graphics.fillStyle(0x22d3ee, 0.22);
+    graphics.fillEllipse(38, 58, 54, 10);
+    graphics.generateTexture(ENEMY_TEXTURE_KEY, ENEMY_DISPLAY_WIDTH, ENEMY_DISPLAY_HEIGHT);
     graphics.destroy();
   }
 
@@ -1559,6 +1754,13 @@ class PrototypeScene extends Phaser.Scene {
     this.isRunActive = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
+    this.hurtUntil = 0;
+    this.invulnerableUntil = 0;
+    this.damageTween?.stop();
+    this.damageTween = undefined;
+    this.player.clearTint();
+    this.player.setAlpha(1);
+    this.player.setAngle(0);
     this.mobileInput = { w: false, a: false, s: false, d: false };
     this.mobileJumpQueued = false;
     this.applyPlayerBody(false);

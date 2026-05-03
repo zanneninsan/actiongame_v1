@@ -23,6 +23,7 @@ export type PlatformRunPlacement = { x: number; y: number; units: number; collid
 export type StreetLampPlacement = { x: number; key: StreetLampKey; scale?: number };
 export type StageDecorationPlacement = { x: number; y?: number; key: string; scale?: number };
 export type ItemPlacement = { type: ItemType; x: number; y: number };
+export type EnemyPlacement = { x: number; y: number; patrolLeft: number; patrolRight: number; speed?: number };
 export type StageDefinition = {
   name: string;
   worldWidth: number;
@@ -37,6 +38,7 @@ export type StageDefinition = {
   streetLamps: StreetLampPlacement[];
   decorations: StageDecorationPlacement[];
   items: ItemPlacement[];
+  enemies?: EnemyPlacement[];
 };
 
 export const STAGE_OBJECT_ASSETS = [
