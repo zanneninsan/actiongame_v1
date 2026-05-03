@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.77
+### English
+- Added a top-left story dialogue window with a generated character portrait, name plate, translucent message area, and click-through story progression.
+- Kept the dialogue implementation in a separate module so future character names, portraits, and messages can be swapped without adding story UI logic to `src/main.ts`.
+### Japanese
+- 画面左上に、生成したキャラクター顔素材、名前欄、うっすら透過したメッセージ欄を持つストーリー会話ウィンドウを追加しました。
+- キャラ名、顔画像、メッセージを差し替えやすい別モジュールにまとめ、`src/main.ts` への追加は薄い接続だけにしました。
 ## v0.1.76
 ### English
 - Added one-way top platforms to the single and double street lamps so the player can land on their lamp heads from above.

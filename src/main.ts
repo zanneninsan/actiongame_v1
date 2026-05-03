@@ -21,6 +21,11 @@ import { StartCountdownOverlay } from "./countdown";
 import { StartModal, type ControlMode } from "./startModal";
 import { StageEditor } from "./stageEditor";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
+import {
+  createStoryDialogue,
+  DEFAULT_STORY_DIALOGUE_LINES,
+  type StoryDialogueController,
+} from "./storyDialogue";
 import { getBrowserLocale, isLocale, LOCALE_OPTIONS, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
 import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-assets";
 
@@ -29,7 +34,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.76";
+const DEBUG_VERSION = "v0.1.77";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -125,6 +130,7 @@ class PrototypeScene extends Phaser.Scene {
   private editorStage = cloneStage(ACTIVE_STAGE);
   private stageConstants: ResolvedStageConstants = resolveStageConstants(ACTIVE_STAGE);
   private stageEditor?: StageEditor;
+  private storyDialogue?: StoryDialogueController;
   private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
   private hasWon = false;
   private wasOnFloor = false;
@@ -293,6 +299,7 @@ class PrototypeScene extends Phaser.Scene {
     this.input.keyboard!.on("keydown-R", () => this.restartStage());
     this.createStageEditor();
     this.createGlobalUI();
+    this.storyDialogue = createStoryDialogue({ lines: DEFAULT_STORY_DIALOGUE_LINES });
 
     this.bgm = this.sound.add("game-bgm", { loop: true, volume: 1.0 });
 
@@ -414,6 +421,8 @@ class PrototypeScene extends Phaser.Scene {
     this.removeMobileOrientationPrompt();
     this.removeStageEditor();
     this.removeGlobalUI();
+    this.storyDialogue?.remove();
+    this.storyDialogue = undefined;
     this.countdownOverlay?.clear();
     this.countdownOverlay = undefined;
     this.mobileInput = { w: false, a: false, s: false, d: false };
