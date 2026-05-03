@@ -29,7 +29,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.72";
+const DEBUG_VERSION = "v0.1.73";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -64,6 +64,10 @@ const JUMP_VELOCITY = -575;
 const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
 const MOBILE_FULLSCREEN_MIN_LANDSCAPE_HEIGHT = 430;
+const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
+const DECORATION_TOP_PLATFORMS: Record<string, { x: number; y: number; width: number; height: number }> = {
+  "stage-structures-bus-shelter": { x: 76, y: 6, width: 462, height: 12 },
+};
 type MobileInputKey = "w" | "a" | "s" | "d";
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
@@ -81,6 +85,7 @@ class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private goal?: Phaser.Types.Physics.Arcade.ImageWithStaticBody;
   private platforms!: Phaser.Physics.Arcade.StaticGroup;
+  private decorationPlatforms!: Phaser.Physics.Arcade.StaticGroup;
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
@@ -187,6 +192,7 @@ class PrototypeScene extends Phaser.Scene {
     this.createBackground();
 
     this.platforms = this.physics.add.staticGroup();
+    this.decorationPlatforms = this.physics.add.staticGroup();
     this.rebuildEditableStageObjects();
 
     const goal = this.physics.add.staticImage(this.editorStage.goal.x, this.editorStage.goal.y, "goal");
@@ -210,6 +216,7 @@ class PrototypeScene extends Phaser.Scene {
     });
 
     this.physics.add.collider(this.player, this.platforms);
+    this.physics.add.collider(this.player, this.decorationPlatforms, undefined, this.canLandOnDecorationPlatform, this);
     this.physics.add.overlap(this.player, goal, () => this.win());
     this.createItems();
 
@@ -675,6 +682,7 @@ class PrototypeScene extends Phaser.Scene {
     this.stageRenderObjects.forEach((object) => object.destroy());
     this.stageRenderObjects = [];
     this.clearStaticGroup(this.platforms);
+    this.clearStaticGroup(this.decorationPlatforms);
     this.clearStaticGroup(this.itemsGroup);
 
     this.buildStage(this.platforms);
@@ -883,6 +891,39 @@ class PrototypeScene extends Phaser.Scene {
         .setScale(scale)
         .setDepth(DECORATION_DEPTH),
     );
+    this.addDecorationTopPlatform(object.x, y, object.key, scale);
+  }
+
+  private addDecorationTopPlatform(x: number, y: number, key: string, scale: number) {
+    const platform = DECORATION_TOP_PLATFORMS[key];
+    if (!platform) {
+      return;
+    }
+
+    const source = this.textures.get(key).getSourceImage() as { width: number; height: number };
+    const platformX = x - (source.width * scale) / 2 + platform.x * scale;
+    const platformY = y - source.height * scale + platform.y * scale;
+    this.addPlatformHitbox(
+      this.decorationPlatforms,
+      platformX,
+      platformY,
+      platform.width * scale,
+      platform.height * scale,
+    );
+  }
+
+  private canLandOnDecorationPlatform(
+    playerObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile,
+    platformObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile,
+  ) {
+    const playerBody = (playerObject as Phaser.Types.Physics.Arcade.GameObjectWithBody).body as Phaser.Physics.Arcade.Body | undefined;
+    const platformBody = (platformObject as Phaser.Types.Physics.Arcade.GameObjectWithBody).body as Phaser.Physics.Arcade.StaticBody | undefined;
+    if (!playerBody || !platformBody) {
+      return false;
+    }
+
+    const previousBottom = playerBody.prev.y + playerBody.height;
+    return playerBody.velocity.y >= 0 && previousBottom <= platformBody.y + DECORATION_PLATFORM_LAND_TOLERANCE;
   }
 
   private addPlatformHitbox(
@@ -1276,6 +1317,13 @@ class PrototypeScene extends Phaser.Scene {
       const body = (child as Phaser.Physics.Arcade.Image).body as Phaser.Physics.Arcade.StaticBody | undefined;
       if (body) {
         this.drawCollisionBody(body, 0xfacc15, 0.12);
+      }
+    });
+
+    this.decorationPlatforms?.getChildren().forEach((child) => {
+      const body = (child as Phaser.Physics.Arcade.Image).body as Phaser.Physics.Arcade.StaticBody | undefined;
+      if (body) {
+        this.drawCollisionBody(body, 0xfb923c, 0.16);
       }
     });
 

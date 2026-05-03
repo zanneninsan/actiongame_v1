@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.73
+### English
+- Added a one-way roof platform to `stage-structures-bus-shelter` so the player can land on the bus shelter from above.
+- Kept side and underside collisions disabled for the bus shelter decoration.
+### Japanese
+- `stage-structures-bus-shelter` の屋根に、上からだけ乗れる当たり判定を追加しました。
+- バス停の左右と下側には当たり判定を付けず、装飾としての見た目はそのままにしました。
 ## v0.1.72
 ### English
 - Request fullscreen in mobile landscape mode only when the available viewport height is clearly too short.
