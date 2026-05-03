@@ -1,5 +1,12 @@
 # Release Notes / リリースノート
 
+## v0.1.99
+### English
+- Restored the top HUD text to its original size.
+- Reduced the story dialogue panel, portrait, and message text to roughly two-thirds of the previous size.
+### Japanese
+- 上部HUDの文字サイズを元の大きさに戻しました。
+- ストーリー会話枠、顔アイコン、メッセージ文字を以前の約3分の2に小さくしました。
 ## v0.1.98
 ### English
 - Limited timer, time bonus, and final score displays to two decimal places while keeping millisecond-based calculations.
