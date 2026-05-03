@@ -1,5 +1,13 @@
 # Release Notes / リリースノート
 
+## v0.1.87
+### English
+- Added an enemy near the player start so one is visible within the initial camera area.
+- Placed the start-area enemy above the first ground platform so it drops in under gravity like the other enemies.
+### Japanese
+- スタート地点近くに敵を追加し、初期カメラ内で見えるようにしました。
+- 追加した敵も最初の地面足場の上空に配置し、ほかの敵と同じように重力で落下するようにしました。
+
 ## v0.1.86
 ### English
 - Removed the automatically generated full-width baseline floor from stage rendering.

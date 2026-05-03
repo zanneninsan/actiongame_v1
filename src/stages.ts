@@ -518,6 +518,13 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
   ],
   "enemies": [
     {
+      "x": 520,
+      "y": 360,
+      "patrolLeft": 360,
+      "patrolRight": 660,
+      "speed": 72
+    },
+    {
       "x": 2080,
       "y": 456,
       "patrolLeft": 1920,
