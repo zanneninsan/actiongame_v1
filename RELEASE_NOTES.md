@@ -5,22 +5,22 @@
 - Added stage editor JSON import from pasted text or a `.json` file.
 - Updated stage editor export to copy JSON and download a stage JSON file.
 ### Japanese
-- Stage editor de haritsuke text mata wa `.json` file kara stage JSON wo import dekiru you ni shimashita.
-- Stage editor no export de JSON copy to stage JSON file download wo okonau you ni shimashita.
+- ステージエディタで、貼り付けたテキストまたは `.json` ファイルからステージJSONをインポートできるようにしました。
+- ステージエディタのエクスポートで、JSONのコピーとステージJSONファイルのダウンロードを行うようにしました。
 
 ## v0.1.62
 ### English
 - Prevented item pickup while the stage editor is enabled.
 ### Japanese
-- Stage editor ON chuu wa item wo shutoku shinai you ni shimashita.
+- ステージエディタがONの間は、アイテムを取得しないようにしました。
 
 ## v0.1.61
 ### English
 - Changed the stage editor Redo shortcut from `R` to `Y` so `R` can restart during editing.
 - Added a second-line editor key hint to the top control hint while the editor is enabled.
 ### Japanese
-- Editor no Redo shortcut wo `R` kara `Y` ni henkou shi, edit chuu demo `R` de restart dekiru you ni shimashita.
-- Editor ON chuu wa gamen jougi no sousa hint ni editor key setsumei no 2 gyoume wo hyouji suru you ni shimashita.
+- エディタのRedoショートカットを `R` から `Y` に変更し、編集中でも `R` でリスタートできるようにしました。
+- エディタON中は、画面上部の操作ヒントにエディタ用キー説明の2行目を表示するようにしました。
 
 ## v0.1.60
 ### English
@@ -29,10 +29,10 @@
 - Split detailed stage editor behavior into `src/stageEditor.ts`, keeping `src/main.ts` focused on core game behavior and thin editor integration.
 - Updated editor guidance docs so future large or user-visible updates bump `DEBUG_VERSION` and `RELEASE_NOTES.md` even before pushing.
 ### Japanese
-- In-game stage editor ni Undo / Redo wo tsuika.
-- Editor shortcut wo tsuika: `Z` de Undo, `R` de Redo, `Delete` de sentakuchu object wo sakujo.
-- Stage editor no shosai logic wo `src/stageEditor.ts` ni bunkatsu shi, `src/main.ts` wo game kihon kinou to usui renkei ni seiri.
-- Kongo no ookina / user-visible na koushin de wa push mae demo `DEBUG_VERSION` to `RELEASE_NOTES.md` wo koushin suru rule wo docs ni tsuika.
+- ゲーム内ステージエディタにUndo / Redoを追加しました。
+- エディタのショートカットを追加しました: `Z` でUndo、`R` でRedo、`Delete` で選択中オブジェクトを削除できます。
+- ステージエディタの詳細ロジックを `src/stageEditor.ts` に分割し、`src/main.ts` をゲームの基本処理と薄い連携に整理しました。
+- 今後の大きな変更またはユーザーに見える更新では、push前でも `DEBUG_VERSION` と `RELEASE_NOTES.md` を更新するルールをドキュメントに追加しました。
 
 ## v0.1.59
 ### English

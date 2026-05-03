@@ -14,7 +14,7 @@ This file is the short context packet for future Codex sessions. Read this first
 
 ## Current State
 
-- Latest known version at handoff creation: `v0.1.60`.
+- Latest known version at handoff creation: `v0.1.63`.
 - Version is displayed in-game through `DEBUG_VERSION` in `src/main.ts`.
 - Build command: `npm run build`.
 - Dev server command: `npm run dev`.
@@ -69,6 +69,7 @@ This file is the short context packet for future Codex sessions. Read this first
   - `git diff --stat`
 - If pushing, bump `DEBUG_VERSION` and add release notes.
 - Also bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` for large or user-visible updates, even when not pushing yet.
+- When updating `RELEASE_NOTES.md`, write the `### Japanese` section in natural Japanese text. Do not use romanized Japanese such as "wo", "ni", or "shimashita".
 - Do not revert user or external changes unless explicitly asked.
 
 ## Version Rule
@@ -77,6 +78,7 @@ When pushing changes, or when making a large/user-visible update even before pus
 
 1. Increment `DEBUG_VERSION` in `src/main.ts`.
 2. Add a matching section to `RELEASE_NOTES.md`.
+   - Write `### Japanese` entries in proper Japanese, not romanized Japanese.
 3. Run `npm run build`.
 4. If pushing, commit with a concise message.
 5. If pushing, push `main`.
@@ -145,6 +147,7 @@ For stage editor behavior changes, start with `src/stageEditor.ts`; use `src/sta
 Run `npm run build` after code edits.
 If pushing, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md`.
 For large or user-visible updates, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` even before pushing.
+When updating `RELEASE_NOTES.md`, write the `### Japanese` section in natural Japanese, not romanized Japanese.
 ```
 
 ## Notes For Future Codex

@@ -10,3 +10,4 @@
 - Run `npm run build` after code edits.
 - If pushing, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md`.
 - Also bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` for large or user-visible updates, even when not pushing yet.
+- When updating `RELEASE_NOTES.md`, write the `### Japanese` section in natural Japanese. Do not use romanized Japanese such as "wo", "ni", or "shimashita".
