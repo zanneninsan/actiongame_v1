@@ -39,7 +39,7 @@ canvas {
 }
 
 .start-dialog {
-  width: min(420px, calc(100vw - 32px));
+  width: min(460px, calc(100vw - 32px));
   display: grid;
   gap: 18px;
   padding: 24px;
@@ -51,8 +51,10 @@ canvas {
 
 .start-dialog h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
 }
 
 .start-dialog label {
@@ -74,13 +76,15 @@ canvas {
   font-size: 18px;
 }
 
-.mode-row {
+.mode-row,
+.sound-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
 
 .mode-button,
+.sound-button,
 .start-button {
   height: 46px;
   border: 1px solid rgba(148, 163, 184, 0.45);
@@ -92,7 +96,8 @@ canvas {
   cursor: pointer;
 }
 
-.mode-button.is-selected {
+.mode-button.is-selected,
+.sound-button.is-selected {
   border-color: #fde68a;
   background: #0f766e;
   color: #fefce8;

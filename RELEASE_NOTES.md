@@ -1,5 +1,14 @@
 # Release Notes / リリースノート
 
+## v0.1.51
+### English
+- Renamed the start modal title to `SUPER ZANNENIN SISTERS`.
+- Added sound on/off selection to the start modal, linked to the existing volume and mute cookies.
+- Moved start modal DOM and event handling into a dedicated `startModal.ts` module.
+### 日本語
+- 開始時モーダルのタイトルを`SUPER ZANNENIN SISTERS`へ変更しました。
+- 開始時モーダルに音あり/音なし選択を追加し、既存の音量・ミュートCookieと連動させました。
+- 開始時モーダルのDOM生成とイベント処理を専用の`startModal.ts`へ分割しました。
 ## v0.1.50
 ### English
 - Moved the start countdown visual and timer logic into a dedicated `countdown.ts` module.

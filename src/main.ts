@@ -19,6 +19,7 @@ import {
 import { ACTIVE_STAGE, cloneStage } from "./stages";
 import { RainbowWinPipeline } from "./rainbowPipeline";
 import { StartCountdownOverlay } from "./countdown";
+import { StartModal, type ControlMode } from "./startModal";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
@@ -28,7 +29,7 @@ const WORLD_TOP = -360;
 const WORLD_BOTTOM = 720;
 const WORLD_HEIGHT = WORLD_BOTTOM - WORLD_TOP;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.50";
+const DEBUG_VERSION = "v0.1.51";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const TIME_BONUS_PER_SECOND = 10;
@@ -66,7 +67,6 @@ const JUMP_VELOCITY = -575;
 const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
 type MobileInputKey = "w" | "a" | "s" | "d";
-type ControlMode = "pc" | "mobile";
 type EditorTool = "platform" | "item" | "streetLamp" | "decoration" | "playerStart" | "goal";
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
@@ -98,6 +98,9 @@ class PrototypeScene extends Phaser.Scene {
   private setupComplete = false;
   private playerName = "PLAYER";
   private controlMode: ControlMode = "pc";
+  private soundVolumePercent = 50;
+  private soundMuted = false;
+  private startModal?: StartModal;
   private controlHint = "A/D: move  W/Space: jump  R: restart";
   private editorStage = cloneStage(ACTIVE_STAGE);
   private editorEnabled = false;
@@ -164,6 +167,9 @@ class PrototypeScene extends Phaser.Scene {
   create() {
     this.registerRainbowPipeline();
     this.playerName = this.getCookieValue("actiongame_player_name") || this.playerName;
+    this.soundVolumePercent = this.getSavedVolumePercent();
+    this.soundMuted = this.getCookieValue("actiongame_muted") === "1";
+    this.applySoundSettings();
     this.resetRunState();
     if (!extraTouchPointersAdded) {
       this.input.addPointer(4);
@@ -450,63 +456,24 @@ class PrototypeScene extends Phaser.Scene {
   private showStartModal() {
     this.removeStartModal();
 
-    const overlay = document.createElement("div");
-    overlay.id = "start-modal";
-    overlay.innerHTML = `
-      <form class="start-dialog">
-        <h1>Action Game</h1>
-        <label>
-          <span>Player Name</span>
-          <input name="playerName" type="text" maxlength="16" autocomplete="off" value="${this.escapeHtml(this.playerName)}" />
-        </label>
-        <div class="mode-row" role="group" aria-label="Control mode">
-          <button type="button" data-mode="pc" class="mode-button is-selected">PC</button>
-          <button type="button" data-mode="mobile" class="mode-button">&#12473;&#12510;&#12507;</button>
-        </div>
-        <button type="submit" class="start-button">START</button>
-      </form>
-    `;
-
-    document.body.appendChild(overlay);
-    const form = overlay.querySelector("form")!;
-    const input = overlay.querySelector<HTMLInputElement>("input[name='playerName']")!;
-    
-    input.addEventListener("keydown", (e) => e.stopPropagation());
-    input.addEventListener("keyup", (e) => e.stopPropagation());
-    input.addEventListener("keypress", (e) => e.stopPropagation());
-
-    const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
-    overlay.querySelector<HTMLButtonElement>("[data-mode='mobile']")!.textContent = "MOBILE";
-    let selectedMode: ControlMode = "pc";
-
-    const selectMode = (mode: ControlMode) => {
-      selectedMode = mode;
-      modeButtons.forEach((button) => {
-        button.classList.toggle("is-selected", button.dataset.mode === mode);
-      });
-    };
-
-    modeButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        selectMode(button.dataset.mode === "mobile" ? "mobile" : "pc");
-      });
+    this.startModal = new StartModal({
+      playerName: this.playerName,
+      controlMode: this.controlMode,
+      soundOn: !this.soundMuted && this.soundVolumePercent > 0,
+      onSoundOnChange: (soundOn) => this.setSoundEnabled(soundOn),
+      onSubmit: ({ playerName, controlMode, soundOn }) => {
+        this.playerName = playerName;
+        this.setCookieValue("actiongame_player_name", this.playerName);
+        this.controlMode = controlMode;
+        this.setSoundEnabled(soundOn);
+        this.setupComplete = true;
+        if (this.controlMode === "mobile") {
+          this.requestMobileFullscreen();
+        }
+        this.startRun();
+      },
     });
-
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const name = input.value.trim();
-      this.playerName = name || "PLAYER";
-      this.setCookieValue("actiongame_player_name", this.playerName);
-      this.controlMode = selectedMode;
-      this.setupComplete = true;
-      if (this.controlMode === "mobile") {
-        this.requestMobileFullscreen();
-      }
-      this.startRun();
-    });
-
-    input.focus();
-    input.select();
+    this.startModal.show();
   }
 
   private requestMobileFullscreen() {
@@ -526,20 +493,9 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private removeStartModal() {
+    this.startModal?.remove();
+    this.startModal = undefined;
     document.getElementById("start-modal")?.remove();
-  }
-
-  private escapeHtml(value: string) {
-    return value.replace(/[&<>"']/g, (character) => {
-      const entities: Record<string, string> = {
-        "&": "&amp;",
-        "<": "&lt;",
-        ">": "&gt;",
-        '"': "&quot;",
-        "'": "&#39;",
-      };
-      return entities[character];
-    });
   }
 
   private getCookieValue(name: string) {
@@ -566,6 +522,32 @@ class PrototypeScene extends Phaser.Scene {
   private saveVolumeSettings(volume: number, isMuted: boolean) {
     this.setCookieValue("actiongame_volume", String(Phaser.Math.Clamp(Math.round(volume), 0, 100)));
     this.setCookieValue("actiongame_muted", isMuted ? "1" : "0");
+  }
+
+  private applySoundSettings() {
+    this.sound.volume = this.soundVolumePercent / 100;
+    this.sound.mute = this.soundMuted;
+    this.saveVolumeSettings(this.soundVolumePercent, this.soundMuted);
+    this.refreshGlobalSoundUI();
+  }
+
+  private setSoundEnabled(soundOn: boolean) {
+    if (soundOn && this.soundVolumePercent === 0) {
+      this.soundVolumePercent = 50;
+    }
+    this.soundMuted = !soundOn;
+    this.applySoundSettings();
+  }
+
+  private refreshGlobalSoundUI() {
+    const bgmToggle = document.getElementById("bgm-toggle") as HTMLButtonElement | null;
+    const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement | null;
+    if (volumeSlider) {
+      volumeSlider.value = String(this.soundVolumePercent);
+    }
+    if (bgmToggle) {
+      bgmToggle.innerHTML = this.soundMuted || this.soundVolumePercent === 0 ? "&#128263;" : "&#128266;";
+    }
   }
 
   private buildStage(platforms: Phaser.Physics.Arcade.StaticGroup) {
@@ -929,18 +911,7 @@ class PrototypeScene extends Phaser.Scene {
     const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
     const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
 
-    const savedVolume = this.getSavedVolumePercent();
-    volumeSlider.value = String(savedVolume);
-    this.sound.volume = savedVolume / 100;
-    let isMuted = this.getCookieValue("actiongame_muted") === "1";
-    this.sound.mute = isMuted;
-
-    const updateIcon = () => {
-      const currentVolume = parseInt(volumeSlider.value, 10);
-      bgmToggle.innerHTML = isMuted || currentVolume === 0 ? "&#128263;" : "&#128266;";
-    };
-
-    updateIcon();
+    this.applySoundSettings();
     collisionDebugToggle.classList.toggle("is-active", this.collisionDebugEnabled);
 
     collisionDebugToggle.addEventListener("click", () => {
@@ -952,15 +923,12 @@ class PrototypeScene extends Phaser.Scene {
     bgmToggle.addEventListener("click", () => {
       const currentVolume = parseInt(volumeSlider.value, 10);
       if (currentVolume === 0) {
-        this.sound.volume = 0.5;
-        volumeSlider.value = "50";
-        isMuted = false;
+        this.soundVolumePercent = 50;
+        this.soundMuted = false;
       } else {
-        isMuted = !isMuted;
+        this.soundMuted = !this.soundMuted;
       }
-      this.sound.mute = isMuted;
-      this.saveVolumeSettings(parseInt(volumeSlider.value, 10), isMuted);
-      updateIcon();
+      this.applySoundSettings();
     });
 
     optionsToggle.addEventListener("click", () => {
@@ -974,13 +942,11 @@ class PrototypeScene extends Phaser.Scene {
     volumeSlider.addEventListener("input", (e) => {
       e.stopPropagation();
       const val = parseInt(volumeSlider.value, 10);
-      this.sound.volume = val / 100;
-      if (val > 0 && isMuted) {
-        isMuted = false;
-        this.sound.mute = false;
+      this.soundVolumePercent = val;
+      if (val > 0 && this.soundMuted) {
+        this.soundMuted = false;
       }
-      this.saveVolumeSettings(val, isMuted);
-      updateIcon();
+      this.applySoundSettings();
     });
 
     optionsModal.addEventListener("keydown", (e) => e.stopPropagation());
