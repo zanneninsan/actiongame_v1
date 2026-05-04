@@ -107,6 +107,13 @@ canvas {
   background: url("../assets/ui/fantasy/select_field_safe.webp") center / 100% 100% no-repeat;
 }
 
+.start-dialog select option,
+.options-dialog select option {
+  background: #ffffff;
+  color: #0f172a;
+  text-shadow: none;
+}
+
 .mode-row,
 .sound-row {
   width: min(100%, calc(100% - 34px));

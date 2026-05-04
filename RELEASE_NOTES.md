@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.152
+### English
+- Fixed dropdown menu option colors so unselected language and stage choices stay readable on the native menu background.
+### Japanese
+- プルダウンメニューの選択肢の文字色を調整し、未選択の言語やステージも標準メニュー背景の上で読めるようにしました。
+
 ## v0.1.151
 ### English
 - Made restart and miss flows close the leaderboard before continuing, while keeping R as a restart command.
