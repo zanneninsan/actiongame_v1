@@ -13,7 +13,7 @@ const ALLOWED_STAGE_IDS = new Set(["neonCanal"]);
 const MAX_ITEM_SCORE = 100_000;
 const MAX_SCORE = MAX_ITEM_SCORE + (MAX_GAME_TIME_MS / 1000) * TIME_BONUS_PER_SECOND;
 
-export const submitScore = onCall({region: "asia-northeast1"}, async (request) => {
+export const submitScore = onCall({region: "asia-northeast1", cors: true}, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Anonymous auth is required.");
   }
