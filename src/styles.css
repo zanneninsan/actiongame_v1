@@ -171,8 +171,15 @@ canvas {
   justify-self: center;
   height: 48px;
   background-image: url("../assets/ui/fantasy/button_primary_selected_safe.webp");
-  color: #fff7d6;
+  color: #ffffff;
   font-size: 18px;
+  filter: brightness(1.34) saturate(1.22) drop-shadow(0 0 12px rgba(253, 230, 138, 0.42));
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.98), 0 0 8px rgba(255, 247, 214, 0.55);
+}
+
+.start-button:hover,
+.start-button:focus-visible {
+  filter: brightness(1.5) saturate(1.34) drop-shadow(0 0 16px rgba(253, 230, 138, 0.58));
 }
 
 @media (max-width: 560px) {
