@@ -606,6 +606,14 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "speed": 96
     },
     {
+      "type": "neonIdolShooter",
+      "x": 7040,
+      "y": 292,
+      "patrolLeft": 7040,
+      "patrolRight": 7040,
+      "speed": 0
+    },
+    {
       "type": "aquaMascot",
       "x": 9500,
       "y": 392,
@@ -739,6 +747,7 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     { type: "rabbitTraveler", x: 3640, y: 444, patrolLeft: 3420, patrolRight: 3680, speed: 86 },
     { type: "knifePunk", x: 5320, y: 444, patrolLeft: 5180, patrolRight: 5480, speed: 82 },
     { type: "hornedCyborg", x: 5850, y: 344, patrolLeft: 5750, patrolRight: 6260, speed: 68 },
+    { type: "neonIdolShooter", x: 6320, y: 260, patrolLeft: 6320, patrolRight: 6320, speed: 0 },
     { type: "aquaMascot", x: 7160, y: 448, patrolLeft: 7040, patrolRight: 7400, speed: 94 },
     { type: "aquaMascot", x: 8460, y: 476, patrolLeft: 8240, patrolRight: 8840, speed: 108 },
   ],

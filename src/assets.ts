@@ -18,8 +18,14 @@ export type ItemType =
   | "powerJump"
   | "star"
   | "dashRing";
-export type EnemyType = "knifePunk" | "aquaMascot" | "hornedCyborg" | "coneGolem" | "rabbitTraveler";
-export type EnemyAiType = "patrol" | "flyingPatrol" | "hoppingPatrol" | "chase";
+export type EnemyType =
+  | "knifePunk"
+  | "aquaMascot"
+  | "hornedCyborg"
+  | "coneGolem"
+  | "rabbitTraveler"
+  | "neonIdolShooter";
+export type EnemyAiType = "patrol" | "flyingPatrol" | "hoppingPatrol" | "chase" | "shooter" | "projectile";
 export const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
 export const ITEM_GLOW_COLORS: Record<ItemType, number> = {
   energyDrink: 0x8cffd2,
@@ -282,5 +288,17 @@ export const ENEMY_DEFINITIONS: Record<
       frameCount: 5,
       frameRate: 8,
     },
+  },
+  neonIdolShooter: {
+    key: "enemy-neon-idol-shooter",
+    label: "Neon Idol",
+    assetPath: "assets/enemies/neon_idol_shooter.png",
+    displayWidth: 78,
+    displayHeight: 104,
+    bodyWidth: 40,
+    bodyHeight: 72,
+    bodyOffsetX: 20,
+    bodyOffsetY: 28,
+    aiType: "shooter",
   },
 };

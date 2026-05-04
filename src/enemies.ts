@@ -8,6 +8,9 @@ const FLYING_BOB_HEIGHT = 34;
 const FLYING_BOB_SPEED = 0.0032;
 const HOP_INTERVAL_MS = 1050;
 const HOP_VELOCITY_Y = -410;
+const SHOOT_INTERVAL_MS = 1700;
+const PROJECTILE_SPEED = 235;
+const PROJECTILE_TEXTURE_KEY = "enemy-projectile-heart";
 
 export const createEnemyAnimations = (scene: Phaser.Scene) => {
   Object.values(ENEMY_DEFINITIONS).forEach((definition) => {
@@ -26,6 +29,7 @@ export const createEnemyAnimations = (scene: Phaser.Scene) => {
       repeat: -1,
     });
   });
+  createProjectileTexture(scene);
 };
 
 export const createEnemies = (
@@ -89,9 +93,33 @@ export const updateEnemies = (
       updateChaseEnemy(enemy, player);
       return;
     }
+    if (aiType === "shooter") {
+      updateShooterEnemy(enemiesGroup, enemy, player);
+      return;
+    }
+    if (aiType === "projectile") {
+      updateProjectileEnemy(enemy, destroyBelowY);
+      return;
+    }
 
     updatePatrolEnemy(enemy);
   });
+};
+
+const createProjectileTexture = (scene: Phaser.Scene) => {
+  if (scene.textures.exists(PROJECTILE_TEXTURE_KEY)) {
+    return;
+  }
+  const graphics = scene.make.graphics({ x: 0, y: 0 }, false);
+  graphics.fillStyle(0xff4fb3, 1);
+  graphics.fillCircle(10, 9, 7);
+  graphics.fillCircle(20, 9, 7);
+  graphics.fillTriangle(4, 12, 26, 12, 15, 28);
+  graphics.lineStyle(3, 0x3b0a2a, 1);
+  graphics.strokeCircle(10, 9, 7);
+  graphics.strokeCircle(20, 9, 7);
+  graphics.generateTexture(PROJECTILE_TEXTURE_KEY, 30, 30);
+  graphics.destroy();
 };
 
 const updatePatrolEnemy = (enemy: Phaser.Physics.Arcade.Sprite) => {
@@ -157,6 +185,46 @@ const updateChaseEnemy = (
 
   enemy.setVelocityX(speed * direction);
   enemy.setFlipX(direction < 0);
+};
+
+const updateShooterEnemy = (
+  enemiesGroup: Phaser.Physics.Arcade.Group,
+  enemy: Phaser.Physics.Arcade.Sprite,
+  player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+) => {
+  const body = enemy.body as Phaser.Physics.Arcade.Body;
+  body.setAllowGravity(true);
+  enemy.setVelocityX(0);
+  if (!player?.active) {
+    return;
+  }
+
+  const direction = player.x < enemy.x ? -1 : 1;
+  enemy.setFlipX(direction < 0);
+  const nextShotAt = (enemy.getData("nextShotAt") as number | undefined) ?? 0;
+  if (enemy.scene.time.now < nextShotAt || Math.abs(player.x - enemy.x) > 620) {
+    return;
+  }
+
+  enemy.setData("nextShotAt", enemy.scene.time.now + SHOOT_INTERVAL_MS + Phaser.Math.Between(-180, 240));
+  const projectile = enemiesGroup.create(enemy.x + direction * 34, enemy.y - 12, PROJECTILE_TEXTURE_KEY) as Phaser.Physics.Arcade.Sprite;
+  projectile.setDisplaySize(28, 28);
+  projectile.setDepth(0.22);
+  projectile.setData("enemyType", "projectile");
+  projectile.setData("aiType", "projectile");
+  projectile.setData("defeated", false);
+  projectile.setVelocity(direction * PROJECTILE_SPEED, -24);
+  projectile.setSize(24, 24);
+  const projectileBody = projectile.body as Phaser.Physics.Arcade.Body;
+  projectileBody.setAllowGravity(false);
+};
+
+const updateProjectileEnemy = (enemy: Phaser.Physics.Arcade.Sprite, destroyBelowY?: number) => {
+  const body = enemy.body as Phaser.Physics.Arcade.Body;
+  body.setAllowGravity(false);
+  if (destroyBelowY !== undefined && (enemy.y > destroyBelowY || enemy.x < -160 || enemy.x > body.world.bounds.width + 160)) {
+    enemy.destroy();
+  }
 };
 
 const updatePatrolDirection = (enemy: Phaser.Physics.Arcade.Sprite) => {
