@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.144
+### English
+- Removed the NEW label from the leaderboard header while keeping the marker space and current-score NEW badge position unchanged.
+### Japanese
+- リーダーボードヘッダから NEW の見出しだけを外し、余白と今回スコアの NEW 表示位置はそのまま残しました。
+
 ## v0.1.143
 ### English
 - Added a fixed leaderboard header and moved the short player ID into its own column beside the player name.

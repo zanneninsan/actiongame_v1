@@ -20,7 +20,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
       <p class="leaderboard-meta">${escapeHtml(options.stageName)} / ${escapeHtml(options.gameVersion)}</p>
       <p class="leaderboard-status">${escapeHtml(options.statusMessage ?? "Loading...")}</p>
       <div class="leaderboard-header">
-        <span>NEW</span>
+        <span aria-hidden="true"></span>
         <span>RANK</span>
         <span>NAME</span>
         <span>ID</span>
