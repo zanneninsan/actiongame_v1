@@ -21,8 +21,8 @@ export const ITEM_GLOW_COLORS: Record<ItemType, number> = {
 export type ScoreState = Record<ItemType, number>;
 export type PlatformAsset = (typeof PLATFORM_ASSETS)[keyof typeof PLATFORM_ASSETS];
 export type StageObjectAsset = { key: string; path: string };
-export type MovingPlatformAxis = "x" | "y";
-export type MovingPlatformConfig = { axis: MovingPlatformAxis; distance: number; speed: number };
+export type MovingPlatformAxis = "x" | "y" | "xy";
+export type MovingPlatformConfig = { axis: MovingPlatformAxis; distance: number; speed: number; distanceY?: number };
 export type PlatformRunPlacement = {
   x: number;
   y: number;

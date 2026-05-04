@@ -30,8 +30,9 @@ export type MovingPlatformInstance = {
   deltaY: number;
   width: number;
   height: number;
-  axis: "x" | "y";
+  axis: "x" | "y" | "xy";
   distance: number;
+  distanceY: number;
   speed: number;
   direction: 1 | -1;
 };
@@ -108,14 +109,14 @@ const addMovingPlatformRun = (options: StageRenderOptions, platform: PlatformRun
 
   const rawDistance = platform.moving?.distance ?? 0;
   const distance = Number.isFinite(rawDistance) ? rawDistance : 0;
+  const rawDistanceY = platform.moving?.distanceY ?? distance;
+  const distanceY = moving.axis === "xy" && Number.isFinite(rawDistanceY) ? rawDistanceY : 0;
   const rawSpeed = platform.moving?.speed ?? 0;
   const speed = Math.max(0, Number.isFinite(rawSpeed) ? rawSpeed : 0);
-  const direction: 1 | -1 = distance >= 0 ? 1 : -1;
-  if (speed > 0 && distance !== 0) {
-    body.setVelocity(
-      moving.axis === "x" ? speed * direction : 0,
-      moving.axis === "y" ? speed * direction : 0,
-    );
+  const primaryDistance = moving.axis === "xy" && distance === 0 ? distanceY : distance;
+  const direction: 1 | -1 = primaryDistance >= 0 ? 1 : -1;
+  if (speed > 0 && (distance !== 0 || distanceY !== 0)) {
+    setMovingPlatformVelocity(body, moving.axis, distance, distanceY, speed, direction);
   }
 
   options.movingPlatformInstances.push({
@@ -131,6 +132,7 @@ const addMovingPlatformRun = (options: StageRenderOptions, platform: PlatformRun
     height: PLATFORM_UNIT_HEIGHT,
     axis: moving.axis,
     distance,
+    distanceY,
     speed,
     direction,
   });
@@ -162,7 +164,7 @@ export const updateMovingPlatforms = (instances: MovingPlatformInstance[], isAct
       return;
     }
 
-    if (!isActive || platform.speed <= 0 || platform.distance === 0) {
+    if (!isActive || platform.speed <= 0 || (platform.distance === 0 && platform.distanceY === 0)) {
       platform.body.setVelocity(0, 0);
       platform.deltaX = 0;
       platform.deltaY = 0;
@@ -172,38 +174,73 @@ export const updateMovingPlatforms = (instances: MovingPlatformInstance[], isAct
       return;
     }
 
-    const endX = platform.startX + (platform.axis === "x" ? platform.distance : 0);
-    const endY = platform.startY + (platform.axis === "y" ? platform.distance : 0);
+    const endX = platform.startX + getMovingPlatformDistanceX(platform);
+    const endY = platform.startY + getMovingPlatformDistanceY(platform);
     const currentX = platform.body.x - platform.width / 2;
     const currentY = platform.body.y - platform.height / 2;
-    const axisStart = platform.axis === "x" ? platform.startX : platform.startY;
-    const axisEnd = platform.axis === "x" ? endX : endY;
-    const axisCurrent = platform.axis === "x" ? currentX : currentY;
-    const min = Math.min(axisStart, axisEnd);
-    const max = Math.max(axisStart, axisEnd);
+    const progress = getMovingPlatformProgress(platform, currentX, currentY, endX, endY);
 
-    if (platform.direction > 0 && axisCurrent >= max) {
+    if (platform.direction > 0 && progress >= 1) {
       platform.direction = -platform.direction as 1 | -1;
-      const clampedX = platform.axis === "x" ? max : currentX;
-      const clampedY = platform.axis === "y" ? max : currentY;
-      platform.body.setPosition(clampedX + platform.width / 2, clampedY + platform.height / 2);
-    } else if (platform.direction < 0 && axisCurrent <= min) {
+      platform.body.setPosition(endX + platform.width / 2, endY + platform.height / 2);
+    } else if (platform.direction < 0 && progress <= 0) {
       platform.direction = -platform.direction as 1 | -1;
-      const clampedX = platform.axis === "x" ? min : currentX;
-      const clampedY = platform.axis === "y" ? min : currentY;
-      platform.body.setPosition(clampedX + platform.width / 2, clampedY + platform.height / 2);
+      platform.body.setPosition(platform.startX + platform.width / 2, platform.startY + platform.height / 2);
     }
 
-    platform.body.setVelocity(
-      platform.axis === "x" ? platform.speed * platform.direction : 0,
-      platform.axis === "y" ? platform.speed * platform.direction : 0,
-    );
+    setMovingPlatformVelocity(platform.body, platform.axis, platform.distance, platform.distanceY, platform.speed, platform.direction);
     platform.deltaX = platform.body.x - platform.previousX;
     platform.deltaY = platform.body.y - platform.previousY;
     platform.previousX = platform.body.x;
     platform.previousY = platform.body.y;
     syncMovingPlatformVisuals(platform);
   });
+};
+
+const getMovingPlatformDistanceX = (platform: MovingPlatformInstance) => {
+  return platform.axis === "x" || platform.axis === "xy" ? platform.distance : 0;
+};
+
+const getMovingPlatformDistanceY = (platform: MovingPlatformInstance) => {
+  return platform.axis === "y" ? platform.distance : platform.axis === "xy" ? platform.distanceY : 0;
+};
+
+const setMovingPlatformVelocity = (
+  body: Phaser.Physics.Arcade.Image,
+  axis: MovingPlatformInstance["axis"],
+  distance: number,
+  distanceY: number,
+  speed: number,
+  direction: 1 | -1,
+) => {
+  const distanceX = axis === "x" || axis === "xy" ? distance : 0;
+  const resolvedDistanceY = axis === "y" ? distance : axis === "xy" ? distanceY : 0;
+  const length = Math.hypot(distanceX, resolvedDistanceY);
+  if (length <= 0) {
+    body.setVelocity(0, 0);
+    return;
+  }
+
+  body.setVelocity((distanceX / length) * speed * direction, (resolvedDistanceY / length) * speed * direction);
+};
+
+const getMovingPlatformProgress = (
+  platform: MovingPlatformInstance,
+  currentX: number,
+  currentY: number,
+  endX: number,
+  endY: number,
+) => {
+  const distanceX = endX - platform.startX;
+  const distanceY = endY - platform.startY;
+  const lengthSq = distanceX * distanceX + distanceY * distanceY;
+  if (lengthSq <= 0) {
+    return 0;
+  }
+
+  const currentDeltaX = currentX - platform.startX;
+  const currentDeltaY = currentY - platform.startY;
+  return (currentDeltaX * distanceX + currentDeltaY * distanceY) / lengthSq;
 };
 
 export const carryPlayerOnMovingPlatforms = (

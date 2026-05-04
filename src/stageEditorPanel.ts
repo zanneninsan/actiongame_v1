@@ -40,6 +40,7 @@ export class StageEditorPanel {
   private platformUnitsInput?: HTMLInputElement;
   private movingAxisSelect?: HTMLSelectElement;
   private movingDistanceInput?: HTMLInputElement;
+  private movingDistanceYInput?: HTMLInputElement;
   private movingSpeedInput?: HTMLInputElement;
   private itemTypeSelect?: HTMLSelectElement;
   private enemyTypeSelect?: HTMLSelectElement;
@@ -66,6 +67,10 @@ export class StageEditorPanel {
 
   get movingDistance() {
     return Number(this.movingDistanceInput?.value) || 256;
+  }
+
+  get movingDistanceY() {
+    return Number(this.movingDistanceYInput?.value) || 160;
   }
 
   get movingSpeed() {
@@ -124,11 +129,16 @@ export class StageEditorPanel {
           <select data-moving-axis>
             <option value="x">${t(this.options.locale, "editor.movingAxis.x")}</option>
             <option value="y">${t(this.options.locale, "editor.movingAxis.y")}</option>
+            <option value="xy">${t(this.options.locale, "editor.movingAxis.xy")}</option>
           </select>
         </div>
         <div class="editor-row">
           <label>${t(this.options.locale, "editor.movingDistance")}</label>
           <input data-moving-distance type="number" min="-960" max="960" step="32" value="256" />
+        </div>
+        <div class="editor-row">
+          <label>${t(this.options.locale, "editor.movingDistanceY")}</label>
+          <input data-moving-distance-y type="number" min="-960" max="960" step="32" value="160" />
         </div>
         <div class="editor-row">
           <label>${t(this.options.locale, "editor.movingSpeed")}</label>
@@ -184,6 +194,7 @@ export class StageEditorPanel {
     this.platformUnitsInput = panel.querySelector<HTMLInputElement>("[data-platform-units]")!;
     this.movingAxisSelect = panel.querySelector<HTMLSelectElement>("[data-moving-axis]")!;
     this.movingDistanceInput = panel.querySelector<HTMLInputElement>("[data-moving-distance]")!;
+    this.movingDistanceYInput = panel.querySelector<HTMLInputElement>("[data-moving-distance-y]")!;
     this.movingSpeedInput = panel.querySelector<HTMLInputElement>("[data-moving-speed]")!;
     this.itemTypeSelect = panel.querySelector<HTMLSelectElement>("[data-item-type]")!;
     this.enemyTypeSelect = panel.querySelector<HTMLSelectElement>("[data-enemy-type]")!;
@@ -305,6 +316,7 @@ export class StageEditorPanel {
     this.platformUnitsInput = undefined;
     this.movingAxisSelect = undefined;
     this.movingDistanceInput = undefined;
+    this.movingDistanceYInput = undefined;
     this.movingSpeedInput = undefined;
     this.itemTypeSelect = undefined;
     this.enemyTypeSelect = undefined;

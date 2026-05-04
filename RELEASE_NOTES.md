@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.165
+### English
+- Added diagonal moving platforms with editor support for X and Y travel distances, and placed a few in Sky Shaft Climb.
+### Japanese
+- 斜めに移動する床を追加し、エディットでもX方向とY方向の移動距離を設定できるようにしました。スカイシャフト・クライムにもいくつか配置しています。
+
 ## v0.1.164
 ### English
 - Changed the five-jump danmaku trigger so it only appears once per run and does not reset on landing.

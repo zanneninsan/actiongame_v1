@@ -233,6 +233,8 @@ export class StageEditor {
         moving: {
           axis: this.panel?.movingAxis ?? "x",
           distance: Phaser.Math.Clamp(this.panel?.movingDistance ?? 256, -960, 960),
+          distanceY:
+            this.panel?.movingAxis === "xy" ? Phaser.Math.Clamp(this.panel?.movingDistanceY ?? 160, -960, 960) : undefined,
           speed: Phaser.Math.Clamp(this.panel?.movingSpeed ?? 90, 16, 360),
         },
       };
@@ -734,8 +736,9 @@ export class StageEditor {
   private isMovingPlatformConfig(value: unknown) {
     return (
       this.isRecord(value) &&
-      (value.axis === "x" || value.axis === "y") &&
+      (value.axis === "x" || value.axis === "y" || value.axis === "xy") &&
       this.isNumber(value.distance) &&
+      (value.distanceY === undefined || this.isNumber(value.distanceY)) &&
       this.isNumber(value.speed)
     );
   }
