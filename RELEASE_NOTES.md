@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.129
+### English
+- Moved countdown scan lines and glow behind the main lettering, then strengthened the foreground text with a hard dark outline for clearer contrast.
+### Japanese
+- カウントダウンのスキャンラインと発光を文字の背面へ下げ、前面の文字に硬い黒縁を付けて、3、2、1、GO がくっきり見えるようにしました。
+
 ## v0.1.128
 ### English
 - Restyled the start countdown with a heavier arcade font stack, layered neon text, burst lines, scan lines, and a sharper hit animation.

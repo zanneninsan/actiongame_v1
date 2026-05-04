@@ -44,11 +44,11 @@ export class StartCountdownOverlay {
 
     let index = 0;
     const sequence = getCountdownSequence(this.locale);
-    this.burst = this.scene.add.graphics().setScrollFactor(0).setDepth(COUNTDOWN_DEPTH - 3);
-    this.scanLines = this.scene.add.graphics().setScrollFactor(0).setDepth(COUNTDOWN_DEPTH + 3).setBlendMode(Phaser.BlendModes.ADD);
+    this.burst = this.scene.add.graphics().setScrollFactor(0).setDepth(COUNTDOWN_DEPTH - 6);
+    this.scanLines = this.scene.add.graphics().setScrollFactor(0).setDepth(COUNTDOWN_DEPTH - 5).setBlendMode(Phaser.BlendModes.ADD);
     this.drawBurst(sequence[index]);
 
-    this.shadowText = this.createCountdownText(sequence[index], 150, "#0f0526", "#000000", 22, COUNTDOWN_DEPTH - 2)
+    this.shadowText = this.createCountdownText(sequence[index], 150, "#0f0526", "#000000", 24, COUNTDOWN_DEPTH - 3)
       .setPosition(this.x + 8, this.y + 9)
       .setAlpha(0.9)
       .setAngle(-2);
@@ -66,17 +66,17 @@ export class StartCountdownOverlay {
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(COUNTDOWN_DEPTH - 1)
-      .setAlpha(0.78)
+      .setAlpha(0.46)
       .setBlendMode(Phaser.BlendModes.ADD)
-      .setShadow(0, 0, "#22d3ee", 38, true, true);
+      .setShadow(0, 0, "#22d3ee", 24, true, true);
 
-    this.hotText = this.createCountdownText(sequence[index], 139, "#fff7ad", "#ff007a", 16, COUNTDOWN_DEPTH + 1)
+    this.hotText = this.createCountdownText(sequence[index], 139, "#ffd166", "#ff007a", 18, COUNTDOWN_DEPTH)
       .setPosition(this.x - 4, this.y - 5)
-      .setAlpha(0.82)
+      .setAlpha(0.5)
       .setBlendMode(Phaser.BlendModes.ADD);
 
-    this.text = this.createCountdownText(sequence[index], 132, "#ffffff", "#020617", 14, COUNTDOWN_DEPTH + 2)
-      .setShadow(0, 0, "#67e8f9", 24, true, true);
+    this.text = this.createCountdownText(sequence[index], 132, "#ffffff", "#020617", 22, COUNTDOWN_DEPTH + 4)
+      .setShadow(4, 5, "#000000", 0, true, false);
 
     if (this.scene.game.renderer.type === Phaser.WEBGL) {
       this.glowText.setPipeline(this.rainbowPipelineKey);
