@@ -10,7 +10,7 @@ export const PROP_ASSETS = {
 } as const;
 export type StreetLampKey = (typeof PROP_ASSETS)[keyof typeof PROP_ASSETS];
 export type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
-export type EnemyType = "knifePunk" | "aquaMascot";
+export type EnemyType = "knifePunk" | "aquaMascot" | "hornedCyborg" | "coneGolem" | "rabbitTraveler";
 export const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
 export const ITEM_GLOW_COLORS: Record<ItemType, number> = {
   energyDrink: 0x8cffd2,
@@ -165,6 +165,60 @@ export const ENEMY_DEFINITIONS: Record<
       frameWidth: 280,
       frameHeight: 250,
       frameCount: 30,
+      frameRate: 8,
+    },
+  },
+  hornedCyborg: {
+    key: "enemy-horned-cyborg",
+    label: "Horned Cyborg",
+    displayWidth: 98,
+    displayHeight: 118,
+    bodyWidth: 42,
+    bodyHeight: 86,
+    bodyOffsetX: 28,
+    bodyOffsetY: 32,
+    animation: {
+      key: "enemy-horned-cyborg-walk",
+      assetPath: "assets/enemies/horned_cyborg_walk.png",
+      frameWidth: 280,
+      frameHeight: 250,
+      frameCount: 4,
+      frameRate: 7,
+    },
+  },
+  coneGolem: {
+    key: "enemy-cone-golem",
+    label: "Cone Golem",
+    displayWidth: 84,
+    displayHeight: 86,
+    bodyWidth: 56,
+    bodyHeight: 54,
+    bodyOffsetX: 14,
+    bodyOffsetY: 30,
+    animation: {
+      key: "enemy-cone-golem-walk",
+      assetPath: "assets/enemies/cone_golem_walk.png",
+      frameWidth: 220,
+      frameHeight: 220,
+      frameCount: 4,
+      frameRate: 7,
+    },
+  },
+  rabbitTraveler: {
+    key: "enemy-rabbit-traveler",
+    label: "Rabbit Traveler",
+    displayWidth: 68,
+    displayHeight: 92,
+    bodyWidth: 34,
+    bodyHeight: 58,
+    bodyOffsetX: 18,
+    bodyOffsetY: 30,
+    animation: {
+      key: "enemy-rabbit-traveler-walk",
+      assetPath: "assets/enemies/rabbit_traveler_walk.png",
+      frameWidth: 160,
+      frameHeight: 190,
+      frameCount: 5,
       frameRate: 8,
     },
   },

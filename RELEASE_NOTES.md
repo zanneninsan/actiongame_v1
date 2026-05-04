@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.158
+### English
+- Added three new enemy types from supplied character sheets: Horned Cyborg, Cone Golem, and Rabbit Traveler.
+- Processed the source sheets into transparent in-game enemy animation sheets and placed examples in Skybridge Sprint.
+### Japanese
+- 受け取ったキャラクターシートを加工し、ホーンドサイボーグ、コーンゴーレム、ラビットトラベラーの3種類を敵キャラとして追加しました。
+- 元画像から透過アニメーション素材を作成し、スカイブリッジ・スプリントに出現例を配置しました。
+
 ## v0.1.157
 ### English
 - Added moving platform support with horizontal and vertical movement, including stage editor placement controls for direction, distance, speed, and unit count.
