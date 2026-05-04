@@ -9,7 +9,6 @@ setGlobalOptions({maxInstances: 10});
 const MAX_NAME_LENGTH = 16;
 const MAX_GAME_TIME_MS = 360_000;
 const TIME_BONUS_PER_SECOND = 10;
-const ALLOWED_STAGE_IDS = new Set(["neonCanal", "skybridgeSprint", "skyShaftClimb"]);
 const MAX_ITEM_SCORE = 100_000;
 const MAX_SCORE = MAX_ITEM_SCORE + (MAX_GAME_TIME_MS / 1000) * TIME_BONUS_PER_SECOND;
 
@@ -29,9 +28,9 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
     throw new HttpsError("invalid-argument", "Player id is required.");
   }
 
-  const stageId = cleanText(data.stageId, 40);
-  if (!ALLOWED_STAGE_IDS.has(stageId)) {
-    throw new HttpsError("invalid-argument", "Unknown stage.");
+  const stageId = cleanStageId(data.stageId);
+  if (!stageId) {
+    throw new HttpsError("invalid-argument", "Stage id is invalid.");
   }
 
   const itemScore = clampNumber(data.itemScore, 0, MAX_ITEM_SCORE);
@@ -103,6 +102,11 @@ async function getLeaderboardRank(firestore: Firestore, stageId: string, score: 
 function cleanPlayerId(value: unknown) {
   const playerId = cleanText(value, 80);
   return /^[a-zA-Z0-9_-]{8,80}$/.test(playerId) ? playerId : "";
+}
+
+function cleanStageId(value: unknown) {
+  const stageId = cleanText(value, 40);
+  return /^[a-zA-Z0-9_-]{1,40}$/.test(stageId) ? stageId : "";
 }
 
 function cleanText(value: unknown, maxLength: number) {

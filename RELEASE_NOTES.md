@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.162
+### English
+- Removed the fixed stage allowlist from leaderboard score submissions so newly added stages can submit scores without another Firebase code change.
+- Kept stage IDs constrained to safe alphanumeric, underscore, and hyphen values.
+### Japanese
+- ランキング登録の固定ステージ許可リストをなくし、新しいステージを追加してもFirebase側のコード変更なしでスコア登録できるようにしました。
+- ステージIDは英数字、アンダースコア、ハイフンだけを許可する安全な形式チェックにしました。
+
 ## v0.1.161
 ### English
 - Fixed moving platform hitboxes so they match the visible platform size without double-scaling the physics body.
