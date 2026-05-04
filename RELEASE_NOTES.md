@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.118
+### English
+- Extended the fall-miss restart delay so the miss danmaku has time to play before the stage restarts.
+### Japanese
+- ミス時の弾幕が見えるように、落下ミス演出からリスタートまでの待ち時間を長くしました。
+
 ## v0.1.117
 ### English
 - Added an options menu toggle to enable or disable danmaku comments, with the setting saved between sessions.
