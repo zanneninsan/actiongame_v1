@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.144";
+const DEBUG_VERSION = "v0.1.145";
 const ACTIVE_STAGE_ID = "neonCanal";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1383,11 +1383,13 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
+    const playerId = isLeaderboardPlayerId(this.leaderboardPlayerId) ? this.leaderboardPlayerId : this.getOrCreateLeaderboardPlayerId();
+    this.leaderboardPlayerId = playerId;
     const elapsedMs = Math.max(0, GAME_TIME_MS - remainingMs);
     const submissionId = createSubmissionId();
     submitLeaderboardScore({
       submissionId,
-      playerId: this.leaderboardPlayerId,
+      playerId,
       stageId: ACTIVE_STAGE_ID,
       stageName: resolveStageName(this.editorStage.name, this.locale),
       gameVersion: DEBUG_VERSION,
@@ -1398,9 +1400,12 @@ class PrototypeScene extends Phaser.Scene {
       elapsedMs,
       remainingMs,
     })
-      .then((result) =>
-        this.showLeaderboard("Score submitted.", "submissionId" in result ? result.submissionId ?? submissionId : submissionId),
-      )
+      .then((result) => {
+        if (!result.ok) {
+          throw new Error("Leaderboard score was rejected.");
+        }
+        this.showLeaderboard("Score submitted.", "submissionId" in result ? result.submissionId ?? submissionId : submissionId);
+      })
       .catch(() => this.showLeaderboard("Score could not be submitted."));
   }
 

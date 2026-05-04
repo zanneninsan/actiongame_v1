@@ -10,7 +10,7 @@ Copy `.env.example` to `.env.local` and fill the Firebase web app values. `VITE_
 
 Use `firebase/firestore.rules`. The leaderboard documents are public to read, but writes are denied from the client. The callable function is responsible for validation and writes.
 
-Each accepted leaderboard row is keyed by stage and persistent client `playerId`, so one player keeps one row per stage. If a later submission is lower than the saved score, the callable updates identity metadata without lowering the ranked score.
+Each accepted leaderboard row requires a persistent client `playerId` and is keyed by stage plus that `playerId`, so one player keeps one row per stage. If a later submission is lower than the saved score, the callable updates identity metadata without lowering the ranked score.
 
 Create this composite index if Firestore asks for it:
 

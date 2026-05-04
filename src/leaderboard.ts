@@ -61,6 +61,11 @@ export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) 
     return { ok: false, reason: "Leaderboard is not configured." };
   }
 
+  const playerId = sanitizePlayerId(payload.playerId);
+  if (!playerId) {
+    throw new Error("Leaderboard player id is required.");
+  }
+
   await ensureAnonymousAuth(services.auth);
   const submitScore = httpsCallable<LeaderboardSubmitPayload, { ok: boolean; status?: string; submissionId?: string }>(
     services.functions,
@@ -68,6 +73,7 @@ export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) 
   );
   return submitScore({
     ...payload,
+    playerId,
     playerName: sanitizePlayerName(payload.playerName),
     score: roundScore(payload.score),
     timeBonus: roundScore(payload.timeBonus),
@@ -88,21 +94,24 @@ export async function fetchLeaderboardEntries(stageId: string, maxEntries = DEFA
     limitQuery(maxEntries),
   );
   const snapshot = await getDocs(entriesQuery);
-  return snapshot.docs.map((doc) => {
-    const data = doc.data();
-    const createdAtValue = data.createdAt as { toDate?: () => Date } | undefined;
-    return {
-      id: doc.id,
-      submissionId: typeof data.submissionId === "string" ? data.submissionId : "",
-      playerId: typeof data.playerId === "string" ? data.playerId : "",
-      playerName: typeof data.playerName === "string" ? data.playerName : "PLAYER",
-      score: typeof data.score === "number" ? data.score : 0,
-      stageId: typeof data.stageId === "string" ? data.stageId : stageId,
-      stageName: typeof data.stageName === "string" ? data.stageName : stageId,
-      gameVersion: typeof data.gameVersion === "string" ? data.gameVersion : "",
-      createdAt: createdAtValue?.toDate?.() ?? null,
-    };
-  });
+  return snapshot.docs
+    .map((doc) => {
+      const data = doc.data();
+      const playerId = sanitizePlayerId(data.playerId);
+      const createdAtValue = data.createdAt as { toDate?: () => Date } | undefined;
+      return {
+        id: doc.id,
+        submissionId: typeof data.submissionId === "string" ? data.submissionId : "",
+        playerId,
+        playerName: typeof data.playerName === "string" ? data.playerName : "PLAYER",
+        score: typeof data.score === "number" ? data.score : 0,
+        stageId: typeof data.stageId === "string" ? data.stageId : stageId,
+        stageName: typeof data.stageName === "string" ? data.stageName : stageId,
+        gameVersion: typeof data.gameVersion === "string" ? data.gameVersion : "",
+        createdAt: createdAtValue?.toDate?.() ?? null,
+      };
+    })
+    .filter((entry) => entry.playerId);
 }
 
 function getFirebaseServices() {
@@ -167,6 +176,11 @@ async function ensureAnonymousAuth(auth: Auth) {
 
 function sanitizePlayerName(playerName: string) {
   return playerName.trim().slice(0, 16) || "PLAYER";
+}
+
+function sanitizePlayerId(playerId: unknown) {
+  const normalizedPlayerId = String(playerId ?? "").trim().slice(0, 80);
+  return /^[a-zA-Z0-9_-]{8,80}$/.test(normalizedPlayerId) ? normalizedPlayerId : "";
 }
 
 function roundScore(score: number) {

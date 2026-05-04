@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.145
+### English
+- Enforced leaderboard player IDs on the client path and hides any fetched leaderboard rows that do not include a valid player ID.
+### Japanese
+- リーダーボード送信時にプレイヤーIDをクライアント側でも必須にし、有効なプレイヤーIDがないランキング行は表示しないようにしました。
+
 ## v0.1.144
 ### English
 - Removed the NEW label from the leaderboard header while keeping the marker space and current-score NEW badge position unchanged.
