@@ -42,17 +42,42 @@ canvas {
 .start-dialog {
   --fantasy-window-border: clamp(30px, 4.8vw, 42px);
   box-sizing: border-box;
+  position: relative;
   width: min(560px, calc(100vw - 112px));
   max-height: calc(100dvh - 48px);
   display: grid;
   gap: 12px;
-  padding: 0 clamp(14px, 3vw, 24px) 14px;
-  border: var(--fantasy-window-border) solid transparent;
-  border-image-source: url("../assets/ui/fantasy/frame_parts/frame_window_9slice_safe.png");
-  border-image-slice: 132 fill;
-  border-image-width: var(--fantasy-window-border);
-  border-image-repeat: stretch;
+  padding: var(--fantasy-window-border) clamp(30px, 5vw, 44px) calc(var(--fantasy-window-border) * 0.72);
+  border: 0;
+  background:
+    url("../assets/ui/fantasy/frame_parts/frame_corner_tl.png") left top / 84px 84px no-repeat,
+    url("../assets/ui/fantasy/frame_parts/frame_corner_tr.png") right top / 84px 84px no-repeat,
+    url("../assets/ui/fantasy/frame_parts/frame_corner_bl.png") left bottom / 84px 84px no-repeat,
+    url("../assets/ui/fantasy/frame_parts/frame_corner_br.png") right bottom / 84px 84px no-repeat,
+    url("../assets/ui/fantasy/frame_parts/frame_edge_top.png") left 72px top / 64px 84px repeat-x,
+    url("../assets/ui/fantasy/frame_parts/frame_edge_bottom.png") left 72px bottom / 64px 84px repeat-x,
+    url("../assets/ui/fantasy/frame_parts/frame_edge_left.png") left top 72px / 84px 64px repeat-y,
+    url("../assets/ui/fantasy/frame_parts/frame_edge_right.png") right top 72px / 84px 64px repeat-y,
+    url("../assets/ui/fantasy/frame_parts/frame_fill.png") center / 100% 100% repeat;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
+}
+
+.start-dialog::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    url("../assets/ui/fantasy/diamond_ornament.png") center -10px / 42px 42px no-repeat,
+    url("../assets/ui/fantasy/diamond_ornament.png") center calc(100% - 32px) / 42px 42px no-repeat,
+    url("../assets/ui/fantasy/diamond_ornament.png") -10px center / 42px 42px no-repeat,
+    url("../assets/ui/fantasy/diamond_ornament.png") calc(100% - 32px) center / 42px 42px no-repeat;
+}
+
+.start-dialog > * {
+  position: relative;
+  z-index: 1;
 }
 
 .start-dialog h1 {
@@ -157,7 +182,7 @@ canvas {
     --fantasy-window-border: 30px;
     width: min(100%, calc(100vw - 64px));
     gap: 10px;
-    padding: 0 8px 10px;
+    padding: var(--fantasy-window-border) 18px 18px;
   }
 
   .mode-row,

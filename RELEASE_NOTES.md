@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.108
+### English
+- Rebuilt the start modal frame from separate corner, edge, fill, and center ornament layers to avoid border-image distortion.
+- Centered the start modal frame ornaments independently so they stay aligned on wide windows.
+### Japanese
+- 開始モーダルの枠を、角、ふち、中面、中央装飾の別レイヤーで組み直し、border-image の引き伸ばしによる歪みを避けました。
+- 開始モーダル枠の中央装飾を独立して中央配置し、横長のウィンドウでも位置がずれないようにしました。
+
 ## v0.1.107
 ### English
 - Added a long-idle player animation that plays once after the player remains idle for 5 seconds, then returns to the normal idle loop.
