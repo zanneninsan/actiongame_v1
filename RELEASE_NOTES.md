@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.150
+### English
+- Added the Skybridge Sprint stage and a stage selector to the start screen, with leaderboard scores separated by selected stage.
+### Japanese
+- 新ステージ「スカイブリッジ・スプリント」と開始画面のステージ選択を追加し、ランキングも選択したステージごとに分かれるようにしました。
+
 ## v0.1.149
 ### English
 - Made the R key dismiss the result screen first when a result or leaderboard panel is visible.

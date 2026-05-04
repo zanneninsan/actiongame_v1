@@ -10,10 +10,10 @@ import {
   type ItemType,
   type ScoreState,
 } from "./assets";
-import { ACTIVE_STAGE, cloneStage } from "./stages";
+import { DEFAULT_STAGE_ID, PLAYABLE_STAGE_IDS, STAGES, cloneStage, type StageId } from "./stages";
 import { RainbowWinPipeline } from "./rainbowPipeline";
 import { StartCountdownOverlay } from "./countdown";
-import { StartModal, type ControlMode } from "./startModal";
+import { StartModal, type ControlMode, type StageOption } from "./startModal";
 import { StageEditor } from "./stageEditor";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
 import {
@@ -55,8 +55,8 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.149";
-const ACTIVE_STAGE_ID = "neonCanal";
+const DEBUG_VERSION = "v0.1.150";
+const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
@@ -153,14 +153,15 @@ class PrototypeScene extends Phaser.Scene {
   private playerName = "PLAYER";
   private leaderboardPlayerId = "";
   private controlMode: ControlMode = "pc";
+  private currentStageId: StageId = DEFAULT_STAGE_ID;
   private locale: Locale = getBrowserLocale();
   private soundVolumePercent = 50;
   private soundMuted = false;
   private danmakuEnabled = true;
   private startModal?: StartModal;
   private controlHint = t(this.locale, "hint.pc");
-  private editorStage = cloneStage(ACTIVE_STAGE);
-  private stageConstants: ResolvedStageConstants = resolveStageConstants(ACTIVE_STAGE);
+  private editorStage = cloneStage(STAGES[DEFAULT_STAGE_ID]);
+  private stageConstants: ResolvedStageConstants = resolveStageConstants(STAGES[DEFAULT_STAGE_ID]);
   private stageEditor?: StageEditor;
   private storyDialogue?: StoryDialogueController;
   private hasAdvancedStoryDialogueAtX = false;
@@ -259,6 +260,8 @@ class PrototypeScene extends Phaser.Scene {
     this.playerName = this.getCookieValue("actiongame_player_name") || this.playerName;
     this.leaderboardPlayerId = this.getOrCreateLeaderboardPlayerId();
     this.locale = this.getSavedLocale();
+    this.currentStageId = this.getSavedStageId();
+    this.editorStage = cloneStage(STAGES[this.currentStageId]);
     this.soundVolumePercent = this.getSavedVolumePercent();
     this.soundMuted = this.getCookieValue("actiongame_muted") === "1";
     this.danmakuEnabled = this.getCookieValue("actiongame_danmaku_disabled") !== "1";
@@ -679,6 +682,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private startRun() {
     this.removeStartModal();
+    this.applySelectedStage(this.currentStageId);
     this.updatePlayerNameText();
     this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
     this.updateControlHintText();
@@ -724,14 +728,18 @@ class PrototypeScene extends Phaser.Scene {
     this.startModal = new StartModal({
       playerName: this.playerName,
       controlMode: this.controlMode,
+      stageId: this.currentStageId,
+      stageOptions: this.getStageOptions(),
       locale: this.locale,
       soundOn: !this.soundMuted && this.soundVolumePercent > 0,
       onLocaleChange: (locale) => this.setLocale(locale),
       onSoundOnChange: (soundOn) => this.setSoundEnabled(soundOn),
-      onSubmit: ({ playerName, controlMode, soundOn, locale }) => {
+      onSubmit: ({ playerName, controlMode, stageId, soundOn, locale }) => {
         this.playerName = playerName;
         this.setCookieValue("actiongame_player_name", this.playerName);
         this.controlMode = controlMode;
+        this.currentStageId = this.resolveStageId(stageId);
+        this.setCookieValue(STAGE_ID_STORAGE_KEY, this.currentStageId);
         this.setLocale(locale);
         this.setSoundEnabled(soundOn);
         this.setupComplete = true;
@@ -835,6 +843,45 @@ class PrototypeScene extends Phaser.Scene {
     this.startModal?.remove();
     this.startModal = undefined;
     document.getElementById("start-modal")?.remove();
+  }
+
+  private getStageOptions(): StageOption[] {
+    return PLAYABLE_STAGE_IDS.map((id) => ({
+      id,
+      label: {
+        ja: resolveStageName(STAGES[id].name, "ja"),
+        en: resolveStageName(STAGES[id].name, "en"),
+      },
+    }));
+  }
+
+  private getSavedStageId(): StageId {
+    return this.resolveStageId(this.getCookieValue(STAGE_ID_STORAGE_KEY));
+  }
+
+  private resolveStageId(stageId: string): StageId {
+    return stageId in STAGES ? (stageId as StageId) : DEFAULT_STAGE_ID;
+  }
+
+  private applySelectedStage(stageId: StageId) {
+    this.currentStageId = stageId;
+    this.editorStage = cloneStage(STAGES[stageId]);
+    this.stageConstants = resolveStageConstants(this.editorStage);
+    this.physics.world.setBounds(
+      0,
+      this.stageConstants.worldTop,
+      this.editorStage.worldWidth,
+      this.stageConstants.worldHeight + FALL_RESET_WORLD_MARGIN,
+    );
+    this.cameras.main.setBounds(0, this.stageConstants.worldTop, this.editorStage.worldWidth, this.stageConstants.worldHeight);
+    this.player.setPosition(this.editorStage.playerStart.x, this.editorStage.playerStart.y);
+    this.player.setVelocity(0, 0);
+    this.player.setAcceleration(0, 0);
+    this.player.setDrag(0, 0);
+    this.applyPlayerBody(false);
+    this.rebuildEditableStageObjects();
+    this.cameras.main.startFollow(this.player, true, 0.12, 0.12);
+    this.cameras.main.centerOn(this.player.x, this.player.y);
   }
 
   private getCookieValue(name: string) {
@@ -1407,7 +1454,7 @@ class PrototypeScene extends Phaser.Scene {
       currentSubmissionId,
       currentPlayerId: this.leaderboardPlayerId,
       currentScore,
-      fetchEntries: () => fetchLeaderboardEntries(ACTIVE_STAGE_ID),
+      fetchEntries: () => fetchLeaderboardEntries(this.currentStageId),
     });
   }
 
@@ -1423,7 +1470,7 @@ class PrototypeScene extends Phaser.Scene {
     submitLeaderboardScore({
       submissionId,
       playerId,
-      stageId: ACTIVE_STAGE_ID,
+      stageId: this.currentStageId,
       stageName: resolveStageName(this.editorStage.name, this.locale),
       gameVersion: DEBUG_VERSION,
       playerName: this.playerName,

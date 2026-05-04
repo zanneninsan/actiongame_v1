@@ -42,8 +42,8 @@ canvas {
 .start-dialog {
   box-sizing: border-box;
   position: relative;
-  width: min(620px, calc(100vw - 72px), calc((100dvh - 48px) * 1.2857));
-  aspect-ratio: 720 / 560;
+  width: min(620px, calc(100vw - 72px), calc((100dvh - 48px) * 1.125));
+  aspect-ratio: 720 / 640;
   display: grid;
   align-content: start;
   gap: 11px;
@@ -188,7 +188,7 @@ canvas {
   }
 
   .start-dialog {
-    width: min(100%, calc(100vw - 64px), calc((100dvh - 36px) * 1.2857));
+    width: min(100%, calc(100vw - 64px), calc((100dvh - 36px) * 1.125));
     gap: 10px;
     padding: 52px 34px 34px;
   }

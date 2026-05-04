@@ -559,11 +559,109 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
 
 export const NEON_CANAL_STAGE: StageDefinition = ORIGINAL_DOWNTOWN_STAGE;
 
+export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
+  name: {
+    jp: "スカイブリッジ・スプリント",
+    en: "Skybridge Sprint",
+  },
+  worldWidth: 9200,
+  worldTop: -760,
+  worldBottom: 720,
+  groundTopY: 672,
+  playerStart: {
+    x: 128,
+    y: 552,
+  },
+  goal: {
+    x: 8970,
+    y: 568,
+  },
+  platforms: [
+    { x: 0, y: 672, units: 8 },
+    { x: 760, y: 672, units: 7 },
+    { x: 1500, y: 672, units: 5 },
+    { x: 2140, y: 672, units: 8 },
+    { x: 3200, y: 672, units: 6 },
+    { x: 4000, y: 672, units: 5 },
+    { x: 4700, y: 672, units: 9 },
+    { x: 6020, y: 672, units: 7 },
+    { x: 6960, y: 672, units: 6 },
+    { x: 7800, y: 672, units: 22 },
+    { x: 420, y: 524, units: 3 },
+    { x: 900, y: 430, units: 3 },
+    { x: 1260, y: 348, units: 4 },
+    { x: 1840, y: 520, units: 4 },
+    { x: 2360, y: 430, units: 3 },
+    { x: 2740, y: 336, units: 4 },
+    { x: 3420, y: 520, units: 4 },
+    { x: 3880, y: 424, units: 3 },
+    { x: 4300, y: 328, units: 4 },
+    { x: 5180, y: 516, units: 5 },
+    { x: 5750, y: 420, units: 4 },
+    { x: 6320, y: 332, units: 4 },
+    { x: 7040, y: 520, units: 4 },
+    { x: 7480, y: 428, units: 3 },
+    { x: 7920, y: 340, units: 5 },
+    { x: 8520, y: 548, units: 7 },
+  ],
+  streetLamps: [
+    { x: 260, key: "street-lamp-single", scale: 0.66 },
+    { x: 1120, key: "street-lamp-double", scale: 0.62 },
+    { x: 2480, key: "street-lamp-single", scale: 0.64 },
+    { x: 4760, key: "street-lamp-double", scale: 0.62 },
+    { x: 6320, key: "street-lamp-single", scale: 0.64 },
+    { x: 8120, key: "street-lamp-double", scale: 0.64 },
+  ],
+  decorations: [
+    { x: 780, y: 672, key: "stage-structures-chainlink-fence", scale: 0.62 },
+    { x: 1120, y: 430, key: "stage-props-planter-box", scale: 0.56 },
+    { x: 1640, y: 672, key: "stage-props-traffic-cone", scale: 0.54 },
+    { x: 2480, y: 672, key: "stage-props-bike-rack", scale: 0.62 },
+    { x: 2860, y: 336, key: "stage-props-utility-box", scale: 0.52 },
+    { x: 3700, y: 672, key: "stage-structures-construction-fence", scale: 0.62 },
+    { x: 4480, y: 672, key: "stage-props-roadwork-sign", scale: 0.5 },
+    { x: 5480, y: 516, key: "stage-props-guard-rail", scale: 0.66 },
+    { x: 6140, y: 672, key: "stage-structures-concrete-pillar", scale: 0.58 },
+    { x: 7240, y: 520, key: "stage-props-sidewalk-sign", scale: 0.54 },
+    { x: 8080, y: 672, key: "stage-structures-station-wall-railing", scale: 0.64 },
+    { x: 8720, y: 672, key: "stage-structures-station-entrance", scale: 0.58 },
+  ],
+  items: [
+    { type: "energyDrink", x: 500, y: 468 },
+    { type: "bubbleTea", x: 1020, y: 374 },
+    { type: "shoppingBag", x: 1400, y: 292 },
+    { type: "energyDrink", x: 1980, y: 464 },
+    { type: "bubbleTea", x: 2480, y: 374 },
+    { type: "shoppingBag", x: 2860, y: 280 },
+    { type: "energyDrink", x: 3560, y: 464 },
+    { type: "bubbleTea", x: 4060, y: 368 },
+    { type: "shoppingBag", x: 4440, y: 272 },
+    { type: "energyDrink", x: 5340, y: 460 },
+    { type: "bubbleTea", x: 5900, y: 364 },
+    { type: "shoppingBag", x: 6460, y: 276 },
+    { type: "energyDrink", x: 7180, y: 464 },
+    { type: "bubbleTea", x: 7600, y: 372 },
+    { type: "shoppingBag", x: 8120, y: 284 },
+    { type: "energyDrink", x: 8680, y: 492 },
+  ],
+  enemies: [
+    { type: "knifePunk", x: 980, y: 590, patrolLeft: 780, patrolRight: 1160, speed: 78 },
+    { type: "aquaMascot", x: 2360, y: 590, patrolLeft: 2160, patrolRight: 2740, speed: 92 },
+    { type: "knifePunk", x: 5320, y: 444, patrolLeft: 5180, patrolRight: 5480, speed: 82 },
+    { type: "aquaMascot", x: 7160, y: 448, patrolLeft: 7040, patrolRight: 7400, speed: 94 },
+    { type: "aquaMascot", x: 8460, y: 476, patrolLeft: 8240, patrolRight: 8840, speed: 108 },
+  ],
+};
+
 export const STAGES = {
   originalDowntown: ORIGINAL_DOWNTOWN_STAGE,
   neonCanal: NEON_CANAL_STAGE,
+  skybridgeSprint: SKYBRIDGE_SPRINT_STAGE,
 };
-export const ACTIVE_STAGE = STAGES.neonCanal;
+export type StageId = keyof typeof STAGES;
+export const DEFAULT_STAGE_ID = "neonCanal" satisfies StageId;
+export const PLAYABLE_STAGE_IDS = ["neonCanal", "skybridgeSprint"] as const satisfies readonly StageId[];
+export const ACTIVE_STAGE = STAGES[DEFAULT_STAGE_ID];
 
 export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   name: typeof stage.name === "string" ? stage.name : { ...stage.name },
