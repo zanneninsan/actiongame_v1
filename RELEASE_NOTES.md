@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.112
+### English
+- Added a Shift speed modifier that doubles movement acceleration, max run speed, and jump launch velocity while held.
+### Japanese
+- Shift キーを押している間、移動加速度、最高移動速度、ジャンプ初速が2倍になるようにしました。
+
 ## v0.1.111
 ### English
 - Added Firebase-backed leaderboard client wiring with score submission on clear and a top-score modal.

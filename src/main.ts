@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.111";
+const DEBUG_VERSION = "v0.1.112";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
@@ -99,6 +99,8 @@ const MAX_FALL_SPEED = 680;
 const JUMP_VELOCITY = -575;
 const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
+const SHIFT_SPEED_MULTIPLIER = 2;
+const SHIFT_MAX_VERTICAL_SPEED = Math.abs(BOOSTED_JUMP_VELOCITY) * SHIFT_SPEED_MULTIPLIER;
 const MOBILE_FULLSCREEN_MIN_LANDSCAPE_HEIGHT = 430;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
@@ -123,7 +125,7 @@ class PrototypeScene extends Phaser.Scene {
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
   private enemiesGroup?: Phaser.Physics.Arcade.Group;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
-  private keys!: Record<"w" | "a" | "s" | "d", Phaser.Input.Keyboard.Key>;
+  private keys!: Record<"w" | "a" | "s" | "d" | "shift", Phaser.Input.Keyboard.Key>;
   private backgrounds?: BackgroundController;
   private playerNameText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
@@ -316,6 +318,7 @@ class PrototypeScene extends Phaser.Scene {
       a: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.A),
       s: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.S),
       d: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+      shift: this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT),
     };
 
     this.cameras.main.setBounds(0, this.stageConstants.worldTop, this.editorStage.worldWidth, this.stageConstants.worldHeight);
@@ -421,10 +424,15 @@ class PrototypeScene extends Phaser.Scene {
     const left = this.keys.a.isDown || this.cursors.left.isDown || this.mobileInput.a;
     const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
     const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
+    const isShiftSpeedActive = this.keys.shift.isDown;
+    const speedMultiplier = isShiftSpeedActive ? SHIFT_SPEED_MULTIPLIER : 1;
     const isCrouchInputActive = down && onFloor;
     this.updateDecorationPlatformDrop(down, onFloor);
     this.applyPlayerBody(isCrouchInputActive);
-    this.player.setMaxVelocity(isCrouchInputActive ? CROUCH_MAX_RUN_SPEED : MAX_RUN_SPEED, MAX_FALL_SPEED);
+    this.player.setMaxVelocity(
+      (isCrouchInputActive ? CROUCH_MAX_RUN_SPEED : MAX_RUN_SPEED) * speedMultiplier,
+      isShiftSpeedActive ? SHIFT_MAX_VERTICAL_SPEED : MAX_FALL_SPEED,
+    );
     this.updateCollisionDebug();
     const debugJump = Phaser.Input.Keyboard.JustDown(this.keys.w) || this.mobileJumpQueued;
     this.mobileJumpQueued = false;
@@ -432,11 +440,12 @@ class PrototypeScene extends Phaser.Scene {
     const jump = debugJump || normalJump;
     const canJump = onFloor || debugJump;
     let startedJump = false;
-    const horizontalAcceleration = onFloor
+    const baseHorizontalAcceleration = onFloor
       ? isCrouchInputActive
         ? CROUCH_GROUND_ACCELERATION
         : GROUND_ACCELERATION
       : AIR_ACCELERATION;
+    const horizontalAcceleration = baseHorizontalAcceleration * speedMultiplier;
     this.player.setDragX(onFloor ? GROUND_DRAG : AIR_DRAG);
 
     if (left) {
@@ -450,9 +459,9 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     if (jump && canJump) {
-      const jumpVelocity =
+      const baseJumpVelocity =
         Math.abs(this.player.body.velocity.x) >= BOOST_JUMP_SPEED_THRESHOLD ? BOOSTED_JUMP_VELOCITY : JUMP_VELOCITY;
-      this.player.setVelocityY(jumpVelocity);
+      this.player.setVelocityY(baseJumpVelocity * speedMultiplier);
       this.isLanding = false;
       this.landingFastForwarded = false;
       this.player.anims.timeScale = 1;
