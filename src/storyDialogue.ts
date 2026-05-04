@@ -39,7 +39,7 @@ export const DEFAULT_STORY_DIALOGUE_LINES: StoryDialogueLine[] = [
   {
     characterName: "残念院さん",
     message: "先へ進みましょう。何か手がかりが見つかるはずです。",
-    portraitUrl: `${ASSET_BASE}assets/story/elis_portrait.png`,
+    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_02_smile.png`,
   },
 ];
 

@@ -55,11 +55,12 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.123";
+const DEBUG_VERSION = "v0.1.124";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
+const STORY_DIALOGUE_ADVANCE_X = 600;
 const TIME_BONUS_PER_SECOND = 10;
 const SCORE_DANMAKU_THRESHOLD = 1000;
 const CROUCH_DANMAKU_HOLD_MS = 2000;
@@ -159,6 +160,7 @@ class PrototypeScene extends Phaser.Scene {
   private stageConstants: ResolvedStageConstants = resolveStageConstants(ACTIVE_STAGE);
   private stageEditor?: StageEditor;
   private storyDialogue?: StoryDialogueController;
+  private hasAdvancedStoryDialogueAtX = false;
   private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
   private hasWon = false;
   private hasScoreMilestoneDanmakuPlayed = false;
@@ -413,6 +415,7 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
+    this.updateStoryDialogueProgress();
     this.refreshDropThroughDecorationPlatform();
     if (this.stageEditor?.isEnabled) {
       freezeEnemies(this.enemiesGroup);
@@ -571,6 +574,7 @@ class PrototypeScene extends Phaser.Scene {
     this.removeGlobalUI();
     this.storyDialogue?.remove();
     this.storyDialogue = undefined;
+    this.hasAdvancedStoryDialogueAtX = false;
     this.countdownOverlay?.clear();
     this.countdownOverlay = undefined;
     this.missText?.destroy();
@@ -607,6 +611,15 @@ class PrototypeScene extends Phaser.Scene {
     this.goal = undefined;
     this.finalScoreText = undefined;
     this.missText = undefined;
+  }
+
+  private updateStoryDialogueProgress() {
+    if (this.hasAdvancedStoryDialogueAtX || this.player.x <= STORY_DIALOGUE_ADVANCE_X) {
+      return;
+    }
+
+    this.hasAdvancedStoryDialogueAtX = true;
+    this.storyDialogue?.next();
   }
 
   private restartStage() {

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.124
+### English
+- Updated the second story dialogue portrait and automatically advances to it when the player moves past X 600.
+### Japanese
+- 「先へ進みましょう」の会話に新しい表情アイコンを使い、プレイヤーのX座標が600を超えたら自動でその会話へ切り替わるようにしました。
+
 ## v0.1.123
 ### English
 - Increased the contrast of the PC/mobile mode selector and sound ON/OFF selector so the active choices are clearer on phone screens.
