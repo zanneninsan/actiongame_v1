@@ -1,4 +1,12 @@
-import { ENEMY_DEFINITIONS, PROP_ASSETS, STAGE_OBJECT_ASSETS, type EnemyType, type ItemType, type StreetLampKey } from "./assets";
+import {
+  ENEMY_DEFINITIONS,
+  PROP_ASSETS,
+  STAGE_OBJECT_ASSETS,
+  type EnemyType,
+  type ItemType,
+  type MovingPlatformAxis,
+  type StreetLampKey,
+} from "./assets";
 import { t, type Locale } from "./i18n";
 
 export type EditorTool =
@@ -6,6 +14,7 @@ export type EditorTool =
   | "move"
   | "delete"
   | "platform"
+  | "movingPlatform"
   | "item"
   | "enemy"
   | "streetLamp"
@@ -29,6 +38,9 @@ export class StageEditorPanel {
   private panel?: HTMLDivElement;
   private exportTextarea?: HTMLTextAreaElement;
   private platformUnitsInput?: HTMLInputElement;
+  private movingAxisSelect?: HTMLSelectElement;
+  private movingDistanceInput?: HTMLInputElement;
+  private movingSpeedInput?: HTMLInputElement;
   private itemTypeSelect?: HTMLSelectElement;
   private enemyTypeSelect?: HTMLSelectElement;
   private lampTypeSelect?: HTMLSelectElement;
@@ -46,6 +58,18 @@ export class StageEditorPanel {
 
   get platformUnits() {
     return Number(this.platformUnitsInput?.value) || 3;
+  }
+
+  get movingAxis() {
+    return (this.movingAxisSelect?.value ?? "x") as MovingPlatformAxis;
+  }
+
+  get movingDistance() {
+    return Number(this.movingDistanceInput?.value) || 256;
+  }
+
+  get movingSpeed() {
+    return Number(this.movingSpeedInput?.value) || 90;
   }
 
   get itemType() {
@@ -82,6 +106,7 @@ export class StageEditorPanel {
             <option value="move">${t(this.options.locale, "editor.tool.move")}</option>
             <option value="delete">${t(this.options.locale, "editor.tool.delete")}</option>
             <option value="platform">${t(this.options.locale, "editor.tool.platform")}</option>
+            <option value="movingPlatform">${t(this.options.locale, "editor.tool.movingPlatform")}</option>
             <option value="item">${t(this.options.locale, "editor.tool.item")}</option>
             <option value="enemy">${t(this.options.locale, "editor.tool.enemy")}</option>
             <option value="streetLamp">${t(this.options.locale, "editor.tool.streetLamp")}</option>
@@ -93,6 +118,21 @@ export class StageEditorPanel {
         <div class="editor-row">
           <label>${t(this.options.locale, "editor.units")}</label>
           <input data-platform-units type="number" min="1" max="16" value="3" />
+        </div>
+        <div class="editor-row">
+          <label>${t(this.options.locale, "editor.movingAxis")}</label>
+          <select data-moving-axis>
+            <option value="x">${t(this.options.locale, "editor.movingAxis.x")}</option>
+            <option value="y">${t(this.options.locale, "editor.movingAxis.y")}</option>
+          </select>
+        </div>
+        <div class="editor-row">
+          <label>${t(this.options.locale, "editor.movingDistance")}</label>
+          <input data-moving-distance type="number" min="-960" max="960" step="32" value="256" />
+        </div>
+        <div class="editor-row">
+          <label>${t(this.options.locale, "editor.movingSpeed")}</label>
+          <input data-moving-speed type="number" min="16" max="360" step="8" value="90" />
         </div>
         <div class="editor-row">
           <label>${t(this.options.locale, "editor.item")}</label>
@@ -142,6 +182,9 @@ export class StageEditorPanel {
     this.panel = panel;
     this.exportTextarea = panel.querySelector<HTMLTextAreaElement>("[data-editor-export]")!;
     this.platformUnitsInput = panel.querySelector<HTMLInputElement>("[data-platform-units]")!;
+    this.movingAxisSelect = panel.querySelector<HTMLSelectElement>("[data-moving-axis]")!;
+    this.movingDistanceInput = panel.querySelector<HTMLInputElement>("[data-moving-distance]")!;
+    this.movingSpeedInput = panel.querySelector<HTMLInputElement>("[data-moving-speed]")!;
     this.itemTypeSelect = panel.querySelector<HTMLSelectElement>("[data-item-type]")!;
     this.enemyTypeSelect = panel.querySelector<HTMLSelectElement>("[data-enemy-type]")!;
     this.lampTypeSelect = panel.querySelector<HTMLSelectElement>("[data-lamp-type]")!;
@@ -260,6 +303,9 @@ export class StageEditorPanel {
     this.panel = undefined;
     this.exportTextarea = undefined;
     this.platformUnitsInput = undefined;
+    this.movingAxisSelect = undefined;
+    this.movingDistanceInput = undefined;
+    this.movingSpeedInput = undefined;
     this.itemTypeSelect = undefined;
     this.enemyTypeSelect = undefined;
     this.lampTypeSelect = undefined;

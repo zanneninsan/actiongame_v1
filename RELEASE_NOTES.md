@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.157
+### English
+- Added moving platform support with horizontal and vertical movement, including stage editor placement controls for direction, distance, speed, and unit count.
+- Added moving platform examples to Skybridge Sprint.
+### Japanese
+- 左右移動と上下移動に対応した移動床を追加し、ステージエディタから方向、距離、速度、足場の数を指定して配置できるようにしました。
+- スカイブリッジ・スプリントに移動床の配置例を追加しました。
+
 ## v0.1.156
 ### English
 - Added per-stage default rear and midground background selections while preserving manual debug background choices across same-stage restarts.

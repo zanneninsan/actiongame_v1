@@ -224,6 +224,22 @@ export class StageEditor {
       this.selected = { kind: "platform", index: this.stage.platforms.length - 1 };
       this.rebuildStageObjects();
       this.recordChange(historySnapshot);
+    } else if (this.tool === "movingPlatform") {
+      const units = Phaser.Math.Clamp(this.panel?.platformUnits ?? 3, 1, 16);
+      const placement: PlatformRunPlacement = {
+        x,
+        y,
+        units,
+        moving: {
+          axis: this.panel?.movingAxis ?? "x",
+          distance: Phaser.Math.Clamp(this.panel?.movingDistance ?? 256, -960, 960),
+          speed: Phaser.Math.Clamp(this.panel?.movingSpeed ?? 90, 16, 360),
+        },
+      };
+      this.stage.platforms.push(placement);
+      this.selected = { kind: "platform", index: this.stage.platforms.length - 1 };
+      this.rebuildStageObjects();
+      this.recordChange(historySnapshot);
     } else if (this.tool === "item") {
       const type = this.panel?.itemType ?? "energyDrink";
       const placement: ItemPlacement = { type, x, y };
@@ -496,7 +512,8 @@ export class StageEditor {
 
   private getSelectionKeyName(selection: EditorSelection) {
     if (selection.kind === "platform") {
-      return "platform";
+      const platform = this.stage.platforms[selection.index];
+      return platform?.moving ? `moving-platform-${platform.moving.axis}` : "platform";
     }
     if (selection.kind === "item") {
       const item = this.stage.items[selection.index];
@@ -709,7 +726,17 @@ export class StageEditor {
       this.isNumber(value.x) &&
       this.isNumber(value.y) &&
       this.isNumber(value.units) &&
-      (value.collides === undefined || typeof value.collides === "boolean")
+      (value.collides === undefined || typeof value.collides === "boolean") &&
+      (value.moving === undefined || this.isMovingPlatformConfig(value.moving))
+    );
+  }
+
+  private isMovingPlatformConfig(value: unknown) {
+    return (
+      this.isRecord(value) &&
+      (value.axis === "x" || value.axis === "y") &&
+      this.isNumber(value.distance) &&
+      this.isNumber(value.speed)
     );
   }
 

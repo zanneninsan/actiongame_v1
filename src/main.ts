@@ -31,7 +31,7 @@ import {
   updateEnemies,
 } from "./enemies";
 import { createItems, populateItems } from "./items";
-import { renderStageObjects } from "./stageRenderer";
+import { renderStageObjects, updateMovingPlatforms, type MovingPlatformInstance } from "./stageRenderer";
 import { BackgroundController } from "./backgrounds";
 import {
   createGlobalUI as createGlobalUIElements,
@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.156";
+const DEBUG_VERSION = "v0.1.157";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -128,6 +128,8 @@ class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private goal?: Phaser.Types.Physics.Arcade.ImageWithStaticBody;
   private platforms!: Phaser.Physics.Arcade.StaticGroup;
+  private movingPlatforms!: Phaser.Physics.Arcade.Group;
+  private movingPlatformInstances: MovingPlatformInstance[] = [];
   private decorationPlatforms!: Phaser.Physics.Arcade.StaticGroup;
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
   private enemiesGroup?: Phaser.Physics.Arcade.Group;
@@ -283,6 +285,7 @@ class PrototypeScene extends Phaser.Scene {
     this.createBackground();
 
     this.platforms = this.physics.add.staticGroup();
+    this.movingPlatforms = this.physics.add.group({ allowGravity: false, immovable: true });
     this.decorationPlatforms = this.physics.add.staticGroup();
     this.rebuildEditableStageObjects();
 
@@ -316,6 +319,7 @@ class PrototypeScene extends Phaser.Scene {
     });
 
     this.physics.add.collider(this.player, this.platforms);
+    this.physics.add.collider(this.player, this.movingPlatforms);
     this.physics.add.collider(this.player, this.decorationPlatforms, undefined, this.canLandOnDecorationPlatform, this);
     this.physics.add.overlap(this.player, goal, () => this.win());
     this.itemsGroup = createItems({
@@ -334,6 +338,7 @@ class PrototypeScene extends Phaser.Scene {
       this.damagePlayer(enemy),
     );
     this.physics.add.collider(this.enemiesGroup, this.platforms);
+    this.physics.add.collider(this.enemiesGroup, this.movingPlatforms);
 
     this.cursors = this.input.keyboard!.createCursorKeys();
     this.keys = {
@@ -415,6 +420,7 @@ class PrototypeScene extends Phaser.Scene {
   update() {
     this.updateBackground();
     this.updateTimerText();
+    updateMovingPlatforms(this.movingPlatformInstances, this.isRunActive && !this.stageEditor?.isEnabled);
     if (!this.isRunActive) {
       if (!this.isDefeatSequenceActive) {
         this.applyPlayerBody(false);
@@ -997,6 +1003,8 @@ class PrototypeScene extends Phaser.Scene {
     this.decorationPlatformCrouchStartedAt = 0;
     this.dropThroughDecorationPlatformBody = undefined;
     this.clearStaticGroup(this.platforms);
+    this.clearDynamicGroup(this.movingPlatforms);
+    this.movingPlatformInstances = [];
     this.clearStaticGroup(this.decorationPlatforms);
     this.clearStaticGroup(this.itemsGroup);
     this.clearDynamicGroup(this.enemiesGroup);
@@ -1006,6 +1014,8 @@ class PrototypeScene extends Phaser.Scene {
       stage: this.editorStage,
       stageConstants: this.stageConstants,
       platforms: this.platforms,
+      movingPlatforms: this.movingPlatforms,
+      movingPlatformInstances: this.movingPlatformInstances,
       decorationPlatforms: this.decorationPlatforms,
       trackStageObject: (object) => this.trackStageObject(object),
     });
@@ -1387,6 +1397,13 @@ class PrototypeScene extends Phaser.Scene {
       const body = (child as Phaser.Physics.Arcade.Image).body as Phaser.Physics.Arcade.StaticBody | undefined;
       if (body) {
         this.drawCollisionBody(body, 0xfb923c, 0.16);
+      }
+    });
+
+    this.movingPlatforms?.getChildren().forEach((child) => {
+      const body = (child as Phaser.Physics.Arcade.Image).body as Phaser.Physics.Arcade.Body | undefined;
+      if (body) {
+        this.drawCollisionBody(body, 0xa78bfa, 0.16);
       }
     });
 
