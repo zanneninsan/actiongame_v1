@@ -278,8 +278,23 @@ export const carryPlayerOnMovingPlatforms = (
     return;
   }
 
-  player.setX(player.x + platform.deltaX);
+  const missingDeltaX = getMissingPlatformCarryX(platform.deltaX, playerBody.deltaX());
+  if (missingDeltaX === 0) {
+    return;
+  }
+
+  player.setX(player.x + missingDeltaX);
   player.body.updateFromGameObject();
+};
+
+const getMissingPlatformCarryX = (platformDeltaX: number, playerDeltaX: number) => {
+  if (platformDeltaX === 0) {
+    return 0;
+  }
+
+  const isPlayerAlreadyMovingWithPlatform =
+    Math.sign(playerDeltaX) === Math.sign(platformDeltaX) && Math.abs(playerDeltaX) >= Math.abs(platformDeltaX);
+  return isPlayerAlreadyMovingWithPlatform ? 0 : platformDeltaX;
 };
 
 const syncMovingPlatformVisuals = (platform: MovingPlatformInstance) => {

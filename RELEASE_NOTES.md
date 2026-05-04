@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.166
+### English
+- Fixed moving platform carry so horizontal platform motion is not applied twice when Arcade Physics already moved the player.
+### Japanese
+- 横移動する床に乗った時、物理判定ですでに押されている分に加えて追随移動が二重にかからないように修正しました。
+
 ## v0.1.165
 ### English
 - Added diagonal moving platforms with editor support for X and Y travel distances, and placed a few in Sky Shaft Climb.
