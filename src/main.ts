@@ -84,6 +84,10 @@ const DAMAGE_INVULNERABLE_MS = 1150;
 const DAMAGE_INPUT_LOCK_MS = 280;
 const DAMAGE_KNOCKBACK_X = 430;
 const DAMAGE_KNOCKBACK_Y = -245;
+const ENEMY_STOMP_TOLERANCE = 18;
+const ENEMY_STOMP_BOUNCE_Y = -455;
+const ENEMY_STOMP_COMBO_MS = 1400;
+const ENEMY_STOMP_BASE_SCORE = 200;
 const PLAYER_DISPLAY_WIDTH = 320;
 const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
@@ -155,6 +159,7 @@ class PrototypeScene extends Phaser.Scene {
   private mobileControlCleanup: Array<() => void> = [];
   private mobileOrientationCleanup: Array<() => void> = [];
   private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
+  private bonusScore = 0;
   private startTime = 0;
   private isRunActive = false;
   private isRestarting = false;
@@ -183,6 +188,8 @@ class PrototypeScene extends Phaser.Scene {
   private hasCrouchDanmakuPlayed = false;
   private jumpChainCount = 0;
   private hasJumpChainDanmakuPlayed = false;
+  private enemyStompCombo = 0;
+  private lastEnemyStompAt = 0;
   private wasOnFloor = false;
   private isLanding = false;
   private landingFastForwarded = false;
@@ -517,6 +524,9 @@ class PrototypeScene extends Phaser.Scene {
     const isCrouching = down && onFloor && !startedJump;
     this.updateJumpChainDanmaku(startedJump, landedThisFrame);
     this.updateCrouchDanmaku(isCrouching);
+    if (landedThisFrame) {
+      this.enemyStompCombo = 0;
+    }
 
     if (landedThisFrame) {
       this.isLanding = true;
@@ -614,6 +624,7 @@ class PrototypeScene extends Phaser.Scene {
     this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
     this.score = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
+    this.bonusScore = 0;
     this.startTime = 0;
     this.isRunActive = false;
     this.hasWon = false;
@@ -622,6 +633,8 @@ class PrototypeScene extends Phaser.Scene {
     this.hasCrouchDanmakuPlayed = false;
     this.jumpChainCount = 0;
     this.hasJumpChainDanmakuPlayed = false;
+    this.enemyStompCombo = 0;
+    this.lastEnemyStompAt = 0;
     this.wasOnFloor = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
@@ -1253,7 +1266,11 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private damagePlayer(enemy: Phaser.Physics.Arcade.Sprite) {
-    if (!this.isRunActive || this.stageEditor?.isEnabled || this.time.now < this.invulnerableUntil || !enemy.active) {
+    if (!this.isRunActive || this.stageEditor?.isEnabled || !enemy.active) {
+      return;
+    }
+
+    if (this.tryStompEnemy(enemy) || this.time.now < this.invulnerableUntil) {
       return;
     }
 
@@ -1271,6 +1288,73 @@ class PrototypeScene extends Phaser.Scene {
     this.player.anims.play("player-air", true);
     this.resetPlayerIdleState();
     this.playDamageMotion(direction);
+  }
+
+  private tryStompEnemy(enemy: Phaser.Physics.Arcade.Sprite) {
+    const playerBody = this.player.body;
+    const enemyBody = enemy.body as Phaser.Physics.Arcade.Body | undefined;
+    if (!playerBody || !enemyBody || playerBody.velocity.y < 90 || enemy.getData("defeated")) {
+      return false;
+    }
+
+    const playerPreviousBottom = playerBody.prev.y + playerBody.height;
+    const enemyTop = enemyBody.y;
+    const cameFromAbove = playerPreviousBottom <= enemyTop + ENEMY_STOMP_TOLERANCE;
+    if (!cameFromAbove) {
+      return false;
+    }
+
+    enemy.setData("defeated", true);
+    enemyBody.enable = false;
+    enemy.setVelocity(0, 0);
+    enemy.setActive(false);
+    this.player.setVelocityY(ENEMY_STOMP_BOUNCE_Y);
+    this.isLanding = false;
+    this.landingFastForwarded = false;
+    this.player.anims.play("player-air", true);
+    this.addEnemyStompScore(enemy);
+    this.tweens.add({
+      targets: enemy,
+      alpha: 0,
+      scaleX: enemy.scaleX * 1.18,
+      scaleY: enemy.scaleY * 0.45,
+      y: enemy.y + 16,
+      duration: 140,
+      ease: "Back.easeIn",
+      onComplete: () => enemy.destroy(),
+    });
+    return true;
+  }
+
+  private addEnemyStompScore(enemy: Phaser.Physics.Arcade.Sprite) {
+    this.enemyStompCombo = this.time.now - this.lastEnemyStompAt <= ENEMY_STOMP_COMBO_MS ? this.enemyStompCombo + 1 : 1;
+    this.lastEnemyStompAt = this.time.now;
+    const points = ENEMY_STOMP_BASE_SCORE * this.enemyStompCombo;
+    this.bonusScore += points;
+    this.updateScoreText();
+    this.tryEmitScoreDanmaku();
+    this.showFloatingScore(enemy.x, enemy.y - 48, `+${points}${this.enemyStompCombo > 1 ? ` x${this.enemyStompCombo}` : ""}`);
+  }
+
+  private showFloatingScore(x: number, y: number, text: string) {
+    const scorePopup = this.add
+      .text(x, y, text, {
+        fontFamily: "monospace",
+        fontSize: "20px",
+        color: "#fde68a",
+      })
+      .setOrigin(0.5)
+      .setDepth(120)
+      .setShadow(1, 1, "#020617", 3, true, true);
+
+    this.tweens.add({
+      targets: scorePopup,
+      y: y - 34,
+      alpha: 0,
+      duration: 720,
+      ease: "Sine.easeOut",
+      onComplete: () => scorePopup.destroy(),
+    });
   }
 
   private playDamageMotion(direction: number) {
@@ -1451,7 +1535,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private getItemScore() {
-    return Object.values(this.score).reduce((sum, value) => sum + value, 0);
+    return Object.values(this.score).reduce((sum, value) => sum + value, this.bonusScore);
   }
 
   private getRemainingMilliseconds() {
