@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.172
+### English
+- Stopped manually moving the player horizontally on moving platforms and let Arcade's direct-control platform friction handle horizontal riding, leaving only descending vertical carry as a manual correction.
+### Japanese
+- 移動床上のプレイヤーを横方向に手動で動かす処理をやめ、横方向はArcade Physicsの移動床摩擦に任せるようにしました。手動補正は下降時の縦追随だけに限定しています。
+
 ## v0.1.171
 ### English
 - Rebuilt moving-platform hitboxes as exact-size textures and advanced them with exact per-frame position steps, making player carry use the same movement amount as the visible platform.
