@@ -803,11 +803,10 @@ export class StageEditor {
   private isBonusBlockPlacement(value: unknown): value is BonusBlockPlacement {
     return (
       this.isRecord(value) &&
-      (value.type === "hidden" || value.type === "question") &&
+      (value.type === "hidden" || value.type === "question" || value.type === "breakable") &&
       this.isNumber(value.x) &&
       this.isNumber(value.y) &&
-      typeof value.reward === "string" &&
-      value.reward in ITEM_DEFINITIONS
+      (value.reward === undefined || (typeof value.reward === "string" && value.reward in ITEM_DEFINITIONS))
     );
   }
 

@@ -568,6 +568,16 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "x": 8420,
       "y": 332,
       "reward": "powerSpeed"
+    },
+    {
+      "type": "breakable",
+      "x": 8560,
+      "y": 332
+    },
+    {
+      "type": "breakable",
+      "x": 8624,
+      "y": 332
     }
   ],
   "checkpoints": [
@@ -735,6 +745,8 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     { type: "question", x: 1180, y: 300, reward: "powerJump" },
     { type: "question", x: 3740, y: 360, reward: "powerSpeed" },
     { type: "hidden", x: 6280, y: 252, reward: "star" },
+    { type: "breakable", x: 6408, y: 252 },
+    { type: "breakable", x: 6472, y: 252 },
   ],
   checkpoints: [
     { x: 4020, y: 606 },

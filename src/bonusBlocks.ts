@@ -30,7 +30,12 @@ export const populateBonusBlocks = (options: {
   }
 
   options.placements.forEach((placement) => {
-    const key = placement.type === "hidden" ? "stage-hidden-block" : "stage-question-block";
+    const key =
+      placement.type === "hidden"
+        ? "stage-hidden-block"
+        : placement.type === "breakable"
+          ? "stage-breakable-block"
+          : "stage-question-block";
     const block = options.blocksGroup!.create(placement.x, placement.y, key) as Phaser.Physics.Arcade.Image;
     block.setDisplaySize(BLOCK_SIZE, BLOCK_SIZE);
     block.setDepth(0.05);
@@ -64,11 +69,27 @@ const hitBonusBlock = (
     return;
   }
 
+  if (block.getData("blockType") === "breakable") {
+    block.setData("used", true);
+    block.disableBody(true, true);
+    scene.tweens.add({
+      targets: block,
+      alpha: 0,
+      scaleX: 1.25,
+      scaleY: 0.35,
+      duration: 140,
+      onComplete: () => block.destroy(),
+    });
+    return;
+  }
+
   block.setData("used", true);
   block.setVisible(true).setAlpha(1).setTexture("stage-hidden-block").setTint(0xb6a58b);
   player.setVelocityY(120);
-  const reward = block.getData("reward") as ItemType;
-  onReward(reward, block.x, block.y - BLOCK_SIZE);
+  const reward = block.getData("reward") as ItemType | undefined;
+  if (reward) {
+    onReward(reward, block.x, block.y - BLOCK_SIZE);
+  }
   scene.tweens.add({
     targets: block,
     y: block.y - 8,
