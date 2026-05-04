@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.119
+### English
+- Rebuilt the leaderboard window with dedicated raster assets so rows, rank numbers, scores, and dates no longer overlap or inherit dropdown arrows.
+### Japanese
+- リーダーボード専用のラスタ素材を追加し、順位、名前、スコア、日時が重ならず、不要なドロップダウン矢印も出ない表示に作り直しました。
+
 ## v0.1.118
 ### English
 - Extended the fall-miss restart delay so the miss danmaku has time to play before the stage restarts.
