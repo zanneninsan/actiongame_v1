@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.114";
+const DEBUG_VERSION = "v0.1.115";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
@@ -63,6 +63,7 @@ const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
 const TIME_BONUS_PER_SECOND = 10;
 const SCORE_DANMAKU_THRESHOLD = 1000;
 const CROUCH_DANMAKU_HOLD_MS = 2000;
+const JUMP_CHAIN_DANMAKU_COUNT = 5;
 const FALL_RESET_WORLD_MARGIN = 640;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
@@ -160,6 +161,8 @@ class PrototypeScene extends Phaser.Scene {
   private hasScoreMilestoneDanmakuPlayed = false;
   private crouchDanmakuStartedAt = 0;
   private hasCrouchDanmakuPlayed = false;
+  private jumpChainCount = 0;
+  private hasJumpChainDanmakuPlayed = false;
   private wasOnFloor = false;
   private isLanding = false;
   private landingFastForwarded = false;
@@ -476,6 +479,7 @@ class PrototypeScene extends Phaser.Scene {
     const isMovingHorizontally = Math.abs(this.player.body.velocity.x) > 8;
     const landedThisFrame = !this.wasOnFloor && onFloor && !startedJump;
     const isCrouching = down && onFloor && !startedJump;
+    this.updateJumpChainDanmaku(startedJump, landedThisFrame);
     this.updateCrouchDanmaku(isCrouching);
 
     if (landedThisFrame) {
@@ -576,6 +580,8 @@ class PrototypeScene extends Phaser.Scene {
     this.hasScoreMilestoneDanmakuPlayed = false;
     this.crouchDanmakuStartedAt = 0;
     this.hasCrouchDanmakuPlayed = false;
+    this.jumpChainCount = 0;
+    this.hasJumpChainDanmakuPlayed = false;
     this.wasOnFloor = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
@@ -1155,6 +1161,26 @@ class PrototypeScene extends Phaser.Scene {
 
     this.hasCrouchDanmakuPlayed = true;
     this.danmaku?.emitCrouchHold();
+  }
+
+  private updateJumpChainDanmaku(startedJump: boolean, landedThisFrame: boolean) {
+    if (landedThisFrame) {
+      this.jumpChainCount = 0;
+      this.hasJumpChainDanmakuPlayed = false;
+      return;
+    }
+
+    if (!startedJump) {
+      return;
+    }
+
+    this.jumpChainCount += 1;
+    if (this.hasJumpChainDanmakuPlayed || this.jumpChainCount < JUMP_CHAIN_DANMAKU_COUNT) {
+      return;
+    }
+
+    this.hasJumpChainDanmakuPlayed = true;
+    this.danmaku?.emitJumpChain();
   }
 
   private updateTimerText() {

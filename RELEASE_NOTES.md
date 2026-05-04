@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.115
+### English
+- Added a repeatable Nico-style danmaku burst after jumping 5 times without landing.
+### Japanese
+- 着地を挟まずにジャンプを5回続けたときに、ニコニコ動画風の弾幕が流れる演出を追加しました。着地すると再発火できるようになります。
+
 ## v0.1.114
 ### English
 - Changed the crouch danmaku trigger from 3 seconds to 2 seconds.

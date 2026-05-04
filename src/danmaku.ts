@@ -35,6 +35,21 @@ const CROUCH_HOLD_COMMENTS = [
   "助かる",
 ];
 
+const JUMP_CHAIN_COMMENTS = [
+  "カービィかよ？",
+  "空飛んでません？",
+  "滞空時間おかしい",
+  "ジャンプしすぎｗ",
+  "もう飛行タイプ",
+  "地面いらない説",
+  "ふわふわしてる",
+  "落ちる気ある？",
+  "空中散歩",
+  "羽ついてる？",
+  "無限ジャンプ助かる",
+  "これは浮いてる",
+];
+
 type ActiveComment = Phaser.GameObjects.Text & {
   destroyTimer?: Phaser.Time.TimerEvent;
 };
@@ -66,6 +81,15 @@ export class DanmakuOverlay {
     this.emitBurst(CROUCH_HOLD_COMMENTS, 18, 80, {
       color: "#fff7ed",
       stroke: "#7c2d12",
+      fontSize: 26,
+      duration: 4200,
+    });
+  }
+
+  emitJumpChain() {
+    this.emitBurst(JUMP_CHAIN_COMMENTS, 18, 80, {
+      color: "#e0f2fe",
+      stroke: "#075985",
       fontSize: 26,
       duration: 4200,
     });
