@@ -36,12 +36,12 @@ export const DEFAULT_STORY_DIALOGUE_LINES: StoryDialogueLine[] = [
   {
     characterName: "残念院さん",
     message: "人が多いですね……ここが渋谷。",
-    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_05_shy.png`,
+    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_05_shy.webp`,
   },
   {
     characterName: "残念院さん",
     message: "先へ進みましょう。何か手がかりが見つかるはずです。",
-    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_02_smile.png`,
+    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_02_smile.webp`,
   },
 ];
 
@@ -71,7 +71,7 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
   });
 
   const frame = document.createElement("img");
-  frame.src = `${ASSET_BASE}assets/story/dialogue_frame.png`;
+  frame.src = `${ASSET_BASE}assets/story/dialogue_frame.webp`;
   frame.alt = "";
   applyStyle(frame, {
     position: "absolute",

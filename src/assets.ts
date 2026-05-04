@@ -83,19 +83,19 @@ export const ITEM_DEFINITIONS: Record<ItemType, { key: string; label: string; po
     key: "item-energy-drink",
     label: "ENERGY",
     points: 100,
-    assetPath: "assets/items/energy_drink.png",
+    assetPath: "assets/items/energy_drink.webp",
   },
   shoppingBag: {
     key: "item-shopping-bag",
     label: "BAG",
     points: 250,
-    assetPath: "assets/items/shopping_bag.png",
+    assetPath: "assets/items/shopping_bag.webp",
   },
   bubbleTea: {
     key: "item-bubble-tea",
     label: "TEA",
     points: 150,
-    assetPath: "assets/items/bubble_tea.png",
+    assetPath: "assets/items/bubble_tea.webp",
   },
 };
 
@@ -134,7 +134,7 @@ export const ENEMY_DEFINITIONS: Record<
   knifePunk: {
     key: "enemy-knife-punk",
     label: "Knife Punk",
-    assetPath: "assets/enemies/knife_punk.png",
+    assetPath: "assets/enemies/knife_punk.webp",
     displayWidth: 86,
     displayHeight: 72,
     bodyWidth: 48,
@@ -143,7 +143,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetY: 22,
     animation: {
       key: "enemy-knife-punk-walk",
-      assetPath: "assets/enemies/knife_punk_walk.png",
+      assetPath: "assets/enemies/knife_punk_walk.webp",
       frameWidth: 280,
       frameHeight: 250,
       frameCount: 4,
@@ -161,7 +161,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetY: 24,
     animation: {
       key: "enemy-aqua-mascot-walk",
-      assetPath: "assets/enemies/aqua_mascot_walk.png",
+      assetPath: "assets/enemies/aqua_mascot_walk.webp",
       frameWidth: 280,
       frameHeight: 250,
       frameCount: 30,

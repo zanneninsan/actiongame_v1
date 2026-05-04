@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.136
+### English
+- Converted runtime PNG assets that benefited from compression to WebP and updated game, story, enemy, item, sprite, and UI references.
+- Kept the tiny leaderboard plate PNGs unchanged because their WebP versions were larger.
+### Japanese
+- 圧縮効果の大きい実行時PNG素材をWebPへ変換し、ゲーム本体、ストーリー、敵、アイテム、スプライト、UIの参照を更新しました。
+- 小さなランキング用プレート画像はWebP化すると逆に大きくなったため、PNGのまま残しました。
+
 ## v0.1.135
 ### English
 - Renamed the English stage display name to Shibu-ya city.
