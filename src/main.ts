@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.115";
+const DEBUG_VERSION = "v0.1.116";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
@@ -64,6 +64,7 @@ const TIME_BONUS_PER_SECOND = 10;
 const SCORE_DANMAKU_THRESHOLD = 1000;
 const CROUCH_DANMAKU_HOLD_MS = 2000;
 const JUMP_CHAIN_DANMAKU_COUNT = 5;
+const FALL_MISS_RESTART_DELAY_MS = 1350;
 const FALL_RESET_WORLD_MARGIN = 640;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
@@ -135,6 +136,7 @@ class PrototypeScene extends Phaser.Scene {
   private controlHintText!: Phaser.GameObjects.Text;
   private countdownOverlay?: StartCountdownOverlay;
   private finalScoreText?: Phaser.GameObjects.Text;
+  private missText?: Phaser.GameObjects.Text;
   private danmaku?: DanmakuOverlay;
   private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false };
   private mobileJumpQueued = false;
@@ -422,7 +424,7 @@ class PrototypeScene extends Phaser.Scene {
       this.player.setDragX(AIR_DRAG);
       this.wasOnFloor = onFloor;
       if (this.player.y > this.stageConstants.worldBottom + 32) {
-        this.restartStage();
+        this.playFallMissSequence();
       }
       return;
     }
@@ -528,7 +530,7 @@ class PrototypeScene extends Phaser.Scene {
     this.wasOnFloor = onFloor;
 
     if (this.player.y > this.stageConstants.worldBottom + 32) {
-      this.restartStage();
+      this.playFallMissSequence();
     }
   }
 
@@ -569,6 +571,8 @@ class PrototypeScene extends Phaser.Scene {
     this.storyDialogue = undefined;
     this.countdownOverlay?.clear();
     this.countdownOverlay = undefined;
+    this.missText?.destroy();
+    this.missText = undefined;
     this.danmaku?.destroy();
     this.danmaku = undefined;
     this.mobileInput = { w: false, a: false, s: false, d: false };
@@ -600,6 +604,7 @@ class PrototypeScene extends Phaser.Scene {
     this.enemiesGroup = undefined;
     this.goal = undefined;
     this.finalScoreText = undefined;
+    this.missText = undefined;
   }
 
   private restartStage() {
@@ -1439,6 +1444,49 @@ class PrototypeScene extends Phaser.Scene {
     this.player.once(`${Phaser.Animations.Events.ANIMATION_COMPLETE_KEY}player-defeat`, () => {
       this.time.delayedCall(180, () => this.restartStage());
     });
+  }
+
+  private playFallMissSequence() {
+    if (this.isDefeatSequenceActive || this.isRestarting) {
+      return;
+    }
+
+    this.isDefeatSequenceActive = true;
+    this.isRunActive = false;
+    this.hurtUntil = 0;
+    this.invulnerableUntil = 0;
+    this.mobileInput = { w: false, a: false, s: false, d: false };
+    this.mobileJumpQueued = false;
+    freezeEnemies(this.enemiesGroup);
+    this.player.setAcceleration(0, 0);
+    this.player.setVelocity(0, 0);
+    this.player.anims.timeScale = 1;
+    this.player.anims.stop();
+    this.player.setAlpha(0.55);
+    this.cameras.main.shake(180, 0.006);
+    this.danmaku?.emitMiss();
+    this.missText?.destroy();
+    this.missText = this.add
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "MISS", {
+        fontFamily: "monospace",
+        fontSize: "64px",
+        color: "#fecdd3",
+        align: "center",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(220)
+      .setShadow(3, 3, "#450a0a", 5, true, true);
+    this.tweens.add({
+      targets: this.missText,
+      scale: 1.08,
+      alpha: 0.72,
+      duration: 220,
+      yoyo: true,
+      repeat: 1,
+      ease: "Sine.easeInOut",
+    });
+    this.time.delayedCall(FALL_MISS_RESTART_DELAY_MS, () => this.restartStage());
   }
 
   private applyPlayerBody(isCrouching = false) {

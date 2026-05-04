@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.116
+### English
+- Added a fall-miss sequence with a MISS overlay, camera shake, danmaku, and delayed restart when the player drops below the stage.
+### Japanese
+- ステージ下へ落ちたときに即リスタートせず、MISS表示、カメラ揺れ、弾幕を挟んでからリスタートするミス演出を追加しました。
+
 ## v0.1.115
 ### English
 - Added a repeatable Nico-style danmaku burst after jumping 5 times without landing.

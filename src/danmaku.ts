@@ -50,6 +50,21 @@ const JUMP_CHAIN_COMMENTS = [
   "これは浮いてる",
 ];
 
+const MISS_COMMENTS = [
+  "あっ",
+  "落ちたｗ",
+  "これはミス",
+  "足場さん！？",
+  "そこ穴です",
+  "今のは痛い",
+  "リスタート不可避",
+  "ドンマイ",
+  "地面仕事して",
+  "吸い込まれた",
+  "次はいける",
+  "見なかったことにしよう",
+];
+
 type ActiveComment = Phaser.GameObjects.Text & {
   destroyTimer?: Phaser.Time.TimerEvent;
 };
@@ -92,6 +107,15 @@ export class DanmakuOverlay {
       stroke: "#075985",
       fontSize: 26,
       duration: 4200,
+    });
+  }
+
+  emitMiss() {
+    this.emitBurst(MISS_COMMENTS, 16, 85, {
+      color: "#fecdd3",
+      stroke: "#881337",
+      fontSize: 27,
+      duration: 3800,
     });
   }
 
