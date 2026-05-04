@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.111
+### English
+- Added a Nico-style scrolling danmaku burst when the item score first exceeds 1000.
+### Japanese
+- アイテムスコアが初めて1000を超えたときに、ニコニコ動画風の横流れ弾幕が出る演出を追加しました。
+
 ## v0.1.110
 ### English
 - Replaced the options modal CSS-built frame with a single fixed-aspect raster window asset.

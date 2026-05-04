@@ -1,0 +1,134 @@
+import Phaser from "phaser";
+
+const SCORE_MILESTONE_COMMENTS = [
+  "ｷﾀ━━━━(ﾟ∀ﾟ)━━━━!!",
+  "ｷﾀ━━━━(ﾟ∀ﾟ)━━━━!!",
+  "スコア1000おめでとう！",
+  "Score1000!!",
+  "1000超えきた！１１１",
+  "おめでとう！！",
+  "1000点突破！",
+  "888888888888",
+  "888888888888",
+  "いいペース",
+  "スコア伸びてる",
+  "ナイス回収",
+  "これは熱い",
+  "まだまだいける",
+  "勢いある",
+  "うまい",
+  "ここから本番",
+];
+
+type ActiveComment = Phaser.GameObjects.Text & {
+  destroyTimer?: Phaser.Time.TimerEvent;
+};
+
+export class DanmakuOverlay {
+  private readonly scene: Phaser.Scene;
+  private readonly width: number;
+  private readonly height: number;
+  private readonly activeComments = new Set<ActiveComment>();
+  private readonly pendingTimers = new Set<Phaser.Time.TimerEvent>();
+  private nextLane = 0;
+
+  constructor(scene: Phaser.Scene, width: number, height: number) {
+    this.scene = scene;
+    this.width = width;
+    this.height = height;
+  }
+
+  emitScoreMilestone() {
+    this.emitBurst(SCORE_MILESTONE_COMMENTS, 20, 75, {
+      color: "#ffffff",
+      stroke: "#0f766e",
+      fontSize: 27,
+      duration: 4400,
+    });
+  }
+
+  destroy() {
+    this.pendingTimers.forEach((timer) => timer.remove(false));
+    this.pendingTimers.clear();
+    this.activeComments.forEach((comment) => {
+      comment.destroyTimer?.remove(false);
+      comment.destroy();
+    });
+    this.activeComments.clear();
+  }
+
+  private emitBurst(
+    comments: readonly string[],
+    count: number,
+    staggerMs: number,
+    options: Partial<DanmakuStyle> = {},
+  ) {
+    for (let index = 0; index < count; index += 1) {
+      const timer = this.scene.time.delayedCall(index * staggerMs, () => {
+        this.pendingTimers.delete(timer);
+        this.emit(comments[index % comments.length], options);
+      });
+      this.pendingTimers.add(timer);
+    }
+  }
+
+  private emit(message: string, options: Partial<DanmakuStyle> = {}) {
+    const style = {
+      color: options.color ?? "#f8fafc",
+      stroke: options.stroke ?? "#020617",
+      fontSize: options.fontSize ?? 22,
+      duration: options.duration ?? 4300,
+    };
+    const y = this.getLaneY();
+    const comment = this.scene.add
+      .text(this.width + 48, y, message, {
+        fontFamily: "monospace",
+        fontSize: `${style.fontSize}px`,
+        color: style.color,
+        stroke: style.stroke,
+        strokeThickness: 5,
+      })
+      .setOrigin(0, 0.5)
+      .setScrollFactor(0)
+      .setDepth(180)
+      .setShadow(2, 2, "#000000", 2, true, true) as ActiveComment;
+
+    this.activeComments.add(comment);
+    const targetX = -comment.width - 72;
+    this.scene.tweens.add({
+      targets: comment,
+      x: targetX,
+      duration: style.duration + Phaser.Math.Between(-450, 450),
+      ease: "Linear",
+      onComplete: () => this.removeComment(comment),
+    });
+    comment.destroyTimer = this.scene.time.delayedCall(style.duration + 1200, () => this.removeComment(comment));
+  }
+
+  private getLaneY() {
+    const laneCount = 12;
+    const top = 92;
+    const bottom = this.height - 88;
+    const laneHeight = (bottom - top) / Math.max(1, laneCount - 1);
+    const lane = this.nextLane % laneCount;
+    this.nextLane += Phaser.Math.Between(1, 3);
+    return top + lane * laneHeight + Phaser.Math.Between(-8, 8);
+  }
+
+  private removeComment(comment: ActiveComment) {
+    if (!this.activeComments.has(comment)) {
+      return;
+    }
+
+    comment.destroyTimer?.remove(false);
+    this.activeComments.delete(comment);
+    comment.destroy();
+  }
+}
+
+type DanmakuStyle = {
+  color: string;
+  stroke: string;
+  fontSize: number;
+  duration: number;
+};

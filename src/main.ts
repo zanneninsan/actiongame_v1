@@ -42,17 +42,19 @@ import {
   createMobileControls as createMobileControlElements,
   type MobileInputKey,
 } from "./mobileControls";
+import { DanmakuOverlay } from "./danmaku";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.110";
+const DEBUG_VERSION = "v0.1.111";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
 const TIME_BONUS_PER_SECOND = 10;
+const SCORE_DANMAKU_THRESHOLD = 1000;
 const FALL_RESET_WORLD_MARGIN = 640;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
@@ -122,6 +124,7 @@ class PrototypeScene extends Phaser.Scene {
   private controlHintText!: Phaser.GameObjects.Text;
   private countdownOverlay?: StartCountdownOverlay;
   private finalScoreText?: Phaser.GameObjects.Text;
+  private danmaku?: DanmakuOverlay;
   private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false };
   private mobileJumpQueued = false;
   private mobileControlCleanup: Array<() => void> = [];
@@ -144,6 +147,7 @@ class PrototypeScene extends Phaser.Scene {
   private storyDialogue?: StoryDialogueController;
   private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
   private hasWon = false;
+  private hasScoreMilestoneDanmakuPlayed = false;
   private wasOnFloor = false;
   private isLanding = false;
   private landingFastForwarded = false;
@@ -290,6 +294,7 @@ class PrototypeScene extends Phaser.Scene {
       onCollect: (itemType, points) => {
         this.score[itemType] += points;
         this.updateScoreText();
+        this.tryEmitScoreDanmaku();
       },
       trackStageObject: (object) => this.trackStageObject(object),
     });
@@ -357,6 +362,7 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(100)
       .setShadow(1, 1, "#020617", 2, true, true);
     this.updateControlHintText();
+    this.danmaku = new DanmakuOverlay(this, GAME_WIDTH, GAME_HEIGHT);
 
     this.input.keyboard!.off("keydown-R");
     this.input.keyboard!.on("keydown-R", () => this.restartStage());
@@ -539,12 +545,15 @@ class PrototypeScene extends Phaser.Scene {
     this.storyDialogue = undefined;
     this.countdownOverlay?.clear();
     this.countdownOverlay = undefined;
+    this.danmaku?.destroy();
+    this.danmaku = undefined;
     this.mobileInput = { w: false, a: false, s: false, d: false };
     this.mobileJumpQueued = false;
     this.score = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
     this.startTime = 0;
     this.isRunActive = false;
     this.hasWon = false;
+    this.hasScoreMilestoneDanmakuPlayed = false;
     this.wasOnFloor = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
@@ -1096,6 +1105,14 @@ class PrototypeScene extends Phaser.Scene {
     this.scoreText.setText(`${t(this.locale, "hud.score")}:${total}`);
   }
 
+  private tryEmitScoreDanmaku() {
+    if (this.hasScoreMilestoneDanmakuPlayed || this.getItemScore() <= SCORE_DANMAKU_THRESHOLD) {
+      return;
+    }
+
+    this.hasScoreMilestoneDanmakuPlayed = true;
+    this.danmaku?.emitScoreMilestone();
+  }
   private updateTimerText() {
     if (!this.timerText || this.hasWon) {
       return;
