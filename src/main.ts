@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.129";
+const DEBUG_VERSION = "v0.1.130";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
@@ -628,7 +628,7 @@ class PrototypeScene extends Phaser.Scene {
       this.storyDialogueNextEvent = undefined;
     });
     this.storyDialogueRemoveEvent = this.time.delayedCall(STORY_DIALOGUE_STEP_DELAY_MS * 2, () => {
-      this.storyDialogue?.remove();
+      this.storyDialogue?.remove({ animate: true });
       this.storyDialogue = undefined;
       this.storyDialogueRemoveEvent = undefined;
     });

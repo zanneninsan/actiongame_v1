@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.130
+### English
+- Added TV power-on and power-off style animations when the story message window appears and disappears.
+### Japanese
+- ストーリーのメッセージウィンドウが表示・非表示になるときに、テレビの電源が入ったり消えたりするような演出を追加しました。
+
 ## v0.1.129
 ### English
 - Moved countdown scan lines and glow behind the main lettering, then strengthened the foreground text with a hard dark outline for clearer contrast.

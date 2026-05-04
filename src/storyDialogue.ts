@@ -16,7 +16,7 @@ export type StoryDialogueController = {
   setLine: (line: StoryDialogueLine) => void;
   setLines: (lines: StoryDialogueLine[], startIndex?: number) => void;
   next: () => boolean;
-  remove: () => void;
+  remove: (options?: { animate?: boolean }) => void;
 };
 
 const ASSET_BASE = import.meta.env.BASE_URL;
@@ -29,6 +29,8 @@ const DEFAULT_DIALOGUE_WIDTH = 656;
 const MIN_DIALOGUE_WIDTH = 176;
 const DEFAULT_DIALOGUE_FONT_SIZE = 18;
 const MIN_DIALOGUE_FONT_SIZE = 10;
+const TV_SWITCH_IN_MS = 520;
+const TV_SWITCH_OUT_MS = 420;
 
 export const DEFAULT_STORY_DIALOGUE_LINES: StoryDialogueLine[] = [
   {
@@ -148,6 +150,7 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
 
   wrapper.append(frame, portrait, namePlate, message, nextButton);
   root.appendChild(wrapper);
+  playTvSwitchIn(wrapper);
 
   const syncToGameFrame = () => {
     const canvas = document.querySelector<HTMLCanvasElement>("#game canvas") ?? document.querySelector<HTMLCanvasElement>("canvas");
@@ -214,12 +217,27 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
     return true;
   };
 
-  const remove = () => {
+  let isRemoving = false;
+  const cleanup = () => {
     wrapper.removeEventListener("pointerdown", stopPropagation);
     wrapper.removeEventListener("keydown", stopPropagation);
     window.removeEventListener("resize", syncToGameFrame);
     window.visualViewport?.removeEventListener("resize", syncToGameFrame);
     resizeObserver?.disconnect();
+  };
+
+  const remove = (removeOptions: { animate?: boolean } = {}) => {
+    if (isRemoving) {
+      return;
+    }
+
+    isRemoving = true;
+    cleanup();
+    if (removeOptions.animate) {
+      playTvSwitchOut(wrapper, () => wrapper.remove());
+      return;
+    }
+
     wrapper.remove();
   };
 
@@ -230,4 +248,50 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
 
 function applyStyle(element: HTMLElement, style: Partial<CSSStyleDeclaration>) {
   Object.assign(element.style, style);
+}
+
+function playTvSwitchIn(element: HTMLElement) {
+  if (!element.animate) {
+    return;
+  }
+
+  element.style.transformOrigin = "50% 50%";
+  element.animate(
+    [
+      { opacity: 0, transform: "scaleX(0.02) scaleY(0.006)", filter: "brightness(3.8) contrast(2.2) blur(1px)" },
+      { opacity: 1, transform: "scaleX(1.04) scaleY(0.035)", filter: "brightness(3.2) contrast(2.6) blur(0.5px)", offset: 0.22 },
+      { opacity: 0.72, transform: "scaleX(0.98) scaleY(1.08)", filter: "brightness(1.8) contrast(1.7)", offset: 0.48 },
+      { opacity: 1, transform: "scaleX(1.01) scaleY(0.97)", filter: "brightness(1.28) contrast(1.18)", offset: 0.72 },
+      { opacity: 1, transform: "scaleX(1) scaleY(1)", filter: "brightness(1) contrast(1)" },
+    ],
+    {
+      duration: TV_SWITCH_IN_MS,
+      easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+    },
+  );
+}
+
+function playTvSwitchOut(element: HTMLElement, onFinish: () => void) {
+  if (!element.animate) {
+    onFinish();
+    return;
+  }
+
+  element.style.pointerEvents = "none";
+  element.style.transformOrigin = "50% 50%";
+  const animation = element.animate(
+    [
+      { opacity: 1, transform: "scaleX(1) scaleY(1)", filter: "brightness(1) contrast(1)" },
+      { opacity: 0.95, transform: "scaleX(1.02) scaleY(0.12)", filter: "brightness(2.2) contrast(2.1)", offset: 0.42 },
+      { opacity: 0.72, transform: "scaleX(0.86) scaleY(0.025)", filter: "brightness(4.2) contrast(2.8) blur(0.4px)", offset: 0.72 },
+      { opacity: 0, transform: "scaleX(0.02) scaleY(0.004)", filter: "brightness(5) contrast(3) blur(1px)" },
+    ],
+    {
+      duration: TV_SWITCH_OUT_MS,
+      easing: "cubic-bezier(0.7, 0, 0.84, 0)",
+      fill: "forwards",
+    },
+  );
+  animation.onfinish = onFinish;
+  animation.oncancel = onFinish;
 }
