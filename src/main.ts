@@ -55,12 +55,13 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.125";
+const DEBUG_VERSION = "v0.1.126";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
 const STORY_DIALOGUE_ADVANCE_X = 600;
+const STORY_DIALOGUE_STEP_DELAY_MS = 8000;
 const TIME_BONUS_PER_SECOND = 10;
 const SCORE_DANMAKU_THRESHOLD = 1000;
 const CROUCH_DANMAKU_HOLD_MS = 2000;
@@ -161,6 +162,8 @@ class PrototypeScene extends Phaser.Scene {
   private stageEditor?: StageEditor;
   private storyDialogue?: StoryDialogueController;
   private hasAdvancedStoryDialogueAtX = false;
+  private storyDialogueNextEvent?: Phaser.Time.TimerEvent;
+  private storyDialogueRemoveEvent?: Phaser.Time.TimerEvent;
   private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
   private hasWon = false;
   private hasScoreMilestoneDanmakuPlayed = false;
@@ -390,7 +393,6 @@ class PrototypeScene extends Phaser.Scene {
     this.input.keyboard!.on("keydown-R", () => this.restartStage());
     this.createStageEditor();
     this.createGlobalUI();
-    this.storyDialogue = createStoryDialogue({ lines: DEFAULT_STORY_DIALOGUE_LINES });
 
     this.bgm = this.sound.add("game-bgm", { loop: true, volume: 1.0 });
 
@@ -572,6 +574,7 @@ class PrototypeScene extends Phaser.Scene {
     this.removeMobileOrientationPrompt();
     this.removeStageEditor();
     this.removeGlobalUI();
+    this.clearStoryDialogueTimers();
     this.storyDialogue?.remove();
     this.storyDialogue = undefined;
     this.hasAdvancedStoryDialogueAtX = false;
@@ -619,7 +622,23 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.hasAdvancedStoryDialogueAtX = true;
-    this.storyDialogue?.next();
+    this.storyDialogue = createStoryDialogue({ lines: DEFAULT_STORY_DIALOGUE_LINES });
+    this.storyDialogueNextEvent = this.time.delayedCall(STORY_DIALOGUE_STEP_DELAY_MS, () => {
+      this.storyDialogue?.next();
+      this.storyDialogueNextEvent = undefined;
+    });
+    this.storyDialogueRemoveEvent = this.time.delayedCall(STORY_DIALOGUE_STEP_DELAY_MS * 2, () => {
+      this.storyDialogue?.remove();
+      this.storyDialogue = undefined;
+      this.storyDialogueRemoveEvent = undefined;
+    });
+  }
+
+  private clearStoryDialogueTimers() {
+    this.storyDialogueNextEvent?.remove(false);
+    this.storyDialogueRemoveEvent?.remove(false);
+    this.storyDialogueNextEvent = undefined;
+    this.storyDialogueRemoveEvent = undefined;
   }
 
   private restartStage() {

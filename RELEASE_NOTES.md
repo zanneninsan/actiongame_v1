@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.126
+### English
+- Delayed the opening story dialogue until the player passes X 600, then automatically advances and hides the message window on timers.
+### Japanese
+- 最初の会話ウィンドウを非表示で開始し、プレイヤーのX座標が600を超えたら「人が多いですね……」を表示して、8秒後に次の会話へ進み、さらに8秒後にウィンドウを消すようにしました。
+
 ## v0.1.125
 ### English
 - Added the extracted aqua mascot frames as an animated enemy sprite sheet.
