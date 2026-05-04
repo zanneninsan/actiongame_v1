@@ -107,6 +107,7 @@ const addMovingPlatformRun = (options: StageRenderOptions, platform: PlatformRun
   body.setPushable(false);
   arcadeBody.setAllowGravity(false);
   arcadeBody.setFriction(0, 0);
+  arcadeBody.friction.set(0, 0);
 
   const rawDistance = platform.moving?.distance ?? 0;
   const distance = Number.isFinite(rawDistance) ? rawDistance : 0;
@@ -233,13 +234,17 @@ export const carryPlayerOnMovingPlatforms = (
     return;
   }
 
-  if (platform.deltaX !== 0) {
-    player.setX(player.x + platform.deltaX);
-  }
+  const currentBodyX = playerBody.x;
+  const currentBodyY = playerBody.y;
   if (platform.deltaY > 0) {
     player.setY(player.y + platform.deltaY);
   }
+  if (platform.deltaX !== 0) {
+    player.setX(player.x + platform.deltaX);
+  }
   player.body.updateFromGameObject();
+  playerBody.prev.x += playerBody.x - currentBodyX;
+  playerBody.prev.y += playerBody.y - currentBodyY;
 };
 
 const getMovingPlatformDistanceX = (platform: MovingPlatformInstance) => {

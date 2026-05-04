@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.170
+### English
+- Applied moving-platform carry after player input and kept Arcade body deltas stable so riders move with the platform without being shoved faster than the platform.
+### Japanese
+- 移動床の追随処理をプレイヤー入力の後に回し、物理Bodyの差分も補正して、床より速く押し出されずに床と同じ速度で運ばれるようにしました。
+
 ## v0.1.169
 ### English
 - Made moving platforms carry the player horizontally with a single manual offset while disabling platform friction, so standing riders do not slide off and walking remains responsive.
