@@ -19,6 +19,10 @@ const DECORATION_DEPTH = -1.2;
 const STREET_LAMP_LIGHT_DEPTH = DECORATION_DEPTH - 0.08;
 const STREET_LAMP_GROUND_LIGHT_DEPTH = PLATFORM_DEPTH + 0.02;
 const MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE = 64;
+const MOVING_PLATFORM_DEBUG_STORAGE_KEY = "actiongame_debug_moving_platforms";
+const MOVING_PLATFORM_DEBUG_QUERY_KEY = "debugMovingPlatforms";
+const MOVING_PLATFORM_DEBUG_INTERVAL_MS = 160;
+let lastMovingPlatformDebugLogAt = 0;
 
 export type MovingPlatformInstance = {
   body: Phaser.Physics.Arcade.Image;
@@ -250,11 +254,20 @@ export const carryPlayerOnDescendingMovingPlatforms = (
   const platformTop = platform.body.y - platform.height / 2;
   const bodyBottom = playerBody.y + playerBody.height;
   const targetDeltaY = platformTop - bodyBottom;
+  const shouldLogDebug = isMovingPlatformDebugEnabled();
+  if (shouldLogDebug && Math.abs(targetDeltaY) > MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE) {
+    logDescendingMovingPlatformDebug("skip-outside-tolerance", playerBody, platform, {
+      bodyBottomBefore: bodyBottom,
+      platformTop,
+      targetDeltaY,
+    });
+  }
   if (Math.abs(targetDeltaY) > MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE) {
     return;
   }
 
   const currentBodyY = playerBody.y;
+  const velocityYBefore = playerBody.velocity.y;
   player.setY(player.y + targetDeltaY);
   if (playerBody.velocity.y > 0) {
     player.setVelocityY(0);
@@ -262,6 +275,17 @@ export const carryPlayerOnDescendingMovingPlatforms = (
   player.body.updateFromGameObject();
   playerBody.prev.y += playerBody.y - currentBodyY;
   playerBody.prevFrame.y += playerBody.y - currentBodyY;
+
+  if (shouldLogDebug) {
+    logDescendingMovingPlatformDebug("carry", playerBody, platform, {
+      bodyBottomBefore: bodyBottom,
+      bodyBottomAfter: playerBody.y + playerBody.height,
+      platformTop,
+      targetDeltaY,
+      appliedBodyDeltaY: playerBody.y - currentBodyY,
+      velocityYBefore,
+    });
+  }
 };
 
 export const isPlayerSupportedByDescendingMovingPlatform = (
@@ -303,6 +327,54 @@ const getMovingPlatformDistanceX = (platform: MovingPlatformInstance) => {
 const getMovingPlatformDistanceY = (platform: MovingPlatformInstance) => {
   return platform.axis === "y" ? platform.distance : platform.axis === "xy" ? platform.distanceY : 0;
 };
+
+const isMovingPlatformDebugEnabled = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return (
+    window.localStorage.getItem(MOVING_PLATFORM_DEBUG_STORAGE_KEY) === "1" ||
+    new URLSearchParams(window.location.search).get(MOVING_PLATFORM_DEBUG_QUERY_KEY) === "1"
+  );
+};
+
+const logDescendingMovingPlatformDebug = (
+  phase: string,
+  playerBody: Phaser.Physics.Arcade.Body,
+  platform: MovingPlatformInstance,
+  values: Record<string, number>,
+) => {
+  const now = performance.now();
+  if (now - lastMovingPlatformDebugLogAt < MOVING_PLATFORM_DEBUG_INTERVAL_MS) {
+    return;
+  }
+  lastMovingPlatformDebugLogAt = now;
+
+  const platformTop = platform.body.y - platform.height / 2;
+  const playerBottom = playerBody.y + playerBody.height;
+  console.table({
+    phase,
+    platformAxis: platform.axis,
+    platformX: roundForDebug(platform.body.x - platform.width / 2),
+    platformY: roundForDebug(platformTop),
+    platformDeltaX: roundForDebug(platform.deltaX),
+    platformDeltaY: roundForDebug(platform.deltaY),
+    playerBodyX: roundForDebug(playerBody.x),
+    playerBodyY: roundForDebug(playerBody.y),
+    playerBottom: roundForDebug(playerBottom),
+    verticalGap: roundForDebug(platformTop - playerBottom),
+    velocityX: roundForDebug(playerBody.velocity.x),
+    velocityY: roundForDebug(playerBody.velocity.y),
+    prevY: roundForDebug(playerBody.prev.y),
+    prevFrameY: roundForDebug(playerBody.prevFrame.y),
+    blockedDown: playerBody.blocked.down,
+    touchingDown: playerBody.touching.down,
+    ...Object.fromEntries(Object.entries(values).map(([key, value]) => [key, roundForDebug(value)])),
+  });
+};
+
+const roundForDebug = (value: number) => Math.round(value * 100) / 100;
 
 const syncMovingPlatformVisuals = (platform: MovingPlatformInstance) => {
   const x = platform.body.x - platform.width / 2;

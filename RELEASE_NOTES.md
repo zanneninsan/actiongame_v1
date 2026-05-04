@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.179
+### English
+- Added opt-in moving platform debug logging for descending platform carry, including platform deltas, player body position, grounded flags, and applied correction values.
+### Japanese
+- 下方向に動く床の追随状態を調べるため、床の移動量、プレイヤーの当たり判定位置、接地フラグ、補正量を確認できる任意有効のデバッグログを追加しました。
+
 ## v0.1.178
 ### English
 - Changed descending moving platform carry to snap the player's feet to the platform top instead of adding the platform's downward movement every frame, preventing the player from sinking into descending platforms.
