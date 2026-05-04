@@ -43,6 +43,12 @@ import {
   type MobileInputKey,
 } from "./mobileControls";
 import { DanmakuOverlay } from "./danmaku";
+import {
+  fetchLeaderboardEntries,
+  isLeaderboardConfigured,
+  submitLeaderboardScore,
+} from "./leaderboard";
+import { showLeaderboardPanel } from "./leaderboardUi";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
@@ -50,6 +56,7 @@ const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
 const DEBUG_VERSION = "v0.1.111";
+const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
@@ -1034,6 +1041,7 @@ class PrototypeScene extends Phaser.Scene {
         this.createStageEditor();
         this.createGlobalUI();
       },
+      onLeaderboardOpen: () => this.showLeaderboard(),
     });
   }
 
@@ -1113,6 +1121,7 @@ class PrototypeScene extends Phaser.Scene {
     this.hasScoreMilestoneDanmakuPlayed = true;
     this.danmaku?.emitScoreMilestone();
   }
+
   private updateTimerText() {
     if (!this.timerText || this.hasWon) {
       return;
@@ -1208,6 +1217,36 @@ class PrototypeScene extends Phaser.Scene {
 
   private formatScoreValue(score: number) {
     return score.toFixed(2);
+  }
+
+  private showLeaderboard(statusMessage?: string) {
+    showLeaderboardPanel({
+      stageName: this.editorStage.name,
+      gameVersion: DEBUG_VERSION,
+      statusMessage: isLeaderboardConfigured() ? statusMessage : "Leaderboard is not configured.",
+      fetchEntries: () => fetchLeaderboardEntries(ACTIVE_STAGE_ID),
+    });
+  }
+
+  private submitWinScore(finalScore: number, itemScore: number, timeBonus: number, remainingMs: number) {
+    if (!isLeaderboardConfigured()) {
+      return;
+    }
+
+    const elapsedMs = Math.max(0, GAME_TIME_MS - remainingMs);
+    submitLeaderboardScore({
+      stageId: ACTIVE_STAGE_ID,
+      stageName: this.editorStage.name,
+      gameVersion: DEBUG_VERSION,
+      playerName: this.playerName,
+      score: finalScore,
+      itemScore,
+      timeBonus,
+      elapsedMs,
+      remainingMs,
+    })
+      .then(() => this.showLeaderboard("Score submitted."))
+      .catch(() => this.showLeaderboard("Score could not be submitted."));
   }
 
   private createPixelTexture(key: string, width: number, height: number, fill: number, stroke: number) {
@@ -1386,6 +1425,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(200)
       .setShadow(3, 3, "#020617", 4, true, true);
+    this.submitWinScore(finalScore, itemScore, timeBonus, remaining);
   }
 
   private registerRainbowPipeline() {

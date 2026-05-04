@@ -4,8 +4,12 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
 ## v0.1.111
 ### English
+- Added Firebase-backed leaderboard client wiring with score submission on clear and a top-score modal.
+- Added Firebase environment, Firestore rules, and Cloud Function setup notes for shared rankings.
 - Added a Nico-style scrolling danmaku burst when the item score first exceeds 1000.
 ### Japanese
+- Firebase を使ったランキング連携を追加し、クリア時のスコア送信とトップスコア表示モーダルを入れました。
+- 共有ランキング用の Firebase 環境設定、Firestore ルール、Cloud Functions の導入メモを追加しました。
 - アイテムスコアが初めて1000を超えたときに、ニコニコ動画風の横流れ弾幕が出る演出を追加しました。
 
 ## v0.1.110

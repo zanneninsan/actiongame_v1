@@ -574,3 +574,120 @@ canvas {
   font-size: 16px;
   font-weight: 800;
 }
+
+#leaderboard-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 26;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(4, 8, 18, 0.78);
+  color: #f8fafc;
+  font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+}
+
+.leaderboard-dialog {
+  box-sizing: border-box;
+  width: min(560px, calc(100vw - 36px), calc((100dvh - 36px) * 1.2381));
+  aspect-ratio: 520 / 420;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: clamp(48px, 9vw, 62px) clamp(42px, 8vw, 70px) clamp(34px, 7vw, 48px);
+  background: url("../assets/ui/fantasy/options_modal_window.png") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
+}
+
+.leaderboard-dialog h2 {
+  margin: 0;
+  min-height: 50px;
+  display: grid;
+  place-items: center;
+  padding: 0 20px;
+  background: url("../assets/ui/fantasy/title_plate_safe.png") center / 100% 100% no-repeat;
+  font-size: clamp(18px, 5vw, 24px);
+  font-weight: 800;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 10px rgba(245, 199, 106, 0.22);
+}
+
+.leaderboard-meta,
+.leaderboard-status {
+  margin: 0;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #f5c76a;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9);
+}
+
+.leaderboard-status {
+  min-height: 18px;
+  color: #f8fafc;
+}
+
+.leaderboard-list {
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  display: grid;
+  align-content: start;
+  gap: 6px;
+}
+
+.leaderboard-entry {
+  min-height: 30px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) 84px 68px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  background: url("../assets/ui/fantasy/input_field_safe.png") center / 100% 100% no-repeat;
+  font-size: 13px;
+  font-weight: 800;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.leaderboard-rank,
+.leaderboard-score,
+.leaderboard-date {
+  color: #f5c76a;
+}
+
+.leaderboard-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-score,
+.leaderboard-date {
+  text-align: right;
+}
+
+#leaderboard-close {
+  width: 100%;
+  margin-top: 4px;
+  background-image: url("../assets/ui/fantasy/button_primary_safe.png");
+  font-size: 16px;
+  font-weight: 800;
+}
+
+@media (max-width: 520px) {
+  .leaderboard-dialog {
+    gap: 8px;
+    padding: 44px 34px 32px;
+  }
+
+  .leaderboard-entry {
+    grid-template-columns: 28px minmax(0, 1fr) 70px;
+  }
+
+  .leaderboard-date {
+    display: none;
+  }
+}

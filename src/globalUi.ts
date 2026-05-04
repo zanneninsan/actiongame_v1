@@ -13,6 +13,7 @@ type GlobalUiOptions = {
   updateMidgroundBackgroundToggle: (button: HTMLButtonElement) => void;
   onSoundChange: (volumePercent: number, muted: boolean) => void;
   onLocaleChange: (locale: Locale) => void;
+  onLeaderboardOpen: () => void;
 };
 
 export const createGlobalUI = (options: GlobalUiOptions) => {
@@ -25,6 +26,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
     <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(options.locale, "aria.toggleCollision")}">HIT</button>
     <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch rear background">RB1</button>
     <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">MG1</button>
+    <button id="leaderboard-toggle" class="ui-button" type="button" aria-label="Open leaderboard">&#127942;</button>
     <button id="bgm-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.toggleSound")}">&#128266;</button>
     <button id="options-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.options")}">&#9881;&#65039;</button>
   `;
@@ -56,6 +58,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const collisionDebugToggle = document.getElementById("collision-debug-toggle") as HTMLButtonElement;
   const rearDebugToggle = document.getElementById("rear-debug-toggle") as HTMLButtonElement;
   const midgroundDebugToggle = document.getElementById("midground-debug-toggle") as HTMLButtonElement;
+  const leaderboardToggle = document.getElementById("leaderboard-toggle") as HTMLButtonElement;
   const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
   const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
   const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
@@ -77,6 +80,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   collisionDebugToggle.addEventListener("click", () => options.onCollisionToggle(collisionDebugToggle));
   rearDebugToggle.addEventListener("click", () => options.onRearBackgroundToggle(rearDebugToggle));
   midgroundDebugToggle.addEventListener("click", () => options.onMidgroundBackgroundToggle(midgroundDebugToggle));
+  leaderboardToggle.addEventListener("click", () => options.onLeaderboardOpen());
 
   bgmToggle.addEventListener("click", () => {
     const currentVolume = parseInt(volumeSlider.value, 10);
