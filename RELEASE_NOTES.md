@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.153
+### English
+- Kept the selected rear and midground debug backgrounds after restarting the stage.
+### Japanese
+- ステージをリスタートしても、切り替えたRB背景とMG背景がそのまま維持されるようにしました。
+
 ## v0.1.152
 ### English
 - Fixed dropdown menu option colors so unselected language and stage choices stay readable on the native menu background.

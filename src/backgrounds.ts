@@ -1,11 +1,14 @@
 import Phaser from "phaser";
 import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-assets";
 
+let selectedRearBackgroundIndex = 0;
+let selectedMidgroundBackgroundIndex = 0;
+
 export class BackgroundController {
   private rearBackground?: Phaser.GameObjects.Image;
-  private rearBackgroundIndex = 0;
+  private rearBackgroundIndex = selectedRearBackgroundIndex;
   private midgroundBackground?: Phaser.GameObjects.TileSprite;
-  private midgroundBackgroundIndex = 0;
+  private midgroundBackgroundIndex = selectedMidgroundBackgroundIndex;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -27,6 +30,7 @@ export class BackgroundController {
 
   cycleRearBackground(toggleButton?: HTMLButtonElement) {
     this.rearBackgroundIndex = (this.rearBackgroundIndex + 1) % REAR_BACKGROUNDS.length;
+    selectedRearBackgroundIndex = this.rearBackgroundIndex;
     const background = this.getCurrentRearBackground();
     this.rearBackground?.setTexture(background.key).setDisplaySize(this.width, this.height);
     this.updateRearDebugToggle(toggleButton);
@@ -44,6 +48,7 @@ export class BackgroundController {
 
   cycleMidgroundBackground(toggleButton?: HTMLButtonElement) {
     this.midgroundBackgroundIndex = (this.midgroundBackgroundIndex + 1) % MIDGROUND_BACKGROUNDS.length;
+    selectedMidgroundBackgroundIndex = this.midgroundBackgroundIndex;
     const background = this.getCurrentMidgroundBackground();
     this.midgroundBackground?.setTexture(background.key);
     this.updateMidgroundDebugToggle(toggleButton);
