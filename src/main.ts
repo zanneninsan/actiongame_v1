@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.121";
+const DEBUG_VERSION = "v0.1.122";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
@@ -1501,17 +1501,19 @@ class PrototypeScene extends Phaser.Scene {
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "MISS", {
         fontFamily: "monospace",
         fontSize: "64px",
-        color: "#fecdd3",
+        color: "#ff1f4f",
+        stroke: "#fff7cf",
+        strokeThickness: 7,
         align: "center",
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(220)
-      .setShadow(3, 3, "#450a0a", 5, true, true);
+      .setShadow(0, 0, "#ff003c", 18, true, true);
     this.tweens.add({
       targets: this.missText,
-      scale: 1.08,
-      alpha: 0.72,
+      scale: 1.16,
+      alpha: 1,
       duration: 220,
       yoyo: true,
       repeat: 1,

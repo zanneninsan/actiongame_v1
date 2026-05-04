@@ -53,6 +53,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
 
       status.textContent = options.statusMessage ?? "Top scores";
       list.replaceChildren(...entries.map((entry, index) => createEntryRow(entry, index + 1, options.currentSubmissionId)));
+      list.querySelector(".leaderboard-entry.is-current-score")?.scrollIntoView({ block: "center" });
     })
     .catch(() => {
       status.textContent = "Leaderboard is unavailable.";

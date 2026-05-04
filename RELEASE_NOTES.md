@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.122
+### English
+- Moved the leaderboard NEW marker outside the rank column and auto-scrolls the list to the newly submitted score.
+- Made the MISS overlay brighter and heavier with a strong outline and glow.
+### Japanese
+- リーダーボードの NEW 表示を順位列の外へ移動し、新しく送信したスコア行まで自動でスクロールするようにしました。
+- MISS 表示を濃くギラついた色、太い縁取り、強い発光に調整しました。
+
 ## v0.1.121
 ### English
 - Highlighted the newly submitted leaderboard score so players can identify their current clear result.

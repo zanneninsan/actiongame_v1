@@ -670,6 +670,7 @@ canvas {
 }
 
 .leaderboard-entry {
+  position: relative;
   min-height: clamp(44px, 5vw, 58px);
   display: grid;
   grid-template-columns: clamp(38px, 5vw, 56px) minmax(180px, 1fr) clamp(118px, 14vw, 150px) clamp(128px, 16vw, 170px);
@@ -697,11 +698,17 @@ canvas {
   filter: drop-shadow(0 0 10px rgba(245, 199, 106, 0.5));
 }
 
-.leaderboard-entry.is-current-score .leaderboard-rank::after {
-  content: " NEW";
-  margin-left: 8px;
-  font-size: 0.7em;
+.leaderboard-entry.is-current-score::before {
+  content: "NEW";
+  position: absolute;
+  left: clamp(-58px, -5.2vw, -38px);
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: clamp(11px, 1.4vw, 15px);
+  font-weight: 900;
+  letter-spacing: 0;
   color: #fff7cf;
+  text-shadow: 0 2px 0 #450a0a, 0 0 10px rgba(245, 199, 106, 0.9);
 }
 
 .leaderboard-name {
@@ -736,6 +743,11 @@ canvas {
   .leaderboard-entry {
     grid-template-columns: 30px minmax(0, 1fr) 84px;
     padding: 0 18px;
+  }
+
+  .leaderboard-entry.is-current-score::before {
+    left: 8px;
+    top: -8px;
   }
 
   .leaderboard-date {
