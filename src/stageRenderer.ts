@@ -18,6 +18,7 @@ const PLATFORM_DEPTH = -0.55;
 const DECORATION_DEPTH = -1.2;
 const STREET_LAMP_LIGHT_DEPTH = DECORATION_DEPTH - 0.08;
 const STREET_LAMP_GROUND_LIGHT_DEPTH = PLATFORM_DEPTH + 0.02;
+const MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE = 28;
 
 export type MovingPlatformInstance = {
   body: Phaser.Physics.Arcade.Image;
@@ -240,11 +241,6 @@ export const carryPlayerOnDescendingMovingPlatforms = (
   }
 
   const playerBody = player.body;
-  const isGrounded = playerBody.blocked.down || playerBody.touching.down;
-  if (!isGrounded) {
-    return;
-  }
-
   const platform = instances.find((candidate) => {
     if (candidate.deltaY <= 0 || !candidate.body.active) {
       return false;
@@ -257,8 +253,11 @@ export const carryPlayerOnDescendingMovingPlatforms = (
     const playerRight = playerBody.x + playerBody.width;
     const playerBottom = playerBody.y + playerBody.height;
     const horizontalOverlap = playerRight > platformLeft + 4 && playerLeft < platformRight - 4;
-    const verticalDistance = Math.abs(playerBottom - platformTop);
-    return horizontalOverlap && verticalDistance <= Math.max(18, candidate.deltaY + 18);
+    const verticalGap = platformTop - playerBottom;
+    const isOnOrJustAbovePlatform =
+      verticalGap >= -MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE &&
+      verticalGap <= Math.max(MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE, candidate.deltaY + MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE);
+    return horizontalOverlap && isOnOrJustAbovePlatform;
   });
 
   if (!platform) {
@@ -267,6 +266,7 @@ export const carryPlayerOnDescendingMovingPlatforms = (
 
   const currentBodyY = playerBody.y;
   player.setY(player.y + platform.deltaY);
+  player.setVelocityY(Math.max(playerBody.velocity.y, platform.deltaY * 60));
   player.body.updateFromGameObject();
   playerBody.prev.y += playerBody.y - currentBodyY;
 };

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.173
+### English
+- Let descending moving platforms continue carrying the player while they are just above the platform, preventing downward platforms from dropping out from under the rider.
+### Japanese
+- 下方向に移動する床で、プレイヤーが床のすぐ上にいる間も下降追随を続けるようにして、床だけが下がってプレイヤーが落ちる問題を修正しました。
+
 ## v0.1.172
 ### English
 - Stopped manually moving the player horizontally on moving platforms and let Arcade's direct-control platform friction handle horizontal riding, leaving only descending vertical carry as a manual correction.
