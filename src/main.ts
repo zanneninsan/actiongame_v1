@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.147";
+const DEBUG_VERSION = "v0.1.148";
 const ACTIVE_STAGE_ID = "neonCanal";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -105,8 +105,8 @@ const MAX_FALL_SPEED = 680;
 const JUMP_VELOCITY = -575;
 const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
-const SHIFT_SPEED_MULTIPLIER = 2;
-const SHIFT_MAX_VERTICAL_SPEED = Math.abs(BOOSTED_JUMP_VELOCITY) * SHIFT_SPEED_MULTIPLIER;
+const DASH_SPEED_MULTIPLIER = 2;
+const DASH_MAX_VERTICAL_SPEED = Math.abs(BOOSTED_JUMP_VELOCITY) * DASH_SPEED_MULTIPLIER;
 const MOBILE_FULLSCREEN_MIN_LANDSCAPE_HEIGHT = 430;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
@@ -141,7 +141,7 @@ class PrototypeScene extends Phaser.Scene {
   private finalScoreText?: Phaser.GameObjects.Text;
   private missText?: Phaser.GameObjects.Text;
   private danmaku?: DanmakuOverlay;
-  private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false };
+  private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false, shift: false };
   private mobileJumpQueued = false;
   private mobileControlCleanup: Array<() => void> = [];
   private mobileOrientationCleanup: Array<() => void> = [];
@@ -443,14 +443,14 @@ class PrototypeScene extends Phaser.Scene {
     const left = this.keys.a.isDown || this.cursors.left.isDown || this.mobileInput.a;
     const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
     const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
-    const isShiftSpeedActive = this.keys.shift.isDown;
-    const speedMultiplier = isShiftSpeedActive ? SHIFT_SPEED_MULTIPLIER : 1;
+    const isShiftSpeedActive = this.keys.shift.isDown || this.mobileInput.shift;
+    const speedMultiplier = isShiftSpeedActive ? DASH_SPEED_MULTIPLIER : 1;
     const isCrouchInputActive = down && onFloor;
     this.updateDecorationPlatformDrop(down, onFloor);
     this.applyPlayerBody(isCrouchInputActive);
     this.player.setMaxVelocity(
       (isCrouchInputActive ? CROUCH_MAX_RUN_SPEED : MAX_RUN_SPEED) * speedMultiplier,
-      isShiftSpeedActive ? SHIFT_MAX_VERTICAL_SPEED : MAX_FALL_SPEED,
+      isShiftSpeedActive ? DASH_MAX_VERTICAL_SPEED : MAX_FALL_SPEED,
     );
     this.updateCollisionDebug();
     const debugJump = Phaser.Input.Keyboard.JustDown(this.keys.w) || this.mobileJumpQueued;
@@ -588,7 +588,7 @@ class PrototypeScene extends Phaser.Scene {
     this.missText = undefined;
     this.danmaku?.destroy();
     this.danmaku = undefined;
-    this.mobileInput = { w: false, a: false, s: false, d: false };
+    this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
     this.score = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
     this.startTime = 0;
@@ -1171,7 +1171,7 @@ class PrototypeScene extends Phaser.Scene {
     this.invulnerableUntil = this.time.now + DAMAGE_INVULNERABLE_MS;
     this.isLanding = false;
     this.landingFastForwarded = false;
-    this.mobileInput = { w: false, a: false, s: false, d: false };
+    this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
     this.player.setAcceleration(0, 0);
     this.player.setVelocity(direction * DAMAGE_KNOCKBACK_X, DAMAGE_KNOCKBACK_Y);
@@ -1543,7 +1543,7 @@ class PrototypeScene extends Phaser.Scene {
     this.player.clearTint();
     this.player.setAlpha(1);
     this.player.setAngle(0);
-    this.mobileInput = { w: false, a: false, s: false, d: false };
+    this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
     this.applyPlayerBody(false);
     this.player.setAcceleration(0, 0);
@@ -1566,7 +1566,7 @@ class PrototypeScene extends Phaser.Scene {
     this.isRunActive = false;
     this.hurtUntil = 0;
     this.invulnerableUntil = 0;
-    this.mobileInput = { w: false, a: false, s: false, d: false };
+    this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
     freezeEnemies(this.enemiesGroup);
     this.player.setAcceleration(0, 0);

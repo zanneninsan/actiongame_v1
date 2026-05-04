@@ -252,6 +252,11 @@ canvas {
   -webkit-user-select: none;
 }
 
+.dash-button {
+  font-size: calc(var(--mobile-button-size) * 0.22);
+  letter-spacing: 0;
+}
+
 .mobile-button.is-pressed {
   border-color: rgba(253, 230, 138, 0.96);
   background: rgba(56, 189, 248, 0.82);
@@ -312,6 +317,11 @@ canvas {
 
 .pad-up {
   grid-column: 2;
+}
+
+.pad-dash-left {
+  grid-column: 1;
+  grid-row: 1;
 }
 
 .pad-left {

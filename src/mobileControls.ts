@@ -1,6 +1,6 @@
 import { t, type Locale } from "./i18n";
 
-export type MobileInputKey = "w" | "a" | "s" | "d";
+export type MobileInputKey = "w" | "a" | "s" | "d" | "shift";
 
 type MobileControlsOptions = {
   locale: Locale;
@@ -18,22 +18,27 @@ export const createMobileControls = (options: MobileControlsOptions) => {
   controls.innerHTML = `
     <div class="mobile-pad">
       <button class="mobile-button pad-up" data-key="w" type="button" aria-label="${t(options.locale, "aria.jump")}">&uarr;</button>
+      <button class="mobile-button dash-button pad-dash-left" data-key="shift" type="button" aria-label="${t(options.locale, "aria.dash")}">DASH</button>
       <button class="mobile-button pad-left" data-key="a" type="button" aria-label="${t(options.locale, "aria.moveLeft")}">&larr;</button>
       <button class="mobile-button pad-down" data-key="s" type="button" aria-label="${t(options.locale, "aria.down")}">&darr;</button>
       <button class="mobile-button pad-right" data-key="d" type="button" aria-label="${t(options.locale, "aria.moveRight")}">&rarr;</button>
     </div>
     <div class="mobile-actions">
       <button class="mobile-button" data-key="w" type="button" aria-label="${t(options.locale, "aria.jump")}">&uarr;</button>
+      <button class="mobile-button dash-button" data-key="shift" type="button" aria-label="${t(options.locale, "aria.dash")}">DASH</button>
       <button class="mobile-button restart-button" data-action="restart" type="button">R</button>
     </div>
   `;
   document.body.appendChild(controls);
 
+  const pressedCounts = new Map<MobileInputKey, number>();
   controls.querySelectorAll<HTMLButtonElement>("[data-key]").forEach((button) => {
     const key = button.dataset.key as MobileInputKey;
     cleanup.push(
       bindMobileButton(button, (pressed) => {
-        options.onInputChange(key, pressed);
+        const nextCount = Math.max(0, (pressedCounts.get(key) ?? 0) + (pressed ? 1 : -1));
+        pressedCounts.set(key, nextCount);
+        options.onInputChange(key, nextCount > 0);
         if (key === "w" && pressed) {
           options.onJumpQueued();
         }
@@ -58,7 +63,12 @@ export const createMobileControls = (options: MobileControlsOptions) => {
 
 const bindMobileButton = (button: HTMLButtonElement, onPressedChange: (pressed: boolean) => void) => {
   const activePointers = new Set<number>();
+  let wasPressed = false;
   const setPressed = (pressed: boolean) => {
+    if (wasPressed === pressed) {
+      return;
+    }
+    wasPressed = pressed;
     button.classList.toggle("is-pressed", pressed);
     onPressedChange(pressed);
   };

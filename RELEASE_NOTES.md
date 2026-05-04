@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.148
+### English
+- Formalized Shift dash controls and added left/right mobile dash buttons with updated control hints.
+### Japanese
+- Shiftキーでダッシュできる操作を正式な操作として追加し、モバイル操作にも左右それぞれにダッシュボタンを追加しました。
+
 ## v0.1.147
 ### English
 - Added the short leaderboard player ID beside the in-game HUD player name.
