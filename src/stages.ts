@@ -664,14 +664,97 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
   ],
 };
 
+export const SKY_SHAFT_CLIMB_STAGE: StageDefinition = {
+  name: {
+    jp: "スカイシャフト・クライム",
+    en: "Sky Shaft Climb",
+  },
+  backgrounds: {
+    rearKey: "rear-620c2900-ce9f-46e9-974e-b40916d5aa0c",
+    midgroundKey: "midground-city-loop-strip",
+  },
+  worldWidth: 1920,
+  worldTop: -3720,
+  worldBottom: 720,
+  groundTopY: 672,
+  streetLampGroundY: 672,
+  playerStart: {
+    x: 180,
+    y: 552,
+  },
+  goal: {
+    x: 1580,
+    y: -3488,
+  },
+  platforms: [
+    { x: 0, y: 672, units: 8 },
+    { x: 620, y: 672, units: 5 },
+    { x: 1180, y: 672, units: 7 },
+    { x: 260, y: 520, units: 3 },
+    { x: 720, y: 388, units: 3, moving: { axis: "x", distance: 360, speed: 76 } },
+    { x: 1280, y: 252, units: 3 },
+    { x: 950, y: 96, units: 2, moving: { axis: "y", distance: -150, speed: 58 } },
+    { x: 520, y: -92, units: 3 },
+    { x: 170, y: -260, units: 2, moving: { axis: "x", distance: 420, speed: 82 } },
+    { x: 820, y: -430, units: 3 },
+    { x: 1260, y: -610, units: 2, moving: { axis: "y", distance: -170, speed: 62 } },
+    { x: 1460, y: -820, units: 3 },
+    { x: 930, y: -1010, units: 2, moving: { axis: "x", distance: -430, speed: 84 } },
+    { x: 380, y: -1190, units: 3 },
+    { x: 650, y: -1370, units: 2, moving: { axis: "y", distance: -180, speed: 66 } },
+    { x: 1060, y: -1590, units: 3 },
+    { x: 1450, y: -1780, units: 2, moving: { axis: "x", distance: -500, speed: 92 } },
+    { x: 780, y: -1990, units: 3 },
+    { x: 250, y: -2190, units: 2, moving: { axis: "y", distance: -160, speed: 58 } },
+    { x: 540, y: -2390, units: 3 },
+    { x: 1020, y: -2590, units: 2, moving: { axis: "x", distance: 470, speed: 88 } },
+    { x: 1460, y: -2780, units: 3 },
+    { x: 900, y: -2990, units: 2, moving: { axis: "y", distance: -180, speed: 64 } },
+    { x: 420, y: -3200, units: 3 },
+    { x: 900, y: -3370, units: 3, moving: { axis: "x", distance: 460, speed: 72 } },
+    { x: 1460, y: -3520, units: 5 },
+  ],
+  streetLamps: [
+    { x: 220, key: "street-lamp-single", scale: 0.64 },
+    { x: 1510, key: "street-lamp-double", scale: 0.58 },
+  ],
+  decorations: [
+    { x: 760, y: 672, key: "stage-structures-chainlink-fence", scale: 0.56 },
+    { x: 1320, y: 672, key: "stage-props-utility-box", scale: 0.48 },
+    { x: 500, y: -1190, key: "stage-props-planter-box", scale: 0.5 },
+    { x: 1530, y: -2780, key: "stage-props-guard-rail", scale: 0.56 },
+    { x: 1640, y: -3520, key: "stage-structures-station-wall-railing", scale: 0.5 },
+  ],
+  items: [
+    { type: "energyDrink", x: 320, y: 464 },
+    { type: "bubbleTea", x: 1360, y: 196 },
+    { type: "shoppingBag", x: 600, y: -148 },
+    { type: "energyDrink", x: 1510, y: -876 },
+    { type: "bubbleTea", x: 460, y: -1246 },
+    { type: "shoppingBag", x: 1140, y: -1646 },
+    { type: "energyDrink", x: 850, y: -2046 },
+    { type: "bubbleTea", x: 590, y: -2446 },
+    { type: "shoppingBag", x: 1540, y: -2836 },
+    { type: "energyDrink", x: 500, y: -3256 },
+  ],
+  enemies: [
+    { type: "coneGolem", x: 1340, y: 590, patrolLeft: 1180, patrolRight: 1560, speed: 64 },
+    { type: "rabbitTraveler", x: 880, y: -502, patrolLeft: 820, patrolRight: 1060, speed: 72 },
+    { type: "hornedCyborg", x: 1360, y: -1000, patrolLeft: 1060, patrolRight: 1620, speed: 60 },
+    { type: "aquaMascot", x: 1110, y: -1662, patrolLeft: 1060, patrolRight: 1240, speed: 58 },
+    { type: "hornedCyborg", x: 500, y: -2380, patrolLeft: 260, patrolRight: 860, speed: 66 },
+  ],
+};
+
 export const STAGES = {
   originalDowntown: ORIGINAL_DOWNTOWN_STAGE,
   neonCanal: NEON_CANAL_STAGE,
   skybridgeSprint: SKYBRIDGE_SPRINT_STAGE,
+  skyShaftClimb: SKY_SHAFT_CLIMB_STAGE,
 };
 export type StageId = keyof typeof STAGES;
 export const DEFAULT_STAGE_ID = "neonCanal" satisfies StageId;
-export const PLAYABLE_STAGE_IDS = ["neonCanal", "skybridgeSprint"] as const satisfies readonly StageId[];
+export const PLAYABLE_STAGE_IDS = ["neonCanal", "skybridgeSprint", "skyShaftClimb"] as const satisfies readonly StageId[];
 export const ACTIVE_STAGE = STAGES[DEFAULT_STAGE_ID];
 
 export const cloneStage = (stage: StageDefinition): StageDefinition => ({

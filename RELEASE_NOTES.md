@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.160
+### English
+- Added Sky Shaft Climb, a narrow vertical stage built around small platforms and frequent moving platforms.
+- Allowed Sky Shaft Climb score submissions in the leaderboard Cloud Function.
+### Japanese
+- 横幅を抑えた縦長ステージ「スカイシャフト・クライム」を追加し、小さな足場と多めの移動床を乗り継いで上へ登る構成にしました。
+- スカイシャフト・クライムのスコアをランキングへ登録できるように、Cloud Functionの許可ステージにも追加しました。
+
 ## v0.1.159
 ### English
 - Added per-enemy AI styles: standard patrol, flying patrol, hopping patrol, and player chase behavior.
