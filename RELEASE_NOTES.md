@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.131
+### English
+- Made the fall MISS overlay more dramatic with a screen flash, stronger camera shake, color-offset echoes, and a punchier bounce animation.
+### Japanese
+- 落下時の MISS 表示に画面フラッシュ、強めのカメラ揺れ、色ズレした残像、勢いのあるバウンド演出を追加しました。
+
 ## v0.1.130
 ### English
 - Added TV power-on and power-off style animations when the story message window appears and disappears.

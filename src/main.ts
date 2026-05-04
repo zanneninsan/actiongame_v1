@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.130";
+const DEBUG_VERSION = "v0.1.131";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
@@ -1524,18 +1524,59 @@ class PrototypeScene extends Phaser.Scene {
     this.player.anims.timeScale = 1;
     this.player.anims.stop();
     this.player.setAlpha(0.55);
-    this.cameras.main.shake(180, 0.006);
+    this.cameras.main.flash(220, 255, 34, 68);
+    this.cameras.main.shake(320, 0.012);
     if (this.danmakuEnabled) {
       this.danmaku?.emitMiss();
     }
     this.missText?.destroy();
+    const missBurst = this.add
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "MISS", {
+        fontFamily: "monospace",
+        fontSize: "104px",
+        color: "#ff003c",
+        stroke: "#fff7cf",
+        strokeThickness: 10,
+        align: "center",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(218)
+      .setAlpha(0.72)
+      .setShadow(0, 0, "#ff003c", 24, true, true);
+    const missEchoLeft = this.add
+      .text(GAME_WIDTH / 2 - 18, GAME_HEIGHT / 2 + 10, "MISS", {
+        fontFamily: "monospace",
+        fontSize: "72px",
+        color: "#38bdf8",
+        stroke: "#0f172a",
+        strokeThickness: 8,
+        align: "center",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(217)
+      .setAlpha(0.58);
+    const missEchoRight = this.add
+      .text(GAME_WIDTH / 2 + 20, GAME_HEIGHT / 2 - 8, "MISS", {
+        fontFamily: "monospace",
+        fontSize: "72px",
+        color: "#fde047",
+        stroke: "#7f1d1d",
+        strokeThickness: 8,
+        align: "center",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(217)
+      .setAlpha(0.58);
     this.missText = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "MISS", {
         fontFamily: "monospace",
-        fontSize: "64px",
+        fontSize: "82px",
         color: "#ff1f4f",
         stroke: "#fff7cf",
-        strokeThickness: 7,
+        strokeThickness: 9,
         align: "center",
       })
       .setOrigin(0.5)
@@ -1544,12 +1585,26 @@ class PrototypeScene extends Phaser.Scene {
       .setShadow(0, 0, "#ff003c", 18, true, true);
     this.tweens.add({
       targets: this.missText,
-      scale: 1.16,
+      scale: { from: 0.55, to: 1.18 },
+      angle: { from: -7, to: 2 },
       alpha: 1,
-      duration: 220,
+      duration: 260,
       yoyo: true,
-      repeat: 1,
-      ease: "Sine.easeInOut",
+      repeat: 2,
+      ease: "Back.easeOut",
+    });
+    this.tweens.add({
+      targets: [missBurst, missEchoLeft, missEchoRight],
+      scale: 1.42,
+      alpha: 0,
+      angle: { from: 0, to: 8 },
+      duration: 760,
+      ease: "Expo.easeOut",
+      onComplete: () => {
+        missBurst.destroy();
+        missEchoLeft.destroy();
+        missEchoRight.destroy();
+      },
     });
     this.time.delayedCall(FALL_MISS_RESTART_DELAY_MS, () => this.restartStage());
   }
