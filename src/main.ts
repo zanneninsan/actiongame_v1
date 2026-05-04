@@ -26,7 +26,6 @@ import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-asse
 import {
   createEnemies,
   createEnemyAnimations,
-  createEnemyTexture,
   freezeEnemies,
   populateEnemies,
   updateEnemies,
@@ -56,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.137";
+const DEBUG_VERSION = "v0.1.138";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
@@ -246,7 +245,6 @@ class PrototypeScene extends Phaser.Scene {
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
     this.createPixelTexture("platform-hitbox", 1, 1, 0xffffff, 0xffffff);
-    createEnemyTexture(this);
     this.load.image(GOAL_TEXTURE_KEY, `${ASSET_BASE}assets/stage_objects/goal_gate.webp`);
     this.load.audio("game-bgm", `${ASSET_BASE}assets/audio/gamebgm_default.mp3`);
     this.load.audio("item-pickup", `${ASSET_BASE}assets/audio/item_pickup.wav`);
