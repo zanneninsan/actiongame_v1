@@ -19,6 +19,14 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
       <h2>LEADERBOARD</h2>
       <p class="leaderboard-meta">${escapeHtml(options.stageName)} / ${escapeHtml(options.gameVersion)}</p>
       <p class="leaderboard-status">${escapeHtml(options.statusMessage ?? "Loading...")}</p>
+      <div class="leaderboard-header">
+        <span>NEW</span>
+        <span>RANK</span>
+        <span>NAME</span>
+        <span>ID</span>
+        <span>SCORE</span>
+        <span>DATE</span>
+      </div>
       <ol class="leaderboard-list"></ol>
       <button id="leaderboard-close" class="ui-button" type="button">Close</button>
     </div>
@@ -74,10 +82,8 @@ function createEntryRow(entry: LeaderboardEntry, rank: number, currentSubmission
   row.innerHTML = `
     <span class="leaderboard-new-marker">${isCurrentScore ? "NEW" : ""}</span>
     <span class="leaderboard-rank">${rank}</span>
-    <span class="leaderboard-name">
-      <span class="leaderboard-player-name">${escapeHtml(entry.playerName)}</span>
-      <span class="leaderboard-player-id">${escapeHtml(formatPlayerId(playerId))}</span>
-    </span>
+    <span class="leaderboard-name">${escapeHtml(entry.playerName)}</span>
+    <span class="leaderboard-player-id">${escapeHtml(formatPlayerId(playerId))}</span>
     <span class="leaderboard-score">${entry.score.toFixed(2)}</span>
     <span class="leaderboard-date">${formatDate(entry.createdAt)}</span>
   `;

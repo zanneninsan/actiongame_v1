@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.143
+### English
+- Added a fixed leaderboard header and moved the short player ID into its own column beside the player name.
+### Japanese
+- リーダーボードに固定ヘッダを追加し、短いプレイヤーIDをプレイヤー名の横の専用列に移しました。
+
 ## v0.1.142
 ### English
 - Made the current leaderboard submission show the locally saved short player ID even when older score rows do not yet include a stored player ID field.

@@ -646,7 +646,7 @@ canvas {
   width: min(1160px, calc(100vw - clamp(20px, 5vw, 48px)), calc((100dvh - clamp(20px, 5vw, 48px)) * 1.5789));
   aspect-ratio: 1200 / 760;
   display: grid;
-  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto;
   gap: clamp(9px, 1.3vw, 16px);
   padding: clamp(72px, 7vw, 98px) clamp(86px, 8vw, 124px) clamp(56px, 5vw, 78px);
   background: url("../assets/ui/fantasy/leaderboard_window.webp") center / 100% 100% no-repeat;
@@ -696,6 +696,36 @@ canvas {
   scrollbar-color: #f5c76a rgba(3, 20, 34, 0.35);
 }
 
+.leaderboard-header,
+.leaderboard-entry {
+  display: grid;
+  grid-template-columns: clamp(48px, 6vw, 72px) clamp(48px, 5vw, 62px) minmax(130px, 1fr) clamp(82px, 9vw, 112px) clamp(118px, 14vw, 150px) clamp(128px, 16vw, 170px);
+  align-items: center;
+  gap: clamp(8px, 1.2vw, 16px);
+  padding: 0 clamp(20px, 2.4vw, 32px);
+}
+
+.leaderboard-header {
+  min-height: clamp(26px, 3vw, 34px);
+  margin: 0 18px 0 6px;
+  border-bottom: 1px solid rgba(245, 199, 106, 0.45);
+  color: #b8e9ff;
+  font-size: clamp(11px, 1.25vw, 14px);
+  font-weight: 900;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+  letter-spacing: 0;
+}
+
+.leaderboard-header span:nth-child(1),
+.leaderboard-header span:nth-child(2) {
+  text-align: center;
+}
+
+.leaderboard-header span:nth-child(5),
+.leaderboard-header span:nth-child(6) {
+  text-align: right;
+}
+
 .leaderboard-list::-webkit-scrollbar {
   width: 12px;
 }
@@ -713,11 +743,6 @@ canvas {
 .leaderboard-entry {
   position: relative;
   min-height: clamp(44px, 5vw, 58px);
-  display: grid;
-  grid-template-columns: clamp(48px, 6vw, 72px) clamp(34px, 4vw, 46px) minmax(160px, 1fr) clamp(118px, 14vw, 150px) clamp(128px, 16vw, 170px);
-  align-items: center;
-  gap: clamp(8px, 1.2vw, 16px);
-  padding: 0 clamp(20px, 2.4vw, 32px);
   background: url("../assets/ui/fantasy/leaderboard_row_plate.png") center / 100% 100% no-repeat;
   font-size: clamp(15px, 1.9vw, 20px);
   font-weight: 800;
@@ -755,22 +780,16 @@ canvas {
 
 .leaderboard-name {
   min-width: 0;
-  display: grid;
-  align-content: center;
-  gap: 2px;
-  overflow: hidden;
-}
-
-.leaderboard-player-name,
-.leaderboard-player-id {
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .leaderboard-player-id {
-  font-size: 0.68em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #b8e9ff;
   opacity: 0.92;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
@@ -799,8 +818,19 @@ canvas {
   }
 
   .leaderboard-entry {
-    grid-template-columns: 42px 24px minmax(0, 1fr) 84px;
+    grid-template-columns: 42px 28px minmax(0, 1fr) 68px 84px;
     padding: 0 16px;
+  }
+
+  .leaderboard-header {
+    grid-template-columns: 42px 28px minmax(0, 1fr) 68px 84px;
+    margin-right: 18px;
+    padding: 0 16px;
+    font-size: 10px;
+  }
+
+  .leaderboard-header span:nth-child(6) {
+    display: none;
   }
 
   .leaderboard-date {
