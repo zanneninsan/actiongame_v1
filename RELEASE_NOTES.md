@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.139
+### English
+- Added electronic countdown sound effects for 3, 2, 1, and a stronger rising cue for GO.
+### Japanese
+- 3、2、1 のカウントに電子音を追加し、GO では少し強い上昇音が鳴るようにしました。
+
 ## v0.1.138
 ### English
 - Removed Neon Bouncer from enemy definitions and replaced its former default stage placements with Aqua Mascot.

@@ -13,6 +13,8 @@ type StartCountdownOverlayOptions = {
 const getCountdownSequence = (locale: Locale) => ["3", "2", "1", t(locale, "countdown.go")];
 const COUNTDOWN_FONT = '"Arial Black", Impact, "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif';
 const COUNTDOWN_DEPTH = 220;
+const COUNTDOWN_TICK_SOUND_KEY = "countdown-tick";
+const COUNTDOWN_GO_SOUND_KEY = "countdown-go";
 
 export class StartCountdownOverlay {
   private readonly scene: Phaser.Scene;
@@ -77,6 +79,7 @@ export class StartCountdownOverlay {
 
     this.text = this.createCountdownText(sequence[index], 132, "#ffffff", "#020617", 22, COUNTDOWN_DEPTH + 4)
       .setShadow(4, 5, "#000000", 0, true, false);
+    this.playCountdownSound(index, sequence.length);
 
     if (this.scene.game.renderer.type === Phaser.WEBGL) {
       this.glowText.setPipeline(this.rainbowPipelineKey);
@@ -95,6 +98,7 @@ export class StartCountdownOverlay {
 
         this.setCountdownText(sequence[index]);
         this.drawBurst(sequence[index]);
+        this.playCountdownSound(index, sequence.length);
         this.scene.tweens.add({
           targets: [this.shadowText, this.glowText, this.hotText, this.text],
           scaleX: { from: 1.36, to: 1 },
@@ -118,6 +122,15 @@ export class StartCountdownOverlay {
         }
       },
     });
+  }
+
+  private playCountdownSound(index: number, sequenceLength: number) {
+    const key = index === sequenceLength - 1 ? COUNTDOWN_GO_SOUND_KEY : COUNTDOWN_TICK_SOUND_KEY;
+    const volume = index === sequenceLength - 1 ? 0.72 : 0.48;
+    if (!this.scene.cache.audio.exists(key)) {
+      return;
+    }
+    this.scene.sound.play(key, { volume });
   }
 
   private createCountdownText(
