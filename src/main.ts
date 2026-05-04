@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.148";
+const DEBUG_VERSION = "v0.1.149";
 const ACTIVE_STAGE_ID = "neonCanal";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -394,7 +394,7 @@ class PrototypeScene extends Phaser.Scene {
     this.danmaku = new DanmakuOverlay(this, GAME_WIDTH, GAME_HEIGHT);
 
     this.input.keyboard!.off("keydown-R");
-    this.input.keyboard!.on("keydown-R", () => this.restartStage());
+    this.input.keyboard!.on("keydown-R", () => this.handleRestartKey());
     this.createStageEditor();
     this.createGlobalUI();
 
@@ -654,6 +654,27 @@ class PrototypeScene extends Phaser.Scene {
     this.resetRunState();
     this.bgm?.stop();
     this.scene.restart();
+  }
+
+  private handleRestartKey() {
+    if (this.dismissResultScreen()) {
+      return;
+    }
+
+    this.restartStage();
+  }
+
+  private dismissResultScreen() {
+    const leaderboardModal = document.getElementById("leaderboard-modal");
+    const hasFinalScore = Boolean(this.finalScoreText);
+    if (!leaderboardModal && !hasFinalScore) {
+      return false;
+    }
+
+    leaderboardModal?.remove();
+    this.finalScoreText?.destroy();
+    this.finalScoreText = undefined;
+    return true;
   }
 
   private startRun() {

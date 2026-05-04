@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.149
+### English
+- Made the R key dismiss the result screen first when a result or leaderboard panel is visible.
+### Japanese
+- リザルトやランキング画面が表示されているときは、Rキーで先にその画面を閉じるようにしました。
+
 ## v0.1.148
 ### English
 - Formalized Shift dash controls and added left/right mobile dash buttons with updated control hints.
