@@ -96,12 +96,11 @@ const addMovingPlatformRun = (options: StageRenderOptions, platform: PlatformRun
   const visuals = createPlatformVisuals(options, platform.x, platform.y, platform.units);
   const body = options.movingPlatforms.create(platform.x + width / 2, platform.y + PLATFORM_UNIT_HEIGHT / 2, "platform-hitbox") as Phaser.Physics.Arcade.Image;
   const arcadeBody = body.body as Phaser.Physics.Arcade.Body;
-  body.setDisplaySize(width, PLATFORM_UNIT_HEIGHT);
+  body.setScale(width, PLATFORM_UNIT_HEIGHT);
   body.setVisible(false);
   body.setImmovable(true);
   body.setPushable(false);
   arcadeBody.setAllowGravity(false);
-  arcadeBody.setSize(width, PLATFORM_UNIT_HEIGHT, false);
 
   const rawDistance = platform.moving?.distance ?? 0;
   const distance = Number.isFinite(rawDistance) ? rawDistance : 0;

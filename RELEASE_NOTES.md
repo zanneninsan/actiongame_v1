@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.161
+### English
+- Fixed moving platform hitboxes so they match the visible platform size without double-scaling the physics body.
+- Smoothed the opening climb in Sky Shaft Climb so the first ascent is less dependent on dash jumps.
+### Japanese
+- 移動床の物理判定が見た目より大きくならないように修正し、表示サイズと当たり判定を揃えました。
+- スカイシャフト・クライムの序盤を調整し、最初の登りがダッシュジャンプ前提になりすぎないようにしました。
+
 ## v0.1.160
 ### English
 - Added Sky Shaft Climb, a narrow vertical stage built around small platforms and frequent moving platforms.
