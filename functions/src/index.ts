@@ -19,6 +19,11 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
   }
 
   const data = request.data ?? {};
+  const submissionId = cleanText(data.submissionId, 80);
+  if (!submissionId) {
+    throw new HttpsError("invalid-argument", "Submission id is required.");
+  }
+
   const stageId = cleanText(data.stageId, 40);
   if (!ALLOWED_STAGE_IDS.has(stageId)) {
     throw new HttpsError("invalid-argument", "Unknown stage.");
@@ -39,6 +44,7 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
 
   await getFirestore().collection("leaderboardScores").add({
     uid: request.auth.uid,
+    submissionId,
     stageId,
     stageName: cleanText(data.stageName, 60),
     gameVersion: cleanText(data.gameVersion, 24),
@@ -52,7 +58,7 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
     createdAt: FieldValue.serverTimestamp(),
   });
 
-  return {ok: true, status: "accepted"};
+  return {ok: true, status: "accepted", submissionId};
 });
 
 function cleanText(value: unknown, maxLength: number) {

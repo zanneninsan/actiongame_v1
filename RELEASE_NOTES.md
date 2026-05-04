@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.121
+### English
+- Highlighted the newly submitted leaderboard score so players can identify their current clear result.
+- Restyled the leaderboard scrollbar to match the fantasy UI instead of the default browser scrollbar.
+### Japanese
+- クリア直後に送信したランキング行を強調し、今回のスコアがどれか分かるようにしました。
+- リーダーボードのスクロールバーをブラウザ標準の見た目から、ファンタジーUIに馴染む色へ調整しました。
+
 ## v0.1.120
 ### English
 - Updated the opening Shibuya dialogue portrait to use the new message face icon asset.

@@ -651,6 +651,22 @@ canvas {
   display: grid;
   align-content: start;
   gap: clamp(8px, 1vw, 12px);
+  scrollbar-width: thin;
+  scrollbar-color: #f5c76a rgba(3, 20, 34, 0.35);
+}
+
+.leaderboard-list::-webkit-scrollbar {
+  width: 12px;
+}
+
+.leaderboard-list::-webkit-scrollbar-track {
+  background: rgba(3, 20, 34, 0.35);
+  border: 1px solid rgba(245, 199, 106, 0.35);
+}
+
+.leaderboard-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(#ffeeb1, #f5c76a 45%, #7a3f11);
+  border: 2px solid rgba(3, 20, 34, 0.95);
 }
 
 .leaderboard-entry {
@@ -674,6 +690,18 @@ canvas {
 
 .leaderboard-rank {
   text-align: center;
+}
+
+.leaderboard-entry.is-current-score {
+  color: #fff7cf;
+  filter: drop-shadow(0 0 10px rgba(245, 199, 106, 0.5));
+}
+
+.leaderboard-entry.is-current-score .leaderboard-rank::after {
+  content: " NEW";
+  margin-left: 8px;
+  font-size: 0.7em;
+  color: #fff7cf;
 }
 
 .leaderboard-name {

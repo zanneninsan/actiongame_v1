@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.120";
+const DEBUG_VERSION = "v0.1.121";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
@@ -1309,11 +1309,12 @@ class PrototypeScene extends Phaser.Scene {
     return score.toFixed(2);
   }
 
-  private showLeaderboard(statusMessage?: string) {
+  private showLeaderboard(statusMessage?: string, currentSubmissionId?: string) {
     showLeaderboardPanel({
       stageName: this.editorStage.name,
       gameVersion: DEBUG_VERSION,
       statusMessage: isLeaderboardConfigured() ? statusMessage : "Leaderboard is not configured.",
+      currentSubmissionId,
       fetchEntries: () => fetchLeaderboardEntries(ACTIVE_STAGE_ID),
     });
   }
@@ -1324,7 +1325,9 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     const elapsedMs = Math.max(0, GAME_TIME_MS - remainingMs);
+    const submissionId = createSubmissionId();
     submitLeaderboardScore({
+      submissionId,
       stageId: ACTIVE_STAGE_ID,
       stageName: this.editorStage.name,
       gameVersion: DEBUG_VERSION,
@@ -1335,7 +1338,9 @@ class PrototypeScene extends Phaser.Scene {
       elapsedMs,
       remainingMs,
     })
-      .then(() => this.showLeaderboard("Score submitted."))
+      .then((result) =>
+        this.showLeaderboard("Score submitted.", "submissionId" in result ? result.submissionId ?? submissionId : submissionId),
+      )
       .catch(() => this.showLeaderboard("Score could not be submitted."));
   }
 
@@ -1583,6 +1588,13 @@ class PrototypeScene extends Phaser.Scene {
       this.player.setTint(0xff66ff, 0x66ffff, 0xffff66, 0x66ff66);
     }
   }
+}
+
+function createSubmissionId() {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
 new Phaser.Game({

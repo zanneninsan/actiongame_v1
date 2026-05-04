@@ -15,6 +15,7 @@ import { getFunctions, httpsCallable, type Functions } from "firebase/functions"
 
 export type LeaderboardEntry = {
   id: string;
+  submissionId: string;
   playerName: string;
   score: number;
   stageId: string;
@@ -24,6 +25,7 @@ export type LeaderboardEntry = {
 };
 
 export type LeaderboardSubmitPayload = {
+  submissionId: string;
   stageId: string;
   stageName: string;
   gameVersion: string;
@@ -57,7 +59,7 @@ export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) 
   }
 
   await ensureAnonymousAuth(services.auth);
-  const submitScore = httpsCallable<LeaderboardSubmitPayload, { ok: boolean; status?: string }>(
+  const submitScore = httpsCallable<LeaderboardSubmitPayload, { ok: boolean; status?: string; submissionId?: string }>(
     services.functions,
     SUBMIT_SCORE_FUNCTION,
   );
@@ -88,6 +90,7 @@ export async function fetchLeaderboardEntries(stageId: string, maxEntries = 10):
     const createdAtValue = data.createdAt as { toDate?: () => Date } | undefined;
     return {
       id: doc.id,
+      submissionId: typeof data.submissionId === "string" ? data.submissionId : "",
       playerName: typeof data.playerName === "string" ? data.playerName : "PLAYER",
       score: typeof data.score === "number" ? data.score : 0,
       stageId: typeof data.stageId === "string" ? data.stageId : stageId,

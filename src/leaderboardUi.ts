@@ -5,6 +5,7 @@ type LeaderboardPanelOptions = {
   gameVersion: string;
   fetchEntries: () => Promise<LeaderboardEntry[]>;
   statusMessage?: string;
+  currentSubmissionId?: string;
 };
 
 export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
@@ -51,16 +52,19 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
       }
 
       status.textContent = options.statusMessage ?? "Top scores";
-      list.replaceChildren(...entries.map((entry, index) => createEntryRow(entry, index + 1)));
+      list.replaceChildren(...entries.map((entry, index) => createEntryRow(entry, index + 1, options.currentSubmissionId)));
     })
     .catch(() => {
       status.textContent = "Leaderboard is unavailable.";
     });
 }
 
-function createEntryRow(entry: LeaderboardEntry, rank: number) {
+function createEntryRow(entry: LeaderboardEntry, rank: number, currentSubmissionId?: string) {
   const row = document.createElement("li");
   row.className = "leaderboard-entry";
+  if (currentSubmissionId && entry.submissionId === currentSubmissionId) {
+    row.classList.add("is-current-score");
+  }
   row.innerHTML = `
     <span class="leaderboard-rank">${rank}</span>
     <span class="leaderboard-name">${escapeHtml(entry.playerName)}</span>
