@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.164
+### English
+- Changed the five-jump danmaku trigger so it only appears once per run and does not reset on landing.
+### Japanese
+- 空中ジャンプ5回の弾幕表示を、着地しても再表示されず、リスタートするまで1回だけ出るようにしました。
+
 ## v0.1.163
 ### English
 - Made the player inherit horizontal movement while standing on moving platforms.
