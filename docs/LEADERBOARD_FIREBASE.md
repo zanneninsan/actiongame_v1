@@ -22,7 +22,7 @@ Create this composite index if Firestore asks for it:
 The callable should require anonymous Auth and App Check, recompute or sanity-check the final score, rate-limit per UID/IP where possible, and write only accepted submissions.
 
 ```ts
-import { getFirestore, FieldValue } from "firebase-admin/firestore";
+import { getFirestore, FieldValue, type Firestore } from "firebase-admin/firestore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 
 const MAX_NAME_LENGTH = 16;
@@ -50,10 +50,12 @@ export const submitScore = onCall(
     const firestore = getFirestore();
     const stageId = cleanText(data.stageId, 40);
     const scoreRef = firestore.collection("leaderboardScores").doc(`${stageId}_${playerId}`);
+    let scoreUpdated = false;
     await firestore.runTransaction(async (transaction) => {
       const currentScore = await transaction.get(scoreRef);
       const previousScore = typeof currentScore.data()?.score === "number" ? currentScore.data()?.score : -Infinity;
       const shouldUpdateScore = !currentScore.exists || expectedScore >= previousScore;
+      scoreUpdated = shouldUpdateScore;
       const sharedFields = {
         uid: request.auth.uid,
         playerId,
@@ -72,6 +74,7 @@ export const submitScore = onCall(
 
       transaction.set(scoreRef, {
         ...sharedFields,
+        submissionId: cleanText(data.submissionId, 80),
         score: expectedScore,
         itemScore,
         timeBonus: roundScore(expectedScore - itemScore),
@@ -81,9 +84,21 @@ export const submitScore = onCall(
       }, { merge: true });
     });
 
-    return { ok: true, status: "accepted" };
+    const rank = scoreUpdated ? await getLeaderboardRank(firestore, stageId, expectedScore) : undefined;
+    return { ok: true, status: "accepted", scoreUpdated, rank };
   },
 );
+
+async function getLeaderboardRank(firestore: Firestore, stageId: string, score: number) {
+  const higherScores = await firestore
+    .collection("leaderboardScores")
+    .where("stageId", "==", stageId)
+    .where("status", "==", "accepted")
+    .where("score", ">", score)
+    .count()
+    .get();
+  return higherScores.data().count + 1;
+}
 
 function cleanText(value: unknown, maxLength: number) {
   return String(value ?? "").trim().slice(0, maxLength);

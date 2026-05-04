@@ -1,5 +1,5 @@
 import {initializeApp} from "firebase-admin/app";
-import {FieldValue, getFirestore} from "firebase-admin/firestore";
+import {FieldValue, getFirestore, type Firestore} from "firebase-admin/firestore";
 import {setGlobalOptions} from "firebase-functions";
 import {HttpsError, onCall} from "firebase-functions/v2/https";
 
@@ -50,14 +50,15 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
   const firestore = getFirestore();
   const uid = request.auth.uid;
   const scoreRef = firestore.collection("leaderboardScores").doc(`${stageId}_${playerId}`);
+  let scoreUpdated = false;
   await firestore.runTransaction(async (transaction) => {
     const currentScore = await transaction.get(scoreRef);
     const currentData = currentScore.data();
     const previousScore = typeof currentData?.score === "number" ? currentData.score : -Infinity;
     const shouldUpdateScore = !currentScore.exists || expectedScore >= previousScore;
+    scoreUpdated = shouldUpdateScore;
     const sharedFields = {
       uid,
-      submissionId,
       playerId,
       stageId,
       stageName: cleanText(data.stageName, 60),
@@ -74,6 +75,7 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
 
     transaction.set(scoreRef, {
       ...sharedFields,
+      submissionId,
       score: expectedScore,
       itemScore,
       timeBonus: roundScore(expectedScore - itemScore),
@@ -83,8 +85,20 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
     }, {merge: true});
   });
 
-  return {ok: true, status: "accepted", submissionId};
+  const rank = scoreUpdated ? await getLeaderboardRank(firestore, stageId, expectedScore) : undefined;
+  return {ok: true, status: "accepted", submissionId, scoreUpdated, rank};
 });
+
+async function getLeaderboardRank(firestore: Firestore, stageId: string, score: number) {
+  const higherScores = await firestore
+    .collection("leaderboardScores")
+    .where("stageId", "==", stageId)
+    .where("status", "==", "accepted")
+    .where("score", ">", score)
+    .count()
+    .get();
+  return higherScores.data().count + 1;
+}
 
 function cleanPlayerId(value: unknown) {
   const playerId = cleanText(value, 80);

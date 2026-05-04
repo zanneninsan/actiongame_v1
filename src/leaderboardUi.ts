@@ -7,6 +7,13 @@ type LeaderboardPanelOptions = {
   statusMessage?: string;
   currentSubmissionId?: string;
   currentPlayerId?: string;
+  currentScore?: LeaderboardCurrentScore;
+};
+
+type LeaderboardCurrentScore = {
+  score: number;
+  rank?: number;
+  scoreUpdated: boolean;
 };
 
 export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
@@ -28,6 +35,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
         <span>DATE</span>
       </div>
       <ol class="leaderboard-list"></ol>
+      <div class="leaderboard-current-score" hidden></div>
       <button id="leaderboard-close" class="ui-button" type="button">Close</button>
     </div>
   `;
@@ -35,8 +43,10 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
 
   const status = modal.querySelector<HTMLElement>(".leaderboard-status")!;
   const list = modal.querySelector<HTMLOListElement>(".leaderboard-list")!;
+  const currentScore = modal.querySelector<HTMLElement>(".leaderboard-current-score")!;
   const closeButton = modal.querySelector<HTMLButtonElement>("#leaderboard-close")!;
   const close = () => modal.remove();
+  renderCurrentScore(currentScore, options.currentScore);
 
   closeButton.addEventListener("click", close);
   modal.addEventListener("pointerdown", (event) => {
@@ -88,6 +98,22 @@ function createEntryRow(entry: LeaderboardEntry, rank: number, currentSubmission
     <span class="leaderboard-date">${formatDate(entry.createdAt)}</span>
   `;
   return row;
+}
+
+function renderCurrentScore(container: HTMLElement, currentScore?: LeaderboardCurrentScore) {
+  if (!currentScore) {
+    container.hidden = true;
+    container.replaceChildren();
+    return;
+  }
+
+  container.hidden = false;
+  container.innerHTML = `
+    <span class="leaderboard-current-label">CURRENT SCORE</span>
+    <span class="leaderboard-current-rank">RANK ${currentScore.scoreUpdated && currentScore.rank ? currentScore.rank : "-"}</span>
+    <span class="leaderboard-current-value">${currentScore.score.toFixed(2)}</span>
+    <span class="leaderboard-current-status">${currentScore.scoreUpdated ? "BEST UPDATED" : "BEST NOT UPDATED"}</span>
+  `;
 }
 
 function formatDate(date: Date | null) {

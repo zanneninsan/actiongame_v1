@@ -39,6 +39,16 @@ export type LeaderboardSubmitPayload = {
   remainingMs: number;
 };
 
+export type LeaderboardSubmitResult =
+  | {
+      ok: true;
+      status?: string;
+      submissionId?: string;
+      scoreUpdated: boolean;
+      rank?: number;
+    }
+  | { ok: false; reason: string };
+
 type FirebaseServices = {
   auth: Auth;
   firestore: Firestore;
@@ -58,7 +68,7 @@ export function isLeaderboardConfigured() {
 export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) {
   const services = await getFirebaseServices();
   if (!services) {
-    return { ok: false, reason: "Leaderboard is not configured." };
+    return { ok: false as const, reason: "Leaderboard is not configured." };
   }
 
   const playerId = sanitizePlayerId(payload.playerId);
@@ -67,7 +77,7 @@ export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) 
   }
 
   await ensureAnonymousAuth(services.auth);
-  const submitScore = httpsCallable<LeaderboardSubmitPayload, { ok: boolean; status?: string; submissionId?: string }>(
+  const submitScore = httpsCallable<LeaderboardSubmitPayload, LeaderboardSubmitResult>(
     services.functions,
     SUBMIT_SCORE_FUNCTION,
   );

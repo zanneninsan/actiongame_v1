@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.146
+### English
+- Added a separate current-score area below the leaderboard and only shows the NEW row marker when the submitted score updates the saved best score.
+### Japanese
+- リーダーボードの下に今回スコア専用エリアを追加し、送信したスコアが自己ベストを更新した場合だけ行に NEW を表示するようにしました。
+
 ## v0.1.145
 ### English
 - Enforced leaderboard player IDs on the client path and hides any fetched leaderboard rows that do not include a valid player ID.
