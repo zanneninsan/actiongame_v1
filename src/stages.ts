@@ -3,7 +3,7 @@ import type { StageDefinition } from "./assets";
 export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
   "name": {
     "jp": "シブヤシティ",
-    "en": "Neon Canal"
+    "en": "Shibu-ya city"
   },
   "worldWidth": 12800,
   "worldTop": -720,
