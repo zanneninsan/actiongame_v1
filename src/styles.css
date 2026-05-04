@@ -658,7 +658,7 @@ canvas {
   align-items: center;
   gap: 8px;
   padding: 0 12px;
-  background: url("../assets/ui/fantasy/input_field_safe.png") center / 100% 100% no-repeat;
+  background: url("../assets/ui/fantasy/select_field_safe.png") center / 100% 100% no-repeat;
   font-size: 13px;
   font-weight: 800;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
