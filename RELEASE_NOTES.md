@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.171
+### English
+- Rebuilt moving-platform hitboxes as exact-size textures and advanced them with exact per-frame position steps, making player carry use the same movement amount as the visible platform.
+### Japanese
+- 移動床の当たり判定を実寸テクスチャで作り、設定速度から毎フレーム正確な座標ステップで動かす方式に変更して、プレイヤーの追随量も見た目の床と同じ移動量になるようにしました。
+
 ## v0.1.170
 ### English
 - Applied moving-platform carry after player input and kept Arcade body deltas stable so riders move with the platform without being shoved faster than the platform.
