@@ -95,7 +95,10 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
     {
       "x": 1430,
       "y": 388,
-      "units": 4
+      "units": 4,
+      "spring": {
+        "velocity": -860
+      }
     },
     {
       "x": 1880,
@@ -130,7 +133,11 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
     {
       "x": 4700,
       "y": 404,
-      "units": 3
+      "units": 3,
+      "fragile": {
+        "delayMs": 420,
+        "respawnMs": 3000
+      }
     },
     {
       "x": 5020,
@@ -393,6 +400,31 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "y": 480
     },
     {
+      "type": "coin",
+      "x": 1180,
+      "y": 396
+    },
+    {
+      "type": "coin",
+      "x": 1240,
+      "y": 372
+    },
+    {
+      "type": "coin",
+      "x": 1300,
+      "y": 396
+    },
+    {
+      "type": "coin",
+      "x": 4760,
+      "y": 340
+    },
+    {
+      "type": "coin",
+      "x": 4820,
+      "y": 320
+    },
+    {
       "type": "bubbleTea",
       "x": 864,
       "y": 352
@@ -597,11 +629,13 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     { x: 7800, y: 672, units: 22 },
     { x: 420, y: 524, units: 3 },
     { x: 900, y: 430, units: 3 },
+    { x: 1080, y: 560, units: 1, spring: { velocity: -860 } },
     { x: 1260, y: 348, units: 4, moving: { axis: "y", distance: 128, speed: 64 } },
     { x: 1840, y: 520, units: 4 },
     { x: 2360, y: 430, units: 3 },
     { x: 2740, y: 336, units: 4 },
     { x: 3420, y: 520, units: 4 },
+    { x: 3730, y: 486, units: 2, fragile: { delayMs: 380, respawnMs: 2800 } },
     { x: 3880, y: 424, units: 3 },
     { x: 4300, y: 328, units: 4 },
     { x: 5180, y: 516, units: 5 },
@@ -636,6 +670,9 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
   ],
   items: [
     { type: "energyDrink", x: 500, y: 468 },
+    { type: "coin", x: 760, y: 470 },
+    { type: "coin", x: 830, y: 438 },
+    { type: "coin", x: 900, y: 410 },
     { type: "bubbleTea", x: 1020, y: 374 },
     { type: "shoppingBag", x: 1400, y: 292 },
     { type: "energyDrink", x: 1980, y: 464 },
@@ -644,6 +681,9 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     { type: "energyDrink", x: 3560, y: 464 },
     { type: "bubbleTea", x: 4060, y: 368 },
     { type: "shoppingBag", x: 4440, y: 272 },
+    { type: "coin", x: 3720, y: 420 },
+    { type: "coin", x: 3780, y: 398 },
+    { type: "coin", x: 3840, y: 420 },
     { type: "energyDrink", x: 5340, y: 460 },
     { type: "bubbleTea", x: 5900, y: 364 },
     { type: "shoppingBag", x: 6460, y: 276 },
@@ -786,6 +826,8 @@ export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   platforms: stage.platforms.map((platform) => ({
     ...platform,
     moving: platform.moving ? { ...platform.moving } : undefined,
+    spring: platform.spring ? { ...platform.spring } : undefined,
+    fragile: platform.fragile ? { ...platform.fragile } : undefined,
   })),
   streetLamps: stage.streetLamps.map((lamp) => ({ ...lamp })),
   decorations: stage.decorations.map((decoration) => ({ ...decoration })),

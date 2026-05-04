@@ -9,7 +9,7 @@ export const PROP_ASSETS = {
   lampDouble: "street-lamp-double",
 } as const;
 export type StreetLampKey = (typeof PROP_ASSETS)[keyof typeof PROP_ASSETS];
-export type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
+export type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea" | "coin";
 export type EnemyType = "knifePunk" | "aquaMascot" | "hornedCyborg" | "coneGolem" | "rabbitTraveler";
 export type EnemyAiType = "patrol" | "flyingPatrol" | "hoppingPatrol" | "chase";
 export const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
@@ -17,18 +17,23 @@ export const ITEM_GLOW_COLORS: Record<ItemType, number> = {
   energyDrink: 0x8cffd2,
   shoppingBag: 0xffd166,
   bubbleTea: 0xf9a8ff,
+  coin: 0xffd166,
 };
 export type ScoreState = Record<ItemType, number>;
 export type PlatformAsset = (typeof PLATFORM_ASSETS)[keyof typeof PLATFORM_ASSETS];
 export type StageObjectAsset = { key: string; path: string };
 export type MovingPlatformAxis = "x" | "y" | "xy";
 export type MovingPlatformConfig = { axis: MovingPlatformAxis; distance: number; speed: number; distanceY?: number };
+export type SpringPlatformConfig = { velocity?: number };
+export type FragilePlatformConfig = { delayMs?: number; respawnMs?: number };
 export type PlatformRunPlacement = {
   x: number;
   y: number;
   units: number;
   collides?: boolean;
   moving?: MovingPlatformConfig;
+  spring?: SpringPlatformConfig;
+  fragile?: FragilePlatformConfig;
 };
 export type StreetLampPlacement = { x: number; key: StreetLampKey; scale?: number };
 export type StageDecorationPlacement = { x: number; y?: number; key: string; scale?: number };
@@ -107,6 +112,12 @@ export const ITEM_DEFINITIONS: Record<ItemType, { key: string; label: string; po
     label: "TEA",
     points: 150,
     assetPath: "assets/items/bubble_tea.webp",
+  },
+  coin: {
+    key: "item-coin",
+    label: "COIN",
+    points: 25,
+    assetPath: "assets/items/coin.png",
   },
 };
 

@@ -88,6 +88,9 @@ const ENEMY_STOMP_TOLERANCE = 18;
 const ENEMY_STOMP_BOUNCE_Y = -455;
 const ENEMY_STOMP_COMBO_MS = 1400;
 const ENEMY_STOMP_BASE_SCORE = 200;
+const SPRING_PLATFORM_DEFAULT_VELOCITY = -820;
+const FRAGILE_PLATFORM_DELAY_MS = 360;
+const FRAGILE_PLATFORM_RESPAWN_MS = 2800;
 const PLAYER_DISPLAY_WIDTH = 320;
 const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
@@ -158,7 +161,7 @@ class PrototypeScene extends Phaser.Scene {
   private mobileJumpQueued = false;
   private mobileControlCleanup: Array<() => void> = [];
   private mobileOrientationCleanup: Array<() => void> = [];
-  private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
+  private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0, coin: 0 };
   private bonusScore = 0;
   private startTime = 0;
   private isRunActive = false;
@@ -331,7 +334,7 @@ class PrototypeScene extends Phaser.Scene {
       }
     });
 
-    this.physics.add.collider(this.player, this.platforms);
+    this.physics.add.collider(this.player, this.platforms, this.handlePlatformCollision, undefined, this);
     this.physics.add.collider(this.player, this.movingPlatforms);
     this.physics.add.collider(this.player, this.decorationPlatforms, undefined, this.canLandOnDecorationPlatform, this);
     this.physics.add.overlap(this.player, goal, () => this.win());
@@ -623,7 +626,7 @@ class PrototypeScene extends Phaser.Scene {
     this.danmaku = undefined;
     this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
-    this.score = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
+    this.score = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0, coin: 0 };
     this.bonusScore = 0;
     this.startTime = 0;
     this.isRunActive = false;
@@ -1090,6 +1093,78 @@ class PrototypeScene extends Phaser.Scene {
 
     this.backgrounds?.applyStageDefaults(this.editorStage.backgrounds);
     stageBackgroundDefaultsAppliedFor = this.currentStageId;
+  }
+
+  private handlePlatformCollision(
+    _playerObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile,
+    platformObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile,
+  ) {
+    if (!this.isRunActive || this.stageEditor?.isEnabled) {
+      return;
+    }
+
+    const platform = platformObject as Phaser.Physics.Arcade.Image;
+    const behavior = platform.getData("platformBehavior") as string | undefined;
+    if (!behavior || !this.didPlayerLandOnStaticPlatform(platform)) {
+      return;
+    }
+
+    if (behavior === "spring") {
+      const velocity = platform.getData("springVelocity") as number | undefined;
+      this.player.setVelocityY(velocity ?? SPRING_PLATFORM_DEFAULT_VELOCITY);
+      this.isLanding = false;
+      this.landingFastForwarded = false;
+      this.player.anims.play("player-air", true);
+      this.cameras.main.shake(80, 0.002);
+      return;
+    }
+
+    if (behavior === "fragile") {
+      this.queueFragilePlatformCollapse(platform);
+    }
+  }
+
+  private didPlayerLandOnStaticPlatform(platform: Phaser.Physics.Arcade.Image) {
+    const platformBody = platform.body as Phaser.Physics.Arcade.StaticBody | undefined;
+    if (!platformBody || !this.player.body) {
+      return false;
+    }
+
+    const playerBody = this.player.body;
+    const previousBottom = playerBody.prev.y + playerBody.height;
+    const overlapsHorizontally = playerBody.right > platformBody.x + 3 && playerBody.x < platformBody.x + platformBody.width - 3;
+    return overlapsHorizontally && playerBody.velocity.y >= 0 && previousBottom <= platformBody.y + DECORATION_PLATFORM_LAND_TOLERANCE;
+  }
+
+  private queueFragilePlatformCollapse(platform: Phaser.Physics.Arcade.Image) {
+    if (platform.getData("collapseQueued")) {
+      return;
+    }
+
+    platform.setData("collapseQueued", true);
+    const visual = platform.getData("fragileVisual") as Phaser.GameObjects.Image | undefined;
+    const delayMs = (platform.getData("fragileDelayMs") as number | undefined) ?? FRAGILE_PLATFORM_DELAY_MS;
+    const respawnMs = (platform.getData("fragileRespawnMs") as number | undefined) ?? FRAGILE_PLATFORM_RESPAWN_MS;
+    if (visual) {
+      this.tweens.add({
+        targets: visual,
+        alpha: 0.45,
+        x: visual.x + 2,
+        duration: 70,
+        yoyo: true,
+        repeat: Math.max(1, Math.floor(delayMs / 140)),
+      });
+    }
+    this.time.delayedCall(delayMs, () => {
+      platform.disableBody(true, true);
+      visual?.setVisible(false);
+      this.time.delayedCall(respawnMs, () => {
+        platform.enableBody(false, platform.x, platform.y, true, false);
+        platform.refreshBody();
+        platform.setData("collapseQueued", false);
+        visual?.setAlpha(1).setVisible(true);
+      });
+    });
   }
 
   private canLandOnDecorationPlatform(

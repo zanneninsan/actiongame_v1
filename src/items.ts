@@ -56,10 +56,12 @@ const createItemSprite = (
   trackStageObject: <T extends Phaser.GameObjects.GameObject>(object: T) => T,
 ) => {
   const definition = ITEM_DEFINITIONS[placement.type];
+  const displaySize = placement.type === "coin" ? 34 : 48;
+  const glowSize = placement.type === "coin" ? 70 : 108;
   const glow = trackStageObject(
     scene.add
       .image(placement.x, placement.y, ITEM_GLOW_TEXTURE_KEY)
-      .setDisplaySize(108, 108)
+      .setDisplaySize(glowSize, glowSize)
       .setTint(ITEM_GLOW_COLORS[placement.type])
       .setAlpha(0.48)
       .setBlendMode(Phaser.BlendModes.ADD)
@@ -68,7 +70,7 @@ const createItemSprite = (
   const item = itemsGroup.create(placement.x, placement.y, definition.key) as Phaser.Physics.Arcade.Sprite;
   item.setData("itemType", placement.type);
   item.setData("glow", glow);
-  item.setDisplaySize(48, 48);
+  item.setDisplaySize(displaySize, displaySize);
   item.setDepth(0.2);
   item.refreshBody();
 

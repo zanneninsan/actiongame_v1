@@ -150,6 +150,7 @@ export class StageEditorPanel {
             <option value="energyDrink">${t(this.options.locale, "editor.item.energy")}</option>
             <option value="bubbleTea">${t(this.options.locale, "editor.item.tea")}</option>
             <option value="shoppingBag">${t(this.options.locale, "editor.item.bag")}</option>
+            <option value="coin">${t(this.options.locale, "editor.item.coin")}</option>
           </select>
         </div>
         <div class="editor-row">

@@ -729,7 +729,21 @@ export class StageEditor {
       this.isNumber(value.y) &&
       this.isNumber(value.units) &&
       (value.collides === undefined || typeof value.collides === "boolean") &&
-      (value.moving === undefined || this.isMovingPlatformConfig(value.moving))
+      (value.moving === undefined || this.isMovingPlatformConfig(value.moving)) &&
+      (value.spring === undefined || this.isSpringPlatformConfig(value.spring)) &&
+      (value.fragile === undefined || this.isFragilePlatformConfig(value.fragile))
+    );
+  }
+
+  private isSpringPlatformConfig(value: unknown) {
+    return this.isRecord(value) && (value.velocity === undefined || this.isNumber(value.velocity));
+  }
+
+  private isFragilePlatformConfig(value: unknown) {
+    return (
+      this.isRecord(value) &&
+      (value.delayMs === undefined || this.isNumber(value.delayMs)) &&
+      (value.respawnMs === undefined || this.isNumber(value.respawnMs))
     );
   }
 
