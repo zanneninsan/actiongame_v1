@@ -18,7 +18,7 @@ const PLATFORM_DEPTH = -0.55;
 const DECORATION_DEPTH = -1.2;
 const STREET_LAMP_LIGHT_DEPTH = DECORATION_DEPTH - 0.08;
 const STREET_LAMP_GROUND_LIGHT_DEPTH = PLATFORM_DEPTH + 0.02;
-const MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE = 28;
+const MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE = 64;
 
 export type MovingPlatformInstance = {
   body: Phaser.Physics.Arcade.Image;
@@ -264,9 +264,16 @@ export const carryPlayerOnDescendingMovingPlatforms = (
     return;
   }
 
+  const platformTop = platform.body.y - platform.height / 2;
+  const bodyBottom = playerBody.y + playerBody.height;
+  const targetDeltaY = Math.max(platform.deltaY, platformTop - bodyBottom);
+  if (targetDeltaY <= 0) {
+    return;
+  }
+
   const currentBodyY = playerBody.y;
-  player.setY(player.y + platform.deltaY);
-  player.setVelocityY(Math.max(playerBody.velocity.y, platform.deltaY * 60));
+  player.setY(player.y + targetDeltaY);
+  player.setVelocityY(Math.max(playerBody.velocity.y, targetDeltaY * 60));
   player.body.updateFromGameObject();
   playerBody.prev.y += playerBody.y - currentBodyY;
 };

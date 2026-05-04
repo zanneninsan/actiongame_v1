@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.174
+### English
+- Snapped riders down to the top of descending moving platforms when a gap opens, instead of only applying the platform's raw vertical delta.
+### Japanese
+- 下方向に動く床で隙間が開いた時、床の移動量だけでなく床の天面までプレイヤーを追随させるようにして、下降床から落ちにくくしました。
+
 ## v0.1.173
 ### English
 - Let descending moving platforms continue carrying the player while they are just above the platform, preventing downward platforms from dropping out from under the rider.
