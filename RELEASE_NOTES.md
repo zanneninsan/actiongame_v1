@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.147
+### English
+- Added the short leaderboard player ID beside the in-game HUD player name.
+### Japanese
+- ゲーム画面上のプレイヤー名の横にも、リーダーボード用の短いプレイヤーIDを表示するようにしました。
+
 ## v0.1.146
 ### English
 - Added a separate current-score area below the leaderboard and only shows the NEW row marker when the submitted score updates the saved best score.

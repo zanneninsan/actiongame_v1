@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.146";
+const DEBUG_VERSION = "v0.1.147";
 const ACTIVE_STAGE_ID = "neonCanal";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -658,7 +658,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private startRun() {
     this.removeStartModal();
-    this.playerNameText.setText(`${t(this.locale, "hud.player")}:${this.playerName}`);
+    this.updatePlayerNameText();
     this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
     this.updateControlHintText();
     if (this.controlMode === "mobile") {
@@ -871,13 +871,20 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private refreshLocalizedUI() {
-    if (this.playerNameText) {
-      this.playerNameText.setText(`${t(this.locale, "hud.player")}:${this.playerName}`);
-    }
+    this.updatePlayerNameText();
     this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
     this.updateScoreText();
     this.updateTimerText();
     this.updateControlHintText();
+  }
+
+  private updatePlayerNameText() {
+    if (!this.playerNameText) {
+      return;
+    }
+
+    const playerIdLabel = isLeaderboardPlayerId(this.leaderboardPlayerId) ? ` #${this.leaderboardPlayerId.slice(0, 8)}` : "";
+    this.playerNameText.setText(`${t(this.locale, "hud.player")}:${this.playerName}${playerIdLabel}`);
   }
 
   private getSavedVolumePercent() {
