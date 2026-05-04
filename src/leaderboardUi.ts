@@ -63,10 +63,12 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
 function createEntryRow(entry: LeaderboardEntry, rank: number, currentSubmissionId?: string) {
   const row = document.createElement("li");
   row.className = "leaderboard-entry";
-  if (currentSubmissionId && entry.submissionId === currentSubmissionId) {
+  const isCurrentScore = Boolean(currentSubmissionId && entry.submissionId === currentSubmissionId);
+  if (isCurrentScore) {
     row.classList.add("is-current-score");
   }
   row.innerHTML = `
+    <span class="leaderboard-new-marker">${isCurrentScore ? "NEW" : ""}</span>
     <span class="leaderboard-rank">${rank}</span>
     <span class="leaderboard-name">${escapeHtml(entry.playerName)}</span>
     <span class="leaderboard-score">${entry.score.toFixed(2)}</span>

@@ -707,9 +707,9 @@ canvas {
   position: relative;
   min-height: clamp(44px, 5vw, 58px);
   display: grid;
-  grid-template-columns: clamp(38px, 5vw, 56px) minmax(180px, 1fr) clamp(118px, 14vw, 150px) clamp(128px, 16vw, 170px);
+  grid-template-columns: clamp(48px, 6vw, 72px) clamp(34px, 4vw, 46px) minmax(160px, 1fr) clamp(118px, 14vw, 150px) clamp(128px, 16vw, 170px);
   align-items: center;
-  gap: clamp(10px, 1.4vw, 18px);
+  gap: clamp(8px, 1.2vw, 16px);
   padding: 0 clamp(20px, 2.4vw, 32px);
   background: url("../assets/ui/fantasy/leaderboard_row_plate.png") center / 100% 100% no-repeat;
   font-size: clamp(15px, 1.9vw, 20px);
@@ -717,10 +717,19 @@ canvas {
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
 }
 
+.leaderboard-new-marker,
 .leaderboard-rank,
 .leaderboard-score,
 .leaderboard-date {
   color: #f5c76a;
+}
+
+.leaderboard-new-marker {
+  min-width: 0;
+  text-align: center;
+  font-size: clamp(14px, 1.8vw, 20px);
+  font-weight: 900;
+  color: transparent;
 }
 
 .leaderboard-rank {
@@ -732,17 +741,9 @@ canvas {
   filter: drop-shadow(0 0 10px rgba(245, 199, 106, 0.5));
 }
 
-.leaderboard-entry.is-current-score::before {
-  content: "NEW";
-  position: absolute;
-  left: clamp(-58px, -5.2vw, -38px);
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: clamp(11px, 1.4vw, 15px);
-  font-weight: 900;
-  letter-spacing: 0;
+.leaderboard-entry.is-current-score .leaderboard-new-marker {
   color: #fff7cf;
-  text-shadow: 0 2px 0 #450a0a, 0 0 10px rgba(245, 199, 106, 0.9);
+  text-shadow: 0 2px 0 #450a0a, 0 0 8px #fff7cf, 0 0 16px rgba(245, 199, 106, 0.95);
 }
 
 .leaderboard-name {
@@ -775,13 +776,8 @@ canvas {
   }
 
   .leaderboard-entry {
-    grid-template-columns: 30px minmax(0, 1fr) 84px;
-    padding: 0 18px;
-  }
-
-  .leaderboard-entry.is-current-score::before {
-    left: 8px;
-    top: -8px;
+    grid-template-columns: 42px 24px minmax(0, 1fr) 84px;
+    padding: 0 16px;
   }
 
   .leaderboard-date {

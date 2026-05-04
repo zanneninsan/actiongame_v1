@@ -2,6 +2,18 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.128
+### English
+- Restyled the start countdown with a heavier arcade font stack, layered neon text, burst lines, scan lines, and a sharper hit animation.
+### Japanese
+- スタート時のカウントダウンを、重めのアーケード風フォント、重ねたネオン文字、放射線、スキャンライン、鋭い出現アニメーションでよりギラギラした見た目にしました。
+
+## v0.1.127
+### English
+- Added a dedicated NEW column to the leaderboard so the freshly submitted score is obvious at a glance.
+### Japanese
+- リーダーボードに NEW 専用の列を追加し、クリア直後に送信したスコアがひと目で分かるようにしました。
+
 ## v0.1.126
 ### English
 - Delayed the opening story dialogue until the player passes X 600, then automatically advances and hides the message window on timers.
