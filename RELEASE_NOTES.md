@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.169
+### English
+- Made moving platforms carry the player horizontally with a single manual offset while disabling platform friction, so standing riders do not slide off and walking remains responsive.
+### Japanese
+- 移動床の摩擦による自動追随を切り、床の移動量を1回だけ手動で反映するようにして、横移動床で立ったまま落ちず、歩行操作も効くようにしました。
+
 ## v0.1.168
 ### English
 - Kept the player attached to diagonal moving platforms while they descend, without changing horizontal walking control.

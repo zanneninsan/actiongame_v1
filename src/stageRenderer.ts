@@ -106,6 +106,7 @@ const addMovingPlatformRun = (options: StageRenderOptions, platform: PlatformRun
   body.setImmovable(true);
   body.setPushable(false);
   arcadeBody.setAllowGravity(false);
+  arcadeBody.setFriction(0, 0);
 
   const rawDistance = platform.moving?.distance ?? 0;
   const distance = Number.isFinite(rawDistance) ? rawDistance : 0;
@@ -197,7 +198,7 @@ export const updateMovingPlatforms = (instances: MovingPlatformInstance[], isAct
   });
 };
 
-export const carryPlayerOnDescendingMovingPlatforms = (
+export const carryPlayerOnMovingPlatforms = (
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   instances: MovingPlatformInstance[],
   isActive: boolean,
@@ -213,7 +214,7 @@ export const carryPlayerOnDescendingMovingPlatforms = (
   }
 
   const platform = instances.find((candidate) => {
-    if (candidate.deltaY <= 0 || !candidate.body.active) {
+    if ((candidate.deltaX === 0 && candidate.deltaY <= 0) || !candidate.body.active) {
       return false;
     }
 
@@ -232,7 +233,12 @@ export const carryPlayerOnDescendingMovingPlatforms = (
     return;
   }
 
-  player.setY(player.y + platform.deltaY);
+  if (platform.deltaX !== 0) {
+    player.setX(player.x + platform.deltaX);
+  }
+  if (platform.deltaY > 0) {
+    player.setY(player.y + platform.deltaY);
+  }
   player.body.updateFromGameObject();
 };
 
