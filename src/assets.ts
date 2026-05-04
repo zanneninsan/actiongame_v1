@@ -52,6 +52,7 @@ export type StageDecorationPlacement = { x: number; y?: number; key: string; sca
 export type ItemPlacement = { type: ItemType; x: number; y: number };
 export type EnemyPlacement = { type?: EnemyType; x: number; y: number; patrolLeft: number; patrolRight: number; speed?: number };
 export type BonusBlockPlacement = { type: "hidden" | "question"; x: number; y: number; reward: ItemType };
+export type CheckpointPlacement = { x: number; y: number };
 export type StageLocalizedName = { jp: string; en: string };
 export type StageName = string | StageLocalizedName;
 export type StageBackgroundSelection = { rearKey?: string; midgroundKey?: string };
@@ -71,6 +72,7 @@ export type StageDefinition = {
   decorations: StageDecorationPlacement[];
   items: ItemPlacement[];
   bonusBlocks?: BonusBlockPlacement[];
+  checkpoints?: CheckpointPlacement[];
   enemies?: EnemyPlacement[];
 };
 
@@ -108,6 +110,7 @@ export const STAGE_OBJECT_ASSETS = [
   { key: "stage-structures-station-entrance", path: "assets/stage_objects/structures_station_entrance.webp" },
   { key: "stage-question-block", path: "assets/stage_objects/question_block.png" },
   { key: "stage-hidden-block", path: "assets/stage_objects/hidden_block.png" },
+  { key: "stage-checkpoint-flag", path: "assets/stage_objects/checkpoint_flag.png" },
 ] as const satisfies readonly StageObjectAsset[];
 
 export const ITEM_DEFINITIONS: Record<ItemType, { key: string; label: string; points: number; assetPath: string }> = {

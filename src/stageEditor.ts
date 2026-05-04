@@ -720,6 +720,8 @@ export class StageEditor {
       value.items.every((item) => this.isItemPlacement(item)) &&
       (value.bonusBlocks === undefined ||
         (Array.isArray(value.bonusBlocks) && value.bonusBlocks.every((block) => this.isBonusBlockPlacement(block)))) &&
+      (value.checkpoints === undefined ||
+        (Array.isArray(value.checkpoints) && value.checkpoints.every((checkpoint) => this.isCheckpointPlacement(checkpoint)))) &&
       (value.enemies === undefined ||
         (Array.isArray(value.enemies) && value.enemies.every((enemy) => this.isEnemyPlacement(enemy))))
     );
@@ -807,6 +809,10 @@ export class StageEditor {
       typeof value.reward === "string" &&
       value.reward in ITEM_DEFINITIONS
     );
+  }
+
+  private isCheckpointPlacement(value: unknown) {
+    return this.isPoint(value);
   }
 
   private isEnemyPlacement(value: unknown): value is EnemyPlacement {

@@ -142,6 +142,7 @@ type OrientationLockScreen = Screen & {
 
 let extraTouchPointersAdded = false;
 let stageBackgroundDefaultsAppliedFor: StageId | undefined;
+const reachedCheckpoints = new Map<StageId, { x: number; y: number }>();
 
 class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -152,6 +153,7 @@ class PrototypeScene extends Phaser.Scene {
   private decorationPlatforms!: Phaser.Physics.Arcade.StaticGroup;
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
   private bonusBlocksGroup?: Phaser.Physics.Arcade.StaticGroup;
+  private checkpointsGroup?: Phaser.Physics.Arcade.StaticGroup;
   private enemiesGroup?: Phaser.Physics.Arcade.Group;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d" | "shift", Phaser.Input.Keyboard.Key>;
@@ -174,6 +176,8 @@ class PrototypeScene extends Phaser.Scene {
   private jumpPowerUntil = 0;
   private starPowerUntil = 0;
   private dashRingBoostUntil = 0;
+  private damageTaken = 0;
+  private collectedCoins = 0;
   private startTime = 0;
   private isRunActive = false;
   private isRestarting = false;
@@ -326,6 +330,7 @@ class PrototypeScene extends Phaser.Scene {
     createEnemyAnimations(this);
 
     this.player = this.physics.add.sprite(this.editorStage.playerStart.x, this.editorStage.playerStart.y, "player-idle");
+    this.movePlayerToCheckpointStart();
     this.player.setDisplaySize(PLAYER_DISPLAY_WIDTH, PLAYER_DISPLAY_HEIGHT);
     this.player.setCollideWorldBounds(true);
     this.applyPlayerBody();
@@ -365,6 +370,7 @@ class PrototypeScene extends Phaser.Scene {
       placements: this.editorStage.bonusBlocks ?? [],
       onReward: (itemType, x, y) => this.applyBonusBlockReward(itemType, x, y),
     });
+    this.checkpointsGroup = this.createCheckpoints();
     this.enemiesGroup = createEnemies(this, this.player, this.editorStage.enemies ?? [], (enemy) =>
       this.damagePlayer(enemy),
     );
@@ -651,6 +657,8 @@ class PrototypeScene extends Phaser.Scene {
     this.jumpPowerUntil = 0;
     this.starPowerUntil = 0;
     this.dashRingBoostUntil = 0;
+    this.damageTaken = 0;
+    this.collectedCoins = 0;
     this.startTime = 0;
     this.isRunActive = false;
     this.hasWon = false;
@@ -677,6 +685,7 @@ class PrototypeScene extends Phaser.Scene {
     this.collisionDebugGraphics = undefined;
     this.itemsGroup = undefined;
     this.bonusBlocksGroup = undefined;
+    this.checkpointsGroup = undefined;
     this.enemiesGroup = undefined;
     this.goal = undefined;
     this.finalScoreText = undefined;
@@ -923,7 +932,7 @@ class PrototypeScene extends Phaser.Scene {
       this.stageConstants.worldHeight + FALL_RESET_WORLD_MARGIN,
     );
     this.cameras.main.setBounds(0, this.stageConstants.worldTop, this.editorStage.worldWidth, this.stageConstants.worldHeight);
-    this.player.setPosition(this.editorStage.playerStart.x, this.editorStage.playerStart.y);
+    this.movePlayerToCheckpointStart();
     this.player.setVelocity(0, 0);
     this.player.setAcceleration(0, 0);
     this.player.setDrag(0, 0);
@@ -1061,6 +1070,7 @@ class PrototypeScene extends Phaser.Scene {
     this.clearStaticGroup(this.decorationPlatforms);
     this.clearStaticGroup(this.itemsGroup);
     this.clearStaticGroup(this.bonusBlocksGroup);
+    this.clearStaticGroup(this.checkpointsGroup);
     this.clearDynamicGroup(this.enemiesGroup);
 
     renderStageObjects({
@@ -1084,6 +1094,7 @@ class PrototypeScene extends Phaser.Scene {
       blocksGroup: this.bonusBlocksGroup,
       placements: this.editorStage.bonusBlocks ?? [],
     });
+    this.populateCheckpoints();
     populateEnemies(this.enemiesGroup, this.editorStage.enemies ?? []);
     if (this.stageEditor?.isEnabled) {
       freezeEnemies(this.enemiesGroup);
@@ -1123,6 +1134,50 @@ class PrototypeScene extends Phaser.Scene {
 
     this.backgrounds?.applyStageDefaults(this.editorStage.backgrounds);
     stageBackgroundDefaultsAppliedFor = this.currentStageId;
+  }
+
+  private movePlayerToCheckpointStart() {
+    const checkpoint = reachedCheckpoints.get(this.currentStageId);
+    const start = checkpoint ?? this.editorStage.playerStart;
+    this.player.setPosition(start.x, start.y);
+  }
+
+  private createCheckpoints() {
+    const checkpoints = this.physics.add.staticGroup();
+    this.populateCheckpoints(checkpoints);
+    this.physics.add.overlap(this.player, checkpoints, (_, checkpointObject) => {
+      this.activateCheckpoint(checkpointObject as Phaser.Physics.Arcade.Image);
+    });
+    return checkpoints;
+  }
+
+  private populateCheckpoints(group = this.checkpointsGroup) {
+    if (!group) {
+      return;
+    }
+
+    (this.editorStage.checkpoints ?? []).forEach((checkpoint) => {
+      const flag = group.create(checkpoint.x, checkpoint.y, "stage-checkpoint-flag") as Phaser.Physics.Arcade.Image;
+      flag.setDisplaySize(48, 96);
+      flag.setDepth(0.12);
+      flag.setData("checkpointX", checkpoint.x);
+      flag.setData("checkpointY", checkpoint.y - 52);
+      flag.refreshBody();
+    });
+  }
+
+  private activateCheckpoint(flag: Phaser.Physics.Arcade.Image) {
+    if (!this.isRunActive || this.stageEditor?.isEnabled || flag.getData("activated")) {
+      return;
+    }
+
+    flag.setData("activated", true);
+    flag.setTint(0x86efac);
+    reachedCheckpoints.set(this.currentStageId, {
+      x: flag.getData("checkpointX") as number,
+      y: flag.getData("checkpointY") as number,
+    });
+    this.showFloatingScore(flag.x, flag.y - 72, "CHECK");
   }
 
   private handlePlatformCollision(
@@ -1386,6 +1441,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     const direction = this.player.x < enemy.x ? -1 : 1;
+    this.damageTaken += 1;
     this.hurtUntil = this.time.now + DAMAGE_INPUT_LOCK_MS;
     this.invulnerableUntil = this.time.now + DAMAGE_INVULNERABLE_MS;
     this.isLanding = false;
@@ -1493,6 +1549,9 @@ class PrototypeScene extends Phaser.Scene {
   private applyItemReward(itemType: ItemType, points: number) {
     if (points > 0) {
       this.score[itemType] = (this.score[itemType] ?? 0) + points;
+    }
+    if (itemType === "coin") {
+      this.collectedCoins += 1;
     }
     this.applyPowerup(itemType);
     this.updateScoreText();
@@ -1715,6 +1774,30 @@ class PrototypeScene extends Phaser.Scene {
 
   private formatScoreValue(score: number) {
     return score.toFixed(2);
+  }
+
+  private getClearRank(finalScore: number, remainingMs: number) {
+    const noDamageBonus = this.damageTaken === 0 ? 1 : 0;
+    const speedBonus = remainingMs >= GAME_TIME_MS * 0.55 ? 1 : 0;
+    const scoreBonus = finalScore >= 4200 ? 1 : finalScore >= 2600 ? 0.5 : 0;
+    const rankScore = noDamageBonus + speedBonus + scoreBonus;
+    if (rankScore >= 2.5) {
+      return "S";
+    }
+    if (rankScore >= 1.5) {
+      return "A";
+    }
+    if (rankScore >= 0.5) {
+      return "B";
+    }
+    return "C";
+  }
+
+  private getMissionSummary(remainingMs: number) {
+    const noDamage = this.damageTaken === 0 ? "NO DMG OK" : `DMG ${this.damageTaken}`;
+    const coins = `COIN ${this.collectedCoins}`;
+    const speed = remainingMs >= GAME_TIME_MS * 0.55 ? "FAST OK" : "FAST --";
+    return `${noDamage}  ${coins}  ${speed}`;
   }
 
   private showLeaderboard(
@@ -2025,6 +2108,8 @@ class PrototypeScene extends Phaser.Scene {
     const timeBonus = (remaining / 1000) * TIME_BONUS_PER_SECOND;
     const itemScore = this.getItemScore();
     const finalScore = itemScore + timeBonus;
+    const clearRank = this.getClearRank(finalScore, remaining);
+    const missionLine = this.getMissionSummary(remaining);
     this.timerText.setText(
       `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,
     );
@@ -2034,7 +2119,7 @@ class PrototypeScene extends Phaser.Scene {
       .text(
         GAME_WIDTH / 2,
         GAME_HEIGHT / 2,
-        `${t(this.locale, "hud.clear")}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}\n${t(
+        `${t(this.locale, "hud.clear")}  ${clearRank}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}\n${missionLine}\n${t(
           this.locale,
           "hud.timeBonus",
         )} ${this.formatScoreValue(timeBonus)}`,

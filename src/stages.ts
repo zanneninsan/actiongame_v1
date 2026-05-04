@@ -570,6 +570,16 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "reward": "powerSpeed"
     }
   ],
+  "checkpoints": [
+    {
+      "x": 4620,
+      "y": 606
+    },
+    {
+      "x": 9140,
+      "y": 606
+    }
+  ],
   "enemies": [
     {
       "type": "knifePunk",
@@ -718,6 +728,10 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     { type: "question", x: 3740, y: 360, reward: "powerSpeed" },
     { type: "hidden", x: 6280, y: 252, reward: "star" },
   ],
+  checkpoints: [
+    { x: 4020, y: 606 },
+    { x: 7180, y: 606 },
+  ],
   enemies: [
     { type: "knifePunk", x: 980, y: 590, patrolLeft: 780, patrolRight: 1160, speed: 78 },
     { type: "coneGolem", x: 1660, y: 590, patrolLeft: 1500, patrolRight: 1800, speed: 72 },
@@ -859,5 +873,6 @@ export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   decorations: stage.decorations.map((decoration) => ({ ...decoration })),
   items: stage.items.map((item) => ({ ...item })),
   bonusBlocks: (stage.bonusBlocks ?? []).map((block) => ({ ...block })),
+  checkpoints: (stage.checkpoints ?? []).map((checkpoint) => ({ ...checkpoint })),
   enemies: (stage.enemies ?? []).map((enemy) => ({ ...enemy })),
 });
