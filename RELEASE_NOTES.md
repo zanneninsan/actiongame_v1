@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.154
+### English
+- Allowed Skybridge Sprint score submissions in the leaderboard Cloud Function.
+### Japanese
+- スカイブリッジ・スプリントのスコアをランキング登録できるように、Cloud Functions側の許可ステージに追加しました。
+
 ## v0.1.153
 ### English
 - Kept the selected rear and midground debug backgrounds after restarting the stage.

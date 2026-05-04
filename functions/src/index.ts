@@ -9,7 +9,7 @@ setGlobalOptions({maxInstances: 10});
 const MAX_NAME_LENGTH = 16;
 const MAX_GAME_TIME_MS = 360_000;
 const TIME_BONUS_PER_SECOND = 10;
-const ALLOWED_STAGE_IDS = new Set(["neonCanal"]);
+const ALLOWED_STAGE_IDS = new Set(["neonCanal", "skybridgeSprint"]);
 const MAX_ITEM_SCORE = 100_000;
 const MAX_SCORE = MAX_ITEM_SCORE + (MAX_GAME_TIME_MS / 1000) * TIME_BONUS_PER_SECOND;
 
