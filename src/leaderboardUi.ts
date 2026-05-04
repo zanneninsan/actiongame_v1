@@ -51,7 +51,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
         return;
       }
 
-      status.textContent = options.statusMessage ?? "Top scores";
+      status.textContent = options.statusMessage ?? "Top 100 scores";
       list.replaceChildren(...entries.map((entry, index) => createEntryRow(entry, index + 1, options.currentSubmissionId)));
       list.querySelector(".leaderboard-entry.is-current-score")?.scrollIntoView({ block: "center" });
     })

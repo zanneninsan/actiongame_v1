@@ -45,6 +45,7 @@ type FirebaseServices = {
 
 const LEADERBOARD_COLLECTION = "leaderboardScores";
 const SUBMIT_SCORE_FUNCTION = "submitScore";
+const DEFAULT_LEADERBOARD_LIMIT = 100;
 let servicesPromise: Promise<FirebaseServices | undefined> | undefined;
 let appCheckInitialized = false;
 
@@ -71,7 +72,7 @@ export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) 
   }).then((result) => result.data);
 }
 
-export async function fetchLeaderboardEntries(stageId: string, maxEntries = 10): Promise<LeaderboardEntry[]> {
+export async function fetchLeaderboardEntries(stageId: string, maxEntries = DEFAULT_LEADERBOARD_LIMIT): Promise<LeaderboardEntry[]> {
   const services = await getFirebaseServices();
   if (!services) {
     return [];

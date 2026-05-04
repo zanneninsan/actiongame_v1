@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.140
+### English
+- Expanded the leaderboard display from the top 10 to the top 100 scores.
+### Japanese
+- リーダーボードの表示件数を10位までから100位までに増やしました。
+
 ## v0.1.139
 ### English
 - Added electronic countdown sound effects for 3, 2, 1, and a stronger rising cue for GO.
