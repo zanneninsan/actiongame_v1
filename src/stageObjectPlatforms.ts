@@ -15,6 +15,7 @@ export const STAGE_OBJECT_TOP_PLATFORMS: Record<string, StageObjectTopPlatform[]
     { x: 171, y: 2, width: 56, height: 10 },
   ],
   "stage-structures-street-kiosk": [{ x: 10, y: 4, width: 370, height: 14 }],
+  "stage-props-utility-box": [{ x: 44, y: 3, width: 272, height: 10 }],
   "stage-props-guard-rail": [{ x: 48, y: 4, width: 235, height: 8 }],
   "stage-structures-concrete-pillar": [{ x: 24, y: 1, width: 193, height: 10 }],
   "stage-structures-station-wall-railing": [{ x: 18, y: 1, width: 464, height: 10 }],

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.155
+### English
+- Added a top landing hitbox to the utility box stage decoration.
+### Japanese
+- ユーティリティボックスの装飾にも、上に乗れる当たり判定を追加しました。
+
 ## v0.1.154
 ### English
 - Allowed Skybridge Sprint score submissions in the leaderboard Cloud Function.
