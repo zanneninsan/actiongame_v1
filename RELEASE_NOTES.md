@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.176
+### English
+- Treated riders on descending moving platforms as grounded for movement, drag, jump, and animation decisions, so horizontal control stays responsive while the platform moves downward.
+### Japanese
+- 下方向に動く床の上にいるプレイヤーを移動・ドラッグ・ジャンプ・アニメーション判定でも接地扱いにして、下降中の床でも横移動が通常通り効くようにしました。
+
 ## v0.1.175
 ### English
 - Kept Arcade Body `prevFrame` in sync after manually carrying the player down with descending platforms, preventing post-update from undoing or duplicating that correction.

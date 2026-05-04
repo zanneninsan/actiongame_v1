@@ -241,24 +241,7 @@ export const carryPlayerOnDescendingMovingPlatforms = (
   }
 
   const playerBody = player.body;
-  const platform = instances.find((candidate) => {
-    if (candidate.deltaY <= 0 || !candidate.body.active) {
-      return false;
-    }
-
-    const platformLeft = candidate.body.x - candidate.width / 2;
-    const platformRight = platformLeft + candidate.width;
-    const platformTop = candidate.body.y - candidate.height / 2;
-    const playerLeft = playerBody.x;
-    const playerRight = playerBody.x + playerBody.width;
-    const playerBottom = playerBody.y + playerBody.height;
-    const horizontalOverlap = playerRight > platformLeft + 4 && playerLeft < platformRight - 4;
-    const verticalGap = platformTop - playerBottom;
-    const isOnOrJustAbovePlatform =
-      verticalGap >= -MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE &&
-      verticalGap <= Math.max(MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE, candidate.deltaY + MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE);
-    return horizontalOverlap && isOnOrJustAbovePlatform;
-  });
+  const platform = findDescendingMovingPlatformUnderPlayer(playerBody, instances);
 
   if (!platform) {
     return;
@@ -277,6 +260,38 @@ export const carryPlayerOnDescendingMovingPlatforms = (
   player.body.updateFromGameObject();
   playerBody.prev.y += playerBody.y - currentBodyY;
   playerBody.prevFrame.y += playerBody.y - currentBodyY;
+};
+
+export const isPlayerSupportedByDescendingMovingPlatform = (
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+  instances: MovingPlatformInstance[],
+  isActive: boolean,
+) => {
+  return Boolean(isActive && player.body && findDescendingMovingPlatformUnderPlayer(player.body, instances));
+};
+
+const findDescendingMovingPlatformUnderPlayer = (
+  playerBody: Phaser.Physics.Arcade.Body,
+  instances: MovingPlatformInstance[],
+) => {
+  return instances.find((candidate) => {
+    if (candidate.deltaY <= 0 || !candidate.body.active) {
+      return false;
+    }
+
+    const platformLeft = candidate.body.x - candidate.width / 2;
+    const platformRight = platformLeft + candidate.width;
+    const platformTop = candidate.body.y - candidate.height / 2;
+    const playerLeft = playerBody.x;
+    const playerRight = playerBody.x + playerBody.width;
+    const playerBottom = playerBody.y + playerBody.height;
+    const horizontalOverlap = playerRight > platformLeft + 4 && playerLeft < platformRight - 4;
+    const verticalGap = platformTop - playerBottom;
+    const isOnOrJustAbovePlatform =
+      verticalGap >= -MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE &&
+      verticalGap <= Math.max(MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE, candidate.deltaY + MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE);
+    return horizontalOverlap && isOnOrJustAbovePlatform;
+  });
 };
 
 const getMovingPlatformDistanceX = (platform: MovingPlatformInstance) => {

@@ -33,6 +33,7 @@ import {
 import { createItems, populateItems } from "./items";
 import {
   carryPlayerOnDescendingMovingPlatforms,
+  isPlayerSupportedByDescendingMovingPlatform,
   renderStageObjects,
   updateMovingPlatforms,
   type MovingPlatformInstance,
@@ -60,7 +61,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.175";
+const DEBUG_VERSION = "v0.1.176";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -444,7 +445,12 @@ class PrototypeScene extends Phaser.Scene {
     } else {
       updateEnemies(this.enemiesGroup, this.player, this.stageConstants.worldBottom + 32);
     }
-    const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
+    const onDescendingMovingPlatform = isPlayerSupportedByDescendingMovingPlatform(
+      this.player,
+      this.movingPlatformInstances,
+      movingPlatformsActive,
+    );
+    const onFloor = this.player.body.blocked.down || this.player.body.touching.down || onDescendingMovingPlatform;
     if (this.time.now < this.hurtUntil) {
       this.updateCollisionDebug();
       this.player.setAcceleration(0, 0);
