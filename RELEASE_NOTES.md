@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.151
+### English
+- Made restart and miss flows close the leaderboard before continuing, while keeping R as a restart command.
+### Japanese
+- Rキーのリスタートや落下ミスの流れでは、先にリーダーボードを閉じてから通常のリスタートやミス演出へ進むようにしました。
+
 ## v0.1.150
 ### English
 - Added the Skybridge Sprint stage and a stage selector to the start screen, with leaderboard scores separated by selected stage.

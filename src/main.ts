@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.150";
+const DEBUG_VERSION = "v0.1.151";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -653,6 +653,7 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
+    this.dismissLeaderboard();
     this.isRestarting = true;
     this.resetRunState();
     this.bgm?.stop();
@@ -660,24 +661,11 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private handleRestartKey() {
-    if (this.dismissResultScreen()) {
-      return;
-    }
-
     this.restartStage();
   }
 
-  private dismissResultScreen() {
-    const leaderboardModal = document.getElementById("leaderboard-modal");
-    const hasFinalScore = Boolean(this.finalScoreText);
-    if (!leaderboardModal && !hasFinalScore) {
-      return false;
-    }
-
-    leaderboardModal?.remove();
-    this.finalScoreText?.destroy();
-    this.finalScoreText = undefined;
-    return true;
+  private dismissLeaderboard() {
+    document.getElementById("leaderboard-modal")?.remove();
   }
 
   private startRun() {
@@ -1599,6 +1587,7 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
+    this.dismissLeaderboard();
     this.isDefeatSequenceActive = true;
     this.isRunActive = false;
     this.isLanding = false;
@@ -1630,6 +1619,7 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
+    this.dismissLeaderboard();
     this.isDefeatSequenceActive = true;
     this.isRunActive = false;
     this.hurtUntil = 0;
