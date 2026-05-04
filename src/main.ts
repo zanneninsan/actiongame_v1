@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.155";
+const DEBUG_VERSION = "v0.1.156";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -122,6 +122,7 @@ type OrientationLockScreen = Screen & {
 };
 
 let extraTouchPointersAdded = false;
+let stageBackgroundDefaultsAppliedFor: StageId | undefined;
 
 class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -855,6 +856,7 @@ class PrototypeScene extends Phaser.Scene {
     this.currentStageId = stageId;
     this.editorStage = cloneStage(STAGES[stageId]);
     this.stageConstants = resolveStageConstants(this.editorStage);
+    this.applyStageBackgroundDefaults();
     this.physics.world.setBounds(
       0,
       this.stageConstants.worldTop,
@@ -1038,10 +1040,20 @@ class PrototypeScene extends Phaser.Scene {
   private createBackground() {
     this.backgrounds = new BackgroundController(this, GAME_WIDTH, GAME_HEIGHT);
     this.backgrounds.create();
+    this.applyStageBackgroundDefaults();
   }
 
   private updateBackground() {
     this.backgrounds?.update(this.cameras.main.scrollX, this.cameras.main.scrollY);
+  }
+
+  private applyStageBackgroundDefaults() {
+    if (stageBackgroundDefaultsAppliedFor === this.currentStageId) {
+      return;
+    }
+
+    this.backgrounds?.applyStageDefaults(this.editorStage.backgrounds);
+    stageBackgroundDefaultsAppliedFor = this.currentStageId;
   }
 
   private canLandOnDecorationPlatform(

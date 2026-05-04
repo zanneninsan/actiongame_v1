@@ -681,6 +681,7 @@ export class StageEditor {
 
     return (
       this.isStageName(value.name) &&
+      (value.backgrounds === undefined || this.isStageBackgroundSelection(value.backgrounds)) &&
       this.isNumber(value.worldWidth) &&
       this.isOptionalNumber(value.worldTop) &&
       this.isOptionalNumber(value.worldBottom) &&
@@ -709,6 +710,14 @@ export class StageEditor {
       this.isNumber(value.y) &&
       this.isNumber(value.units) &&
       (value.collides === undefined || typeof value.collides === "boolean")
+    );
+  }
+
+  private isStageBackgroundSelection(value: unknown) {
+    return (
+      this.isRecord(value) &&
+      (value.rearKey === undefined || typeof value.rearKey === "string") &&
+      (value.midgroundKey === undefined || typeof value.midgroundKey === "string")
     );
   }
 

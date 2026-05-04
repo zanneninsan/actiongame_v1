@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import type { StageBackgroundSelection } from "./assets";
 import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-assets";
 
 let selectedRearBackgroundIndex = 0;
@@ -19,6 +20,25 @@ export class BackgroundController {
   create() {
     this.createRearBackground();
     this.createMidgroundBackground();
+  }
+
+  applyStageDefaults(defaults?: StageBackgroundSelection) {
+    this.rearBackgroundIndex = resolveBackgroundIndex(
+      REAR_BACKGROUNDS,
+      defaults?.rearKey,
+      this.rearBackgroundIndex,
+    );
+    selectedRearBackgroundIndex = this.rearBackgroundIndex;
+    const rearBackground = this.getCurrentRearBackground();
+    this.rearBackground?.setTexture(rearBackground.key).setDisplaySize(this.width, this.height);
+
+    this.midgroundBackgroundIndex = resolveBackgroundIndex(
+      MIDGROUND_BACKGROUNDS,
+      defaults?.midgroundKey,
+      this.midgroundBackgroundIndex,
+    );
+    selectedMidgroundBackgroundIndex = this.midgroundBackgroundIndex;
+    this.midgroundBackground?.setTexture(this.getCurrentMidgroundBackground().key);
   }
 
   update(scrollX: number, scrollY: number) {
@@ -94,4 +114,17 @@ export class BackgroundController {
   private getCurrentMidgroundBackground() {
     return MIDGROUND_BACKGROUNDS[this.midgroundBackgroundIndex];
   }
+}
+
+function resolveBackgroundIndex(
+  backgrounds: readonly { key: string }[],
+  key: string | undefined,
+  fallbackIndex: number,
+) {
+  if (!key) {
+    return fallbackIndex;
+  }
+
+  const index = backgrounds.findIndex((background) => background.key === key);
+  return index >= 0 ? index : fallbackIndex;
 }

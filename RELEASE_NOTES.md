@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.156
+### English
+- Added per-stage default rear and midground background selections while preserving manual debug background choices across same-stage restarts.
+### Japanese
+- ステージごとに既定の後景と中景の組み合わせを設定できるようにし、同じステージのリスタートでは手動で切り替えた背景を維持するようにしました。
+
 ## v0.1.155
 ### English
 - Added a top landing hitbox to the utility box stage decoration.

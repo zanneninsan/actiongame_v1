@@ -5,6 +5,10 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
     "jp": "シブヤシティ",
     "en": "Shibu-ya city"
   },
+  "backgrounds": {
+    "rearKey": "rear-starry-sky",
+    "midgroundKey": "midground-city-loop-strip"
+  },
   "worldWidth": 12800,
   "worldTop": -720,
   "worldBottom": 720,
@@ -564,6 +568,10 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     jp: "スカイブリッジ・スプリント",
     en: "Skybridge Sprint",
   },
+  backgrounds: {
+    rearKey: "rear-620c2900-ce9f-46e9-974e-b40916d5aa0c",
+    midgroundKey: "midground-photoroom-20260504-035157",
+  },
   worldWidth: 9200,
   worldTop: -760,
   worldBottom: 720,
@@ -665,6 +673,7 @@ export const ACTIVE_STAGE = STAGES[DEFAULT_STAGE_ID];
 
 export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   name: typeof stage.name === "string" ? stage.name : { ...stage.name },
+  backgrounds: stage.backgrounds ? { ...stage.backgrounds } : undefined,
   worldWidth: stage.worldWidth,
   worldTop: stage.worldTop,
   worldBottom: stage.worldBottom,

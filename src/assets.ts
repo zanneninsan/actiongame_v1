@@ -27,8 +27,10 @@ export type ItemPlacement = { type: ItemType; x: number; y: number };
 export type EnemyPlacement = { type?: EnemyType; x: number; y: number; patrolLeft: number; patrolRight: number; speed?: number };
 export type StageLocalizedName = { jp: string; en: string };
 export type StageName = string | StageLocalizedName;
+export type StageBackgroundSelection = { rearKey?: string; midgroundKey?: string };
 export type StageDefinition = {
   name: StageName;
+  backgrounds?: StageBackgroundSelection;
   worldWidth: number;
   worldTop?: number;
   worldBottom?: number;
