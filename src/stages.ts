@@ -550,6 +550,26 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "y": 492
     }
   ],
+  "bonusBlocks": [
+    {
+      "type": "question",
+      "x": 1640,
+      "y": 300,
+      "reward": "powerJump"
+    },
+    {
+      "type": "hidden",
+      "x": 5200,
+      "y": 240,
+      "reward": "star"
+    },
+    {
+      "type": "question",
+      "x": 8420,
+      "y": 332,
+      "reward": "powerSpeed"
+    }
+  ],
   "enemies": [
     {
       "type": "knifePunk",
@@ -688,9 +708,15 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     { type: "bubbleTea", x: 5900, y: 364 },
     { type: "shoppingBag", x: 6460, y: 276 },
     { type: "energyDrink", x: 7180, y: 464 },
+    { type: "dashRing", x: 7360, y: 382 },
     { type: "bubbleTea", x: 7600, y: 372 },
     { type: "shoppingBag", x: 8120, y: 284 },
     { type: "energyDrink", x: 8680, y: 492 },
+  ],
+  bonusBlocks: [
+    { type: "question", x: 1180, y: 300, reward: "powerJump" },
+    { type: "question", x: 3740, y: 360, reward: "powerSpeed" },
+    { type: "hidden", x: 6280, y: 252, reward: "star" },
   ],
   enemies: [
     { type: "knifePunk", x: 980, y: 590, patrolLeft: 780, patrolRight: 1160, speed: 78 },
@@ -832,5 +858,6 @@ export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   streetLamps: stage.streetLamps.map((lamp) => ({ ...lamp })),
   decorations: stage.decorations.map((decoration) => ({ ...decoration })),
   items: stage.items.map((item) => ({ ...item })),
+  bonusBlocks: (stage.bonusBlocks ?? []).map((block) => ({ ...block })),
   enemies: (stage.enemies ?? []).map((enemy) => ({ ...enemy })),
 });

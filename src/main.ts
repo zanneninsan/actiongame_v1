@@ -31,6 +31,7 @@ import {
   updateEnemies,
 } from "./enemies";
 import { createItems, populateItems } from "./items";
+import { createBonusBlocks, populateBonusBlocks } from "./bonusBlocks";
 import {
   carryPlayerOnDescendingMovingPlatforms,
   isPlayerSupportedByDescendingMovingPlatform,
@@ -91,6 +92,11 @@ const ENEMY_STOMP_BASE_SCORE = 200;
 const SPRING_PLATFORM_DEFAULT_VELOCITY = -820;
 const FRAGILE_PLATFORM_DELAY_MS = 360;
 const FRAGILE_PLATFORM_RESPAWN_MS = 2800;
+const POWERUP_DURATION_MS = 9000;
+const POWER_SPEED_MULTIPLIER = 1.28;
+const POWER_JUMP_MULTIPLIER = 1.18;
+const DASH_RING_VELOCITY_X = 720;
+const DASH_RING_BOOST_MS = 900;
 const PLAYER_DISPLAY_WIDTH = 320;
 const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
@@ -145,6 +151,7 @@ class PrototypeScene extends Phaser.Scene {
   private movingPlatformInstances: MovingPlatformInstance[] = [];
   private decorationPlatforms!: Phaser.Physics.Arcade.StaticGroup;
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
+  private bonusBlocksGroup?: Phaser.Physics.Arcade.StaticGroup;
   private enemiesGroup?: Phaser.Physics.Arcade.Group;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d" | "shift", Phaser.Input.Keyboard.Key>;
@@ -163,6 +170,10 @@ class PrototypeScene extends Phaser.Scene {
   private mobileOrientationCleanup: Array<() => void> = [];
   private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0, coin: 0 };
   private bonusScore = 0;
+  private speedPowerUntil = 0;
+  private jumpPowerUntil = 0;
+  private starPowerUntil = 0;
+  private dashRingBoostUntil = 0;
   private startTime = 0;
   private isRunActive = false;
   private isRestarting = false;
@@ -344,11 +355,15 @@ class PrototypeScene extends Phaser.Scene {
       placements: this.editorStage.items,
       canCollect: () => !this.stageEditor?.isEnabled,
       onCollect: (itemType, points) => {
-        this.score[itemType] += points;
-        this.updateScoreText();
-        this.tryEmitScoreDanmaku();
+        this.applyItemReward(itemType, points);
       },
       trackStageObject: (object) => this.trackStageObject(object),
+    });
+    this.bonusBlocksGroup = createBonusBlocks({
+      scene: this,
+      player: this.player,
+      placements: this.editorStage.bonusBlocks ?? [],
+      onReward: (itemType, x, y) => this.applyBonusBlockReward(itemType, x, y),
     });
     this.enemiesGroup = createEnemies(this, this.player, this.editorStage.enemies ?? [], (enemy) =>
       this.damagePlayer(enemy),
@@ -476,7 +491,11 @@ class PrototypeScene extends Phaser.Scene {
     const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
     const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
     const isShiftSpeedActive = this.keys.shift.isDown || this.mobileInput.shift;
-    const speedMultiplier = isShiftSpeedActive ? DASH_SPEED_MULTIPLIER : 1;
+    const speedMultiplier =
+      (isShiftSpeedActive ? DASH_SPEED_MULTIPLIER : 1) *
+      (this.time.now < this.speedPowerUntil ? POWER_SPEED_MULTIPLIER : 1) *
+      (this.time.now < this.dashRingBoostUntil ? POWER_SPEED_MULTIPLIER : 1);
+    const jumpMultiplier = this.time.now < this.jumpPowerUntil ? POWER_JUMP_MULTIPLIER : 1;
     const isCrouchInputActive = down && onFloor;
     this.updateDecorationPlatformDrop(down, onFloor);
     this.applyPlayerBody(isCrouchInputActive);
@@ -513,7 +532,7 @@ class PrototypeScene extends Phaser.Scene {
     if (jump && canJump) {
       const baseJumpVelocity =
         Math.abs(this.player.body.velocity.x) >= BOOST_JUMP_SPEED_THRESHOLD ? BOOSTED_JUMP_VELOCITY : JUMP_VELOCITY;
-      this.player.setVelocityY(baseJumpVelocity * speedMultiplier);
+      this.player.setVelocityY(baseJumpVelocity * speedMultiplier * jumpMultiplier);
       this.isLanding = false;
       this.landingFastForwarded = false;
       this.player.anims.timeScale = 1;
@@ -628,6 +647,10 @@ class PrototypeScene extends Phaser.Scene {
     this.mobileJumpQueued = false;
     this.score = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0, coin: 0 };
     this.bonusScore = 0;
+    this.speedPowerUntil = 0;
+    this.jumpPowerUntil = 0;
+    this.starPowerUntil = 0;
+    this.dashRingBoostUntil = 0;
     this.startTime = 0;
     this.isRunActive = false;
     this.hasWon = false;
@@ -653,6 +676,7 @@ class PrototypeScene extends Phaser.Scene {
     this.collisionDebugGraphics?.clear();
     this.collisionDebugGraphics = undefined;
     this.itemsGroup = undefined;
+    this.bonusBlocksGroup = undefined;
     this.enemiesGroup = undefined;
     this.goal = undefined;
     this.finalScoreText = undefined;
@@ -1036,6 +1060,7 @@ class PrototypeScene extends Phaser.Scene {
     this.movingPlatformInstances = [];
     this.clearStaticGroup(this.decorationPlatforms);
     this.clearStaticGroup(this.itemsGroup);
+    this.clearStaticGroup(this.bonusBlocksGroup);
     this.clearDynamicGroup(this.enemiesGroup);
 
     renderStageObjects({
@@ -1053,6 +1078,11 @@ class PrototypeScene extends Phaser.Scene {
       itemsGroup: this.itemsGroup,
       placements: this.editorStage.items,
       trackStageObject: (object) => this.trackStageObject(object),
+    });
+    populateBonusBlocks({
+      scene: this,
+      blocksGroup: this.bonusBlocksGroup,
+      placements: this.editorStage.bonusBlocks ?? [],
     });
     populateEnemies(this.enemiesGroup, this.editorStage.enemies ?? []);
     if (this.stageEditor?.isEnabled) {
@@ -1345,6 +1375,12 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
+    if (this.time.now < this.starPowerUntil) {
+      this.defeatEnemy(enemy, false);
+      this.addEnemyStompScore(enemy);
+      return;
+    }
+
     if (this.tryStompEnemy(enemy) || this.time.now < this.invulnerableUntil) {
       return;
     }
@@ -1380,25 +1416,33 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     enemy.setData("defeated", true);
-    enemyBody.enable = false;
-    enemy.setVelocity(0, 0);
-    enemy.setActive(false);
     this.player.setVelocityY(ENEMY_STOMP_BOUNCE_Y);
     this.isLanding = false;
     this.landingFastForwarded = false;
     this.player.anims.play("player-air", true);
     this.addEnemyStompScore(enemy);
+    this.defeatEnemy(enemy, true);
+    return true;
+  }
+
+  private defeatEnemy(enemy: Phaser.Physics.Arcade.Sprite, squash: boolean) {
+    const enemyBody = enemy.body as Phaser.Physics.Arcade.Body | undefined;
+    enemy.setData("defeated", true);
+    if (enemyBody) {
+      enemyBody.enable = false;
+    }
+    enemy.setVelocity(0, 0);
+    enemy.setActive(false);
     this.tweens.add({
       targets: enemy,
       alpha: 0,
-      scaleX: enemy.scaleX * 1.18,
-      scaleY: enemy.scaleY * 0.45,
-      y: enemy.y + 16,
+      scaleX: enemy.scaleX * (squash ? 1.18 : 0.6),
+      scaleY: enemy.scaleY * (squash ? 0.45 : 0.6),
+      y: enemy.y + (squash ? 16 : -18),
       duration: 140,
       ease: "Back.easeIn",
       onComplete: () => enemy.destroy(),
     });
-    return true;
   }
 
   private addEnemyStompScore(enemy: Phaser.Physics.Arcade.Sprite) {
@@ -1430,6 +1474,49 @@ class PrototypeScene extends Phaser.Scene {
       ease: "Sine.easeOut",
       onComplete: () => scorePopup.destroy(),
     });
+  }
+
+  private applyBonusBlockReward(itemType: ItemType, x: number, y: number) {
+    const definition = ITEM_DEFINITIONS[itemType];
+    this.applyItemReward(itemType, definition.points);
+    const rewardSprite = this.add.image(x, y, definition.key).setDisplaySize(46, 46).setDepth(0.4);
+    this.tweens.add({
+      targets: rewardSprite,
+      y: y - 38,
+      alpha: 0,
+      duration: 720,
+      ease: "Sine.easeOut",
+      onComplete: () => rewardSprite.destroy(),
+    });
+  }
+
+  private applyItemReward(itemType: ItemType, points: number) {
+    if (points > 0) {
+      this.score[itemType] = (this.score[itemType] ?? 0) + points;
+    }
+    this.applyPowerup(itemType);
+    this.updateScoreText();
+    this.tryEmitScoreDanmaku();
+  }
+
+  private applyPowerup(itemType: ItemType) {
+    if (itemType === "powerSpeed") {
+      this.speedPowerUntil = this.time.now + POWERUP_DURATION_MS;
+      this.showFloatingScore(this.player.x, this.player.y - 110, "SPEED UP");
+    } else if (itemType === "powerJump") {
+      this.jumpPowerUntil = this.time.now + POWERUP_DURATION_MS;
+      this.showFloatingScore(this.player.x, this.player.y - 110, "JUMP UP");
+    } else if (itemType === "star") {
+      this.starPowerUntil = this.time.now + POWERUP_DURATION_MS;
+      this.invulnerableUntil = Math.max(this.invulnerableUntil, this.starPowerUntil);
+      this.cameras.main.flash(180, 255, 226, 90);
+      this.showFloatingScore(this.player.x, this.player.y - 110, "STAR");
+    } else if (itemType === "dashRing") {
+      this.dashRingBoostUntil = this.time.now + DASH_RING_BOOST_MS;
+      const direction = this.player.flipX ? -1 : 1;
+      this.player.setVelocityX(direction * DASH_RING_VELOCITY_X);
+      this.showFloatingScore(this.player.x, this.player.y - 110, "DASH");
+    }
   }
 
   private playDamageMotion(direction: number) {

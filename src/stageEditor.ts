@@ -5,6 +5,7 @@ import {
   STAGE_OBJECT_ASSETS,
   ITEM_DEFINITIONS,
   resolveStageName,
+  type BonusBlockPlacement,
   type EnemyPlacement,
   type ItemPlacement,
   type PlatformRunPlacement,
@@ -717,6 +718,8 @@ export class StageEditor {
       value.decorations.every((decoration) => this.isDecorationPlacement(decoration)) &&
       Array.isArray(value.items) &&
       value.items.every((item) => this.isItemPlacement(item)) &&
+      (value.bonusBlocks === undefined ||
+        (Array.isArray(value.bonusBlocks) && value.bonusBlocks.every((block) => this.isBonusBlockPlacement(block)))) &&
       (value.enemies === undefined ||
         (Array.isArray(value.enemies) && value.enemies.every((enemy) => this.isEnemyPlacement(enemy))))
     );
@@ -792,6 +795,17 @@ export class StageEditor {
       this.isNumber(value.y) &&
       typeof value.type === "string" &&
       value.type in ITEM_DEFINITIONS
+    );
+  }
+
+  private isBonusBlockPlacement(value: unknown): value is BonusBlockPlacement {
+    return (
+      this.isRecord(value) &&
+      (value.type === "hidden" || value.type === "question") &&
+      this.isNumber(value.x) &&
+      this.isNumber(value.y) &&
+      typeof value.reward === "string" &&
+      value.reward in ITEM_DEFINITIONS
     );
   }
 
