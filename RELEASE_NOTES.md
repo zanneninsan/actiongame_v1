@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.109
+### English
+- Replaced the CSS-built start modal frame with a single fixed-aspect raster window asset.
+- Limited CSS on the start modal to sizing, positioning, and form layout so frame ornaments no longer distort or multiply.
+### Japanese
+- CSSで組み立てていた開始モーダルの枠をやめ、固定アスペクト比の1枚絵ウィンドウ素材に置き換えました。
+- 開始モーダルのCSSはサイズ、配置、フォームレイアウト中心に絞り、枠の装飾が歪んだり増殖したりしないようにしました。
+
 ## v0.1.108
 ### English
 - Rebuilt the start modal frame from separate corner, edge, fill, and center ornament layers to avoid border-image distortion.
