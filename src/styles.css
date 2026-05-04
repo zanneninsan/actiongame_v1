@@ -594,7 +594,7 @@ canvas {
   z-index: 26;
   display: grid;
   place-items: center;
-  padding: 18px;
+  padding: clamp(10px, 2.5vw, 24px);
   background: rgba(4, 8, 18, 0.78);
   color: #f8fafc;
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
@@ -602,24 +602,24 @@ canvas {
 
 .leaderboard-dialog {
   box-sizing: border-box;
-  width: min(560px, calc(100vw - 36px), calc((100dvh - 36px) * 1.2381));
+  width: min(1040px, calc(100vw - clamp(20px, 5vw, 48px)), calc((100dvh - clamp(20px, 5vw, 48px)) * 1.2381));
   aspect-ratio: 520 / 420;
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr) auto;
-  gap: 10px;
-  padding: clamp(48px, 9vw, 62px) clamp(42px, 8vw, 70px) clamp(34px, 7vw, 48px);
+  gap: clamp(10px, 1.7vw, 18px);
+  padding: clamp(54px, 7vw, 90px) clamp(48px, 7.5vw, 110px) clamp(38px, 5.2vw, 70px);
   background: url("../assets/ui/fantasy/options_modal_window.png") center / 100% 100% no-repeat;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
 }
 
 .leaderboard-dialog h2 {
   margin: 0;
-  min-height: 50px;
+  min-height: clamp(50px, 7vw, 78px);
   display: grid;
   place-items: center;
   padding: 0 20px;
   background: url("../assets/ui/fantasy/title_plate_safe.png") center / 100% 100% no-repeat;
-  font-size: clamp(18px, 5vw, 24px);
+  font-size: clamp(22px, 4vw, 36px);
   font-weight: 800;
   text-align: center;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 10px rgba(245, 199, 106, 0.22);
@@ -648,18 +648,18 @@ canvas {
   list-style: none;
   display: grid;
   align-content: start;
-  gap: 6px;
+  gap: clamp(6px, 1vw, 10px);
 }
 
 .leaderboard-entry {
-  min-height: 30px;
+  min-height: clamp(34px, 5vw, 48px);
   display: grid;
-  grid-template-columns: 34px minmax(0, 1fr) 84px 68px;
+  grid-template-columns: clamp(34px, 5vw, 52px) minmax(0, 1fr) clamp(90px, 13vw, 128px) clamp(74px, 11vw, 112px);
   align-items: center;
-  gap: 8px;
-  padding: 0 12px;
+  gap: clamp(8px, 1.5vw, 16px);
+  padding: 0 clamp(12px, 2vw, 22px);
   background: url("../assets/ui/fantasy/select_field_safe.png") center / 100% 100% no-repeat;
-  font-size: 13px;
+  font-size: clamp(13px, 2vw, 18px);
   font-weight: 800;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
 }
@@ -686,18 +686,20 @@ canvas {
   width: 100%;
   margin-top: 4px;
   background-image: url("../assets/ui/fantasy/button_primary_safe.png");
-  font-size: 16px;
+  min-height: clamp(42px, 5.5vw, 56px);
+  font-size: clamp(16px, 2.5vw, 22px);
   font-weight: 800;
 }
 
 @media (max-width: 520px) {
   .leaderboard-dialog {
     gap: 8px;
-    padding: 44px 34px 32px;
+    width: min(calc(100vw - 20px), calc((100dvh - 20px) * 1.2381));
+    padding: 48px 34px 34px;
   }
 
   .leaderboard-entry {
-    grid-template-columns: 28px minmax(0, 1fr) 70px;
+    grid-template-columns: 28px minmax(0, 1fr) 76px;
   }
 
   .leaderboard-date {
