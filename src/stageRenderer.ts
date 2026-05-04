@@ -256,7 +256,9 @@ export const carryPlayerOnDescendingMovingPlatforms = (
 
   const currentBodyY = playerBody.y;
   player.setY(player.y + targetDeltaY);
-  player.setVelocityY(Math.max(playerBody.velocity.y, targetDeltaY * 60));
+  if (playerBody.velocity.y > 0) {
+    player.setVelocityY(0);
+  }
   player.body.updateFromGameObject();
   playerBody.prev.y += playerBody.y - currentBodyY;
   playerBody.prevFrame.y += playerBody.y - currentBodyY;

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.177
+### English
+- Stopped injecting downward velocity while carrying the player on descending platforms, keeping the rider grounded without forcing constant falling collision.
+### Japanese
+- 下方向に動く床でプレイヤーを追随させる時、下向き速度を毎フレーム加えないようにして、落下衝突が続いて横移動が不安定になる問題を修正しました。
+
 ## v0.1.176
 ### English
 - Treated riders on descending moving platforms as grounded for movement, drag, jump, and animation decisions, so horizontal control stays responsive while the platform moves downward.
