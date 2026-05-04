@@ -3,6 +3,7 @@
 - Read `docs/CODEX_HANDOFF.md` first. Then check `git status --short --branch`.
 - Use Japanese for conversation with the user.
 - Do not scan the whole repo. Only inspect files directly relevant to the user's next request.
+- When searching files, exclude `node_modules` from the search target.
 - For stage layout changes, start with `src/stages.ts`.
 - For stage rendering behavior, start with `src/stageRenderer.ts`.
 - For enemy behavior, start with `src/enemies.ts`; use `src/stages.ts` for enemy placement.
