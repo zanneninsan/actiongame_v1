@@ -232,7 +232,7 @@ export class StageEditor {
       this.rebuildStageObjects();
       this.recordChange(historySnapshot);
     } else if (this.tool === "enemy") {
-      const type = this.panel?.enemyType ?? "neonBouncer";
+      const type = this.panel?.enemyType ?? "aquaMascot";
       const placement: EnemyPlacement = {
         type,
         x,
@@ -504,7 +504,7 @@ export class StageEditor {
     }
     if (selection.kind === "enemy") {
       const enemy = this.stage.enemies?.[selection.index];
-      return enemy ? ENEMY_DEFINITIONS[enemy.type ?? "neonBouncer"].key : "enemy";
+      return enemy ? ENEMY_DEFINITIONS[enemy.type ?? "aquaMascot"].key : "enemy";
     }
     if (selection.kind === "streetLamp") {
       return this.stage.streetLamps[selection.index]?.key ?? "streetLamp";
@@ -538,7 +538,7 @@ export class StageEditor {
         return undefined;
       }
 
-      const definition = ENEMY_DEFINITIONS[enemy.type ?? "neonBouncer"];
+      const definition = ENEMY_DEFINITIONS[enemy.type ?? "aquaMascot"];
       return { x: enemy.x, y: enemy.y, width: definition.displayWidth + 10, height: definition.displayHeight + 10 };
     }
     if (selection.kind === "streetLamp") {

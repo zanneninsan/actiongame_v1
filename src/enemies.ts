@@ -1,41 +1,7 @@
 import Phaser from "phaser";
 import { ENEMY_DEFINITIONS, type EnemyPlacement } from "./assets";
 
-export const ENEMY_TEXTURE_KEY = ENEMY_DEFINITIONS.neonBouncer.key;
-export const ENEMY_DISPLAY_WIDTH = ENEMY_DEFINITIONS.neonBouncer.displayWidth;
-export const ENEMY_DISPLAY_HEIGHT = ENEMY_DEFINITIONS.neonBouncer.displayHeight;
 const ENEMY_DEFAULT_SPEED = 92;
-
-export const createEnemyTexture = (scene: Phaser.Scene) => {
-  if (scene.textures.exists(ENEMY_TEXTURE_KEY)) {
-    return;
-  }
-
-  const graphics = scene.make.graphics({ x: 0, y: 0 }, false);
-  graphics.fillStyle(0x111827, 0.92);
-  graphics.fillRoundedRect(6, 18, 64, 38, 14);
-  graphics.fillStyle(0x7c2d12, 0.98);
-  graphics.fillRoundedRect(12, 12, 52, 40, 12);
-  graphics.fillStyle(0xff4d6d, 0.94);
-  graphics.fillCircle(24, 29, 7);
-  graphics.fillCircle(52, 29, 7);
-  graphics.fillStyle(0xfff1f2, 0.96);
-  graphics.fillCircle(26, 28, 2);
-  graphics.fillCircle(54, 28, 2);
-  graphics.lineStyle(4, 0xfacc15, 0.95);
-  graphics.beginPath();
-  graphics.moveTo(28, 46);
-  graphics.lineTo(35, 40);
-  graphics.lineTo(42, 46);
-  graphics.lineTo(49, 40);
-  graphics.strokePath();
-  graphics.lineStyle(3, 0x22d3ee, 0.8);
-  graphics.strokeRoundedRect(10, 10, 56, 44, 14);
-  graphics.fillStyle(0x22d3ee, 0.22);
-  graphics.fillEllipse(38, 58, 54, 10);
-  graphics.generateTexture(ENEMY_TEXTURE_KEY, ENEMY_DISPLAY_WIDTH, ENEMY_DISPLAY_HEIGHT);
-  graphics.destroy();
-};
 
 export const createEnemyAnimations = (scene: Phaser.Scene) => {
   Object.values(ENEMY_DEFINITIONS).forEach((definition) => {
@@ -126,14 +92,14 @@ export const freezeEnemies = (enemiesGroup?: Phaser.Physics.Arcade.Group) => {
 };
 
 const createEnemySprite = (enemiesGroup: Phaser.Physics.Arcade.Group, placement: EnemyPlacement) => {
-  const definition = ENEMY_DEFINITIONS[placement.type ?? "neonBouncer"];
+  const definition = ENEMY_DEFINITIONS[placement.type ?? "aquaMascot"];
   const animation = definition.animation;
   const enemy = enemiesGroup.create(placement.x, placement.y, animation?.key ?? definition.key) as Phaser.Physics.Arcade.Sprite;
   const speed = placement.speed ?? ENEMY_DEFAULT_SPEED;
   const direction = speed >= 0 ? 1 : -1;
   enemy.setDisplaySize(definition.displayWidth, definition.displayHeight);
   enemy.setDepth(0.18);
-  enemy.setData("enemyType", placement.type ?? "neonBouncer");
+  enemy.setData("enemyType", placement.type ?? "aquaMascot");
   enemy.setData("patrolLeft", Math.min(placement.patrolLeft, placement.patrolRight));
   enemy.setData("patrolRight", Math.max(placement.patrolLeft, placement.patrolRight));
   enemy.setData("speed", Math.abs(speed));

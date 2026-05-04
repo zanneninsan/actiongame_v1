@@ -53,7 +53,7 @@ export class StageEditorPanel {
   }
 
   get enemyType() {
-    return (this.enemyTypeSelect?.value ?? "neonBouncer") as EnemyType;
+    return (this.enemyTypeSelect?.value ?? "aquaMascot") as EnemyType;
   }
 
   get lampType() {

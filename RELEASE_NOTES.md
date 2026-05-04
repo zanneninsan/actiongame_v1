@@ -2,6 +2,11 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.137
+### English
+- Brightened the start button in the opening modal so it reads as clearly clickable before hover.
+### Japanese
+- 開始モーダルのスタートボタンを通常状態でも明るくし、押せるボタンだと分かりやすくしました。
 ## v0.1.136
 ### English
 - Converted runtime PNG assets that benefited from compression to WebP and updated game, story, enemy, item, sprite, and UI references.

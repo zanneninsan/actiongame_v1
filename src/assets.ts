@@ -10,7 +10,7 @@ export const PROP_ASSETS = {
 } as const;
 export type StreetLampKey = (typeof PROP_ASSETS)[keyof typeof PROP_ASSETS];
 export type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
-export type EnemyType = "neonBouncer" | "knifePunk" | "aquaMascot";
+export type EnemyType = "knifePunk" | "aquaMascot";
 export const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
 export const ITEM_GLOW_COLORS: Record<ItemType, number> = {
   energyDrink: 0x8cffd2,
@@ -121,16 +121,6 @@ export const ENEMY_DEFINITIONS: Record<
     };
   }
 > = {
-  neonBouncer: {
-    key: "enemy-neon-bouncer",
-    label: "Neon Bouncer",
-    displayWidth: 76,
-    displayHeight: 64,
-    bodyWidth: 56,
-    bodyHeight: 42,
-    bodyOffsetX: 10,
-    bodyOffsetY: 16,
-  },
   knifePunk: {
     key: "enemy-knife-punk",
     label: "Knife Punk",
