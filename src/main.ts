@@ -7,8 +7,6 @@ import {
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
   resolveStageName,
-  type ItemType,
-  type ScoreState,
 } from "./assets";
 import { DEFAULT_STAGE_ID, PLAYABLE_STAGE_IDS, STAGES, cloneStage, type StageId } from "./stages";
 import { RainbowWinPipeline } from "./rainbowPipeline";
@@ -32,6 +30,14 @@ import {
 } from "./enemies";
 import { createItems, populateItems } from "./items";
 import { createBonusBlocks, populateBonusBlocks } from "./bonusBlocks";
+import { defeatEnemy, tryStompEnemy } from "./enemyCombat";
+import { RewardSystem } from "./rewardSystem";
+import {
+  CheckpointController,
+  OneWayGateController,
+  handleSpecialPlatformCollision,
+  movePlayerToCheckpointStart,
+} from "./stageInteractives";
 import {
   carryPlayerOnDescendingMovingPlatforms,
   isPlayerSupportedByDescendingMovingPlatform,
@@ -85,18 +91,6 @@ const DAMAGE_INVULNERABLE_MS = 1150;
 const DAMAGE_INPUT_LOCK_MS = 280;
 const DAMAGE_KNOCKBACK_X = 430;
 const DAMAGE_KNOCKBACK_Y = -245;
-const ENEMY_STOMP_TOLERANCE = 18;
-const ENEMY_STOMP_BOUNCE_Y = -455;
-const ENEMY_STOMP_COMBO_MS = 1400;
-const ENEMY_STOMP_BASE_SCORE = 200;
-const SPRING_PLATFORM_DEFAULT_VELOCITY = -820;
-const FRAGILE_PLATFORM_DELAY_MS = 360;
-const FRAGILE_PLATFORM_RESPAWN_MS = 2800;
-const POWERUP_DURATION_MS = 9000;
-const POWER_SPEED_MULTIPLIER = 1.28;
-const POWER_JUMP_MULTIPLIER = 1.18;
-const DASH_RING_VELOCITY_X = 720;
-const DASH_RING_BOOST_MS = 900;
 const PLAYER_DISPLAY_WIDTH = 320;
 const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
@@ -142,7 +136,6 @@ type OrientationLockScreen = Screen & {
 
 let extraTouchPointersAdded = false;
 let stageBackgroundDefaultsAppliedFor: StageId | undefined;
-const reachedCheckpoints = new Map<StageId, { x: number; y: number }>();
 
 class PrototypeScene extends Phaser.Scene {
   private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -153,9 +146,8 @@ class PrototypeScene extends Phaser.Scene {
   private decorationPlatforms!: Phaser.Physics.Arcade.StaticGroup;
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
   private bonusBlocksGroup?: Phaser.Physics.Arcade.StaticGroup;
-  private checkpointsGroup?: Phaser.Physics.Arcade.StaticGroup;
-  private oneWayGateWalls?: Phaser.Physics.Arcade.StaticGroup;
-  private oneWayGateSprites: Phaser.GameObjects.Image[] = [];
+  private checkpointController?: CheckpointController;
+  private oneWayGateController?: OneWayGateController;
   private enemiesGroup?: Phaser.Physics.Arcade.Group;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d" | "shift", Phaser.Input.Keyboard.Key>;
@@ -172,14 +164,7 @@ class PrototypeScene extends Phaser.Scene {
   private mobileJumpQueued = false;
   private mobileControlCleanup: Array<() => void> = [];
   private mobileOrientationCleanup: Array<() => void> = [];
-  private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0, coin: 0 };
-  private bonusScore = 0;
-  private speedPowerUntil = 0;
-  private jumpPowerUntil = 0;
-  private starPowerUntil = 0;
-  private dashRingBoostUntil = 0;
-  private damageTaken = 0;
-  private collectedCoins = 0;
+  private rewards?: RewardSystem;
   private startTime = 0;
   private isRunActive = false;
   private isRestarting = false;
@@ -208,8 +193,6 @@ class PrototypeScene extends Phaser.Scene {
   private hasCrouchDanmakuPlayed = false;
   private jumpChainCount = 0;
   private hasJumpChainDanmakuPlayed = false;
-  private enemyStompCombo = 0;
-  private lastEnemyStompAt = 0;
   private wasOnFloor = false;
   private isLanding = false;
   private landingFastForwarded = false;
@@ -332,7 +315,13 @@ class PrototypeScene extends Phaser.Scene {
     createEnemyAnimations(this);
 
     this.player = this.physics.add.sprite(this.editorStage.playerStart.x, this.editorStage.playerStart.y, "player-idle");
-    this.movePlayerToCheckpointStart();
+    movePlayerToCheckpointStart(this.currentStageId, this.editorStage, this.player);
+    this.rewards = new RewardSystem(
+      this,
+      () => this.player,
+      () => this.updateScoreText(),
+      () => this.tryEmitScoreDanmaku(),
+    );
     this.player.setDisplaySize(PLAYER_DISPLAY_WIDTH, PLAYER_DISPLAY_HEIGHT);
     this.player.setCollideWorldBounds(true);
     this.applyPlayerBody();
@@ -361,21 +350,32 @@ class PrototypeScene extends Phaser.Scene {
       player: this.player,
       placements: this.editorStage.items,
       canCollect: () => !this.stageEditor?.isEnabled,
-      onCollect: (itemType, points) => {
-        this.applyItemReward(itemType, points);
-      },
+      onCollect: (itemType, points) => this.rewards?.collectItem(itemType, points),
       trackStageObject: (object) => this.trackStageObject(object),
     });
     this.bonusBlocksGroup = createBonusBlocks({
       scene: this,
       player: this.player,
       placements: this.editorStage.bonusBlocks ?? [],
-      onReward: (itemType, x, y) => this.applyBonusBlockReward(itemType, x, y),
+      onReward: (itemType, x, y) => this.rewards?.applyBonusBlockReward(itemType, x, y),
     });
-    this.checkpointsGroup = this.createCheckpoints();
-    this.oneWayGateWalls = this.physics.add.staticGroup();
-    this.physics.add.collider(this.player, this.oneWayGateWalls);
-    this.createOneWayGates();
+    this.checkpointController = new CheckpointController(
+      this,
+      this.player,
+      () => this.currentStageId,
+      () => this.editorStage,
+      () => this.isRunActive && !this.stageEditor?.isEnabled,
+      (x, y, text) => this.rewards?.showFloatingText(x, y, text),
+    );
+    this.checkpointController.create();
+    this.oneWayGateController = new OneWayGateController(
+      this,
+      this.player,
+      () => this.editorStage,
+      () => this.isRunActive && !this.stageEditor?.isEnabled,
+      (x, y, text) => this.rewards?.showFloatingText(x, y, text),
+    );
+    this.oneWayGateController.create();
     this.enemiesGroup = createEnemies(this, this.player, this.editorStage.enemies ?? [], (enemy) =>
       this.damagePlayer(enemy),
     );
@@ -476,7 +476,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.updateStoryDialogueProgress();
     this.refreshDropThroughDecorationPlatform();
-    this.updateOneWayGates();
+    this.oneWayGateController?.update();
     if (this.stageEditor?.isEnabled) {
       freezeEnemies(this.enemiesGroup);
     } else {
@@ -503,11 +503,8 @@ class PrototypeScene extends Phaser.Scene {
     const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
     const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
     const isShiftSpeedActive = this.keys.shift.isDown || this.mobileInput.shift;
-    const speedMultiplier =
-      (isShiftSpeedActive ? DASH_SPEED_MULTIPLIER : 1) *
-      (this.time.now < this.speedPowerUntil ? POWER_SPEED_MULTIPLIER : 1) *
-      (this.time.now < this.dashRingBoostUntil ? POWER_SPEED_MULTIPLIER : 1);
-    const jumpMultiplier = this.time.now < this.jumpPowerUntil ? POWER_JUMP_MULTIPLIER : 1;
+    const speedMultiplier = (isShiftSpeedActive ? DASH_SPEED_MULTIPLIER : 1) * (this.rewards?.getSpeedMultiplier() ?? 1);
+    const jumpMultiplier = this.rewards?.getJumpMultiplier() ?? 1;
     const isCrouchInputActive = down && onFloor;
     this.updateDecorationPlatformDrop(down, onFloor);
     this.applyPlayerBody(isCrouchInputActive);
@@ -559,7 +556,7 @@ class PrototypeScene extends Phaser.Scene {
     this.updateJumpChainDanmaku(startedJump, landedThisFrame);
     this.updateCrouchDanmaku(isCrouching);
     if (landedThisFrame) {
-      this.enemyStompCombo = 0;
+      this.rewards?.resetStompComboOnLanding();
     }
 
     if (landedThisFrame) {
@@ -657,14 +654,7 @@ class PrototypeScene extends Phaser.Scene {
     this.danmaku = undefined;
     this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
-    this.score = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0, coin: 0 };
-    this.bonusScore = 0;
-    this.speedPowerUntil = 0;
-    this.jumpPowerUntil = 0;
-    this.starPowerUntil = 0;
-    this.dashRingBoostUntil = 0;
-    this.damageTaken = 0;
-    this.collectedCoins = 0;
+    this.rewards?.reset();
     this.startTime = 0;
     this.isRunActive = false;
     this.hasWon = false;
@@ -673,8 +663,6 @@ class PrototypeScene extends Phaser.Scene {
     this.hasCrouchDanmakuPlayed = false;
     this.jumpChainCount = 0;
     this.hasJumpChainDanmakuPlayed = false;
-    this.enemyStompCombo = 0;
-    this.lastEnemyStompAt = 0;
     this.wasOnFloor = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
@@ -691,9 +679,8 @@ class PrototypeScene extends Phaser.Scene {
     this.collisionDebugGraphics = undefined;
     this.itemsGroup = undefined;
     this.bonusBlocksGroup = undefined;
-    this.checkpointsGroup = undefined;
-    this.oneWayGateWalls = undefined;
-    this.oneWayGateSprites = [];
+    this.checkpointController = undefined;
+    this.oneWayGateController = undefined;
     this.enemiesGroup = undefined;
     this.goal = undefined;
     this.finalScoreText = undefined;
@@ -940,7 +927,7 @@ class PrototypeScene extends Phaser.Scene {
       this.stageConstants.worldHeight + FALL_RESET_WORLD_MARGIN,
     );
     this.cameras.main.setBounds(0, this.stageConstants.worldTop, this.editorStage.worldWidth, this.stageConstants.worldHeight);
-    this.movePlayerToCheckpointStart();
+    movePlayerToCheckpointStart(this.currentStageId, this.editorStage, this.player);
     this.player.setVelocity(0, 0);
     this.player.setAcceleration(0, 0);
     this.player.setDrag(0, 0);
@@ -1078,10 +1065,6 @@ class PrototypeScene extends Phaser.Scene {
     this.clearStaticGroup(this.decorationPlatforms);
     this.clearStaticGroup(this.itemsGroup);
     this.clearStaticGroup(this.bonusBlocksGroup);
-    this.clearStaticGroup(this.checkpointsGroup);
-    this.clearStaticGroup(this.oneWayGateWalls);
-    this.oneWayGateSprites.forEach((gate) => gate.destroy());
-    this.oneWayGateSprites = [];
     this.clearDynamicGroup(this.enemiesGroup);
 
     renderStageObjects({
@@ -1105,8 +1088,8 @@ class PrototypeScene extends Phaser.Scene {
       blocksGroup: this.bonusBlocksGroup,
       placements: this.editorStage.bonusBlocks ?? [],
     });
-    this.populateCheckpoints();
-    this.createOneWayGates();
+    this.checkpointController?.rebuild();
+    this.oneWayGateController?.rebuild();
     populateEnemies(this.enemiesGroup, this.editorStage.enemies ?? []);
     if (this.stageEditor?.isEnabled) {
       freezeEnemies(this.enemiesGroup);
@@ -1148,156 +1131,19 @@ class PrototypeScene extends Phaser.Scene {
     stageBackgroundDefaultsAppliedFor = this.currentStageId;
   }
 
-  private movePlayerToCheckpointStart() {
-    const checkpoint = reachedCheckpoints.get(this.currentStageId);
-    const start = checkpoint ?? this.editorStage.playerStart;
-    this.player.setPosition(start.x, start.y);
-  }
-
-  private createCheckpoints() {
-    const checkpoints = this.physics.add.staticGroup();
-    this.populateCheckpoints(checkpoints);
-    this.physics.add.overlap(this.player, checkpoints, (_, checkpointObject) => {
-      this.activateCheckpoint(checkpointObject as Phaser.Physics.Arcade.Image);
-    });
-    return checkpoints;
-  }
-
-  private populateCheckpoints(group = this.checkpointsGroup) {
-    if (!group) {
-      return;
-    }
-
-    (this.editorStage.checkpoints ?? []).forEach((checkpoint) => {
-      const flag = group.create(checkpoint.x, checkpoint.y, "stage-checkpoint-flag") as Phaser.Physics.Arcade.Image;
-      flag.setDisplaySize(48, 96);
-      flag.setDepth(0.12);
-      flag.setData("checkpointX", checkpoint.x);
-      flag.setData("checkpointY", checkpoint.y - 52);
-      flag.refreshBody();
-    });
-  }
-
-  private activateCheckpoint(flag: Phaser.Physics.Arcade.Image) {
-    if (!this.isRunActive || this.stageEditor?.isEnabled || flag.getData("activated")) {
-      return;
-    }
-
-    flag.setData("activated", true);
-    flag.setTint(0x86efac);
-    reachedCheckpoints.set(this.currentStageId, {
-      x: flag.getData("checkpointX") as number,
-      y: flag.getData("checkpointY") as number,
-    });
-    this.showFloatingScore(flag.x, flag.y - 72, "CHECK");
-  }
-
-  private createOneWayGates() {
-    if (!this.oneWayGateWalls) {
-      return;
-    }
-
-    (this.editorStage.oneWayGates ?? []).forEach((gate) => {
-      const height = gate.height ?? 160;
-      const sprite = this.add.image(gate.x, gate.y, "stage-one-way-gate").setDisplaySize(64, height).setDepth(0.08);
-      sprite.setData("gateX", gate.x);
-      sprite.setData("gateY", gate.y);
-      sprite.setData("height", height);
-      sprite.setData("activated", false);
-      this.oneWayGateSprites.push(sprite);
-    });
-  }
-
-  private updateOneWayGates() {
-    if (!this.isRunActive || this.stageEditor?.isEnabled || !this.oneWayGateWalls) {
-      return;
-    }
-
-    this.oneWayGateSprites.forEach((gate) => {
-      if (gate.getData("activated") || this.player.x <= (gate.getData("gateX") as number) + 24) {
-        return;
-      }
-
-      gate.setData("activated", true);
-      gate.setTint(0xf0abfc);
-      const height = gate.getData("height") as number;
-      const wall = this.oneWayGateWalls!.create(gate.x - 44, gate.y, "platform-hitbox") as Phaser.Physics.Arcade.Image;
-      wall.setDisplaySize(24, height);
-      wall.setVisible(false);
-      wall.refreshBody();
-      this.showFloatingScore(gate.x, gate.y - height / 2, "ONE WAY");
-    });
-  }
-
   private handlePlatformCollision(
     _playerObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile,
     platformObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile,
   ) {
-    if (!this.isRunActive || this.stageEditor?.isEnabled) {
-      return;
-    }
-
-    const platform = platformObject as Phaser.Physics.Arcade.Image;
-    const behavior = platform.getData("platformBehavior") as string | undefined;
-    if (!behavior || !this.didPlayerLandOnStaticPlatform(platform)) {
-      return;
-    }
-
-    if (behavior === "spring") {
-      const velocity = platform.getData("springVelocity") as number | undefined;
-      this.player.setVelocityY(velocity ?? SPRING_PLATFORM_DEFAULT_VELOCITY);
+    handleSpecialPlatformCollision({
+      scene: this,
+      player: this.player,
+      platformObject,
+      canInteract: () => this.isRunActive && !this.stageEditor?.isEnabled,
+      onLaunch: () => {
       this.isLanding = false;
       this.landingFastForwarded = false;
-      this.player.anims.play("player-air", true);
-      this.cameras.main.shake(80, 0.002);
-      return;
-    }
-
-    if (behavior === "fragile") {
-      this.queueFragilePlatformCollapse(platform);
-    }
-  }
-
-  private didPlayerLandOnStaticPlatform(platform: Phaser.Physics.Arcade.Image) {
-    const platformBody = platform.body as Phaser.Physics.Arcade.StaticBody | undefined;
-    if (!platformBody || !this.player.body) {
-      return false;
-    }
-
-    const playerBody = this.player.body;
-    const previousBottom = playerBody.prev.y + playerBody.height;
-    const overlapsHorizontally = playerBody.right > platformBody.x + 3 && playerBody.x < platformBody.x + platformBody.width - 3;
-    return overlapsHorizontally && playerBody.velocity.y >= 0 && previousBottom <= platformBody.y + DECORATION_PLATFORM_LAND_TOLERANCE;
-  }
-
-  private queueFragilePlatformCollapse(platform: Phaser.Physics.Arcade.Image) {
-    if (platform.getData("collapseQueued")) {
-      return;
-    }
-
-    platform.setData("collapseQueued", true);
-    const visual = platform.getData("fragileVisual") as Phaser.GameObjects.Image | undefined;
-    const delayMs = (platform.getData("fragileDelayMs") as number | undefined) ?? FRAGILE_PLATFORM_DELAY_MS;
-    const respawnMs = (platform.getData("fragileRespawnMs") as number | undefined) ?? FRAGILE_PLATFORM_RESPAWN_MS;
-    if (visual) {
-      this.tweens.add({
-        targets: visual,
-        alpha: 0.45,
-        x: visual.x + 2,
-        duration: 70,
-        yoyo: true,
-        repeat: Math.max(1, Math.floor(delayMs / 140)),
-      });
-    }
-    this.time.delayedCall(delayMs, () => {
-      platform.disableBody(true, true);
-      visual?.setVisible(false);
-      this.time.delayedCall(respawnMs, () => {
-        platform.enableBody(false, platform.x, platform.y, true, false);
-        platform.refreshBody();
-        platform.setData("collapseQueued", false);
-        visual?.setAlpha(1).setVisible(true);
-      });
+      },
     });
   }
 
@@ -1479,18 +1325,23 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    if (this.time.now < this.starPowerUntil) {
-      this.defeatEnemy(enemy, false);
-      this.addEnemyStompScore(enemy);
+    if (this.rewards?.isStarActive()) {
+      defeatEnemy(enemy, false);
+      this.rewards.addEnemyDefeatScore(enemy);
       return;
     }
 
-    if (this.tryStompEnemy(enemy) || this.time.now < this.invulnerableUntil) {
+    const stomped = tryStompEnemy(this.player, enemy, () => {
+      this.isLanding = false;
+      this.landingFastForwarded = false;
+      this.rewards?.addEnemyDefeatScore(enemy);
+    });
+    if (stomped || this.time.now < this.invulnerableUntil) {
       return;
     }
 
     const direction = this.player.x < enemy.x ? -1 : 1;
-    this.damageTaken += 1;
+    this.rewards?.noteDamage();
     this.hurtUntil = this.time.now + DAMAGE_INPUT_LOCK_MS;
     this.invulnerableUntil = this.time.now + DAMAGE_INVULNERABLE_MS;
     this.isLanding = false;
@@ -1504,127 +1355,6 @@ class PrototypeScene extends Phaser.Scene {
     this.player.anims.play("player-air", true);
     this.resetPlayerIdleState();
     this.playDamageMotion(direction);
-  }
-
-  private tryStompEnemy(enemy: Phaser.Physics.Arcade.Sprite) {
-    const playerBody = this.player.body;
-    const enemyBody = enemy.body as Phaser.Physics.Arcade.Body | undefined;
-    if (!playerBody || !enemyBody || playerBody.velocity.y < 90 || enemy.getData("defeated")) {
-      return false;
-    }
-
-    const playerPreviousBottom = playerBody.prev.y + playerBody.height;
-    const enemyTop = enemyBody.y;
-    const cameFromAbove = playerPreviousBottom <= enemyTop + ENEMY_STOMP_TOLERANCE;
-    if (!cameFromAbove) {
-      return false;
-    }
-
-    enemy.setData("defeated", true);
-    this.player.setVelocityY(ENEMY_STOMP_BOUNCE_Y);
-    this.isLanding = false;
-    this.landingFastForwarded = false;
-    this.player.anims.play("player-air", true);
-    this.addEnemyStompScore(enemy);
-    this.defeatEnemy(enemy, true);
-    return true;
-  }
-
-  private defeatEnemy(enemy: Phaser.Physics.Arcade.Sprite, squash: boolean) {
-    const enemyBody = enemy.body as Phaser.Physics.Arcade.Body | undefined;
-    enemy.setData("defeated", true);
-    if (enemyBody) {
-      enemyBody.enable = false;
-    }
-    enemy.setVelocity(0, 0);
-    enemy.setActive(false);
-    this.tweens.add({
-      targets: enemy,
-      alpha: 0,
-      scaleX: enemy.scaleX * (squash ? 1.18 : 0.6),
-      scaleY: enemy.scaleY * (squash ? 0.45 : 0.6),
-      y: enemy.y + (squash ? 16 : -18),
-      duration: 140,
-      ease: "Back.easeIn",
-      onComplete: () => enemy.destroy(),
-    });
-  }
-
-  private addEnemyStompScore(enemy: Phaser.Physics.Arcade.Sprite) {
-    this.enemyStompCombo = this.time.now - this.lastEnemyStompAt <= ENEMY_STOMP_COMBO_MS ? this.enemyStompCombo + 1 : 1;
-    this.lastEnemyStompAt = this.time.now;
-    const points = ENEMY_STOMP_BASE_SCORE * this.enemyStompCombo;
-    this.bonusScore += points;
-    this.updateScoreText();
-    this.tryEmitScoreDanmaku();
-    this.showFloatingScore(enemy.x, enemy.y - 48, `+${points}${this.enemyStompCombo > 1 ? ` x${this.enemyStompCombo}` : ""}`);
-  }
-
-  private showFloatingScore(x: number, y: number, text: string) {
-    const scorePopup = this.add
-      .text(x, y, text, {
-        fontFamily: "monospace",
-        fontSize: "20px",
-        color: "#fde68a",
-      })
-      .setOrigin(0.5)
-      .setDepth(120)
-      .setShadow(1, 1, "#020617", 3, true, true);
-
-    this.tweens.add({
-      targets: scorePopup,
-      y: y - 34,
-      alpha: 0,
-      duration: 720,
-      ease: "Sine.easeOut",
-      onComplete: () => scorePopup.destroy(),
-    });
-  }
-
-  private applyBonusBlockReward(itemType: ItemType, x: number, y: number) {
-    const definition = ITEM_DEFINITIONS[itemType];
-    this.applyItemReward(itemType, definition.points);
-    const rewardSprite = this.add.image(x, y, definition.key).setDisplaySize(46, 46).setDepth(0.4);
-    this.tweens.add({
-      targets: rewardSprite,
-      y: y - 38,
-      alpha: 0,
-      duration: 720,
-      ease: "Sine.easeOut",
-      onComplete: () => rewardSprite.destroy(),
-    });
-  }
-
-  private applyItemReward(itemType: ItemType, points: number) {
-    if (points > 0) {
-      this.score[itemType] = (this.score[itemType] ?? 0) + points;
-    }
-    if (itemType === "coin") {
-      this.collectedCoins += 1;
-    }
-    this.applyPowerup(itemType);
-    this.updateScoreText();
-    this.tryEmitScoreDanmaku();
-  }
-
-  private applyPowerup(itemType: ItemType) {
-    if (itemType === "powerSpeed") {
-      this.speedPowerUntil = this.time.now + POWERUP_DURATION_MS;
-      this.showFloatingScore(this.player.x, this.player.y - 110, "SPEED UP");
-    } else if (itemType === "powerJump") {
-      this.jumpPowerUntil = this.time.now + POWERUP_DURATION_MS;
-      this.showFloatingScore(this.player.x, this.player.y - 110, "JUMP UP");
-    } else if (itemType === "star") {
-      this.starPowerUntil = this.time.now + POWERUP_DURATION_MS;
-      this.invulnerableUntil = Math.max(this.invulnerableUntil, this.starPowerUntil);
-      this.cameras.main.flash(180, 255, 226, 90);
-      this.showFloatingScore(this.player.x, this.player.y - 110, "STAR");
-    } else if (itemType === "dashRing") {
-      this.dashRingBoostUntil = this.time.now + DASH_RING_BOOST_MS;
-      const direction = this.player.flipX ? -1 : 1;
-      this.player.setVelocityX(direction * DASH_RING_VELOCITY_X);
-      this.showFloatingScore(this.player.x, this.player.y - 110, "DASH");
-    }
   }
 
   private playDamageMotion(direction: number) {
@@ -1657,12 +1387,12 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    const total = this.getItemScore();
+    const total = this.rewards?.getItemScore() ?? 0;
     this.scoreText.setText(`${t(this.locale, "hud.score")}:${total}`);
   }
 
   private tryEmitScoreDanmaku() {
-    if (this.hasScoreMilestoneDanmakuPlayed || this.getItemScore() <= SCORE_DANMAKU_THRESHOLD) {
+    if (this.hasScoreMilestoneDanmakuPlayed || (this.rewards?.getItemScore() ?? 0) <= SCORE_DANMAKU_THRESHOLD) {
       return;
     }
 
@@ -1804,10 +1534,6 @@ class PrototypeScene extends Phaser.Scene {
       .strokeRect(body.x, body.y, body.width, body.height);
   }
 
-  private getItemScore() {
-    return Object.values(this.score).reduce((sum, value) => sum + value, this.bonusScore);
-  }
-
   private getRemainingMilliseconds() {
     if (!this.isRunActive || this.startTime === 0) {
       return GAME_TIME_MS;
@@ -1823,30 +1549,6 @@ class PrototypeScene extends Phaser.Scene {
 
   private formatScoreValue(score: number) {
     return score.toFixed(2);
-  }
-
-  private getClearRank(finalScore: number, remainingMs: number) {
-    const noDamageBonus = this.damageTaken === 0 ? 1 : 0;
-    const speedBonus = remainingMs >= GAME_TIME_MS * 0.55 ? 1 : 0;
-    const scoreBonus = finalScore >= 4200 ? 1 : finalScore >= 2600 ? 0.5 : 0;
-    const rankScore = noDamageBonus + speedBonus + scoreBonus;
-    if (rankScore >= 2.5) {
-      return "S";
-    }
-    if (rankScore >= 1.5) {
-      return "A";
-    }
-    if (rankScore >= 0.5) {
-      return "B";
-    }
-    return "C";
-  }
-
-  private getMissionSummary(remainingMs: number) {
-    const noDamage = this.damageTaken === 0 ? "NO DMG OK" : `DMG ${this.damageTaken}`;
-    const coins = `COIN ${this.collectedCoins}`;
-    const speed = remainingMs >= GAME_TIME_MS * 0.55 ? "FAST OK" : "FAST --";
-    return `${noDamage}  ${coins}  ${speed}`;
   }
 
   private showLeaderboard(
@@ -2155,10 +1857,10 @@ class PrototypeScene extends Phaser.Scene {
     this.hasWon = true;
     const remaining = this.getRemainingMilliseconds();
     const timeBonus = (remaining / 1000) * TIME_BONUS_PER_SECOND;
-    const itemScore = this.getItemScore();
+    const itemScore = this.rewards?.getItemScore() ?? 0;
     const finalScore = itemScore + timeBonus;
-    const clearRank = this.getClearRank(finalScore, remaining);
-    const missionLine = this.getMissionSummary(remaining);
+    const clearRank = this.rewards?.getClearRank(finalScore, remaining, GAME_TIME_MS) ?? "C";
+    const missionLine = this.rewards?.getMissionSummary(remaining, GAME_TIME_MS) ?? "";
     this.timerText.setText(
       `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,
     );
