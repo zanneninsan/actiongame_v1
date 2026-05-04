@@ -32,7 +32,6 @@ import {
 } from "./enemies";
 import { createItems, populateItems } from "./items";
 import {
-  carryPlayerOnMovingPlatforms,
   renderStageObjects,
   updateMovingPlatforms,
   type MovingPlatformInstance,
@@ -60,7 +59,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.166";
+const DEBUG_VERSION = "v0.1.167";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -427,7 +426,6 @@ class PrototypeScene extends Phaser.Scene {
     this.updateTimerText();
     const movingPlatformsActive = this.isRunActive && !this.stageEditor?.isEnabled;
     updateMovingPlatforms(this.movingPlatformInstances, movingPlatformsActive);
-    carryPlayerOnMovingPlatforms(this.player, this.movingPlatformInstances, movingPlatformsActive);
     if (!this.isRunActive) {
       if (!this.isDefeatSequenceActive) {
         this.applyPlayerBody(false);

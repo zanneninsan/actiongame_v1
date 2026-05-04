@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.167
+### English
+- Removed the manual horizontal carry correction from moving platforms so player walking input works normally while Phaser's platform friction handles riding motion.
+### Japanese
+- 横移動床の手動追随補正を外し、Phaserの床摩擦による移動に任せることで、床の上でも通常通り歩けるようにしました。
+
 ## v0.1.166
 ### English
 - Fixed moving platform carry so horizontal platform motion is not applied twice when Arcade Physics already moved the player.

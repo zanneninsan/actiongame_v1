@@ -243,60 +243,6 @@ const getMovingPlatformProgress = (
   return (currentDeltaX * distanceX + currentDeltaY * distanceY) / lengthSq;
 };
 
-export const carryPlayerOnMovingPlatforms = (
-  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
-  instances: MovingPlatformInstance[],
-  isActive: boolean,
-) => {
-  if (!isActive || !player.body) {
-    return;
-  }
-
-  const playerBody = player.body;
-  const playerLeft = playerBody.x;
-  const playerRight = playerBody.x + playerBody.width;
-  const playerBottom = playerBody.y + playerBody.height;
-  const isGrounded = playerBody.blocked.down || playerBody.touching.down;
-  if (!isGrounded) {
-    return;
-  }
-
-  const platform = instances.find((candidate) => {
-    if (candidate.deltaX === 0 || !candidate.body.active) {
-      return false;
-    }
-
-    const platformLeft = candidate.body.x - candidate.width / 2;
-    const platformRight = platformLeft + candidate.width;
-    const platformTop = candidate.body.y - candidate.height / 2;
-    const horizontalOverlap = playerRight > platformLeft + 4 && playerLeft < platformRight - 4;
-    const verticalDistance = Math.abs(playerBottom - platformTop);
-    return horizontalOverlap && verticalDistance <= 12;
-  });
-
-  if (!platform) {
-    return;
-  }
-
-  const missingDeltaX = getMissingPlatformCarryX(platform.deltaX, playerBody.deltaX());
-  if (missingDeltaX === 0) {
-    return;
-  }
-
-  player.setX(player.x + missingDeltaX);
-  player.body.updateFromGameObject();
-};
-
-const getMissingPlatformCarryX = (platformDeltaX: number, playerDeltaX: number) => {
-  if (platformDeltaX === 0) {
-    return 0;
-  }
-
-  const isPlayerAlreadyMovingWithPlatform =
-    Math.sign(playerDeltaX) === Math.sign(platformDeltaX) && Math.abs(playerDeltaX) >= Math.abs(platformDeltaX);
-  return isPlayerAlreadyMovingWithPlatform ? 0 : platformDeltaX;
-};
-
 const syncMovingPlatformVisuals = (platform: MovingPlatformInstance) => {
   const x = platform.body.x - platform.width / 2;
   const y = platform.body.y - platform.height / 2;
