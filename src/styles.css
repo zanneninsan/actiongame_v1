@@ -513,18 +513,15 @@ canvas {
 }
 
 .options-dialog {
-  --fantasy-window-border: clamp(32px, 6vw, 46px);
   box-sizing: border-box;
-  width: min(440px, calc(100vw - 36px));
-  max-height: calc(100dvh - 36px);
+  width: min(440px, calc(100vw - 36px), calc((100dvh - 36px) * 1.2381));
+  aspect-ratio: 520 / 420;
   display: grid;
+  align-content: start;
   gap: 14px;
-  padding: 0 clamp(8px, 3vw, 16px) 14px;
-  border: var(--fantasy-window-border) solid transparent;
-  border-image-source: url("../assets/ui/fantasy/frame_parts/frame_window_9slice_safe.png");
-  border-image-slice: 132 fill;
-  border-image-width: var(--fantasy-window-border);
-  border-image-repeat: stretch;
+  padding: clamp(52px, 10vw, 64px) clamp(46px, 8vw, 66px) clamp(34px, 7vw, 48px);
+  border: 0;
+  background: url("../assets/ui/fantasy/options_modal_window.png") center / 100% 100% no-repeat;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
 }
 

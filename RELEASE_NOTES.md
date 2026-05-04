@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.110
+### English
+- Replaced the options modal CSS-built frame with a single fixed-aspect raster window asset.
+- Limited options modal CSS to sizing and form layout so the frame no longer distorts.
+### Japanese
+- 設定モーダルのCSSで組み立てていた枠を、固定アスペクト比の1枚絵ウィンドウ素材に置き換えました。
+- 設定モーダルのCSSをサイズとフォーム配置中心に絞り、枠が歪まないようにしました。
+
 ## v0.1.109
 ### English
 - Replaced the CSS-built start modal frame with a single fixed-aspect raster window asset.
