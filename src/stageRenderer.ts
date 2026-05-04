@@ -253,26 +253,42 @@ export const carryPlayerOnDescendingMovingPlatforms = (
 
   const platformTop = platform.body.y - platform.height / 2;
   const bodyBottom = playerBody.y + playerBody.height;
-  const targetDeltaY = platformTop - bodyBottom;
+  const desiredBodyY = platformTop - playerBody.height;
+  const targetBodyDeltaY = desiredBodyY - playerBody.y;
+  const isGroundedByPhysics = playerBody.blocked.down || playerBody.touching.down;
   const shouldLogDebug = isMovingPlatformDebugEnabled();
-  if (shouldLogDebug && Math.abs(targetDeltaY) > MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE) {
+  if (playerBody.velocity.y < 0 && !isGroundedByPhysics) {
+    if (shouldLogDebug) {
+      logDescendingMovingPlatformDebug("skip-upward-motion", playerBody, platform, {
+        bodyBottomBefore: bodyBottom,
+        desiredBodyY,
+        platformTop,
+        targetBodyDeltaY,
+      });
+    }
+    return;
+  }
+
+  if (shouldLogDebug && Math.abs(targetBodyDeltaY) > MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE) {
     logDescendingMovingPlatformDebug("skip-outside-tolerance", playerBody, platform, {
       bodyBottomBefore: bodyBottom,
+      desiredBodyY,
       platformTop,
-      targetDeltaY,
+      targetBodyDeltaY,
     });
   }
-  if (Math.abs(targetDeltaY) > MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE) {
+  if (Math.abs(targetBodyDeltaY) > MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE) {
     return;
   }
 
   const currentBodyY = playerBody.y;
   const velocityYBefore = playerBody.velocity.y;
-  player.setY(player.y + targetDeltaY);
+  player.setY(player.y + targetBodyDeltaY);
+  playerBody.y = desiredBodyY;
+  playerBody.updateCenter();
   if (playerBody.velocity.y > 0) {
     player.setVelocityY(0);
   }
-  player.body.updateFromGameObject();
   playerBody.prev.y += playerBody.y - currentBodyY;
   playerBody.prevFrame.y += playerBody.y - currentBodyY;
 
@@ -280,8 +296,9 @@ export const carryPlayerOnDescendingMovingPlatforms = (
     logDescendingMovingPlatformDebug("carry", playerBody, platform, {
       bodyBottomBefore: bodyBottom,
       bodyBottomAfter: playerBody.y + playerBody.height,
+      desiredBodyY,
       platformTop,
-      targetDeltaY,
+      targetBodyDeltaY,
       appliedBodyDeltaY: playerBody.y - currentBodyY,
       velocityYBefore,
     });

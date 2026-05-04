@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.180
+### English
+- Fixed descending moving platform carry to align the player's physics body directly to the platform top, avoiding the Game Object sync mismatch shown in debug logs.
+### Japanese
+- デバッグログで確認できたGame Object同期時のズレを避けるため、下方向に動く床ではプレイヤーの物理bodyを床の上面へ直接合わせるように修正しました。
+
 ## v0.1.179
 ### English
 - Added opt-in moving platform debug logging for descending platform carry, including platform deltas, player body position, grounded flags, and applied correction values.
