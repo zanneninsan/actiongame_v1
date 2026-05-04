@@ -722,6 +722,8 @@ export class StageEditor {
         (Array.isArray(value.bonusBlocks) && value.bonusBlocks.every((block) => this.isBonusBlockPlacement(block)))) &&
       (value.checkpoints === undefined ||
         (Array.isArray(value.checkpoints) && value.checkpoints.every((checkpoint) => this.isCheckpointPlacement(checkpoint)))) &&
+      (value.oneWayGates === undefined ||
+        (Array.isArray(value.oneWayGates) && value.oneWayGates.every((gate) => this.isOneWayGatePlacement(gate)))) &&
       (value.enemies === undefined ||
         (Array.isArray(value.enemies) && value.enemies.every((enemy) => this.isEnemyPlacement(enemy))))
     );
@@ -812,6 +814,10 @@ export class StageEditor {
 
   private isCheckpointPlacement(value: unknown) {
     return this.isPoint(value);
+  }
+
+  private isOneWayGatePlacement(value: unknown) {
+    return this.isRecord(value) && this.isNumber(value.x) && this.isNumber(value.y) && this.isOptionalNumber(value.height);
   }
 
   private isEnemyPlacement(value: unknown): value is EnemyPlacement {

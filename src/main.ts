@@ -154,6 +154,8 @@ class PrototypeScene extends Phaser.Scene {
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
   private bonusBlocksGroup?: Phaser.Physics.Arcade.StaticGroup;
   private checkpointsGroup?: Phaser.Physics.Arcade.StaticGroup;
+  private oneWayGateWalls?: Phaser.Physics.Arcade.StaticGroup;
+  private oneWayGateSprites: Phaser.GameObjects.Image[] = [];
   private enemiesGroup?: Phaser.Physics.Arcade.Group;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d" | "shift", Phaser.Input.Keyboard.Key>;
@@ -371,6 +373,9 @@ class PrototypeScene extends Phaser.Scene {
       onReward: (itemType, x, y) => this.applyBonusBlockReward(itemType, x, y),
     });
     this.checkpointsGroup = this.createCheckpoints();
+    this.oneWayGateWalls = this.physics.add.staticGroup();
+    this.physics.add.collider(this.player, this.oneWayGateWalls);
+    this.createOneWayGates();
     this.enemiesGroup = createEnemies(this, this.player, this.editorStage.enemies ?? [], (enemy) =>
       this.damagePlayer(enemy),
     );
@@ -471,6 +476,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.updateStoryDialogueProgress();
     this.refreshDropThroughDecorationPlatform();
+    this.updateOneWayGates();
     if (this.stageEditor?.isEnabled) {
       freezeEnemies(this.enemiesGroup);
     } else {
@@ -686,6 +692,8 @@ class PrototypeScene extends Phaser.Scene {
     this.itemsGroup = undefined;
     this.bonusBlocksGroup = undefined;
     this.checkpointsGroup = undefined;
+    this.oneWayGateWalls = undefined;
+    this.oneWayGateSprites = [];
     this.enemiesGroup = undefined;
     this.goal = undefined;
     this.finalScoreText = undefined;
@@ -1071,6 +1079,9 @@ class PrototypeScene extends Phaser.Scene {
     this.clearStaticGroup(this.itemsGroup);
     this.clearStaticGroup(this.bonusBlocksGroup);
     this.clearStaticGroup(this.checkpointsGroup);
+    this.clearStaticGroup(this.oneWayGateWalls);
+    this.oneWayGateSprites.forEach((gate) => gate.destroy());
+    this.oneWayGateSprites = [];
     this.clearDynamicGroup(this.enemiesGroup);
 
     renderStageObjects({
@@ -1095,6 +1106,7 @@ class PrototypeScene extends Phaser.Scene {
       placements: this.editorStage.bonusBlocks ?? [],
     });
     this.populateCheckpoints();
+    this.createOneWayGates();
     populateEnemies(this.enemiesGroup, this.editorStage.enemies ?? []);
     if (this.stageEditor?.isEnabled) {
       freezeEnemies(this.enemiesGroup);
@@ -1178,6 +1190,43 @@ class PrototypeScene extends Phaser.Scene {
       y: flag.getData("checkpointY") as number,
     });
     this.showFloatingScore(flag.x, flag.y - 72, "CHECK");
+  }
+
+  private createOneWayGates() {
+    if (!this.oneWayGateWalls) {
+      return;
+    }
+
+    (this.editorStage.oneWayGates ?? []).forEach((gate) => {
+      const height = gate.height ?? 160;
+      const sprite = this.add.image(gate.x, gate.y, "stage-one-way-gate").setDisplaySize(64, height).setDepth(0.08);
+      sprite.setData("gateX", gate.x);
+      sprite.setData("gateY", gate.y);
+      sprite.setData("height", height);
+      sprite.setData("activated", false);
+      this.oneWayGateSprites.push(sprite);
+    });
+  }
+
+  private updateOneWayGates() {
+    if (!this.isRunActive || this.stageEditor?.isEnabled || !this.oneWayGateWalls) {
+      return;
+    }
+
+    this.oneWayGateSprites.forEach((gate) => {
+      if (gate.getData("activated") || this.player.x <= (gate.getData("gateX") as number) + 24) {
+        return;
+      }
+
+      gate.setData("activated", true);
+      gate.setTint(0xf0abfc);
+      const height = gate.getData("height") as number;
+      const wall = this.oneWayGateWalls!.create(gate.x - 44, gate.y, "platform-hitbox") as Phaser.Physics.Arcade.Image;
+      wall.setDisplaySize(24, height);
+      wall.setVisible(false);
+      wall.refreshBody();
+      this.showFloatingScore(gate.x, gate.y - height / 2, "ONE WAY");
+    });
   }
 
   private handlePlatformCollision(

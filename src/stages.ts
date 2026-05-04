@@ -590,6 +590,13 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "y": 606
     }
   ],
+  "oneWayGates": [
+    {
+      "x": 9040,
+      "y": 592,
+      "height": 168
+    }
+  ],
   "enemies": [
     {
       "type": "knifePunk",
@@ -752,6 +759,9 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     { x: 4020, y: 606 },
     { x: 7180, y: 606 },
   ],
+  oneWayGates: [
+    { x: 7000, y: 592, height: 168 },
+  ],
   enemies: [
     { type: "knifePunk", x: 980, y: 590, patrolLeft: 780, patrolRight: 1160, speed: 78 },
     { type: "coneGolem", x: 1660, y: 590, patrolLeft: 1500, patrolRight: 1800, speed: 72 },
@@ -895,5 +905,6 @@ export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   items: stage.items.map((item) => ({ ...item })),
   bonusBlocks: (stage.bonusBlocks ?? []).map((block) => ({ ...block })),
   checkpoints: (stage.checkpoints ?? []).map((checkpoint) => ({ ...checkpoint })),
+  oneWayGates: (stage.oneWayGates ?? []).map((gate) => ({ ...gate })),
   enemies: (stage.enemies ?? []).map((enemy) => ({ ...enemy })),
 });
