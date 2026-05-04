@@ -755,9 +755,25 @@ canvas {
 
 .leaderboard-name {
   min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.leaderboard-player-name,
+.leaderboard-player-id {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.leaderboard-player-id {
+  font-size: 0.68em;
+  color: #b8e9ff;
+  opacity: 0.92;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
 }
 
 .leaderboard-score,

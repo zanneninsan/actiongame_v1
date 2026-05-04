@@ -24,6 +24,11 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
     throw new HttpsError("invalid-argument", "Submission id is required.");
   }
 
+  const playerId = cleanPlayerId(data.playerId);
+  if (!playerId) {
+    throw new HttpsError("invalid-argument", "Player id is required.");
+  }
+
   const stageId = cleanText(data.stageId, 40);
   if (!ALLOWED_STAGE_IDS.has(stageId)) {
     throw new HttpsError("invalid-argument", "Unknown stage.");
@@ -42,24 +47,49 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
     throw new HttpsError("failed-precondition", "Score payload is invalid.");
   }
 
-  await getFirestore().collection("leaderboardScores").add({
-    uid: request.auth.uid,
-    submissionId,
-    stageId,
-    stageName: cleanText(data.stageName, 60),
-    gameVersion: cleanText(data.gameVersion, 24),
-    playerName: cleanText(data.playerName, MAX_NAME_LENGTH) || "PLAYER",
-    score: expectedScore,
-    itemScore,
-    timeBonus: roundScore(expectedScore - itemScore),
-    elapsedMs,
-    remainingMs,
-    status: "accepted",
-    createdAt: FieldValue.serverTimestamp(),
+  const firestore = getFirestore();
+  const uid = request.auth.uid;
+  const scoreRef = firestore.collection("leaderboardScores").doc(`${stageId}_${playerId}`);
+  await firestore.runTransaction(async (transaction) => {
+    const currentScore = await transaction.get(scoreRef);
+    const currentData = currentScore.data();
+    const previousScore = typeof currentData?.score === "number" ? currentData.score : -Infinity;
+    const shouldUpdateScore = !currentScore.exists || expectedScore >= previousScore;
+    const sharedFields = {
+      uid,
+      submissionId,
+      playerId,
+      stageId,
+      stageName: cleanText(data.stageName, 60),
+      gameVersion: cleanText(data.gameVersion, 24),
+      playerName: cleanText(data.playerName, MAX_NAME_LENGTH) || "PLAYER",
+      status: "accepted",
+      lastSubmittedAt: FieldValue.serverTimestamp(),
+    };
+
+    if (!shouldUpdateScore) {
+      transaction.set(scoreRef, sharedFields, {merge: true});
+      return;
+    }
+
+    transaction.set(scoreRef, {
+      ...sharedFields,
+      score: expectedScore,
+      itemScore,
+      timeBonus: roundScore(expectedScore - itemScore),
+      elapsedMs,
+      remainingMs,
+      createdAt: FieldValue.serverTimestamp(),
+    }, {merge: true});
   });
 
   return {ok: true, status: "accepted", submissionId};
 });
+
+function cleanPlayerId(value: unknown) {
+  const playerId = cleanText(value, 80);
+  return /^[a-zA-Z0-9_-]{8,80}$/.test(playerId) ? playerId : "";
+}
 
 function cleanText(value: unknown, maxLength: number) {
   return String(value ?? "").trim().slice(0, maxLength);

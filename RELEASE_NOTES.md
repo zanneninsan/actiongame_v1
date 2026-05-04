@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.141
+### English
+- Added a persistent leaderboard player ID so each player keeps one leaderboard row per stage, with the short ID shown beside the player name.
+### Japanese
+- リーダーボード用のプレイヤーIDを保存し、同じステージでは1人1行にまとまるようにしました。プレイヤー名の横に短いIDも表示します。
+
 ## v0.1.140
 ### English
 - Expanded the leaderboard display from the top 10 to the top 100 scores.

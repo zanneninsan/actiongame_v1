@@ -55,8 +55,9 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.140";
+const DEBUG_VERSION = "v0.1.141";
 const ACTIVE_STAGE_ID = "neonCanal";
+const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
@@ -150,6 +151,7 @@ class PrototypeScene extends Phaser.Scene {
   private isRestarting = false;
   private setupComplete = false;
   private playerName = "PLAYER";
+  private leaderboardPlayerId = "";
   private controlMode: ControlMode = "pc";
   private locale: Locale = getBrowserLocale();
   private soundVolumePercent = 50;
@@ -255,6 +257,7 @@ class PrototypeScene extends Phaser.Scene {
   create() {
     this.registerRainbowPipeline();
     this.playerName = this.getCookieValue("actiongame_player_name") || this.playerName;
+    this.leaderboardPlayerId = this.getOrCreateLeaderboardPlayerId();
     this.locale = this.getSavedLocale();
     this.soundVolumePercent = this.getSavedVolumePercent();
     this.soundMuted = this.getCookieValue("actiongame_muted") === "1";
@@ -826,6 +829,28 @@ class PrototypeScene extends Phaser.Scene {
     document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; max-age=31536000; path=/; SameSite=Lax`;
   }
 
+  private getOrCreateLeaderboardPlayerId() {
+    try {
+      const savedPlayerId = window.localStorage.getItem(LEADERBOARD_PLAYER_ID_STORAGE_KEY);
+      if (savedPlayerId && isLeaderboardPlayerId(savedPlayerId)) {
+        return savedPlayerId;
+      }
+
+      const playerId = createSubmissionId();
+      window.localStorage.setItem(LEADERBOARD_PLAYER_ID_STORAGE_KEY, playerId);
+      return playerId;
+    } catch {
+      const cookiePlayerId = this.getCookieValue(LEADERBOARD_PLAYER_ID_STORAGE_KEY);
+      if (cookiePlayerId && isLeaderboardPlayerId(cookiePlayerId)) {
+        return cookiePlayerId;
+      }
+
+      const playerId = createSubmissionId();
+      this.setCookieValue(LEADERBOARD_PLAYER_ID_STORAGE_KEY, playerId);
+      return playerId;
+    }
+  }
+
   private getSavedLocale() {
     try {
       const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
@@ -1361,6 +1386,7 @@ class PrototypeScene extends Phaser.Scene {
     const submissionId = createSubmissionId();
     submitLeaderboardScore({
       submissionId,
+      playerId: this.leaderboardPlayerId,
       stageId: ACTIVE_STAGE_ID,
       stageName: resolveStageName(this.editorStage.name, this.locale),
       gameVersion: DEBUG_VERSION,
@@ -1685,6 +1711,10 @@ function createSubmissionId() {
     return crypto.randomUUID();
   }
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function isLeaderboardPlayerId(playerId: string) {
+  return /^[a-zA-Z0-9_-]{8,80}$/.test(playerId);
 }
 
 new Phaser.Game({

@@ -70,7 +70,10 @@ function createEntryRow(entry: LeaderboardEntry, rank: number, currentSubmission
   row.innerHTML = `
     <span class="leaderboard-new-marker">${isCurrentScore ? "NEW" : ""}</span>
     <span class="leaderboard-rank">${rank}</span>
-    <span class="leaderboard-name">${escapeHtml(entry.playerName)}</span>
+    <span class="leaderboard-name">
+      <span class="leaderboard-player-name">${escapeHtml(entry.playerName)}</span>
+      <span class="leaderboard-player-id">${escapeHtml(formatPlayerId(entry.playerId))}</span>
+    </span>
     <span class="leaderboard-score">${entry.score.toFixed(2)}</span>
     <span class="leaderboard-date">${formatDate(entry.createdAt)}</span>
   `;
@@ -88,6 +91,10 @@ function formatDate(date: Date | null) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
+}
+
+function formatPlayerId(playerId: string) {
+  return playerId ? `#${playerId.slice(0, 8)}` : "";
 }
 
 function escapeHtml(value: string) {

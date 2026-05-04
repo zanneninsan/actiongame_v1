@@ -10,6 +10,8 @@ Copy `.env.example` to `.env.local` and fill the Firebase web app values. `VITE_
 
 Use `firebase/firestore.rules`. The leaderboard documents are public to read, but writes are denied from the client. The callable function is responsible for validation and writes.
 
+Each accepted leaderboard row is keyed by stage and persistent client `playerId`, so one player keeps one row per stage. If a later submission is lower than the saved score, the callable updates identity metadata without lowering the ranked score.
+
 Create this composite index if Firestore asks for it:
 
 - Collection: `leaderboardScores`
@@ -35,6 +37,7 @@ export const submitScore = onCall(
     }
 
     const data = request.data ?? {};
+    const playerId = cleanPlayerId(data.playerId);
     const itemScore = clampNumber(data.itemScore, 0, 100_000);
     const remainingMs = clampNumber(data.remainingMs, 0, MAX_GAME_TIME_MS);
     const expectedScore = roundScore(itemScore + (remainingMs / 1000) * TIME_BONUS_PER_SECOND);
@@ -44,19 +47,38 @@ export const submitScore = onCall(
       throw new HttpsError("failed-precondition", "Score payload is invalid.");
     }
 
-    await getFirestore().collection("leaderboardScores").add({
-      uid: request.auth.uid,
-      stageId: cleanText(data.stageId, 40),
-      stageName: cleanText(data.stageName, 60),
-      gameVersion: cleanText(data.gameVersion, 24),
-      playerName: cleanText(data.playerName, MAX_NAME_LENGTH) || "PLAYER",
-      score: expectedScore,
-      itemScore,
-      timeBonus: roundScore(expectedScore - itemScore),
-      elapsedMs: clampNumber(data.elapsedMs, 0, MAX_GAME_TIME_MS),
-      remainingMs,
-      status: "accepted",
-      createdAt: FieldValue.serverTimestamp(),
+    const firestore = getFirestore();
+    const stageId = cleanText(data.stageId, 40);
+    const scoreRef = firestore.collection("leaderboardScores").doc(`${stageId}_${playerId}`);
+    await firestore.runTransaction(async (transaction) => {
+      const currentScore = await transaction.get(scoreRef);
+      const previousScore = typeof currentScore.data()?.score === "number" ? currentScore.data()?.score : -Infinity;
+      const shouldUpdateScore = !currentScore.exists || expectedScore >= previousScore;
+      const sharedFields = {
+        uid: request.auth.uid,
+        playerId,
+        stageId,
+        stageName: cleanText(data.stageName, 60),
+        gameVersion: cleanText(data.gameVersion, 24),
+        playerName: cleanText(data.playerName, MAX_NAME_LENGTH) || "PLAYER",
+        status: "accepted",
+        lastSubmittedAt: FieldValue.serverTimestamp(),
+      };
+
+      if (!shouldUpdateScore) {
+        transaction.set(scoreRef, sharedFields, { merge: true });
+        return;
+      }
+
+      transaction.set(scoreRef, {
+        ...sharedFields,
+        score: expectedScore,
+        itemScore,
+        timeBonus: roundScore(expectedScore - itemScore),
+        elapsedMs: clampNumber(data.elapsedMs, 0, MAX_GAME_TIME_MS),
+        remainingMs,
+        createdAt: FieldValue.serverTimestamp(),
+      }, { merge: true });
     });
 
     return { ok: true, status: "accepted" };
@@ -65,6 +87,11 @@ export const submitScore = onCall(
 
 function cleanText(value: unknown, maxLength: number) {
   return String(value ?? "").trim().slice(0, maxLength);
+}
+
+function cleanPlayerId(value: unknown) {
+  const playerId = cleanText(value, 80);
+  return /^[a-zA-Z0-9_-]{8,80}$/.test(playerId) ? playerId : "";
 }
 
 function clampNumber(value: unknown, min: number, max: number) {

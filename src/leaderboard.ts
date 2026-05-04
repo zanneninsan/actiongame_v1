@@ -16,6 +16,7 @@ import { getFunctions, httpsCallable, type Functions } from "firebase/functions"
 export type LeaderboardEntry = {
   id: string;
   submissionId: string;
+  playerId: string;
   playerName: string;
   score: number;
   stageId: string;
@@ -26,6 +27,7 @@ export type LeaderboardEntry = {
 
 export type LeaderboardSubmitPayload = {
   submissionId: string;
+  playerId: string;
   stageId: string;
   stageName: string;
   gameVersion: string;
@@ -92,6 +94,7 @@ export async function fetchLeaderboardEntries(stageId: string, maxEntries = DEFA
     return {
       id: doc.id,
       submissionId: typeof data.submissionId === "string" ? data.submissionId : "",
+      playerId: typeof data.playerId === "string" ? data.playerId : "",
       playerName: typeof data.playerName === "string" ? data.playerName : "PLAYER",
       score: typeof data.score === "number" ? data.score : 0,
       stageId: typeof data.stageId === "string" ? data.stageId : stageId,
