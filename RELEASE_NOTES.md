@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.168
+### English
+- Kept the player attached to diagonal moving platforms while they descend, without changing horizontal walking control.
+### Japanese
+- 斜め移動床が下がる時にプレイヤーが置いていかれないようにしつつ、横方向の歩行操作はそのまま使えるようにしました。
+
 ## v0.1.167
 ### English
 - Removed the manual horizontal carry correction from moving platforms so player walking input works normally while Phaser's platform friction handles riding motion.

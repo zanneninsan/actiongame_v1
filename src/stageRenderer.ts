@@ -197,6 +197,45 @@ export const updateMovingPlatforms = (instances: MovingPlatformInstance[], isAct
   });
 };
 
+export const carryPlayerOnDescendingMovingPlatforms = (
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+  instances: MovingPlatformInstance[],
+  isActive: boolean,
+) => {
+  if (!isActive || !player.body) {
+    return;
+  }
+
+  const playerBody = player.body;
+  const isGrounded = playerBody.blocked.down || playerBody.touching.down;
+  if (!isGrounded) {
+    return;
+  }
+
+  const platform = instances.find((candidate) => {
+    if (candidate.deltaY <= 0 || !candidate.body.active) {
+      return false;
+    }
+
+    const platformLeft = candidate.body.x - candidate.width / 2;
+    const platformRight = platformLeft + candidate.width;
+    const platformTop = candidate.body.y - candidate.height / 2;
+    const playerLeft = playerBody.x;
+    const playerRight = playerBody.x + playerBody.width;
+    const playerBottom = playerBody.y + playerBody.height;
+    const horizontalOverlap = playerRight > platformLeft + 4 && playerLeft < platformRight - 4;
+    const verticalDistance = Math.abs(playerBottom - platformTop);
+    return horizontalOverlap && verticalDistance <= Math.max(18, candidate.deltaY + 18);
+  });
+
+  if (!platform) {
+    return;
+  }
+
+  player.setY(player.y + platform.deltaY);
+  player.body.updateFromGameObject();
+};
+
 const getMovingPlatformDistanceX = (platform: MovingPlatformInstance) => {
   return platform.axis === "x" || platform.axis === "xy" ? platform.distance : 0;
 };
