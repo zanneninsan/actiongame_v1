@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.134
+### English
+- Renamed the Japanese stage display name from Neon Canal to Shibuya City.
+### Japanese
+- ステージの日本語表示名を「ネオン運河」から「シブヤシティ」に変更しました。
+
 ## v0.1.132
 ### English
 - Added localized stage names with `jp` and `en` fields in stage definitions, while keeping old string-name stage JSON imports compatible.
