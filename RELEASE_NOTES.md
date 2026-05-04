@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.114
+### English
+- Changed the crouch danmaku trigger from 3 seconds to 2 seconds.
+### Japanese
+- しゃがみ弾幕が流れるまでの時間を3秒から2秒に短くしました。
+
 ## v0.1.113
 ### English
 - Added a repeatable Nico-style danmaku burst after crouching for more than 3 seconds.
