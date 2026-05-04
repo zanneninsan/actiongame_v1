@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.125
+### English
+- Added the extracted aqua mascot frames as an animated enemy sprite sheet.
+- Registered Aqua Mascot as an enemy type and placed a sample enemy in the stage.
+### Japanese
+- 抽出したアクア系マスコットのフレームを、敵キャラクター用のアニメーションスプライトシートとして追加しました。
+- Aqua Mascot を敵タイプとして登録し、ステージ上にサンプル敵として配置しました。
+
 ## v0.1.124
 ### English
 - Updated the second story dialogue portrait and automatically advances to it when the player moves past X 600.

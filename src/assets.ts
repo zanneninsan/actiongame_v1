@@ -10,7 +10,7 @@ export const PROP_ASSETS = {
 } as const;
 export type StreetLampKey = (typeof PROP_ASSETS)[keyof typeof PROP_ASSETS];
 export type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
-export type EnemyType = "neonBouncer" | "knifePunk";
+export type EnemyType = "neonBouncer" | "knifePunk" | "aquaMascot";
 export const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
 export const ITEM_GLOW_COLORS: Record<ItemType, number> = {
   energyDrink: 0x8cffd2,
@@ -138,6 +138,24 @@ export const ENEMY_DEFINITIONS: Record<
       frameHeight: 250,
       frameCount: 4,
       frameRate: 7,
+    },
+  },
+  aquaMascot: {
+    key: "enemy-aqua-mascot",
+    label: "Aqua Mascot",
+    displayWidth: 86,
+    displayHeight: 72,
+    bodyWidth: 58,
+    bodyHeight: 44,
+    bodyOffsetX: 14,
+    bodyOffsetY: 24,
+    animation: {
+      key: "enemy-aqua-mascot-walk",
+      assetPath: "assets/enemies/aqua_mascot_walk.png",
+      frameWidth: 280,
+      frameHeight: 250,
+      frameCount: 30,
+      frameRate: 8,
     },
   },
 };

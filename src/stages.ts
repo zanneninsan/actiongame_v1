@@ -521,6 +521,7 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "speed": 72
     },
     {
+      "type": "aquaMascot",
       "x": 2080,
       "y": 456,
       "patrolLeft": 1920,
