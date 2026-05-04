@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.178
+### English
+- Changed descending moving platform carry to snap the player's feet to the platform top instead of adding the platform's downward movement every frame, preventing the player from sinking into descending platforms.
+### Japanese
+- 下方向に動く床の追随処理を、床の移動量を毎フレーム足す方式からプレイヤーの足元を床の上面へ合わせる方式に変更し、下降床にめり込んでいく問題を修正しました。
+
 ## v0.1.177
 ### English
 - Stopped injecting downward velocity while carrying the player on descending platforms, keeping the rider grounded without forcing constant falling collision.

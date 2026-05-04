@@ -249,8 +249,8 @@ export const carryPlayerOnDescendingMovingPlatforms = (
 
   const platformTop = platform.body.y - platform.height / 2;
   const bodyBottom = playerBody.y + playerBody.height;
-  const targetDeltaY = Math.max(platform.deltaY, platformTop - bodyBottom);
-  if (targetDeltaY <= 0) {
+  const targetDeltaY = platformTop - bodyBottom;
+  if (Math.abs(targetDeltaY) > MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE) {
     return;
   }
 
