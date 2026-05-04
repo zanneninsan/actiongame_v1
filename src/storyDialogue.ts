@@ -34,7 +34,7 @@ export const DEFAULT_STORY_DIALOGUE_LINES: StoryDialogueLine[] = [
   {
     characterName: "残念院さん",
     message: "人が多いですね……ここが渋谷。",
-    portraitUrl: `${ASSET_BASE}assets/story/elis_portrait.png`,
+    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_05_shy.png`,
   },
   {
     characterName: "残念院さん",

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.120
+### English
+- Updated the opening Shibuya dialogue portrait to use the new message face icon asset.
+### Japanese
+- 渋谷の会話で「人が多いですね……」と話す場面の顔表示に、新しいメッセージ用表情アイコンを使うようにしました。
+
 ## v0.1.119
 ### English
 - Rebuilt the leaderboard window with dedicated raster assets so rows, rank numbers, scores, and dates no longer overlap or inherit dropdown arrows.
