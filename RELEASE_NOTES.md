@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.181
+### English
+- Added a Mario-style feature pack with enemy stomps and combo scoring, spring and fragile platforms, coins, bonus blocks, powerups, checkpoints, clear ranks, missions, a neon idol shooter enemy, breakable blocks, and one-way gates.
+### Japanese
+- 敵の踏みつけ撃破と連続ボーナス、ジャンプ台、崩れる足場、コイン、はてなブロックと隠しブロック、パワーアップ、チェックポイント、クリアランク、ミッション表示、ネオンアイドル系の射撃敵、壊せるブロック、一方通行ゲートを追加しました。
+
 ## v0.1.180
 ### English
 - Fixed descending moving platform carry to align the player's physics body directly to the platform top, avoiding the Game Object sync mismatch shown in debug logs.
