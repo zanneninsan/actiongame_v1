@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.113
+### English
+- Added a repeatable Nico-style danmaku burst after crouching for more than 3 seconds.
+### Japanese
+- しゃがみ状態を3秒以上続けたときに、ニコニコ動画風の弾幕が流れる演出を追加しました。しゃがみを解除すると再発火できるようになります。
+
 ## v0.1.112
 ### English
 - Added a Shift speed modifier that doubles movement acceleration, max run speed, and jump launch velocity while held.

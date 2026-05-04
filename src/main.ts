@@ -55,13 +55,14 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.112";
+const DEBUG_VERSION = "v0.1.113";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
 const TIME_BONUS_PER_SECOND = 10;
 const SCORE_DANMAKU_THRESHOLD = 1000;
+const CROUCH_DANMAKU_HOLD_MS = 3000;
 const FALL_RESET_WORLD_MARGIN = 640;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
@@ -157,6 +158,8 @@ class PrototypeScene extends Phaser.Scene {
   private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
   private hasWon = false;
   private hasScoreMilestoneDanmakuPlayed = false;
+  private crouchDanmakuStartedAt = 0;
+  private hasCrouchDanmakuPlayed = false;
   private wasOnFloor = false;
   private isLanding = false;
   private landingFastForwarded = false;
@@ -473,6 +476,7 @@ class PrototypeScene extends Phaser.Scene {
     const isMovingHorizontally = Math.abs(this.player.body.velocity.x) > 8;
     const landedThisFrame = !this.wasOnFloor && onFloor && !startedJump;
     const isCrouching = down && onFloor && !startedJump;
+    this.updateCrouchDanmaku(isCrouching);
 
     if (landedThisFrame) {
       this.isLanding = true;
@@ -570,6 +574,8 @@ class PrototypeScene extends Phaser.Scene {
     this.isRunActive = false;
     this.hasWon = false;
     this.hasScoreMilestoneDanmakuPlayed = false;
+    this.crouchDanmakuStartedAt = 0;
+    this.hasCrouchDanmakuPlayed = false;
     this.wasOnFloor = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
@@ -1129,6 +1135,26 @@ class PrototypeScene extends Phaser.Scene {
 
     this.hasScoreMilestoneDanmakuPlayed = true;
     this.danmaku?.emitScoreMilestone();
+  }
+
+  private updateCrouchDanmaku(isCrouching: boolean) {
+    if (!isCrouching) {
+      this.crouchDanmakuStartedAt = 0;
+      this.hasCrouchDanmakuPlayed = false;
+      return;
+    }
+
+    if (this.crouchDanmakuStartedAt === 0) {
+      this.crouchDanmakuStartedAt = this.time.now;
+      return;
+    }
+
+    if (this.hasCrouchDanmakuPlayed || this.time.now - this.crouchDanmakuStartedAt < CROUCH_DANMAKU_HOLD_MS) {
+      return;
+    }
+
+    this.hasCrouchDanmakuPlayed = true;
+    this.danmaku?.emitCrouchHold();
   }
 
   private updateTimerText() {

@@ -20,6 +20,21 @@ const SCORE_MILESTONE_COMMENTS = [
   "ここから本番",
 ];
 
+const CROUCH_HOLD_COMMENTS = [
+  "え、見え・・・",
+  "カメラ仕事した",
+  "一時停止不可避",
+  "スカート「解せぬ」",
+  "今日も生きていける",
+  "公式が病気",
+  "ファンサありがとう",
+  "今の見た？",
+  "ありがとうございます",
+  "神カメラ",
+  "ここリプレイ",
+  "助かる",
+];
+
 type ActiveComment = Phaser.GameObjects.Text & {
   destroyTimer?: Phaser.Time.TimerEvent;
 };
@@ -44,6 +59,15 @@ export class DanmakuOverlay {
       stroke: "#0f766e",
       fontSize: 27,
       duration: 4400,
+    });
+  }
+
+  emitCrouchHold() {
+    this.emitBurst(CROUCH_HOLD_COMMENTS, 18, 80, {
+      color: "#fff7ed",
+      stroke: "#7c2d12",
+      fontSize: 26,
+      duration: 4200,
     });
   }
 
