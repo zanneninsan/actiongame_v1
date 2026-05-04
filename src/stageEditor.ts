@@ -4,6 +4,7 @@ import {
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
   ITEM_DEFINITIONS,
+  resolveStageName,
   type EnemyPlacement,
   type ItemPlacement,
   type PlatformRunPlacement,
@@ -679,7 +680,7 @@ export class StageEditor {
     }
 
     return (
-      typeof value.name === "string" &&
+      this.isStageName(value.name) &&
       this.isNumber(value.worldWidth) &&
       this.isOptionalNumber(value.worldTop) &&
       this.isOptionalNumber(value.worldBottom) &&
@@ -757,6 +758,13 @@ export class StageEditor {
     return this.isRecord(value) && this.isNumber(value.x) && this.isNumber(value.y);
   }
 
+  private isStageName(value: unknown) {
+    return (
+      typeof value === "string" ||
+      (this.isRecord(value) && typeof value.jp === "string" && typeof value.en === "string")
+    );
+  }
+
   private isOptionalNumber(value: unknown) {
     return value === undefined || this.isNumber(value);
   }
@@ -779,7 +787,9 @@ export class StageEditor {
   }
 
   private getExportFilename() {
-    const safeName = this.stage.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "stage";
+    const safeName =
+      resolveStageName(this.stage.name, "en").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") ||
+      "stage";
     return `${safeName}.stage.json`;
   }
 }

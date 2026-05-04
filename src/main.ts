@@ -6,6 +6,7 @@ import {
   PLATFORM_ASSETS,
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
+  resolveStageName,
   type ItemType,
   type ScoreState,
 } from "./assets";
@@ -55,7 +56,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.131";
+const DEBUG_VERSION = "v0.1.132";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
@@ -1343,7 +1344,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private showLeaderboard(statusMessage?: string, currentSubmissionId?: string) {
     showLeaderboardPanel({
-      stageName: this.editorStage.name,
+      stageName: resolveStageName(this.editorStage.name, this.locale),
       gameVersion: DEBUG_VERSION,
       statusMessage: isLeaderboardConfigured() ? statusMessage : "Leaderboard is not configured.",
       currentSubmissionId,
@@ -1361,7 +1362,7 @@ class PrototypeScene extends Phaser.Scene {
     submitLeaderboardScore({
       submissionId,
       stageId: ACTIVE_STAGE_ID,
-      stageName: this.editorStage.name,
+      stageName: resolveStageName(this.editorStage.name, this.locale),
       gameVersion: DEBUG_VERSION,
       playerName: this.playerName,
       score: finalScore,

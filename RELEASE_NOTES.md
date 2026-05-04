@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.132
+### English
+- Added localized stage names with `jp` and `en` fields in stage definitions, while keeping old string-name stage JSON imports compatible.
+### Japanese
+- ステージ定義の名前に `jp` と `en` を持たせられるようにし、古い文字列形式のステージJSONも引き続き読み込めるようにしました。
+
 ## v0.1.131
 ### English
 - Made the fall MISS overlay more dramatic with a screen flash, stronger camera shake, color-offset echoes, and a punchier bounce animation.

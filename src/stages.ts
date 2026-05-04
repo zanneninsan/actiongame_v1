@@ -1,7 +1,10 @@
 import type { StageDefinition } from "./assets";
 
 export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
-  "name": "Neon Canal",
+  "name": {
+    "jp": "ネオン運河",
+    "en": "Neon Canal"
+  },
   "worldWidth": 12800,
   "worldTop": -720,
   "worldBottom": 720,
@@ -561,7 +564,7 @@ export const STAGES = {
 export const ACTIVE_STAGE = STAGES.neonCanal;
 
 export const cloneStage = (stage: StageDefinition): StageDefinition => ({
-  name: stage.name,
+  name: typeof stage.name === "string" ? stage.name : { ...stage.name },
   worldWidth: stage.worldWidth,
   worldTop: stage.worldTop,
   worldBottom: stage.worldBottom,

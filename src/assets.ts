@@ -25,8 +25,10 @@ export type StreetLampPlacement = { x: number; key: StreetLampKey; scale?: numbe
 export type StageDecorationPlacement = { x: number; y?: number; key: string; scale?: number };
 export type ItemPlacement = { type: ItemType; x: number; y: number };
 export type EnemyPlacement = { type?: EnemyType; x: number; y: number; patrolLeft: number; patrolRight: number; speed?: number };
+export type StageLocalizedName = { jp: string; en: string };
+export type StageName = string | StageLocalizedName;
 export type StageDefinition = {
-  name: string;
+  name: StageName;
   worldWidth: number;
   worldTop?: number;
   worldBottom?: number;
@@ -41,6 +43,14 @@ export type StageDefinition = {
   items: ItemPlacement[];
   enemies?: EnemyPlacement[];
 };
+
+export function resolveStageName(name: StageName, locale: "ja" | "en") {
+  if (typeof name === "string") {
+    return name;
+  }
+
+  return locale === "ja" ? name.jp : name.en;
+}
 
 export const STAGE_OBJECT_ASSETS = [
   { key: "stage-props-traffic-cone", path: "assets/stage_objects/props_traffic_cone.webp" },
