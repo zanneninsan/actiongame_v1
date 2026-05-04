@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.163
+### English
+- Made the player inherit horizontal movement while standing on moving platforms.
+### Japanese
+- 移動床に乗っている間、床の横移動に合わせてプレイヤーも一緒に動くようにしました。
+
 ## v0.1.162
 ### English
 - Removed the fixed stage allowlist from leaderboard score submissions so newly added stages can submit scores without another Firebase code change.

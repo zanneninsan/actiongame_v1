@@ -31,7 +31,12 @@ import {
   updateEnemies,
 } from "./enemies";
 import { createItems, populateItems } from "./items";
-import { renderStageObjects, updateMovingPlatforms, type MovingPlatformInstance } from "./stageRenderer";
+import {
+  carryPlayerOnMovingPlatforms,
+  renderStageObjects,
+  updateMovingPlatforms,
+  type MovingPlatformInstance,
+} from "./stageRenderer";
 import { BackgroundController } from "./backgrounds";
 import {
   createGlobalUI as createGlobalUIElements,
@@ -55,7 +60,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.162";
+const DEBUG_VERSION = "v0.1.163";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -420,7 +425,9 @@ class PrototypeScene extends Phaser.Scene {
   update() {
     this.updateBackground();
     this.updateTimerText();
-    updateMovingPlatforms(this.movingPlatformInstances, this.isRunActive && !this.stageEditor?.isEnabled);
+    const movingPlatformsActive = this.isRunActive && !this.stageEditor?.isEnabled;
+    updateMovingPlatforms(this.movingPlatformInstances, movingPlatformsActive);
+    carryPlayerOnMovingPlatforms(this.player, this.movingPlatformInstances, movingPlatformsActive);
     if (!this.isRunActive) {
       if (!this.isDefeatSequenceActive) {
         this.applyPlayerBody(false);

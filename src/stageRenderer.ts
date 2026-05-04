@@ -24,6 +24,10 @@ export type MovingPlatformInstance = {
   visuals: Phaser.GameObjects.Image[];
   startX: number;
   startY: number;
+  previousX: number;
+  previousY: number;
+  deltaX: number;
+  deltaY: number;
   width: number;
   height: number;
   axis: "x" | "y";
@@ -119,6 +123,10 @@ const addMovingPlatformRun = (options: StageRenderOptions, platform: PlatformRun
     visuals,
     startX: platform.x,
     startY: platform.y,
+    previousX: body.x,
+    previousY: body.y,
+    deltaX: 0,
+    deltaY: 0,
     width,
     height: PLATFORM_UNIT_HEIGHT,
     axis: moving.axis,
@@ -156,6 +164,10 @@ export const updateMovingPlatforms = (instances: MovingPlatformInstance[], isAct
 
     if (!isActive || platform.speed <= 0 || platform.distance === 0) {
       platform.body.setVelocity(0, 0);
+      platform.deltaX = 0;
+      platform.deltaY = 0;
+      platform.previousX = platform.body.x;
+      platform.previousY = platform.body.y;
       syncMovingPlatformVisuals(platform);
       return;
     }
@@ -186,8 +198,51 @@ export const updateMovingPlatforms = (instances: MovingPlatformInstance[], isAct
       platform.axis === "x" ? platform.speed * platform.direction : 0,
       platform.axis === "y" ? platform.speed * platform.direction : 0,
     );
+    platform.deltaX = platform.body.x - platform.previousX;
+    platform.deltaY = platform.body.y - platform.previousY;
+    platform.previousX = platform.body.x;
+    platform.previousY = platform.body.y;
     syncMovingPlatformVisuals(platform);
   });
+};
+
+export const carryPlayerOnMovingPlatforms = (
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+  instances: MovingPlatformInstance[],
+  isActive: boolean,
+) => {
+  if (!isActive || !player.body) {
+    return;
+  }
+
+  const playerBody = player.body;
+  const playerLeft = playerBody.x;
+  const playerRight = playerBody.x + playerBody.width;
+  const playerBottom = playerBody.y + playerBody.height;
+  const isGrounded = playerBody.blocked.down || playerBody.touching.down;
+  if (!isGrounded) {
+    return;
+  }
+
+  const platform = instances.find((candidate) => {
+    if (candidate.deltaX === 0 || !candidate.body.active) {
+      return false;
+    }
+
+    const platformLeft = candidate.body.x - candidate.width / 2;
+    const platformRight = platformLeft + candidate.width;
+    const platformTop = candidate.body.y - candidate.height / 2;
+    const horizontalOverlap = playerRight > platformLeft + 4 && playerLeft < platformRight - 4;
+    const verticalDistance = Math.abs(playerBottom - platformTop);
+    return horizontalOverlap && verticalDistance <= 12;
+  });
+
+  if (!platform) {
+    return;
+  }
+
+  player.setX(player.x + platform.deltaX);
+  player.body.updateFromGameObject();
 };
 
 const syncMovingPlatformVisuals = (platform: MovingPlatformInstance) => {
