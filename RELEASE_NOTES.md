@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.175
+### English
+- Kept Arcade Body `prevFrame` in sync after manually carrying the player down with descending platforms, preventing post-update from undoing or duplicating that correction.
+### Japanese
+- 下降する移動床に合わせてプレイヤーを手動で下げた後、Arcade Bodyの`prevFrame`も同期して、postUpdateで補正が崩れないようにしました。
+
 ## v0.1.174
 ### English
 - Snapped riders down to the top of descending moving platforms when a gap opens, instead of only applying the platform's raw vertical delta.
