@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.123
+### English
+- Increased the contrast of the PC/mobile mode selector so the active choice is clearer on phone screens.
+### Japanese
+- スマホ画面でも現在選ばれている操作モードが分かりやすいように、パソコンモードとモバイルモードの選択表示のコントラストを強めました。
+
 ## v0.1.122
 ### English
 - Moved the leaderboard NEW marker outside the rank column and auto-scrolls the list to the newly submitted score.

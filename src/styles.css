@@ -120,6 +120,7 @@ canvas {
 .sound-button,
 .start-button {
   box-sizing: border-box;
+  position: relative;
   min-width: 0;
   height: 42px;
   border: 0;
@@ -131,10 +132,38 @@ canvas {
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
 }
 
+.mode-button,
+.sound-button {
+  color: #cbd5e1;
+  filter: brightness(0.62) saturate(0.72);
+}
+
 .mode-button.is-selected,
 .sound-button.is-selected {
   background-image: url("../assets/ui/fantasy/button_primary_selected_safe.png");
   color: #fef3c7;
+}
+
+.mode-button.is-selected,
+.sound-button.is-selected {
+  outline: 2px solid #fde68a;
+  outline-offset: -5px;
+  color: #fff7d6;
+  filter: brightness(1.28) saturate(1.35) drop-shadow(0 0 10px rgba(253, 230, 138, 0.58));
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.96), 0 0 8px rgba(255, 247, 214, 0.55);
+}
+
+.mode-button.is-selected::before,
+.sound-button.is-selected::before {
+  content: "✓";
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fef3c7;
+  font-size: 18px;
+  line-height: 1;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 8px rgba(255, 247, 214, 0.82);
 }
 
 .start-button {
@@ -160,6 +189,11 @@ canvas {
   .mode-row,
   .sound-row {
     grid-template-columns: 1fr;
+  }
+
+  .mode-button,
+  .sound-button {
+    height: 46px;
   }
 }
 
