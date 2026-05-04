@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.159
+### English
+- Added per-enemy AI styles: standard patrol, flying patrol, hopping patrol, and player chase behavior.
+- Assigned the Horned Cyborg to flying patrol, Cone Golem to hopping patrol, and Rabbit Traveler to chase behavior.
+### Japanese
+- 敵キャラごとに、通常巡回、空中巡回、ジャンプ巡回、プレイヤー追跡のAIタイプを持てるようにしました。
+- ホーンドサイボーグは空中巡回、コーンゴーレムはジャンプ巡回、ラビットトラベラーはプレイヤー追跡として動くようにしました。
+
 ## v0.1.158
 ### English
 - Added three new enemy types from supplied character sheets: Horned Cyborg, Cone Golem, and Rabbit Traveler.

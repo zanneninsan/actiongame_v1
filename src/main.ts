@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.158";
+const DEBUG_VERSION = "v0.1.159";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -436,7 +436,7 @@ class PrototypeScene extends Phaser.Scene {
     if (this.stageEditor?.isEnabled) {
       freezeEnemies(this.enemiesGroup);
     } else {
-      updateEnemies(this.enemiesGroup, this.stageConstants.worldBottom + 32);
+      updateEnemies(this.enemiesGroup, this.player, this.stageConstants.worldBottom + 32);
     }
     const onFloor = this.player.body.blocked.down || this.player.body.touching.down;
     if (this.time.now < this.hurtUntil) {

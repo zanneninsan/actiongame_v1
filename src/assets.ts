@@ -11,6 +11,7 @@ export const PROP_ASSETS = {
 export type StreetLampKey = (typeof PROP_ASSETS)[keyof typeof PROP_ASSETS];
 export type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
 export type EnemyType = "knifePunk" | "aquaMascot" | "hornedCyborg" | "coneGolem" | "rabbitTraveler";
+export type EnemyAiType = "patrol" | "flyingPatrol" | "hoppingPatrol" | "chase";
 export const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
 export const ITEM_GLOW_COLORS: Record<ItemType, number> = {
   energyDrink: 0x8cffd2,
@@ -121,6 +122,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyHeight: number;
     bodyOffsetX: number;
     bodyOffsetY: number;
+    aiType: EnemyAiType;
     animation?: {
       key: string;
       assetPath: string;
@@ -141,6 +143,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyHeight: 46,
     bodyOffsetX: 20,
     bodyOffsetY: 22,
+    aiType: "patrol",
     animation: {
       key: "enemy-knife-punk-walk",
       assetPath: "assets/enemies/knife_punk_walk.webp",
@@ -159,6 +162,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyHeight: 44,
     bodyOffsetX: 14,
     bodyOffsetY: 24,
+    aiType: "patrol",
     animation: {
       key: "enemy-aqua-mascot-walk",
       assetPath: "assets/enemies/aqua_mascot_walk.webp",
@@ -177,6 +181,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyHeight: 86,
     bodyOffsetX: 28,
     bodyOffsetY: 32,
+    aiType: "flyingPatrol",
     animation: {
       key: "enemy-horned-cyborg-walk",
       assetPath: "assets/enemies/horned_cyborg_walk.png",
@@ -195,6 +200,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyHeight: 54,
     bodyOffsetX: 14,
     bodyOffsetY: 30,
+    aiType: "hoppingPatrol",
     animation: {
       key: "enemy-cone-golem-walk",
       assetPath: "assets/enemies/cone_golem_walk.png",
@@ -213,6 +219,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyHeight: 58,
     bodyOffsetX: 18,
     bodyOffsetY: 30,
+    aiType: "chase",
     animation: {
       key: "enemy-rabbit-traveler-walk",
       assetPath: "assets/enemies/rabbit_traveler_walk.png",
