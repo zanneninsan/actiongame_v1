@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.142
+### English
+- Made the current leaderboard submission show the locally saved short player ID even when older score rows do not yet include a stored player ID field.
+### Japanese
+- 古いランキング行にプレイヤーIDが保存されていない場合でも、今回送信したスコアには端末に保存した短いプレイヤーIDを表示するようにしました。
+
 ## v0.1.141
 ### English
 - Added a persistent leaderboard player ID so each player keeps one leaderboard row per stage, with the short ID shown beside the player name.

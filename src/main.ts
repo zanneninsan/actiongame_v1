@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.141";
+const DEBUG_VERSION = "v0.1.142";
 const ACTIVE_STAGE_ID = "neonCanal";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1373,6 +1373,7 @@ class PrototypeScene extends Phaser.Scene {
       gameVersion: DEBUG_VERSION,
       statusMessage: isLeaderboardConfigured() ? statusMessage : "Leaderboard is not configured.",
       currentSubmissionId,
+      currentPlayerId: this.leaderboardPlayerId,
       fetchEntries: () => fetchLeaderboardEntries(ACTIVE_STAGE_ID),
     });
   }
