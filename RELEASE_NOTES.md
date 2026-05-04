@@ -4,9 +4,9 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
 ## v0.1.123
 ### English
-- Increased the contrast of the PC/mobile mode selector so the active choice is clearer on phone screens.
+- Increased the contrast of the PC/mobile mode selector and sound ON/OFF selector so the active choices are clearer on phone screens.
 ### Japanese
-- スマホ画面でも現在選ばれている操作モードが分かりやすいように、パソコンモードとモバイルモードの選択表示のコントラストを強めました。
+- スマホ画面でも現在選ばれている操作モードとサウンド設定が分かりやすいように、選択表示のコントラストを強めました。
 
 ## v0.1.122
 ### English
