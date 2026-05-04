@@ -553,6 +553,19 @@ canvas {
   cursor: pointer;
 }
 
+.options-checkbox-row {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.options-dialog input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  accent-color: #f5c76a;
+  cursor: pointer;
+}
+
 .options-dialog select {
   box-sizing: border-box;
   width: 100%;

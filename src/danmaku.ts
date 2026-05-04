@@ -119,7 +119,7 @@ export class DanmakuOverlay {
     });
   }
 
-  destroy() {
+  clear() {
     this.pendingTimers.forEach((timer) => timer.remove(false));
     this.pendingTimers.clear();
     this.activeComments.forEach((comment) => {
@@ -127,6 +127,10 @@ export class DanmakuOverlay {
       comment.destroy();
     });
     this.activeComments.clear();
+  }
+
+  destroy() {
+    this.clear();
   }
 
   private emitBurst(

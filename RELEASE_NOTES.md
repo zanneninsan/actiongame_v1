@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.117
+### English
+- Added an options menu toggle to enable or disable danmaku comments, with the setting saved between sessions.
+### Japanese
+- オプションメニューに弾幕表示のオン・オフを追加し、設定が次回起動時にも残るようにしました。
+
 ## v0.1.116
 ### English
 - Added a fall-miss sequence with a MISS overlay, camera shake, danmaku, and delayed restart when the player drops below the stage.

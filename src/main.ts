@@ -55,7 +55,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.116";
+const DEBUG_VERSION = "v0.1.117";
 const ACTIVE_STAGE_ID = "neonCanal";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
@@ -152,6 +152,7 @@ class PrototypeScene extends Phaser.Scene {
   private locale: Locale = getBrowserLocale();
   private soundVolumePercent = 50;
   private soundMuted = false;
+  private danmakuEnabled = true;
   private startModal?: StartModal;
   private controlHint = t(this.locale, "hint.pc");
   private editorStage = cloneStage(ACTIVE_STAGE);
@@ -251,6 +252,7 @@ class PrototypeScene extends Phaser.Scene {
     this.locale = this.getSavedLocale();
     this.soundVolumePercent = this.getSavedVolumePercent();
     this.soundMuted = this.getCookieValue("actiongame_muted") === "1";
+    this.danmakuEnabled = this.getCookieValue("actiongame_danmaku_disabled") !== "1";
     this.applySoundSettings();
     this.resetRunState();
     this.isRestarting = false;
@@ -852,6 +854,14 @@ class PrototypeScene extends Phaser.Scene {
     setGlobalSoundUI(this.soundVolumePercent, this.soundMuted);
   }
 
+  private setDanmakuEnabled(enabled: boolean) {
+    this.danmakuEnabled = enabled;
+    this.setCookieValue("actiongame_danmaku_disabled", enabled ? "0" : "1");
+    if (!enabled) {
+      this.danmaku?.clear();
+    }
+  }
+
   private trackStageObject<T extends Phaser.GameObjects.GameObject>(object: T) {
     this.stageRenderObjects.push(object);
     return object;
@@ -1046,6 +1056,7 @@ class PrototypeScene extends Phaser.Scene {
       locale: this.locale,
       soundVolumePercent: this.soundVolumePercent,
       soundMuted: this.soundMuted,
+      danmakuEnabled: this.danmakuEnabled,
       collisionDebugEnabled: this.collisionDebugEnabled,
       onCollisionToggle: (button) => {
         this.collisionDebugEnabled = !this.collisionDebugEnabled;
@@ -1061,6 +1072,7 @@ class PrototypeScene extends Phaser.Scene {
         this.soundMuted = muted;
         this.applySoundSettings();
       },
+      onDanmakuChange: (enabled) => this.setDanmakuEnabled(enabled),
       onLocaleChange: (locale) => {
         this.setLocale(locale);
         this.removeStageEditor();
@@ -1145,6 +1157,10 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.hasScoreMilestoneDanmakuPlayed = true;
+    if (!this.danmakuEnabled) {
+      return;
+    }
+
     this.danmaku?.emitScoreMilestone();
   }
 
@@ -1165,6 +1181,10 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.hasCrouchDanmakuPlayed = true;
+    if (!this.danmakuEnabled) {
+      return;
+    }
+
     this.danmaku?.emitCrouchHold();
   }
 
@@ -1185,6 +1205,10 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.hasJumpChainDanmakuPlayed = true;
+    if (!this.danmakuEnabled) {
+      return;
+    }
+
     this.danmaku?.emitJumpChain();
   }
 
@@ -1464,7 +1488,9 @@ class PrototypeScene extends Phaser.Scene {
     this.player.anims.stop();
     this.player.setAlpha(0.55);
     this.cameras.main.shake(180, 0.006);
-    this.danmaku?.emitMiss();
+    if (this.danmakuEnabled) {
+      this.danmaku?.emitMiss();
+    }
     this.missText?.destroy();
     this.missText = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "MISS", {

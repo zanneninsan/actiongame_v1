@@ -5,6 +5,7 @@ type GlobalUiOptions = {
   locale: Locale;
   soundVolumePercent: number;
   soundMuted: boolean;
+  danmakuEnabled: boolean;
   collisionDebugEnabled: boolean;
   onCollisionToggle: (button: HTMLButtonElement) => void;
   onRearBackgroundToggle: (button: HTMLButtonElement) => void;
@@ -12,6 +13,7 @@ type GlobalUiOptions = {
   updateRearBackgroundToggle: (button: HTMLButtonElement) => void;
   updateMidgroundBackgroundToggle: (button: HTMLButtonElement) => void;
   onSoundChange: (volumePercent: number, muted: boolean) => void;
+  onDanmakuChange: (enabled: boolean) => void;
   onLocaleChange: (locale: Locale) => void;
   onLeaderboardOpen: () => void;
 };
@@ -49,6 +51,10 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
           ).join("")}
         </select>
       </label>
+      <label class="options-checkbox-row">
+        <span>${t(options.locale, "options.danmaku")}</span>
+        <input id="danmaku-toggle" type="checkbox"${options.danmakuEnabled ? " checked" : ""} />
+      </label>
       <button id="options-close" class="ui-button" type="button">${t(options.locale, "options.close")}</button>
     </div>
   `;
@@ -63,6 +69,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
   const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
   const languageSelect = document.getElementById("language-select") as HTMLSelectElement;
+  const danmakuToggle = document.getElementById("danmaku-toggle") as HTMLInputElement;
 
   let currentVolumePercent = options.soundVolumePercent;
   let currentMuted = options.soundMuted;
@@ -116,6 +123,11 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
     if (nextOptionsModal) {
       nextOptionsModal.style.display = "grid";
     }
+  });
+
+  danmakuToggle.addEventListener("change", (event) => {
+    event.stopPropagation();
+    options.onDanmakuChange(danmakuToggle.checked);
   });
 
   optionsModal.addEventListener("keydown", (event) => event.stopPropagation());
