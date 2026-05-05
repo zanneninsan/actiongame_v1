@@ -5,8 +5,10 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 ## v0.1.207
 ### English
 - Preserve edited stage layouts across R-key and miss restarts even when the stage editor panel is currently closed.
+- Improved responsive layouts for the start, options, and leaderboard modals so they remain usable on narrow mobile screens.
 ### Japanese
 - ステージ編集パネルを閉じている状態でも、Rキーやミスによるリスタートで編集中のステージ配置がリセットされないようにしました。
+- スマホなどの狭い画面でも崩れにくいように、スタート、設定、ランキングの各モーダルのレスポンシブ表示を改善しました。
 
 ## v0.1.206
 ### English
