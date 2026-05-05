@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.250
+### English
+- Changed ranking ghost selection to start unselected and load immediately when a ghost is chosen, removing the separate load button.
+### Japanese
+- ランキングゴースト選択を初期未選択にし、選択した時点で即読み込むようにして、専用の読込ボタンを削除しました。
+
 ## v0.1.249
 ### English
 - Moved the ghost JSON export button to the upper-right of the clear screen so closing the leaderboard modal does not accidentally trigger a download.

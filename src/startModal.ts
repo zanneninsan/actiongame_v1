@@ -98,7 +98,6 @@ export class StartModal {
           <select name="leaderboardGhost" class="start-ghost-select">
             <option value="">${t(this.options.locale, "start.ghostRankingEmpty")}</option>
           </select>
-          <button type="button" class="start-ghost-ranking-load">${t(this.options.locale, "start.ghostRankingLoad")}</button>
           <span class="start-ghost-status">${t(this.options.locale, "start.ghostEmpty")}</span>
         </div>
         <div class="start-account-panel">
@@ -122,7 +121,6 @@ export class StartModal {
     const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
     const soundButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-sound]"));
     const ghostFileInput = overlay.querySelector<HTMLInputElement>("#start-ghost-file")!;
-    const ghostRankingLoadButton = overlay.querySelector<HTMLButtonElement>(".start-ghost-ranking-load")!;
     const ghostStatus = overlay.querySelector<HTMLSpanElement>(".start-ghost-status")!;
     const accountStatus = overlay.querySelector<HTMLSpanElement>(".start-account-status")!;
     const startButton = overlay.querySelector<HTMLButtonElement>(".start-button")!;
@@ -149,17 +147,20 @@ export class StartModal {
     ghostSelect.addEventListener("keypress", (event) => event.stopPropagation());
     const loadGhostOptions = async () => {
       ghostSelect.innerHTML = `<option value="">${t(this.options.locale, "start.ghostRankingLoading")}</option>`;
-      ghostRankingLoadButton.disabled = true;
+      ghostSelect.disabled = true;
       try {
         const options = await this.options.onFetchGhostOptions(selectedStageId);
         ghostSelect.innerHTML = options.length
-          ? options.map((option) => `<option value="${escapeHtml(option.id)}">${escapeHtml(option.label)}</option>`).join("")
+          ? [
+              `<option value="" selected>${t(this.options.locale, "start.ghostRankingSelect")}</option>`,
+              ...options.map((option) => `<option value="${escapeHtml(option.id)}">${escapeHtml(option.label)}</option>`),
+            ].join("")
           : `<option value="">${t(this.options.locale, "start.ghostRankingEmpty")}</option>`;
-        ghostRankingLoadButton.disabled = options.length === 0;
+        ghostSelect.disabled = options.length === 0;
       } catch (error) {
         console.warn("Could not load leaderboard ghost options.", error);
         ghostSelect.innerHTML = `<option value="">${t(this.options.locale, "start.ghostRankingFailed")}</option>`;
-        ghostRankingLoadButton.disabled = true;
+        ghostSelect.disabled = true;
       }
     };
     stageSelect.addEventListener("change", () => {
@@ -266,15 +267,16 @@ export class StartModal {
       }
     });
 
-    ghostRankingLoadButton.addEventListener("click", async () => {
-      if (!ghostSelect.value) {
+    ghostSelect.addEventListener("change", async () => {
+      const selectedGhostId = ghostSelect.value;
+      if (!selectedGhostId) {
         return;
       }
 
-      ghostRankingLoadButton.disabled = true;
+      ghostSelect.disabled = true;
       ghostStatus.textContent = t(this.options.locale, "start.ghostRankingLoading");
       try {
-        const result = await this.options.onGhostReplaySelect(ghostSelect.value);
+        const result = await this.options.onGhostReplaySelect(selectedGhostId);
         ghostStatus.textContent = result.label;
         if (result.stageId && Array.from(stageSelect.options).some((option) => option.value === result.stageId)) {
           selectedStageId = result.stageId;
@@ -285,7 +287,7 @@ export class StartModal {
         console.warn("Could not load leaderboard ghost replay.", error);
         ghostStatus.textContent = t(this.options.locale, "start.ghostRankingFailed");
       } finally {
-        ghostRankingLoadButton.disabled = !ghostSelect.value;
+        ghostSelect.disabled = false;
       }
     });
 

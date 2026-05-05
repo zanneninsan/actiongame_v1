@@ -256,8 +256,7 @@ canvas {
   pointer-events: none;
 }
 
-.start-ghost-load,
-.start-ghost-ranking-load {
+.start-ghost-load {
   box-sizing: border-box;
   width: auto;
   justify-self: stretch;
@@ -275,18 +274,17 @@ canvas {
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
 }
 
-.start-ghost-ranking-load:disabled {
-  cursor: default;
-  filter: brightness(0.66) saturate(0.72);
-  opacity: 0.78;
-}
-
 .start-ghost-select {
   min-width: 0;
   height: 36px;
   padding: 0 18px;
   font-size: 13px;
-  grid-column: 1 / -1;
+}
+
+.start-ghost-select:disabled {
+  cursor: default;
+  filter: brightness(0.66) saturate(0.72);
+  opacity: 0.78;
 }
 
 .start-ghost-status {
