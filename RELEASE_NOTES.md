@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.226
+### English
+- Added stationary and no-gravity stationary enemy behavior overrides to enemy placements and the stage editor.
+### Japanese
+- 敵配置の挙動に「その場で静止」と「その場で静止(重力無効)」を追加し、ステージ編集パネルから選べるようにしました。
+
 ## v0.1.225
 ### English
 - Added a debug control in the stage editor panel for setting the remaining time during a run.

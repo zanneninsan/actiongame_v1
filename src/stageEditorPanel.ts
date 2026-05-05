@@ -3,6 +3,7 @@ import {
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
   type EnemyType,
+  type EnemyAiType,
   type ItemType,
   type MovingPlatformAxis,
   type StreetLampKey,
@@ -47,6 +48,7 @@ export class StageEditorPanel {
   private movingSpeedInput?: HTMLInputElement;
   private itemTypeSelect?: HTMLSelectElement;
   private enemyTypeSelect?: HTMLSelectElement;
+  private enemyAiTypeSelect?: HTMLSelectElement;
   private lampTypeSelect?: HTMLSelectElement;
   private decorationSelect?: HTMLSelectElement;
   private remainingTimeInput?: HTMLInputElement;
@@ -87,6 +89,11 @@ export class StageEditorPanel {
 
   get enemyType() {
     return (this.enemyTypeSelect?.value ?? "aquaMascot") as EnemyType;
+  }
+
+  get enemyAiType() {
+    const value = this.enemyAiTypeSelect?.value ?? "";
+    return value ? (value as EnemyAiType) : undefined;
   }
 
   get lampType() {
@@ -168,6 +175,14 @@ export class StageEditorPanel {
             ${Object.entries(ENEMY_DEFINITIONS).map(([type, definition]) => `<option value="${type}">${definition.label}</option>`).join("")}
           </select>
         </div>
+        <div class="editor-row" data-editor-fields="enemy">
+          <label>${t(this.options.locale, "editor.enemyBehavior")}</label>
+          <select data-enemy-ai-type>
+            <option value="">${t(this.options.locale, "editor.enemyBehavior.default")}</option>
+            <option value="stationary">${t(this.options.locale, "editor.enemyBehavior.stationary")}</option>
+            <option value="stationaryNoGravity">${t(this.options.locale, "editor.enemyBehavior.stationaryNoGravity")}</option>
+          </select>
+        </div>
         <div class="editor-row" data-editor-fields="streetLamp">
           <label>${t(this.options.locale, "editor.lamp")}</label>
           <select data-lamp-type>
@@ -217,6 +232,7 @@ export class StageEditorPanel {
     this.movingSpeedInput = panel.querySelector<HTMLInputElement>("[data-moving-speed]")!;
     this.itemTypeSelect = panel.querySelector<HTMLSelectElement>("[data-item-type]")!;
     this.enemyTypeSelect = panel.querySelector<HTMLSelectElement>("[data-enemy-type]")!;
+    this.enemyAiTypeSelect = panel.querySelector<HTMLSelectElement>("[data-enemy-ai-type]")!;
     this.lampTypeSelect = panel.querySelector<HTMLSelectElement>("[data-lamp-type]")!;
     this.decorationSelect = panel.querySelector<HTMLSelectElement>("[data-decoration-key]")!;
     this.remainingTimeInput = panel.querySelector<HTMLInputElement>("[data-editor-remaining-time]")!;
@@ -369,6 +385,7 @@ export class StageEditorPanel {
     this.movingSpeedInput = undefined;
     this.itemTypeSelect = undefined;
     this.enemyTypeSelect = undefined;
+    this.enemyAiTypeSelect = undefined;
     this.lampTypeSelect = undefined;
     this.decorationSelect = undefined;
     this.remainingTimeInput = undefined;

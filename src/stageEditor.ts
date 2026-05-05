@@ -262,8 +262,10 @@ export class StageEditor {
       this.recordChange(historySnapshot);
     } else if (this.tool === "enemy") {
       const type = this.panel?.enemyType ?? "aquaMascot";
+      const aiType = this.panel?.enemyAiType;
       const placement: EnemyPlacement = {
         type,
+        ...(aiType ? { aiType } : {}),
         x,
         y,
         patrolLeft: x - this.options.platformUnitWidth * 2,
@@ -838,7 +840,21 @@ export class StageEditor {
       this.isNumber(value.patrolLeft) &&
       this.isNumber(value.patrolRight) &&
       (value.type === undefined || (typeof value.type === "string" && value.type in ENEMY_DEFINITIONS)) &&
+      (value.aiType === undefined || this.isEnemyAiType(value.aiType)) &&
       this.isOptionalNumber(value.speed)
+    );
+  }
+
+  private isEnemyAiType(value: unknown) {
+    return (
+      value === "patrol" ||
+      value === "flyingPatrol" ||
+      value === "hoppingPatrol" ||
+      value === "chase" ||
+      value === "shooter" ||
+      value === "turret" ||
+      value === "stationary" ||
+      value === "stationaryNoGravity"
     );
   }
 
