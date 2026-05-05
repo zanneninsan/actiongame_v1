@@ -84,7 +84,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.251";
+const DEBUG_VERSION = "v0.1.252";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -146,6 +146,7 @@ const MAX_UPWARD_LAUNCH_SPEED = 1280;
 const JUMP_VELOCITY = -590;
 const BOOSTED_JUMP_VELOCITY = -675;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
+const STOMP_FREE_JUMP_BUFFER_MS = 420;
 const DASH_SPEED_MULTIPLIER = 2;
 const DASH_MAX_VERTICAL_SPEED = Math.abs(BOOSTED_JUMP_VELOCITY) * DASH_SPEED_MULTIPLIER;
 const EDITOR_FLY_SPEED = 360;
@@ -327,6 +328,7 @@ class PrototypeScene extends Phaser.Scene {
   private isLongIdlePlaying = false;
   private isDefeatSequenceActive = false;
   private hurtUntil = 0;
+  private stompFreeJumpUntil = 0;
   private invulnerableUntil = 0;
   private damageTween?: Phaser.Tweens.Tween;
   private collisionDebugEnabled = false;
@@ -708,8 +710,9 @@ class PrototypeScene extends Phaser.Scene {
     }
     const springLaunchedRecently = this.time.now - this.lastSpringLaunchAt <= SPRING_LAUNCH_NORMAL_JUMP_SUPPRESS_MS;
     const jump = (debugJump || normalJump) && !springLaunchedRecently;
+    const wantsStompFreeJump = jump && !onFloor && this.time.now <= this.stompFreeJumpUntil;
     const wantsAirJump = jump && !onFloor && debugJump;
-    const canJump = onFloor || (wantsAirJump && this.consumeStamina(AIR_JUMP_STAMINA_COST));
+    const canJump = onFloor || wantsStompFreeJump || (wantsAirJump && this.consumeStamina(AIR_JUMP_STAMINA_COST));
     let startedJump = false;
     const baseHorizontalAcceleration = onFloor
       ? isCrouchInputActive
@@ -731,6 +734,9 @@ class PrototypeScene extends Phaser.Scene {
     carryPlayerOnDescendingMovingPlatforms(this.player, this.movingPlatformInstances, movingPlatformsActive);
 
     if (jump && canJump) {
+      if (wantsStompFreeJump) {
+        this.stompFreeJumpUntil = 0;
+      }
       const isDashJumpInputActive = wantsDash && isShiftSpeedActive;
       const isSpeedBoostedJump = Math.abs(this.player.body.velocity.x) >= BOOST_JUMP_SPEED_THRESHOLD;
       const baseJumpVelocity =
@@ -916,6 +922,7 @@ class PrototypeScene extends Phaser.Scene {
     this.isLongIdlePlaying = false;
     this.isDefeatSequenceActive = false;
     this.hurtUntil = 0;
+    this.stompFreeJumpUntil = 0;
     this.invulnerableUntil = 0;
     this.damageTween?.stop();
     this.damageTween = undefined;
@@ -1866,6 +1873,7 @@ class PrototypeScene extends Phaser.Scene {
     const stomped = tryStompEnemy(this.player, stompTarget, () => {
       this.isLanding = false;
       this.landingFastForwarded = false;
+      this.stompFreeJumpUntil = this.time.now + STOMP_FREE_JUMP_BUFFER_MS;
       this.rewards?.addEnemyDefeatScore(stompTarget);
       this.showAquaMascotStompDialogueOnce(stompTarget);
     });
@@ -2675,6 +2683,7 @@ class PrototypeScene extends Phaser.Scene {
     this.landingFastForwarded = false;
     this.resetPlayerIdleState();
     this.hurtUntil = 0;
+    this.stompFreeJumpUntil = 0;
     this.invulnerableUntil = 0;
     this.damageTween?.stop();
     this.damageTween = undefined;
@@ -2704,6 +2713,7 @@ class PrototypeScene extends Phaser.Scene {
     this.isDefeatSequenceActive = true;
     this.isRunActive = false;
     this.hurtUntil = 0;
+    this.stompFreeJumpUntil = 0;
     this.invulnerableUntil = 0;
     this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
@@ -2747,6 +2757,7 @@ class PrototypeScene extends Phaser.Scene {
     this.isDefeatSequenceActive = true;
     this.isRunActive = false;
     this.hurtUntil = 0;
+    this.stompFreeJumpUntil = 0;
     this.invulnerableUntil = 0;
     this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;

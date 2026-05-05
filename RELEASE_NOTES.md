@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.252
+### English
+- Added a short free-jump window after stomping an enemy so pressing jump can launch again without spending stamina.
+### Japanese
+- 敵を踏んだ直後に短い無料ジャンプ受付を追加し、ジャンプ入力でスタミナを消費せずに再ジャンプできるようにしました。
+
 ## v0.1.251
 ### English
 - Tightened the start screen by removing the player spec link, renaming ghost loading to ghost file loading, and placing player name, language, and stage inputs beside their labels.
