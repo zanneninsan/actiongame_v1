@@ -38,6 +38,9 @@ type StartModalOptions = {
 export class StartModal {
   private readonly options: StartModalOptions;
   private overlay?: HTMLDivElement;
+  private orientationPromptDismissed = false;
+  private orientationPromptSatisfied = false;
+  private removeOrientationPromptListeners?: () => void;
 
   constructor(options: StartModalOptions) {
     this.options = options;
@@ -49,6 +52,16 @@ export class StartModal {
     const overlay = document.createElement("div");
     overlay.id = "start-modal";
     overlay.innerHTML = `
+      <div class="start-orientation-prompt" hidden>
+        <div class="start-orientation-dialog" role="dialog" aria-modal="true">
+          <p class="start-orientation-message"></p>
+          <p class="start-orientation-note" hidden></p>
+          <div class="start-orientation-actions">
+            <button type="button" class="start-orientation-yes">${t(this.options.locale, "start.orientationYes")}</button>
+            <button type="button" class="start-orientation-no">${t(this.options.locale, "start.orientationNo")}</button>
+          </div>
+        </div>
+      </div>
       <form class="start-dialog">
         <h1>SUPER ZANNENIN SISTERS</h1>
         <div class="start-primary-panel">
@@ -126,6 +139,11 @@ export class StartModal {
     const accountStatus = overlay.querySelector<HTMLSpanElement>(".start-account-status")!;
     const startButton = overlay.querySelector<HTMLButtonElement>(".start-button")!;
     const googleLoginButton = overlay.querySelector<HTMLButtonElement>(".start-google-login")!;
+    const orientationPrompt = overlay.querySelector<HTMLDivElement>(".start-orientation-prompt")!;
+    const orientationMessage = overlay.querySelector<HTMLParagraphElement>(".start-orientation-message")!;
+    const orientationNote = overlay.querySelector<HTMLParagraphElement>(".start-orientation-note")!;
+    const orientationYes = overlay.querySelector<HTMLButtonElement>(".start-orientation-yes")!;
+    const orientationNo = overlay.querySelector<HTMLButtonElement>(".start-orientation-no")!;
     let selectedMode = this.options.controlMode;
     let selectedStageId = this.options.stageId;
     let soundOn = this.options.soundOn;
@@ -146,6 +164,58 @@ export class StartModal {
     ghostSelect.addEventListener("keydown", (event) => event.stopPropagation());
     ghostSelect.addEventListener("keyup", (event) => event.stopPropagation());
     ghostSelect.addEventListener("keypress", (event) => event.stopPropagation());
+    const showOrientationPrompt = (failed = false) => {
+      if (this.orientationPromptDismissed || this.orientationPromptSatisfied || !shouldSuggestMobileFullscreen()) {
+        orientationPrompt.hidden = true;
+        return;
+      }
+      orientationMessage.textContent = t(this.options.locale, "start.orientationPrompt");
+      orientationNote.hidden = !failed;
+      orientationNote.textContent = failed ? t(this.options.locale, "start.orientationFallback") : "";
+      orientationPrompt.hidden = false;
+      orientationYes.focus();
+    };
+
+    const refreshOrientationPrompt = () => {
+      if (isLandscapeViewport()) {
+        this.orientationPromptSatisfied = true;
+        orientationPrompt.hidden = true;
+        return;
+      }
+      showOrientationPrompt(!orientationNote.hidden);
+    };
+
+    orientationYes.addEventListener("click", async () => {
+      orientationYes.disabled = true;
+      orientationNo.disabled = true;
+      orientationYes.textContent = t(this.options.locale, "start.orientationTrying");
+      try {
+        const succeeded = await requestFullscreenAndLandscape();
+        this.orientationPromptSatisfied = succeeded || isLandscapeViewport();
+        if (this.orientationPromptSatisfied) {
+          orientationPrompt.hidden = true;
+        } else {
+          showOrientationPrompt(true);
+        }
+      } finally {
+        orientationYes.disabled = false;
+        orientationNo.disabled = false;
+        orientationYes.textContent = t(this.options.locale, "start.orientationYes");
+      }
+    });
+    orientationNo.addEventListener("click", () => {
+      this.orientationPromptDismissed = true;
+      orientationPrompt.hidden = true;
+      input.focus();
+    });
+    orientationPrompt.addEventListener("pointerdown", (event) => event.stopPropagation());
+    orientationPrompt.addEventListener("keydown", (event) => event.stopPropagation());
+    window.addEventListener("resize", refreshOrientationPrompt, { passive: true });
+    screen.orientation?.addEventListener?.("change", refreshOrientationPrompt);
+    this.removeOrientationPromptListeners = () => {
+      window.removeEventListener("resize", refreshOrientationPrompt);
+      screen.orientation?.removeEventListener?.("change", refreshOrientationPrompt);
+    };
     const loadGhostOptions = async () => {
       ghostSelect.innerHTML = `<option value="">${t(this.options.locale, "start.ghostRankingLoading")}</option>`;
       ghostSelect.disabled = true;
@@ -307,8 +377,11 @@ export class StartModal {
     refreshSound();
     refreshAccount();
     void loadGhostOptions();
-    input.focus();
-    input.select();
+    showOrientationPrompt();
+    if (orientationPrompt.hidden) {
+      input.focus();
+      input.select();
+    }
   }
 
   setAccountStatus(status: StartAccountStatus | undefined) {
@@ -320,6 +393,8 @@ export class StartModal {
     this.overlay?.remove();
     this.overlay = undefined;
     this.refreshAccountUi = undefined;
+    this.removeOrientationPromptListeners?.();
+    this.removeOrientationPromptListeners = undefined;
     document.getElementById("start-modal")?.remove();
     document.body.classList.remove("is-start-modal-open");
   }
@@ -338,6 +413,51 @@ export class StartModal {
     const accountName = status.displayName || status.email;
     return accountName ? `#${playerId} / ${loginStatus} / ${accountName}` : `#${playerId} / ${loginStatus}`;
   }
+}
+
+function shouldSuggestMobileFullscreen() {
+  if (!isProbablySmartphone()) {
+    return false;
+  }
+  return !isLandscapeViewport() || !document.fullscreenElement;
+}
+
+function isProbablySmartphone() {
+  const userAgent = navigator.userAgent || "";
+  const uaLooksMobile = /Android|iPhone|iPod|Windows Phone|Mobile/i.test(userAgent);
+  const hasTouch = navigator.maxTouchPoints > 0 || matchMedia("(pointer: coarse)").matches;
+  const shortSide = Math.min(window.innerWidth, window.innerHeight);
+  const longSide = Math.max(window.innerWidth, window.innerHeight);
+  return uaLooksMobile || (hasTouch && shortSide <= 560 && longSide <= 980);
+}
+
+function isLandscapeViewport() {
+  return window.innerWidth > window.innerHeight;
+}
+
+async function requestFullscreenAndLandscape() {
+  let fullscreenSucceeded = Boolean(document.fullscreenElement);
+  try {
+    if (!fullscreenSucceeded && document.documentElement.requestFullscreen) {
+      await document.documentElement.requestFullscreen();
+      fullscreenSucceeded = true;
+    }
+  } catch (error) {
+    console.warn("Fullscreen request failed.", error);
+  }
+
+  let orientationSucceeded = isLandscapeViewport();
+  try {
+    const orientation = screen.orientation as ScreenOrientation | undefined;
+    if (orientation?.lock) {
+      await orientation.lock("landscape");
+      orientationSucceeded = true;
+    }
+  } catch (error) {
+    console.warn("Landscape orientation lock failed.", error);
+  }
+
+  return fullscreenSucceeded && orientationSucceeded;
 }
 
 function escapeHtml(value: string) {

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.255
+### English
+- Added a smartphone startup prompt that asks to switch to landscape fullscreen, attempts fullscreen and orientation lock when accepted, and falls back to a rotate-device retry prompt when the browser blocks it.
+### Japanese
+- スマートフォンと思われる環境で、スタート画面の前に横画面・フルスクリーン推奨の確認を表示し、許可された場合は自動切り替えを試み、失敗時は端末を横向きにして再試行できる案内を出すようにしました。
+
 ## v0.1.254
 ### English
 - Reworked the mobile start screen into a dedicated vertical layout with a sticky start area, collapsed ghost options, and hidden background controls while the modal is open.
