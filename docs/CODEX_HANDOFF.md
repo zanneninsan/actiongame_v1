@@ -99,6 +99,7 @@ This file is the short context packet for future Codex sessions. Read this first
 - Before committing, check:
   - `git status --short`
   - `git diff --stat`
+- When merging a work branch back into `main`, expect README and version/release-note files to conflict. Resolve them deliberately by preserving the newest user-facing version entry, keeping both relevant README changes when possible, and re-running `npm run build` before the merge commit is considered done.
 - If pushing, bump `DEBUG_VERSION` and add release notes.
 - Also bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` for large or user-visible updates, even when not pushing yet.
 - When updating `RELEASE_NOTES.md`, write the `### Japanese` section in natural Japanese text. Do not use romanized Japanese such as "wo", "ni", or "shimashita".
