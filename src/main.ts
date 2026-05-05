@@ -1551,6 +1551,10 @@ class PrototypeScene extends Phaser.Scene {
     return score.toFixed(2);
   }
 
+  private roundScoreValue(score: number) {
+    return Math.round(score * 100) / 100;
+  }
+
   private showLeaderboard(
     statusMessage?: string,
     currentSubmissionId?: string,
@@ -1600,7 +1604,10 @@ class PrototypeScene extends Phaser.Scene {
           currentScore,
         );
       })
-      .catch(() => this.showLeaderboard("Score could not be submitted."));
+      .catch((error) => {
+        console.warn("Score submission failed.", error);
+        this.showLeaderboard("Score could not be submitted.");
+      });
   }
 
   private createPixelTexture(key: string, width: number, height: number, fill: number, stroke: number) {
@@ -1856,9 +1863,9 @@ class PrototypeScene extends Phaser.Scene {
 
     this.hasWon = true;
     const remaining = this.getRemainingMilliseconds();
-    const timeBonus = (remaining / 1000) * TIME_BONUS_PER_SECOND;
-    const itemScore = this.rewards?.getItemScore() ?? 0;
-    const finalScore = itemScore + timeBonus;
+    const timeBonus = this.roundScoreValue((remaining / 1000) * TIME_BONUS_PER_SECOND);
+    const itemScore = this.roundScoreValue(this.rewards?.getItemScore() ?? 0);
+    const finalScore = this.roundScoreValue(itemScore + timeBonus);
     const clearRank = this.rewards?.getClearRank(finalScore, remaining, GAME_TIME_MS) ?? "C";
     const missionLine = this.rewards?.getMissionSummary(remaining, GAME_TIME_MS) ?? "";
     this.timerText.setText(
