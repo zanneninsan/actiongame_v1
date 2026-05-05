@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.213
+### English
+- Added Google login and account status controls to the start screen while keeping anonymous play available.
+### Japanese
+- 開始画面にGoogleログインと連携状況の表示を追加し、未ログインでも匿名でプレイできる導線を分かりやすくしました。
+
 ## v0.1.212
 ### English
 - Added a Google login path for already-linked leaderboard accounts and made Firebase Auth persistence explicit to keep player IDs stable across reloads.
