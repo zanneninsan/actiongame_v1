@@ -21,6 +21,12 @@ This file is the short context packet for future Codex sessions. Read this first
   - When starting a dev server from a Codex worktree, avoid the default port if another worktree may already be using it. Pick a separate port such as `5176` and run `npm run dev -- --host 127.0.0.1 --port 5176`.
   - Before reusing a port, check which worktree owns it; do not stop another worktree's server unless the user asks.
 - GitHub Pages deployment runs from GitHub Actions.
+- Firebase manual deployment:
+  - Target project is defined in `.firebaserc` as `zannenin-sisters-leaderboard`.
+  - Hosting URL is `https://zannenin-sisters-leaderboard.web.app/`.
+  - Run `npm run build` first, then run `firebase deploy` from the repository root to deploy Firestore rules/indexes, Functions, and Hosting together.
+  - If only Functions should be deployed, run `firebase deploy --only functions`.
+  - `firebase.json` hosts the built Vite app from `dist` and runs the Functions predeploy build automatically.
 - The worktree may contain user or external changes. Always check `git status --short --branch` before editing.
 
 ## Important Files
