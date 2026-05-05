@@ -45,20 +45,10 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
     "y": 552
   },
   "goal": {
-    "x": 12580,
-    "y": 568
+    "x": 12576,
+    "y": 576
   },
   "platforms": [
-    {
-      "x": 0,
-      "y": 672,
-      "units": 11
-    },
-    {
-      "x": 896,
-      "y": 672,
-      "units": 12
-    },
     {
       "x": 1920,
       "y": 672,
@@ -233,6 +223,26 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "x": 448,
       "y": 544,
       "units": 2
+    },
+    {
+      "x": 11264,
+      "y": 480,
+      "units": 3
+    },
+    {
+      "x": 0,
+      "y": 672,
+      "units": 6
+    },
+    {
+      "x": 608,
+      "y": 672,
+      "units": 12
+    },
+    {
+      "x": 1504,
+      "y": 672,
+      "units": 4
     }
   ],
   "streetLamps": [
@@ -262,7 +272,7 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "scale": 0.68
     },
     {
-      "x": 5152,
+      "x": 5408,
       "key": "street-lamp-double",
       "scale": 0.64
     },
@@ -272,12 +282,12 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "scale": 0.66
     },
     {
-      "x": 7180,
+      "x": 7136,
       "key": "street-lamp-double",
       "scale": 0.64
     },
     {
-      "x": 8200,
+      "x": 8672,
       "key": "street-lamp-single",
       "scale": 0.68
     },
@@ -305,7 +315,7 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "scale": 0.72
     },
     {
-      "x": 1440,
+      "x": 1280,
       "y": 672,
       "key": "stage-props-planter-box",
       "scale": 0.62
@@ -323,37 +333,37 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "scale": 0.78
     },
     {
-      "x": 4224,
+      "x": 4768,
       "y": 672,
       "key": "stage-structures-phone-booth",
       "scale": 0.76
     },
     {
-      "x": 5536,
+      "x": 5312,
       "y": 672,
       "key": "stage-structures-vending-kiosk",
       "scale": 0.76
     },
     {
-      "x": 5760,
+      "x": 5152,
       "y": 672,
       "key": "stage-props-utility-box",
       "scale": 0.56
     },
     {
-      "x": 6624,
+      "x": 6816,
       "y": 672,
       "key": "stage-structures-chainlink-fence",
       "scale": 0.64
     },
     {
-      "x": 7328,
+      "x": 7936,
       "y": 672,
       "key": "stage-props-park-bench",
       "scale": 0.68
     },
     {
-      "x": 8320,
+      "x": 8512,
       "y": 672,
       "key": "stage-props-bus-stop-sign",
       "scale": 0.62
@@ -389,13 +399,13 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "scale": 0.72
     },
     {
-      "x": 11168,
+      "x": 11712,
       "y": 672,
       "key": "stage-props-roadwork-sign",
       "scale": 0.52
     },
     {
-      "x": 11392,
+      "x": 11008,
       "y": 672,
       "key": "stage-structures-concrete-pillar",
       "scale": 0.58
@@ -545,6 +555,9 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "y": 492
     }
   ],
+  "bonusBlocks": [],
+  "checkpoints": [],
+  "oneWayGates": [],
   "enemies": [
     {
       "type": "knifePunk",
@@ -1743,9 +1756,9 @@ export const STAGES = {
   rankingCheck: RANKING_CHECK_STAGE,
 };
 export type StageId = keyof typeof STAGES;
-export const DEFAULT_STAGE_ID = "neonCanal" satisfies StageId;
+export const DEFAULT_STAGE_ID = "originalDowntown" satisfies StageId;
 export const PLAYABLE_STAGE_IDS = [
-  "neonCanal",
+  "originalDowntown",
   "neoShibuyaCity",
   "mobileTouchTutorial",
   "skybridgeSprint",

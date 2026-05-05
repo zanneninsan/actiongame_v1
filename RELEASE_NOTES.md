@@ -2,6 +2,16 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.269
+### English
+- Changed the top-right Title shortcut from text to a home-style icon.
+- Reflected the imported Shibu-ya city stage JSON into the playable Shibu-ya city stage layout.
+- Set the first-play default stage explicitly to Shibu-ya city instead of the legacy neonCanal alias.
+### Japanese
+- 右上のタイトルへ戻るボタンを文字表示からホーム風のアイコン表示に変更しました。
+- 読み込んだシブヤシティのステージJSONを、プレイ対象のシブヤシティのステージ配置に反映しました。
+- 初回プレイ時のデフォルトステージを、旧名称のneonCanalではなく明示的にシブヤシティへ設定しました。
+
 ## v0.1.268
 ### English
 - Added a short touch-control tutorial stage that introduces movement, jumping, dash, a checkpoint, and a simple stationary enemy.
@@ -39,6 +49,7 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 - Improved the smartphone startup flow with a success message after landscape fullscreen setup and a portrait-start confirmation that can either retry landscape fullscreen or start anyway.
 ### Japanese
 - スマートフォン向け初回導線を改善し、横画面・フルスクリーン切り替え成功時の表示と、縦画面開始時に「横向きにする」か「このまま開始」を選べる確認を追加しました。
+
 
 ## v0.1.263
 ### English
