@@ -1,6 +1,7 @@
 import { LOCALE_OPTIONS, t, type Locale } from "./i18n";
 
-const PLAYER_SPEC_URL = `${import.meta.env.BASE_URL}player-spec/index.html`;
+const getPlayerSpecUrl = (locale: Locale) =>
+  `${import.meta.env.BASE_URL}player-spec/index.html?lang=${encodeURIComponent(locale)}`;
 
 export type ControlMode = "pc" | "mobile";
 export type StageOption = { id: string; label: Record<Locale, string> };
@@ -67,7 +68,10 @@ export class StartModal {
           <button type="button" data-sound="on" class="sound-button">&#128266; ${t(this.options.locale, "start.soundOn")}</button>
           <button type="button" data-sound="off" class="sound-button">&#128263; ${t(this.options.locale, "start.soundOff")}</button>
         </div>
-        <a class="start-spec-link" href="${PLAYER_SPEC_URL}" target="_blank" rel="noopener">Player Spec</a>
+        <a class="start-spec-link" href="${getPlayerSpecUrl(this.options.locale)}" target="_blank" rel="noopener">${t(
+          this.options.locale,
+          "start.playerSpec",
+        )}</a>
         <button type="submit" class="start-button">${t(this.options.locale, "start.start")}</button>
       </form>
     `;

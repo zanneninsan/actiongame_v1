@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.208
+### English
+- Localized the in-game Player Spec link and SPEC button, and passed the current game language to the Player Spec page.
+### Japanese
+- ゲーム内のPlayer SpecリンクとSPECボタンを多言語対応し、現在のゲーム言語をPlayer Specページへ渡すようにしました。
+
 ## v0.1.207
 ### English
 - Localized the Player Spec page with Japanese/English language switching and fixed the broken Japanese text on the page.
