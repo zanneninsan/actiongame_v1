@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.256
+### English
+- Changed the clear result text to use a thin outline.
+- Added a Back to Menu button below the clear-screen ghost JSON export button that returns to the initial menu like the Title control.
+### Japanese
+- クリア時の結果表示を細い縁取りに変更しました。
+- クリア画面のゴーストJSON出力ボタンの下に「メニューに戻る」を追加し、タイトル操作と同じように最初のメニューへ戻れるようにしました。
+
 ## v0.1.255
 ### English
 - Updated the start screen and browser title to 作成中ネオシブヤシティ.
