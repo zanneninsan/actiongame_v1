@@ -2,6 +2,18 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.257
+### English
+- Renamed the game to スーパー残念院さんランド / SUPER ZANNENIN=SAN LAND and renamed Neo Shibuya City to WIP Neo Shibuya City.
+### Japanese
+- ゲームタイトルを「スーパー残念院さんランド」/「SUPER ZANNENIN=SAN LAND」に変更し、ステージ名「ネオシブヤシティ」を「作成中ネオシブヤシティ」に変更しました。
+
+## v0.1.256
+### English
+- Selecting yes on the smartphone landscape fullscreen prompt now also switches the start screen control mode to mobile.
+### Japanese
+- スマートフォン向けの横画面・フルスクリーン確認で「はい」を選んだ時に、スタート画面の操作モードも自動でモバイルモードへ切り替わるようにしました。
+
 ## v0.1.255
 ### English
 - Updated the start screen and browser title to 作成中ネオシブヤシティ.

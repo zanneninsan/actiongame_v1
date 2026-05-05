@@ -63,7 +63,7 @@ export class StartModal {
         </div>
       </div>
       <form class="start-dialog">
-        <h1>作成中ネオシブヤシティ</h1>
+        <h1>${t(this.options.locale, "start.title")}</h1>
         <div class="start-primary-panel">
           <label class="start-field">
             <span>${t(this.options.locale, "start.playerName")}</span>
@@ -186,6 +186,9 @@ export class StartModal {
     };
 
     orientationYes.addEventListener("click", async () => {
+      selectedMode = "mobile";
+      this.options.controlMode = selectedMode;
+      refreshMode();
       orientationYes.disabled = true;
       orientationNo.disabled = true;
       orientationYes.textContent = t(this.options.locale, "start.orientationTrying");
