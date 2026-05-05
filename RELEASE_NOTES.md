@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.220
+### English
+- Sync player preferences to the linked Google account, including name, language, stage, sound, danmaku, and moving-platform debug settings.
+### Japanese
+- プレイヤー名、言語、ステージ、サウンド、弾幕、動く足場デバッグ設定を、連携済みGoogleアカウントに同期するようにしました。
+
 ## v0.1.219
 ### English
 - Added Google login and account status controls to the start screen while keeping anonymous play available.

@@ -14,11 +14,15 @@ import {
 } from "firebase/auth";
 import {
   collection,
+  doc,
   getDocs,
+  getDoc,
   getFirestore,
   limit as limitQuery,
   orderBy,
   query,
+  serverTimestamp,
+  setDoc,
   where,
   type Firestore,
 } from "firebase/firestore";
@@ -68,6 +72,16 @@ export type LeaderboardIdentity = {
   displayName: string | null;
 };
 
+export type LeaderboardUserSettings = {
+  playerName?: string;
+  locale?: string;
+  stageId?: string;
+  soundVolumePercent?: number;
+  soundMuted?: boolean;
+  danmakuEnabled?: boolean;
+  movingPlatformsDebug?: boolean;
+};
+
 type FirebaseServices = {
   auth: Auth;
   firestore: Firestore;
@@ -75,6 +89,7 @@ type FirebaseServices = {
 };
 
 const LEADERBOARD_COLLECTION = "leaderboardScores";
+const USER_SETTINGS_DOC = "app";
 const SUBMIT_SCORE_FUNCTION = "submitScore";
 const DEFAULT_LEADERBOARD_LIMIT = 100;
 let servicesPromise: Promise<FirebaseServices | undefined> | undefined;
@@ -143,6 +158,43 @@ export async function unlinkLeaderboardGoogleAccount() {
 
   const unlinkedUser = await unlink(user, GoogleAuthProvider.PROVIDER_ID);
   return { ok: true as const, identity: createLeaderboardIdentity(unlinkedUser) };
+}
+
+export async function fetchLeaderboardUserSettings(): Promise<LeaderboardUserSettings | undefined> {
+  const services = await getFirebaseServices();
+  if (!services) {
+    return undefined;
+  }
+
+  const user = await ensureAnonymousAuth(services.auth);
+  if (!isGoogleLinkedUser(user)) {
+    return undefined;
+  }
+
+  const snapshot = await getDoc(doc(services.firestore, "users", user.uid, "settings", USER_SETTINGS_DOC));
+  return snapshot.exists() ? sanitizeUserSettings(snapshot.data()) : undefined;
+}
+
+export async function saveLeaderboardUserSettings(settings: LeaderboardUserSettings) {
+  const services = await getFirebaseServices();
+  if (!services) {
+    return false;
+  }
+
+  const user = await ensureAnonymousAuth(services.auth);
+  if (!isGoogleLinkedUser(user)) {
+    return false;
+  }
+
+  await setDoc(
+    doc(services.firestore, "users", user.uid, "settings", USER_SETTINGS_DOC),
+    {
+      ...sanitizeUserSettings(settings),
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
+  return true;
 }
 
 export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) {
@@ -339,4 +391,31 @@ function sanitizePlayerId(playerId: unknown) {
 
 function roundScore(score: number) {
   return Math.round(score * 100) / 100;
+}
+
+function sanitizeUserSettings(data: unknown): LeaderboardUserSettings {
+  const source = data && typeof data === "object" ? (data as Record<string, unknown>) : {};
+  const settings: LeaderboardUserSettings = {};
+  if (typeof source.playerName === "string") {
+    settings.playerName = sanitizePlayerName(source.playerName);
+  }
+  if (typeof source.locale === "string") {
+    settings.locale = source.locale.slice(0, 8);
+  }
+  if (typeof source.stageId === "string") {
+    settings.stageId = source.stageId.slice(0, 80);
+  }
+  if (typeof source.soundVolumePercent === "number" && Number.isFinite(source.soundVolumePercent)) {
+    settings.soundVolumePercent = Math.max(0, Math.min(100, Math.round(source.soundVolumePercent)));
+  }
+  if (typeof source.soundMuted === "boolean") {
+    settings.soundMuted = source.soundMuted;
+  }
+  if (typeof source.danmakuEnabled === "boolean") {
+    settings.danmakuEnabled = source.danmakuEnabled;
+  }
+  if (typeof source.movingPlatformsDebug === "boolean") {
+    settings.movingPlatformsDebug = source.movingPlatformsDebug;
+  }
+  return settings;
 }

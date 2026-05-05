@@ -61,12 +61,15 @@ import { DanmakuOverlay } from "./danmaku";
 import {
   fetchLeaderboardEntries,
   fetchMyLeaderboardEntries,
+  fetchLeaderboardUserSettings,
   getLeaderboardIdentity,
   isLeaderboardConfigured,
   logInLeaderboardWithGoogle,
+  saveLeaderboardUserSettings,
   signInLeaderboardWithGoogle,
   submitLeaderboardScore,
   type LeaderboardIdentity,
+  type LeaderboardUserSettings,
   unlinkLeaderboardGoogleAccount,
 } from "./leaderboard";
 import { showLeaderboardPanel } from "./leaderboardUi";
@@ -77,9 +80,10 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.219";
+const DEBUG_VERSION = "v0.1.220";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
+const MOVING_PLATFORM_DEBUG_STORAGE_KEY = "actiongame_debug_moving_platforms";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
@@ -209,6 +213,9 @@ class PrototypeScene extends Phaser.Scene {
   private leaderboardGoogleLinked = false;
   private leaderboardGoogleEmail: string | null = null;
   private leaderboardGoogleDisplayName: string | null = null;
+  private leaderboardSettingsSyncLoadedForPlayerId = "";
+  private leaderboardSettingsSaveTimer: number | undefined;
+  private applyingLeaderboardUserSettings = false;
   private controlMode: ControlMode = "pc";
   private currentStageId: StageId = DEFAULT_STAGE_ID;
   private locale: Locale = getBrowserLocale();
@@ -899,6 +906,7 @@ class PrototypeScene extends Phaser.Scene {
         this.setCookieValue(STAGE_ID_STORAGE_KEY, this.currentStageId);
         this.setLocale(locale);
         this.setSoundEnabled(soundOn);
+        this.scheduleLeaderboardUserSettingsSave();
         this.setupComplete = true;
         this.startRun();
       },
@@ -1023,6 +1031,112 @@ class PrototypeScene extends Phaser.Scene {
     this.leaderboardGoogleDisplayName = identity.displayName;
     this.updatePlayerNameText();
     this.startModal?.setAccountStatus(this.getStartAccountStatus());
+    void this.syncLeaderboardUserSettings();
+  }
+
+  private async syncLeaderboardUserSettings() {
+    if (!this.leaderboardGoogleLinked || !this.leaderboardPlayerId) {
+      this.leaderboardSettingsSyncLoadedForPlayerId = "";
+      return;
+    }
+    if (this.leaderboardSettingsSyncLoadedForPlayerId === this.leaderboardPlayerId) {
+      return;
+    }
+
+    try {
+      const settings = await fetchLeaderboardUserSettings();
+      this.leaderboardSettingsSyncLoadedForPlayerId = this.leaderboardPlayerId;
+      if (settings && Object.keys(settings).length > 0) {
+        this.applyLeaderboardUserSettings(settings);
+        return;
+      }
+      await saveLeaderboardUserSettings(this.getLeaderboardUserSettings());
+    } catch (error) {
+      console.warn("Could not sync leaderboard user settings.", error);
+    }
+  }
+
+  private getLeaderboardUserSettings(): LeaderboardUserSettings {
+    return {
+      playerName: this.playerName,
+      locale: this.locale,
+      stageId: this.currentStageId,
+      soundVolumePercent: this.soundVolumePercent,
+      soundMuted: this.soundMuted,
+      danmakuEnabled: this.danmakuEnabled,
+      movingPlatformsDebug: this.getMovingPlatformsDebugEnabled(),
+    };
+  }
+
+  private applyLeaderboardUserSettings(settings: LeaderboardUserSettings) {
+    this.applyingLeaderboardUserSettings = true;
+    try {
+      if (settings.playerName) {
+        this.playerName = settings.playerName;
+        this.setCookieValue("actiongame_player_name", this.playerName);
+      }
+      if (settings.locale && isLocale(settings.locale)) {
+        this.setLocale(settings.locale);
+      }
+      if (settings.stageId && (!this.setupComplete || this.startModal)) {
+        this.currentStageId = this.resolveStageId(settings.stageId);
+        this.setCookieValue(STAGE_ID_STORAGE_KEY, this.currentStageId);
+      }
+      if (typeof settings.soundVolumePercent === "number") {
+        this.soundVolumePercent = Phaser.Math.Clamp(Math.round(settings.soundVolumePercent), 0, 100);
+      }
+      if (typeof settings.soundMuted === "boolean") {
+        this.soundMuted = settings.soundMuted;
+      }
+      if (typeof settings.danmakuEnabled === "boolean") {
+        this.danmakuEnabled = settings.danmakuEnabled;
+        this.setCookieValue("actiongame_danmaku_disabled", settings.danmakuEnabled ? "0" : "1");
+      }
+      if (typeof settings.movingPlatformsDebug === "boolean") {
+        this.setMovingPlatformsDebugEnabled(settings.movingPlatformsDebug);
+      }
+      this.applySoundSettings();
+      this.refreshLocalizedUI();
+      if (this.startModal) {
+        this.showStartModal();
+      }
+      if (this.setupComplete) {
+        this.createGlobalUI();
+      }
+    } finally {
+      this.applyingLeaderboardUserSettings = false;
+    }
+  }
+
+  private scheduleLeaderboardUserSettingsSave() {
+    if (this.applyingLeaderboardUserSettings || !this.leaderboardGoogleLinked) {
+      return;
+    }
+    if (this.leaderboardSettingsSaveTimer !== undefined) {
+      window.clearTimeout(this.leaderboardSettingsSaveTimer);
+    }
+    this.leaderboardSettingsSaveTimer = window.setTimeout(() => {
+      this.leaderboardSettingsSaveTimer = undefined;
+      void saveLeaderboardUserSettings(this.getLeaderboardUserSettings()).catch((error) => {
+        console.warn("Could not save leaderboard user settings.", error);
+      });
+    }, 400);
+  }
+
+  private getMovingPlatformsDebugEnabled() {
+    try {
+      return window.localStorage.getItem(MOVING_PLATFORM_DEBUG_STORAGE_KEY) === "1";
+    } catch {
+      return false;
+    }
+  }
+
+  private setMovingPlatformsDebugEnabled(enabled: boolean) {
+    try {
+      window.localStorage.setItem(MOVING_PLATFORM_DEBUG_STORAGE_KEY, enabled ? "1" : "0");
+    } catch {
+      // Ignore storage failures; this debug preference is optional.
+    }
   }
 
   private getSavedLocale() {
@@ -1042,6 +1156,7 @@ class PrototypeScene extends Phaser.Scene {
       // Ignore storage failures; the current session can still use the chosen language.
     }
     this.refreshLocalizedUI();
+    this.scheduleLeaderboardUserSettingsSave();
   }
 
   private refreshLocalizedUI() {
@@ -1135,6 +1250,7 @@ class PrototypeScene extends Phaser.Scene {
     this.sound.mute = this.soundMuted;
     this.saveVolumeSettings(this.soundVolumePercent, this.soundMuted);
     this.refreshGlobalSoundUI();
+    this.scheduleLeaderboardUserSettingsSave();
   }
 
   private setSoundEnabled(soundOn: boolean) {
@@ -1152,6 +1268,7 @@ class PrototypeScene extends Phaser.Scene {
   private setDanmakuEnabled(enabled: boolean) {
     this.danmakuEnabled = enabled;
     this.setCookieValue("actiongame_danmaku_disabled", enabled ? "0" : "1");
+    this.scheduleLeaderboardUserSettingsSave();
     if (!enabled) {
       this.danmaku?.clear();
     }
