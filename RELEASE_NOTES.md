@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.245
+### English
+- Restored the three jump-height tiers: normal jumps, speed-boosted jumps from horizontal momentum, and higher Shift dash jumps only while dash input is held.
+### Japanese
+- ジャンプ高さを、通常ジャンプ、横速度による加速中ジャンプ、Shiftダッシュ入力中だけの高いジャンプの3段階に戻しました。
+
 ## v0.1.244
 ### English
 - Limited dash-boosted jumps to moments when dash input is actively held, preventing dash linger momentum from turning normal jumps into super jumps.

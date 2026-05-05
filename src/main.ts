@@ -83,7 +83,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.244";
+const DEBUG_VERSION = "v0.1.245";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -730,10 +730,9 @@ class PrototypeScene extends Phaser.Scene {
 
     if (jump && canJump) {
       const isDashJumpInputActive = wantsDash && isShiftSpeedActive;
+      const isSpeedBoostedJump = Math.abs(this.player.body.velocity.x) >= BOOST_JUMP_SPEED_THRESHOLD;
       const baseJumpVelocity =
-        isDashJumpInputActive && Math.abs(this.player.body.velocity.x) >= BOOST_JUMP_SPEED_THRESHOLD
-          ? BOOSTED_JUMP_VELOCITY
-          : JUMP_VELOCITY;
+        isDashJumpInputActive || isSpeedBoostedJump ? BOOSTED_JUMP_VELOCITY : JUMP_VELOCITY;
       const jumpSpeedMultiplier =
         (isDashJumpInputActive ? DASH_SPEED_MULTIPLIER : 1) * (this.rewards?.getSpeedMultiplier() ?? 1);
       this.player.setVelocityY(baseJumpVelocity * jumpSpeedMultiplier * jumpMultiplier);
