@@ -34,6 +34,7 @@ canvas {
   display: grid;
   place-items: center;
   padding: 24px 56px;
+  overflow: auto;
   background: rgba(4, 8, 18, 0.78);
   color: #f8fafc;
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
@@ -43,6 +44,7 @@ canvas {
   box-sizing: border-box;
   position: relative;
   width: min(620px, calc(100vw - 72px), calc((100dvh - 48px) * 1.125));
+  max-height: calc(100dvh - 48px);
   aspect-ratio: 720 / 640;
   display: grid;
   align-content: start;
@@ -206,23 +208,50 @@ canvas {
 
 @media (max-width: 560px) {
   #start-modal {
-    padding: 18px 32px;
+    place-items: start center;
+    padding: 8px;
   }
 
   .start-dialog {
-    width: min(100%, calc(100vw - 64px), calc((100dvh - 36px) * 1.125));
-    gap: 10px;
-    padding: 52px 34px 34px;
+    width: min(calc(100vw - 16px), 430px);
+    max-height: calc(100dvh - 16px);
+    aspect-ratio: auto;
+    gap: 8px;
+    padding: 48px 28px 28px;
+    overflow: auto;
+  }
+
+  .start-dialog h1 {
+    width: 100%;
+    min-height: 46px;
+    padding: 0 18px;
+    font-size: 18px;
+  }
+
+  .start-dialog label,
+  .mode-row,
+  .sound-row,
+  .start-button {
+    width: 100%;
+  }
+
+  .start-dialog input,
+  .start-dialog select {
+    height: 38px;
+    padding-left: 24px;
+    font-size: 16px;
   }
 
   .mode-row,
   .sound-row {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .mode-button,
   .sound-button {
-    height: 46px;
+    height: 40px;
+    font-size: 14px;
   }
 }
 
@@ -555,6 +584,7 @@ canvas {
   display: none;
   place-items: center;
   padding: 18px;
+  overflow: auto;
   background: rgba(4, 8, 18, 0.78);
   color: #f8fafc;
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
@@ -563,6 +593,7 @@ canvas {
 .options-dialog {
   box-sizing: border-box;
   width: min(440px, calc(100vw - 36px), calc((100dvh - 36px) * 1.2381));
+  max-height: calc(100dvh - 36px);
   aspect-ratio: 520 / 420;
   display: grid;
   align-content: start;
@@ -636,6 +667,32 @@ canvas {
   font-weight: 800;
 }
 
+@media (max-width: 480px) {
+  #options-modal {
+    place-items: start center;
+    padding: 8px;
+  }
+
+  .options-dialog {
+    width: min(calc(100vw - 16px), 390px);
+    max-height: calc(100dvh - 16px);
+    aspect-ratio: auto;
+    gap: 10px;
+    padding: 48px 28px 28px;
+    overflow: auto;
+  }
+
+  .options-dialog h2 {
+    min-height: 44px;
+    font-size: 18px;
+  }
+
+  .options-dialog select {
+    height: 38px;
+    font-size: 15px;
+  }
+}
+
 #leaderboard-modal {
   position: fixed;
   inset: 0;
@@ -643,6 +700,7 @@ canvas {
   display: grid;
   place-items: center;
   padding: clamp(10px, 2.5vw, 24px);
+  overflow: auto;
   background: rgba(4, 8, 18, 0.78);
   color: #f8fafc;
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
@@ -651,6 +709,7 @@ canvas {
 .leaderboard-dialog {
   box-sizing: border-box;
   width: min(1160px, calc(100vw - clamp(20px, 5vw, 48px)), calc((100dvh - clamp(20px, 5vw, 48px)) * 1.5789));
+  max-height: calc(100dvh - clamp(20px, 5vw, 48px));
   aspect-ratio: 1200 / 760;
   display: grid;
   grid-template-rows: auto auto auto auto minmax(0, 1fr) auto auto auto;
@@ -658,6 +717,7 @@ canvas {
   padding: clamp(72px, 7vw, 98px) clamp(86px, 8vw, 124px) clamp(56px, 5vw, 78px);
   background: url("../public/assets/ui/fantasy/leaderboard_window.webp") center / 100% 100% no-repeat;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
+  overflow: hidden;
 }
 
 .leaderboard-dialog h2 {
@@ -913,21 +973,51 @@ canvas {
 }
 
 @media (max-width: 520px) {
+  #leaderboard-modal {
+    place-items: start center;
+    padding: 6px;
+  }
+
   .leaderboard-dialog {
-    gap: 8px;
-    width: min(calc(100vw - 20px), calc((100dvh - 20px) * 1.5789));
-    padding: 50px 34px 36px;
+    grid-template-rows: auto auto auto auto minmax(150px, 1fr) auto auto auto;
+    gap: 7px;
+    width: min(calc(100vw - 12px), 430px);
+    max-height: calc(100dvh - 12px);
+    aspect-ratio: auto;
+    padding: 48px 16px 24px;
+  }
+
+  .leaderboard-dialog h2 {
+    width: 100%;
+    min-height: 42px;
+    padding: 0 18px;
+    font-size: 20px;
+  }
+
+  .leaderboard-meta,
+  .leaderboard-status {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+
+  .leaderboard-list {
+    padding: 0 3px;
+    gap: 6px;
   }
 
   .leaderboard-entry {
-    grid-template-columns: 42px 28px minmax(0, 1fr) 68px 84px;
-    padding: 0 16px;
+    grid-template-columns: 34px 38px minmax(64px, 1fr) 54px 74px;
+    gap: 5px;
+    min-height: 40px;
+    padding: 0 8px;
+    font-size: 12px;
   }
 
   .leaderboard-header {
-    grid-template-columns: 42px 28px minmax(0, 1fr) 68px 84px;
-    margin-right: 18px;
-    padding: 0 16px;
+    grid-template-columns: 34px 38px minmax(64px, 1fr) 54px 74px;
+    gap: 5px;
+    margin: 0 12px 0 3px;
+    padding: 0 8px;
     font-size: 10px;
   }
 
@@ -939,23 +1029,50 @@ canvas {
     display: none;
   }
 
-  .leaderboard-current-score {
-    grid-template-columns: minmax(0, 1fr) 62px 84px;
-    padding: 0 16px;
+  .leaderboard-new-marker {
+    font-size: 11px;
+  }
+
+  .leaderboard-player-id {
     font-size: 10px;
   }
 
+  .leaderboard-score {
+    font-size: 11px;
+  }
+
+  .leaderboard-current-score {
+    grid-template-columns: minmax(0, 1fr) 86px;
+    gap: 4px 8px;
+    min-height: auto;
+    padding: 8px;
+    font-size: 11px;
+  }
+
+  .leaderboard-current-value,
   .leaderboard-current-status {
-    display: none;
+    text-align: right;
   }
 
   .leaderboard-account-prompt {
     grid-template-columns: 1fr;
     gap: 6px;
-    padding: 8px 16px;
+    padding: 8px;
   }
 
   .leaderboard-account-copy span {
     display: none;
+  }
+
+  .leaderboard-google-button {
+    width: 100%;
+    min-height: 40px;
+    font-size: 12px;
+  }
+
+  #leaderboard-close {
+    width: 100%;
+    min-height: 42px;
+    font-size: 16px;
   }
 }

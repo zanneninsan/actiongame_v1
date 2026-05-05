@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.207
+### English
+- Improved responsive layouts for the start, options, and leaderboard modals so they remain usable on narrow mobile screens.
+### Japanese
+- スマホなどの狭い画面でも崩れにくいように、スタート、設定、ランキングの各モーダルのレスポンシブ表示を改善しました。
+
 ## v0.1.206
 ### English
 - Temporarily disabled leaderboard anti-cheat score and timer checks behind a server-side flag while keeping the validation mechanism in place.
