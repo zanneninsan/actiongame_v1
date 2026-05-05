@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.216
+### English
+- Slightly increased normal jump height and boosted running jump height.
+### Japanese
+- 通常ジャンプと加速中ジャンプのジャンプ力を少しだけ上げました。
+
 ## v0.1.215
 ### English
 - Shifted spring platform big-jump timing later by reducing the pre-contact buffer and adding a short post-launch upgrade window.
