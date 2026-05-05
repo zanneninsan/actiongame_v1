@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.182
+### English
+- Split the enhanced Shibuya City layout into a new Neo Shibuya City stage while restoring Shibuya City to the main-branch layout from `04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`.
+### Japanese
+- 強化版のシブヤシティを新しいステージ「ネオシブヤシティ」として分け、シブヤシティ本体は`04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`時点のmainブランチの構成に戻しました。
+
 ## v0.1.181
 ### English
 - Added a Mario-style feature pack with enemy stomps and combo scoring, spring and fragile platforms, coins, bonus blocks, powerups, checkpoints, clear ranks, missions, a neon idol shooter enemy, breakable blocks, and one-way gates.
