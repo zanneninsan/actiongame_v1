@@ -529,6 +529,19 @@ canvas {
   white-space: nowrap;
 }
 
+#player-position-label {
+  color: #fef3c7;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  padding: 4px 7px;
+  border: 1px solid rgba(253, 230, 138, 0.55);
+  background: rgba(2, 6, 23, 0.68);
+  text-shadow: 1px 1px 2px #020617;
+  white-space: nowrap;
+}
+
 .ui-button {
   pointer-events: auto;
   width: 40px;

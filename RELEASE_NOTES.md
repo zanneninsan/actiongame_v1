@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.187
+### English
+- Added a live player position readout beside the HIT debug toggle while collision debug is enabled.
+### Japanese
+- HITデバッグを有効にしている間、プレイヤーの現在座標をHITボタンの横に表示するようにしました。
+
 ## v0.1.186
 ### English
 - Resolved build-time UI asset URL warnings by making CSS image references resolve through the project asset graph.

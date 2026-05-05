@@ -50,6 +50,7 @@ import {
   createGlobalUI as createGlobalUIElements,
   removeGlobalUI as removeGlobalUIElements,
   setGlobalSoundUI,
+  setPlayerPositionDebugUI,
 } from "./globalUi";
 import {
   createMobileControls as createMobileControlElements,
@@ -68,7 +69,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.186";
+const DEBUG_VERSION = "v0.1.187";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1469,6 +1470,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private updateCollisionDebug() {
+    setPlayerPositionDebugUI(this.collisionDebugEnabled, this.player.x, this.player.y);
     if (!this.collisionDebugGraphics) {
       return;
     }

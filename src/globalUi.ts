@@ -25,6 +25,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   uiContainer.id = "global-ui";
   uiContainer.innerHTML = `
     <span id="version-label">${options.version}</span>
+    <span id="player-position-label" hidden>POS --,--</span>
     <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(options.locale, "aria.toggleCollision")}">HIT</button>
     <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch rear background">RB1</button>
     <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">MG1</button>
@@ -140,6 +141,17 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
 export const removeGlobalUI = () => {
   document.getElementById("global-ui")?.remove();
   document.getElementById("options-modal")?.remove();
+};
+
+export const setPlayerPositionDebugUI = (enabled: boolean, x: number, y: number) => {
+  const positionLabel = document.getElementById("player-position-label") as HTMLSpanElement | null;
+  if (!positionLabel) {
+    return;
+  }
+  positionLabel.hidden = !enabled;
+  if (enabled) {
+    positionLabel.textContent = `POS ${Math.round(x)}, ${Math.round(y)}`;
+  }
 };
 
 export const setGlobalSoundUI = (volumePercent: number, muted: boolean) => {
