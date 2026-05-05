@@ -2,6 +2,66 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.237
+### English
+- Expanded the classic MISS danmaku reaction across the full screen height and removed fade-in/fade-out from its fixed comments.
+### Japanese
+- ニコ動風モードのMISS弾幕を画面の縦幅いっぱいに広げ、固定コメントの出現時・消滅時のフェード演出をなくしました。
+
+## v0.1.236
+### English
+- Reworked the classic miss danmaku into dense fixed reaction waves that start from the screen center, add multiple centered rows in bursts, and allow some overlap without scrolling.
+### Japanese
+- ニコ動風モードのMISS時弾幕を、画面中央から始まり、呼応するように複数行が一気に増える固定リアクション演出へ変更しました。スクロールせず、密度高めで一部の行が重なるようにしています。
+
+## v0.1.235
+### English
+- Changed the classic danmaku miss effect to fixed red, bold, center-aligned comments that stack downward one by one and fade out when the stack is full.
+### Japanese
+- ニコ動風モードのMISS時弾幕を、赤文字・太字・中央揃えの固定コメントが上から下へ1件ずつ積み重なり、上限を超えると古いコメントからフェードアウトする演出に変更しました。
+
+## v0.1.234
+### English
+- Added YouTube Live-style emoji-heavy comments to the live chat danmaku mode.
+### Japanese
+- ライブチャット風の弾幕に、YouTube Liveらしい絵文字多めのコメントが混ざるようにしました。
+
+## v0.1.233
+### English
+- Updated live chat danmaku comments to show a user icon and name before each comment, and spaced stacked comments by their rendered height to prevent overlap.
+### Japanese
+- ライブチャット風の弾幕をユーザーアイコン・名前・コメントの体裁にし、表示行の高さに合わせて積み上げることで文字同士が重なりにくいようにしました。
+
+## v0.1.232
+### English
+- Reworked the item pickup sound into a brighter collection chime and reused the previous pickup sound as the player jump sound effect.
+### Japanese
+- アイテム取得音をより取得音らしい明るいチャイムに差し替え、これまでの取得音をプレイヤーのジャンプ音として使うようにしました。
+
+## v0.1.231
+### English
+- Added a danmaku display style setting with a live chat column mode that stacks comments upward from the lower-left side of the screen.
+### Japanese
+- 弾幕の表示形式を切り替えられる設定を追加し、画面左側で下から上へコメントが積み上がるライブチャット風モードを選べるようにしました。
+
+## v0.1.230
+### English
+- Increased the score HUD size and aligned the remaining time on the same row.
+### Japanese
+- スコア表示を少し大きくし、残り時間をスコアと同じ行に並べました。
+
+## v0.1.229
+### English
+- Moved the player, score, and stamina HUD elements slightly upward.
+### Japanese
+- プレイヤー名、スコア、スタミナのHUD表示を少し上へ移動しました。
+
+## v0.1.228
+### English
+- Added a global title button that returns the current session to the start screen.
+### Japanese
+- プレイ中や編集中にスタート画面へ戻れるタイトルボタンを右上のグローバルUIに追加しました。
+
 ## v0.1.227
 ### English
 - Added an empty stage creation button to the stage editor and made edit mode use no-gravity free movement, including downward movement with down input.

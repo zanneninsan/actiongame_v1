@@ -57,7 +57,7 @@ import {
   createMobileControls as createMobileControlElements,
   type MobileInputKey,
 } from "./mobileControls";
-import { DanmakuOverlay } from "./danmaku";
+import { DanmakuOverlay, type DanmakuMode } from "./danmaku";
 import {
   fetchLeaderboardEntries,
   fetchMyLeaderboardEntries,
@@ -80,7 +80,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.227";
+const DEBUG_VERSION = "v0.1.237";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -148,7 +148,13 @@ const HUD_MIN_SCALE = 1;
 const HUD_MAX_SCALE = 1.45;
 const HUD_PLAYER_NAME_FONT_SIZE = 15;
 const HUD_MAIN_FONT_SIZE = 12;
+const HUD_SCORE_FONT_SIZE = 15;
 const HUD_HINT_FONT_SIZE = 11;
+const HUD_PLAYER_NAME_Y = 28;
+const HUD_SCORE_Y = 56;
+const HUD_TIMER_X = 230;
+const HUD_STAMINA_Y = 80;
+const HUD_STAMINA_BAR_Y = 89;
 const HUD_STAMINA_BAR_WIDTH = 132;
 const HUD_STAMINA_BAR_HEIGHT = 9;
 const HUD_STAMINA_FILL_WIDTH = 128;
@@ -223,6 +229,7 @@ class PrototypeScene extends Phaser.Scene {
   private soundVolumePercent = 50;
   private soundMuted = false;
   private danmakuEnabled = true;
+  private danmakuMode: DanmakuMode = "classic";
   private startModal?: StartModal;
   private controlHint = t(this.locale, "hint.pc");
   private editorStage = cloneStage(STAGES[DEFAULT_STAGE_ID]);
@@ -323,6 +330,7 @@ class PrototypeScene extends Phaser.Scene {
     this.load.image(GOAL_TEXTURE_KEY, `${ASSET_BASE}assets/stage_objects/goal_gate.webp`);
     this.load.audio("game-bgm", `${ASSET_BASE}assets/audio/gamebgm_default.mp3`);
     this.load.audio("item-pickup", `${ASSET_BASE}assets/audio/item_pickup.wav`);
+    this.load.audio("player-jump-sfx", `${ASSET_BASE}assets/audio/player_jump.wav`);
     this.load.audio("countdown-tick", `${ASSET_BASE}assets/audio/countdown_tick.wav`);
     this.load.audio("countdown-go", `${ASSET_BASE}assets/audio/countdown_go.wav`);
   }
@@ -338,6 +346,7 @@ class PrototypeScene extends Phaser.Scene {
     this.soundVolumePercent = this.getSavedVolumePercent();
     this.soundMuted = this.getCookieValue("actiongame_muted") === "1";
     this.danmakuEnabled = this.getCookieValue("actiongame_danmaku_disabled") !== "1";
+    this.danmakuMode = this.getSavedDanmakuMode();
     this.applySoundSettings();
     this.resetRunState();
     this.isRestarting = false;
@@ -453,7 +462,7 @@ class PrototypeScene extends Phaser.Scene {
     this.collisionDebugGraphics = this.add.graphics().setDepth(300);
 
     this.playerNameText = this.add
-      .text(58, 40, "", {
+      .text(58, HUD_PLAYER_NAME_Y, "", {
         fontFamily: "monospace",
         fontSize: `${HUD_PLAYER_NAME_FONT_SIZE}px`,
         color: "#e0f2fe",
@@ -463,9 +472,9 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0);
 
     this.scoreText = this.add
-      .text(58, 68, "", {
+      .text(58, HUD_SCORE_Y, "", {
         fontFamily: "monospace",
-        fontSize: `${HUD_MAIN_FONT_SIZE}px`,
+        fontSize: `${HUD_SCORE_FONT_SIZE}px`,
         color: "#f8fafc",
       })
       .setScrollFactor(0)
@@ -474,7 +483,7 @@ class PrototypeScene extends Phaser.Scene {
     this.updateScoreText();
 
     this.timerText = this.add
-      .text(178, 68, "", {
+      .text(HUD_TIMER_X, HUD_SCORE_Y, "", {
         fontFamily: "monospace",
         fontSize: `${HUD_MAIN_FONT_SIZE}px`,
         color: "#fde68a",
@@ -485,7 +494,7 @@ class PrototypeScene extends Phaser.Scene {
     this.updateTimerText();
 
     this.staminaText = this.add
-      .text(58, 92, "", {
+      .text(58, HUD_STAMINA_Y, "", {
         fontFamily: "monospace",
         fontSize: `${HUD_MAIN_FONT_SIZE}px`,
         color: "#bbf7d0",
@@ -493,9 +502,17 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(100)
       .setShadow(1, 1, "#020617", 2, true, true);
-    this.staminaBarBack = this.add.rectangle(150, 101, 132, 9, 0x0f172a, 0.78).setOrigin(0, 0.5).setScrollFactor(0).setDepth(99);
+    this.staminaBarBack = this.add
+      .rectangle(150, HUD_STAMINA_BAR_Y, 132, 9, 0x0f172a, 0.78)
+      .setOrigin(0, 0.5)
+      .setScrollFactor(0)
+      .setDepth(99);
     this.staminaBarBack.setStrokeStyle(1, 0x86efac, 0.8);
-    this.staminaBarFill = this.add.rectangle(152, 101, 128, 5, 0x86efac, 0.95).setOrigin(0, 0.5).setScrollFactor(0).setDepth(100);
+    this.staminaBarFill = this.add
+      .rectangle(152, HUD_STAMINA_BAR_Y, 128, 5, 0x86efac, 0.95)
+      .setOrigin(0, 0.5)
+      .setScrollFactor(0)
+      .setDepth(100);
     this.updateStaminaHud();
 
     this.controlHintText = this.add
@@ -514,6 +531,7 @@ class PrototypeScene extends Phaser.Scene {
     this.scale.on("resize", this.handleScaleResize, this);
     this.updateControlHintText();
     this.danmaku = new DanmakuOverlay(this, GAME_WIDTH, GAME_HEIGHT);
+    this.danmaku.setMode(this.danmakuMode);
 
     this.input.keyboard!.off("keydown-R");
     this.input.keyboard!.on("keydown-R", () => this.handleRestartKey());
@@ -641,6 +659,7 @@ class PrototypeScene extends Phaser.Scene {
       startedJump = true;
       this.resetPlayerIdleState();
       this.player.anims.play("player-jump-start", true);
+      this.sound.play("player-jump-sfx", { volume: 0.42 });
     }
 
     const isMovingHorizontally = Math.abs(this.player.body.velocity.x) > 8;
@@ -859,6 +878,22 @@ class PrototypeScene extends Phaser.Scene {
     this.dismissLeaderboard();
     this.restartStageEditorEnabled = this.stageEditor?.isEnabled ?? false;
     this.restartEditorStage = cloneStage(this.editorStage);
+    this.isRestarting = true;
+    this.resetRunState();
+    this.bgm?.stop();
+    this.scene.restart();
+  }
+
+  private returnToTitle() {
+    if (this.isRestarting) {
+      return;
+    }
+
+    this.dismissLeaderboard();
+    document.getElementById("account-modal")?.remove();
+    this.setupComplete = false;
+    this.restartStageEditorEnabled = false;
+    this.restartEditorStage = undefined;
     this.isRestarting = true;
     this.resetRunState();
     this.bgm?.stop();
@@ -1101,6 +1136,7 @@ class PrototypeScene extends Phaser.Scene {
       soundVolumePercent: this.soundVolumePercent,
       soundMuted: this.soundMuted,
       danmakuEnabled: this.danmakuEnabled,
+      danmakuMode: this.danmakuMode,
     };
   }
 
@@ -1127,6 +1163,11 @@ class PrototypeScene extends Phaser.Scene {
       if (typeof settings.danmakuEnabled === "boolean") {
         this.danmakuEnabled = settings.danmakuEnabled;
         this.setCookieValue("actiongame_danmaku_disabled", settings.danmakuEnabled ? "0" : "1");
+      }
+      if (settings.danmakuMode === "classic" || settings.danmakuMode === "liveChat") {
+        this.danmakuMode = settings.danmakuMode;
+        this.setCookieValue("actiongame_danmaku_mode", settings.danmakuMode);
+        this.danmaku?.setMode(this.danmakuMode);
       }
       this.applySoundSettings();
       this.refreshLocalizedUI();
@@ -1202,34 +1243,34 @@ class PrototypeScene extends Phaser.Scene {
     this.hudScale = scale;
 
     if (this.playerNameText) {
-      this.playerNameText.setPosition(58 * scale, 40 * scale);
+      this.playerNameText.setPosition(58 * scale, HUD_PLAYER_NAME_Y * scale);
       this.playerNameText.setFontSize(`${Math.round(HUD_PLAYER_NAME_FONT_SIZE * scale)}px`);
     }
 
     if (this.scoreText) {
-      this.scoreText.setPosition(58 * scale, 68 * scale);
-      this.scoreText.setFontSize(`${Math.round(HUD_MAIN_FONT_SIZE * scale)}px`);
+      this.scoreText.setPosition(58 * scale, HUD_SCORE_Y * scale);
+      this.scoreText.setFontSize(`${Math.round(HUD_SCORE_FONT_SIZE * scale)}px`);
     }
 
     if (this.timerText) {
-      this.timerText.setPosition(178 * scale, 68 * scale);
+      this.timerText.setPosition(HUD_TIMER_X * scale, HUD_SCORE_Y * scale);
       this.timerText.setFontSize(`${Math.round(HUD_MAIN_FONT_SIZE * scale)}px`);
     }
 
     if (this.staminaText) {
-      this.staminaText.setPosition(58 * scale, 92 * scale);
+      this.staminaText.setPosition(58 * scale, HUD_STAMINA_Y * scale);
       this.staminaText.setFontSize(`${Math.round(HUD_MAIN_FONT_SIZE * scale)}px`);
     }
 
     if (this.staminaBarBack) {
-      this.staminaBarBack.setPosition(150 * scale, 101 * scale);
+      this.staminaBarBack.setPosition(150 * scale, HUD_STAMINA_BAR_Y * scale);
       this.staminaBarBack.width = HUD_STAMINA_BAR_WIDTH * scale;
       this.staminaBarBack.height = HUD_STAMINA_BAR_HEIGHT * scale;
       this.staminaBarBack.setStrokeStyle(Math.max(1, Math.round(scale)), 0x86efac, 0.8);
     }
 
     if (this.staminaBarFill) {
-      this.staminaBarFill.setPosition(152 * scale, 101 * scale);
+      this.staminaBarFill.setPosition(152 * scale, HUD_STAMINA_BAR_Y * scale);
       this.staminaBarFill.height = HUD_STAMINA_FILL_HEIGHT * scale;
       this.updateStaminaHud();
     }
@@ -1255,6 +1296,10 @@ class PrototypeScene extends Phaser.Scene {
       return 50;
     }
     return Phaser.Math.Clamp(Math.round(savedVolume), 0, 100);
+  }
+
+  private getSavedDanmakuMode(): DanmakuMode {
+    return this.getCookieValue("actiongame_danmaku_mode") === "liveChat" ? "liveChat" : "classic";
   }
 
   private saveVolumeSettings(volume: number, isMuted: boolean) {
@@ -1289,6 +1334,13 @@ class PrototypeScene extends Phaser.Scene {
     if (!enabled) {
       this.danmaku?.clear();
     }
+  }
+
+  private setDanmakuMode(mode: DanmakuMode) {
+    this.danmakuMode = mode;
+    this.setCookieValue("actiongame_danmaku_mode", mode);
+    this.danmaku?.setMode(mode);
+    this.scheduleLeaderboardUserSettingsSave();
   }
 
   private trackStageObject<T extends Phaser.GameObjects.GameObject>(object: T) {
@@ -1603,6 +1655,7 @@ class PrototypeScene extends Phaser.Scene {
       soundVolumePercent: this.soundVolumePercent,
       soundMuted: this.soundMuted,
       danmakuEnabled: this.danmakuEnabled,
+      danmakuMode: this.danmakuMode,
       collisionDebugEnabled: this.collisionDebugEnabled,
       onCollisionToggle: (button) => {
         this.collisionDebugEnabled = !this.collisionDebugEnabled;
@@ -1619,6 +1672,7 @@ class PrototypeScene extends Phaser.Scene {
         this.applySoundSettings();
       },
       onDanmakuChange: (enabled) => this.setDanmakuEnabled(enabled),
+      onDanmakuModeChange: (mode) => this.setDanmakuMode(mode),
       onLocaleChange: (locale) => {
         this.setLocale(locale);
         this.createStageEditor(this.stageEditor?.isEnabled ?? false);
@@ -1626,6 +1680,7 @@ class PrototypeScene extends Phaser.Scene {
       },
       onLeaderboardOpen: () => this.showLeaderboard(),
       onAccountOpen: () => this.showAccount(),
+      onReturnToTitle: () => this.returnToTitle(),
     });
   }
 
