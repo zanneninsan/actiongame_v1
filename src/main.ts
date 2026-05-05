@@ -80,7 +80,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.227";
+const DEBUG_VERSION = "v0.1.228";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -865,6 +865,22 @@ class PrototypeScene extends Phaser.Scene {
     this.scene.restart();
   }
 
+  private returnToTitle() {
+    if (this.isRestarting) {
+      return;
+    }
+
+    this.dismissLeaderboard();
+    document.getElementById("account-modal")?.remove();
+    this.setupComplete = false;
+    this.restartStageEditorEnabled = false;
+    this.restartEditorStage = undefined;
+    this.isRestarting = true;
+    this.resetRunState();
+    this.bgm?.stop();
+    this.scene.restart();
+  }
+
   private handleRestartKey() {
     this.restartStage();
   }
@@ -1626,6 +1642,7 @@ class PrototypeScene extends Phaser.Scene {
       },
       onLeaderboardOpen: () => this.showLeaderboard(),
       onAccountOpen: () => this.showAccount(),
+      onReturnToTitle: () => this.returnToTitle(),
     });
   }
 

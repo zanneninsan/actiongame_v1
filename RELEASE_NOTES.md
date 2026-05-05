@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.228
+### English
+- Added a global title button that returns the current session to the start screen.
+### Japanese
+- プレイ中や編集中にスタート画面へ戻れるタイトルボタンを右上のグローバルUIに追加しました。
+
 ## v0.1.227
 ### English
 - Added an empty stage creation button to the stage editor and made edit mode use no-gravity free movement, including downward movement with down input.

@@ -20,6 +20,7 @@ type GlobalUiOptions = {
   onLocaleChange: (locale: Locale) => void;
   onLeaderboardOpen: () => void;
   onAccountOpen: () => void;
+  onReturnToTitle: () => void;
 };
 
 export const createGlobalUI = (options: GlobalUiOptions) => {
@@ -42,6 +43,10 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
       options.locale,
       "aria.playerSpec",
     )}">${t(options.locale, "global.playerSpecShort")}</button>
+    <button id="title-toggle" class="ui-button title-toggle" type="button" aria-label="${t(
+      options.locale,
+      "aria.returnToTitle",
+    )}">${t(options.locale, "global.titleShort")}</button>
     <button id="bgm-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.toggleSound")}">&#128266;</button>
     <button id="options-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.options")}">&#9881;&#65039;</button>
   `;
@@ -80,6 +85,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const leaderboardToggle = document.getElementById("leaderboard-toggle") as HTMLButtonElement;
   const accountToggle = document.getElementById("account-toggle") as HTMLButtonElement;
   const playerSpecToggle = document.getElementById("player-spec-toggle") as HTMLButtonElement;
+  const titleToggle = document.getElementById("title-toggle") as HTMLButtonElement;
   const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
   const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
   const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
@@ -105,6 +111,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   leaderboardToggle.addEventListener("click", () => options.onLeaderboardOpen());
   accountToggle.addEventListener("click", () => options.onAccountOpen());
   playerSpecToggle.addEventListener("click", () => window.open(getPlayerSpecUrl(options.locale), "_blank", "noopener"));
+  titleToggle.addEventListener("click", () => options.onReturnToTitle());
 
   bgmToggle.addEventListener("click", () => {
     const currentVolume = parseInt(volumeSlider.value, 10);
