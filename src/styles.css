@@ -127,7 +127,8 @@ canvas {
 
 .mode-button,
 .sound-button,
-.start-button {
+.start-button,
+.start-google-login {
   box-sizing: border-box;
   position: relative;
   min-width: 0;
@@ -186,6 +187,49 @@ canvas {
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.98), 0 0 8px rgba(255, 247, 214, 0.55);
 }
 
+.start-account-panel {
+  width: min(100%, calc(100% - 34px));
+  justify-self: center;
+  display: grid;
+  gap: 7px;
+}
+
+.start-account-status {
+  min-height: 16px;
+  color: #b8e9ff;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 8px rgba(56, 189, 248, 0.36);
+  white-space: nowrap;
+}
+
+.start-account-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+  gap: 10px;
+}
+
+.start-account-actions .start-button {
+  width: 100%;
+}
+
+.start-google-login {
+  height: 48px;
+  color: #dbeafe;
+  font-size: 14px;
+  filter: brightness(0.9) saturate(0.98);
+}
+
+.start-google-login:disabled {
+  cursor: default;
+  filter: brightness(0.66) saturate(0.72);
+  opacity: 0.82;
+}
+
 .start-spec-link {
   justify-self: center;
   color: #8cffd2;
@@ -202,7 +246,9 @@ canvas {
 }
 
 .start-button:hover,
-.start-button:focus-visible {
+.start-button:focus-visible,
+.start-google-login:not(:disabled):hover,
+.start-google-login:not(:disabled):focus-visible {
   filter: brightness(1.5) saturate(1.34) drop-shadow(0 0 16px rgba(253, 230, 138, 0.58));
 }
 
@@ -231,6 +277,7 @@ canvas {
   .start-dialog label,
   .mode-row,
   .sound-row,
+  .start-account-panel,
   .start-button {
     width: 100%;
   }
@@ -243,15 +290,21 @@ canvas {
   }
 
   .mode-row,
-  .sound-row {
+  .sound-row,
+  .start-account-actions {
     grid-template-columns: 1fr;
     gap: 8px;
   }
 
   .mode-button,
-  .sound-button {
+  .sound-button,
+  .start-google-login {
     height: 40px;
     font-size: 14px;
+  }
+
+  .start-account-status {
+    white-space: normal;
   }
 }
 
@@ -354,7 +407,7 @@ canvas {
 #stage-editor {
   position: fixed;
   top: 12px;
-  right: 180px;
+  left: 12px;
   z-index: 18;
   width: min(320px, calc(100vw - 24px));
   color: #e5e7eb;

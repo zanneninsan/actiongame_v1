@@ -5,6 +5,12 @@ const getPlayerSpecUrl = (locale: Locale) =>
 
 export type ControlMode = "pc" | "mobile";
 export type StageOption = { id: string; label: Record<Locale, string> };
+export type StartAccountStatus = {
+  playerId: string;
+  isGoogleLinked: boolean;
+  email: string | null;
+  displayName: string | null;
+};
 
 type StartModalOptions = {
   playerName: string;
@@ -13,8 +19,10 @@ type StartModalOptions = {
   stageOptions: StageOption[];
   soundOn: boolean;
   locale: Locale;
+  accountStatus?: StartAccountStatus;
   onLocaleChange: (locale: Locale) => void;
   onSoundOnChange: (soundOn: boolean) => void;
+  onGoogleLogin: () => Promise<StartAccountStatus | undefined>;
   onSubmit: (settings: { playerName: string; controlMode: ControlMode; stageId: string; soundOn: boolean; locale: Locale }) => void;
 };
 
@@ -72,7 +80,13 @@ export class StartModal {
           this.options.locale,
           "start.playerSpec",
         )}</a>
-        <button type="submit" class="start-button">${t(this.options.locale, "start.start")}</button>
+        <div class="start-account-panel">
+          <span class="start-account-status"></span>
+          <div class="start-account-actions">
+            <button type="submit" class="start-button"></button>
+            <button type="button" class="start-google-login"></button>
+          </div>
+        </div>
       </form>
     `;
 
@@ -85,6 +99,9 @@ export class StartModal {
     const stageSelect = overlay.querySelector<HTMLSelectElement>("select[name='stage']")!;
     const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
     const soundButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-sound]"));
+    const accountStatus = overlay.querySelector<HTMLSpanElement>(".start-account-status")!;
+    const startButton = overlay.querySelector<HTMLButtonElement>(".start-button")!;
+    const googleLoginButton = overlay.querySelector<HTMLButtonElement>(".start-google-login")!;
     let selectedMode = this.options.controlMode;
     let selectedStageId = this.options.stageId;
     let soundOn = this.options.soundOn;
@@ -126,6 +143,19 @@ export class StartModal {
       });
     };
 
+    const refreshAccount = () => {
+      accountStatus.textContent = this.getAccountStatusText();
+      startButton.textContent = this.options.accountStatus?.isGoogleLinked
+        ? t(this.options.locale, "start.start")
+        : t(this.options.locale, "start.anonymousPlay");
+      googleLoginButton.textContent = this.options.accountStatus?.isGoogleLinked
+        ? t(this.options.locale, "start.googleLoggedIn")
+        : t(this.options.locale, "start.googleLogin");
+      googleLoginButton.disabled = Boolean(this.options.accountStatus?.isGoogleLinked);
+    };
+
+    this.refreshAccountUi = refreshAccount;
+
     modeButtons.forEach((button) => {
       button.addEventListener("click", () => {
         selectedMode = button.dataset.mode === "mobile" ? "mobile" : "pc";
@@ -141,6 +171,33 @@ export class StartModal {
       });
     });
 
+    googleLoginButton.addEventListener("click", async () => {
+      let loginFailed = false;
+      googleLoginButton.disabled = true;
+      googleLoginButton.textContent = t(this.options.locale, "start.googleLoggingIn");
+      try {
+        const status = await this.options.onGoogleLogin();
+        if (status) {
+          this.setAccountStatus(status);
+        } else {
+          refreshAccount();
+        }
+      } catch (error) {
+        console.warn("Could not log in with Google from start modal.", error);
+        loginFailed = true;
+        accountStatus.textContent = t(this.options.locale, "start.googleLoginFailed");
+      } finally {
+        if (!loginFailed) {
+          refreshAccount();
+        } else {
+          googleLoginButton.disabled = Boolean(this.options.accountStatus?.isGoogleLinked);
+          googleLoginButton.textContent = this.options.accountStatus?.isGoogleLinked
+            ? t(this.options.locale, "start.googleLoggedIn")
+            : t(this.options.locale, "start.googleLogin");
+        }
+      }
+    });
+
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       this.options.onSubmit({
@@ -154,14 +211,36 @@ export class StartModal {
 
     refreshMode();
     refreshSound();
+    refreshAccount();
     input.focus();
     input.select();
+  }
+
+  setAccountStatus(status: StartAccountStatus | undefined) {
+    this.options.accountStatus = status;
+    this.refreshAccountUi?.();
   }
 
   remove() {
     this.overlay?.remove();
     this.overlay = undefined;
+    this.refreshAccountUi = undefined;
     document.getElementById("start-modal")?.remove();
+  }
+
+  private refreshAccountUi?: () => void;
+
+  private getAccountStatusText() {
+    const status = this.options.accountStatus;
+    if (!status?.playerId) {
+      return t(this.options.locale, "start.accountLoading");
+    }
+    const playerId = status.playerId.slice(0, 8);
+    const loginStatus = status.isGoogleLinked
+      ? t(this.options.locale, "start.googleLoggedIn")
+      : t(this.options.locale, "start.googleNotLinked");
+    const accountName = status.displayName || status.email;
+    return accountName ? `#${playerId} / ${loginStatus} / ${accountName}` : `#${playerId} / ${loginStatus}`;
   }
 }
 

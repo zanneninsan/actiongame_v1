@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.219
+### English
+- Added Google login and account status controls to the start screen while keeping anonymous play available.
+- Moved the stage editor panel launcher to the upper-left corner to avoid overlapping the upper-right controls.
+### Japanese
+- 開始画面にGoogleログインと連携状況の表示を追加し、未ログインでも匿名でプレイできる導線を分かりやすくしました。
+- 右上の操作UIと重なりにくくするため、ステージ編集パネルの起点を左上へ移動しました。
+
 ## v0.1.218
 ### English
 - Made the in-game HUD scale more dynamically with the displayed screen size, including player name, score, timer, stamina, and control hints.

@@ -12,7 +12,7 @@ import {
 import { DEFAULT_STAGE_ID, PLAYABLE_STAGE_IDS, STAGES, cloneStage, type StageId } from "./stages";
 import { RainbowWinPipeline } from "./rainbowPipeline";
 import { StartCountdownOverlay } from "./countdown";
-import { StartModal, type ControlMode, type StageOption } from "./startModal";
+import { StartModal, type ControlMode, type StageOption, type StartAccountStatus } from "./startModal";
 import { StageEditor } from "./stageEditor";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
 import {
@@ -66,6 +66,7 @@ import {
   logInLeaderboardWithGoogle,
   signInLeaderboardWithGoogle,
   submitLeaderboardScore,
+  type LeaderboardIdentity,
   unlinkLeaderboardGoogleAccount,
 } from "./leaderboard";
 import { showLeaderboardPanel } from "./leaderboardUi";
@@ -76,7 +77,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.218";
+const DEBUG_VERSION = "v0.1.219";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -206,6 +207,8 @@ class PrototypeScene extends Phaser.Scene {
   private playerName = "PLAYER";
   private leaderboardPlayerId = "";
   private leaderboardGoogleLinked = false;
+  private leaderboardGoogleEmail: string | null = null;
+  private leaderboardGoogleDisplayName: string | null = null;
   private controlMode: ControlMode = "pc";
   private currentStageId: StageId = DEFAULT_STAGE_ID;
   private locale: Locale = getBrowserLocale();
@@ -884,8 +887,10 @@ class PrototypeScene extends Phaser.Scene {
       stageOptions: this.getStageOptions(),
       locale: this.locale,
       soundOn: !this.soundMuted && this.soundVolumePercent > 0,
+      accountStatus: this.getStartAccountStatus(),
       onLocaleChange: (locale) => this.setLocale(locale),
       onSoundOnChange: (soundOn) => this.setSoundEnabled(soundOn),
+      onGoogleLogin: () => this.logInLeaderboardGoogleAccount(),
       onSubmit: ({ playerName, controlMode, stageId, soundOn, locale }) => {
         this.playerName = playerName;
         this.setCookieValue("actiongame_player_name", this.playerName);
@@ -915,6 +920,15 @@ class PrototypeScene extends Phaser.Scene {
         en: resolveStageName(STAGES[id].name, "en"),
       },
     }));
+  }
+
+  private getStartAccountStatus(): StartAccountStatus {
+    return {
+      playerId: this.leaderboardPlayerId,
+      isGoogleLinked: this.leaderboardGoogleLinked,
+      email: this.leaderboardGoogleEmail,
+      displayName: this.leaderboardGoogleDisplayName,
+    };
   }
 
   private getSavedStageId(): StageId {
@@ -994,14 +1008,21 @@ class PrototypeScene extends Phaser.Scene {
       if (!identity) {
         return undefined;
       }
-      this.leaderboardPlayerId = identity.playerId;
-      this.leaderboardGoogleLinked = identity.isGoogleLinked;
-      this.updatePlayerNameText();
+      this.applyLeaderboardIdentity(identity);
       return identity;
     } catch (error) {
       console.warn("Could not refresh leaderboard identity.", error);
       return undefined;
     }
+  }
+
+  private applyLeaderboardIdentity(identity: LeaderboardIdentity) {
+    this.leaderboardPlayerId = identity.playerId;
+    this.leaderboardGoogleLinked = identity.isGoogleLinked;
+    this.leaderboardGoogleEmail = identity.email;
+    this.leaderboardGoogleDisplayName = identity.displayName;
+    this.updatePlayerNameText();
+    this.startModal?.setAccountStatus(this.getStartAccountStatus());
   }
 
   private getSavedLocale() {
@@ -1815,9 +1836,7 @@ class PrototypeScene extends Phaser.Scene {
       throw new Error(result.reason);
     }
 
-    this.leaderboardPlayerId = result.identity.playerId;
-    this.leaderboardGoogleLinked = result.identity.isGoogleLinked;
-    this.updatePlayerNameText();
+    this.applyLeaderboardIdentity(result.identity);
     return result.identity;
   }
 
@@ -1827,9 +1846,7 @@ class PrototypeScene extends Phaser.Scene {
       throw new Error(result.reason);
     }
 
-    this.leaderboardPlayerId = result.identity.playerId;
-    this.leaderboardGoogleLinked = result.identity.isGoogleLinked;
-    this.updatePlayerNameText();
+    this.applyLeaderboardIdentity(result.identity);
     return result.identity;
   }
 
@@ -1839,9 +1856,7 @@ class PrototypeScene extends Phaser.Scene {
       throw new Error(result.reason);
     }
 
-    this.leaderboardPlayerId = result.identity.playerId;
-    this.leaderboardGoogleLinked = result.identity.isGoogleLinked;
-    this.updatePlayerNameText();
+    this.applyLeaderboardIdentity(result.identity);
     return result.identity;
   }
 
