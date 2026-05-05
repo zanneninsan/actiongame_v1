@@ -106,6 +106,13 @@ const translations = {
     "leaderboard.scoreSubmitted": "Score submitted.",
     "leaderboard.scoreSubmittedBestNotUpdated": "Score submitted. Best score was not updated.",
     "leaderboard.scoreSubmitFailed": "Score could not be submitted.",
+    "leaderboard.accountPromptTitle": "Keep this player ID",
+    "leaderboard.accountPromptBody":
+      "You can keep playing without registration, but this ID and score history may be lost if browser data is cleared. Link a Google account to keep the same ID on other devices.",
+    "leaderboard.googleSignIn": "Link Google Account",
+    "leaderboard.googleSigningIn": "Linking...",
+    "leaderboard.accountLinkedTitle": "Google account linked",
+    "leaderboard.accountLinkedBody": "Your leaderboard ID is now tied to this Google account.",
   },
   ja: {
     "start.playerName": "プレイヤー名",
@@ -205,6 +212,13 @@ const translations = {
     "leaderboard.scoreSubmitted": "スコアを登録しました。",
     "leaderboard.scoreSubmittedBestNotUpdated": "スコアを登録しました。ベストスコアは更新されませんでした。",
     "leaderboard.scoreSubmitFailed": "スコアを登録できませんでした。",
+    "leaderboard.accountPromptTitle": "このプレイヤーIDを保護できます",
+    "leaderboard.accountPromptBody":
+      "登録しなくてもこのまま遊べますが、ブラウザのデータを削除するとIDやスコア履歴が失われる可能性があります。Googleアカウントと連携すると、別の端末でも同じIDを使えます。",
+    "leaderboard.googleSignIn": "Googleアカウントと連携",
+    "leaderboard.googleSigningIn": "連携中...",
+    "leaderboard.accountLinkedTitle": "Googleアカウントと連携しました",
+    "leaderboard.accountLinkedBody": "リーダーボードIDがこのGoogleアカウントに紐づきました。",
   },
 } as const;
 

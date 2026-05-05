@@ -11,12 +11,18 @@ type LeaderboardPanelOptions = {
   currentSubmissionId?: string;
   currentPlayerId?: string;
   currentScore?: LeaderboardCurrentScore;
+  accountPrompt?: LeaderboardAccountPrompt;
 };
 
 type LeaderboardCurrentScore = {
   score: number;
   rank?: number;
   scoreUpdated: boolean;
+};
+
+type LeaderboardAccountPrompt = {
+  show: boolean;
+  onGoogleSignIn: () => Promise<void>;
 };
 
 export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
@@ -40,6 +46,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
       </div>
       <ol class="leaderboard-list"></ol>
       <div class="leaderboard-current-score" hidden></div>
+      <div class="leaderboard-account-prompt" hidden></div>
       <button id="leaderboard-close" class="ui-button" type="button">${escapeHtml(t(locale, "leaderboard.close"))}</button>
     </div>
   `;
@@ -48,9 +55,11 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
   const status = modal.querySelector<HTMLElement>(".leaderboard-status")!;
   const list = modal.querySelector<HTMLOListElement>(".leaderboard-list")!;
   const currentScore = modal.querySelector<HTMLElement>(".leaderboard-current-score")!;
+  const accountPrompt = modal.querySelector<HTMLElement>(".leaderboard-account-prompt")!;
   const closeButton = modal.querySelector<HTMLButtonElement>("#leaderboard-close")!;
   const close = () => modal.remove();
   renderCurrentScore(currentScore, options.currentScore, locale);
+  renderAccountPrompt(accountPrompt, options.accountPrompt, locale);
 
   closeButton.addEventListener("click", close);
   modal.addEventListener("pointerdown", (event) => {
@@ -148,6 +157,44 @@ function renderCurrentScore(container: HTMLElement, currentScore: LeaderboardCur
       currentScore.scoreUpdated ? t(locale, "leaderboard.bestUpdated") : t(locale, "leaderboard.bestNotUpdated"),
     )}</span>
   `;
+}
+
+function renderAccountPrompt(container: HTMLElement, accountPrompt: LeaderboardAccountPrompt | undefined, locale: Locale) {
+  if (!accountPrompt?.show) {
+    container.hidden = true;
+    container.replaceChildren();
+    return;
+  }
+
+  container.hidden = false;
+  container.innerHTML = `
+    <div class="leaderboard-account-copy">
+      <strong>${escapeHtml(t(locale, "leaderboard.accountPromptTitle"))}</strong>
+      <span>${escapeHtml(t(locale, "leaderboard.accountPromptBody"))}</span>
+    </div>
+    <button class="leaderboard-google-button" type="button">${escapeHtml(t(locale, "leaderboard.googleSignIn"))}</button>
+  `;
+
+  const button = container.querySelector<HTMLButtonElement>(".leaderboard-google-button")!;
+  button.addEventListener("click", () => {
+    button.disabled = true;
+    button.textContent = t(locale, "leaderboard.googleSigningIn");
+    accountPrompt
+      .onGoogleSignIn()
+      .then(() => {
+        container.classList.add("is-linked");
+        container.innerHTML = `
+          <div class="leaderboard-account-copy">
+            <strong>${escapeHtml(t(locale, "leaderboard.accountLinkedTitle"))}</strong>
+            <span>${escapeHtml(t(locale, "leaderboard.accountLinkedBody"))}</span>
+          </div>
+        `;
+      })
+      .catch(() => {
+        button.disabled = false;
+        button.textContent = t(locale, "leaderboard.googleSignIn");
+      });
+  });
 }
 
 function formatDate(date: Date | null) {

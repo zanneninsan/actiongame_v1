@@ -60,7 +60,9 @@ import {
 import { DanmakuOverlay } from "./danmaku";
 import {
   fetchLeaderboardEntries,
+  getLeaderboardIdentity,
   isLeaderboardConfigured,
+  signInLeaderboardWithGoogle,
   submitLeaderboardScore,
 } from "./leaderboard";
 import { showLeaderboardPanel } from "./leaderboardUi";
@@ -70,7 +72,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.200";
+const DEBUG_VERSION = "v0.1.201";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -174,6 +176,7 @@ class PrototypeScene extends Phaser.Scene {
   private setupComplete = false;
   private playerName = "PLAYER";
   private leaderboardPlayerId = "";
+  private leaderboardGoogleLinked = false;
   private controlMode: ControlMode = "pc";
   private currentStageId: StageId = DEFAULT_STAGE_ID;
   private locale: Locale = getBrowserLocale();
@@ -283,6 +286,7 @@ class PrototypeScene extends Phaser.Scene {
     this.registerRainbowPipeline();
     this.playerName = this.getCookieValue("actiongame_player_name") || this.playerName;
     this.leaderboardPlayerId = this.getOrCreateLeaderboardPlayerId();
+    void this.refreshLeaderboardIdentity();
     this.locale = this.getSavedLocale();
     this.currentStageId = this.getSavedStageId();
     this.editorStage = cloneStage(STAGES[this.currentStageId]);
@@ -896,6 +900,26 @@ class PrototypeScene extends Phaser.Scene {
       const playerId = createSubmissionId();
       this.setCookieValue(LEADERBOARD_PLAYER_ID_STORAGE_KEY, playerId);
       return playerId;
+    }
+  }
+
+  private async refreshLeaderboardIdentity() {
+    if (!isLeaderboardConfigured()) {
+      return undefined;
+    }
+
+    try {
+      const identity = await getLeaderboardIdentity();
+      if (!identity) {
+        return undefined;
+      }
+      this.leaderboardPlayerId = identity.playerId;
+      this.leaderboardGoogleLinked = identity.isGoogleLinked;
+      this.updatePlayerNameText();
+      return identity;
+    } catch (error) {
+      console.warn("Could not refresh leaderboard identity.", error);
+      return undefined;
     }
   }
 
@@ -1537,6 +1561,7 @@ class PrototypeScene extends Phaser.Scene {
     statusMessage?: string,
     currentSubmissionId?: string,
     currentScore?: { score: number; rank?: number; scoreUpdated: boolean },
+    showAccountPrompt = false,
   ) {
     showLeaderboardPanel({
       stageName: resolveStageName(this.editorStage.name, this.locale),
@@ -1546,33 +1571,52 @@ class PrototypeScene extends Phaser.Scene {
       currentSubmissionId,
       currentPlayerId: this.leaderboardPlayerId,
       currentScore,
+      accountPrompt: showAccountPrompt
+        ? {
+            show: !this.leaderboardGoogleLinked,
+            onGoogleSignIn: () => this.linkLeaderboardGoogleAccount(),
+          }
+        : undefined,
       fetchEntries: () => fetchLeaderboardEntries(this.currentStageId),
     });
   }
 
-  private submitWinScore(finalScore: number, itemScore: number, timeBonus: number, remainingMs: number) {
+  private async linkLeaderboardGoogleAccount() {
+    const result = await signInLeaderboardWithGoogle();
+    if (!result.ok) {
+      throw new Error(result.reason);
+    }
+
+    this.leaderboardPlayerId = result.identity.playerId;
+    this.leaderboardGoogleLinked = result.identity.isGoogleLinked;
+    this.updatePlayerNameText();
+  }
+
+  private async submitWinScore(finalScore: number, itemScore: number, timeBonus: number, remainingMs: number) {
     if (!isLeaderboardConfigured()) {
       return;
     }
 
-    const playerId = isLeaderboardPlayerId(this.leaderboardPlayerId) ? this.leaderboardPlayerId : this.getOrCreateLeaderboardPlayerId();
+    const identity = await this.refreshLeaderboardIdentity();
+    const playerId = identity?.playerId ?? (isLeaderboardPlayerId(this.leaderboardPlayerId) ? this.leaderboardPlayerId : this.getOrCreateLeaderboardPlayerId());
     this.leaderboardPlayerId = playerId;
     const elapsedMs = Math.max(0, GAME_TIME_MS - remainingMs);
     const submissionId = createSubmissionId();
-    submitLeaderboardScore({
-      submissionId,
-      playerId,
-      stageId: this.currentStageId,
-      stageName: resolveStageName(this.editorStage.name, this.locale),
-      gameVersion: DEBUG_VERSION,
-      playerName: this.playerName,
-      score: finalScore,
-      itemScore,
-      timeBonus,
-      elapsedMs,
-      remainingMs,
-    })
-      .then((result) => {
+    try {
+      const result = await submitLeaderboardScore({
+        submissionId,
+        playerId,
+        stageId: this.currentStageId,
+        stageName: resolveStageName(this.editorStage.name, this.locale),
+        gameVersion: DEBUG_VERSION,
+        playerName: this.playerName,
+        score: finalScore,
+        itemScore,
+        timeBonus,
+        elapsedMs,
+        remainingMs,
+      });
+
         if (!result.ok) {
           throw new Error("Leaderboard score was rejected.");
         }
@@ -1581,12 +1625,12 @@ class PrototypeScene extends Phaser.Scene {
           result.scoreUpdated ? t(this.locale, "leaderboard.scoreSubmitted") : t(this.locale, "leaderboard.scoreSubmittedBestNotUpdated"),
           result.scoreUpdated && "submissionId" in result ? result.submissionId ?? submissionId : undefined,
           currentScore,
+          !this.leaderboardGoogleLinked,
         );
-      })
-      .catch((error) => {
-        console.warn("Score submission failed.", error);
-        this.showLeaderboard(t(this.locale, "leaderboard.scoreSubmitFailed"));
-      });
+    } catch (error) {
+      console.warn("Score submission failed.", error);
+      this.showLeaderboard(t(this.locale, "leaderboard.scoreSubmitFailed"));
+    }
   }
 
   private createPixelTexture(key: string, width: number, height: number, fill: number, stroke: number) {

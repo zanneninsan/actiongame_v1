@@ -27,6 +27,9 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
   if (!playerId) {
     throw new HttpsError("invalid-argument", "Player id is required.");
   }
+  if (playerId !== request.auth.uid) {
+    throw new HttpsError("permission-denied", "Player id must match the authenticated user.");
+  }
 
   const stageId = cleanStageId(data.stageId);
   if (!stageId) {

@@ -1,6 +1,14 @@
 import { initializeApp, getApp, getApps, type FirebaseApp, type FirebaseOptions } from "firebase/app";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
-import { getAuth, signInAnonymously, type Auth } from "firebase/auth";
+import {
+  GoogleAuthProvider,
+  getAuth,
+  linkWithPopup,
+  signInAnonymously,
+  signInWithPopup,
+  type Auth,
+  type User,
+} from "firebase/auth";
 import {
   collection,
   getDocs,
@@ -49,6 +57,14 @@ export type LeaderboardSubmitResult =
     }
   | { ok: false; reason: string };
 
+export type LeaderboardIdentity = {
+  playerId: string;
+  isAnonymous: boolean;
+  isGoogleLinked: boolean;
+  email: string | null;
+  displayName: string | null;
+};
+
 type FirebaseServices = {
   auth: Auth;
   firestore: Firestore;
@@ -63,6 +79,40 @@ let appCheckInitialized = false;
 
 export function isLeaderboardConfigured() {
   return Boolean(getFirebaseConfig());
+}
+
+export async function getLeaderboardIdentity(): Promise<LeaderboardIdentity | undefined> {
+  const services = await getFirebaseServices();
+  if (!services) {
+    return undefined;
+  }
+
+  const user = await ensureAnonymousAuth(services.auth);
+  return createLeaderboardIdentity(user);
+}
+
+export async function signInLeaderboardWithGoogle() {
+  const services = await getFirebaseServices();
+  if (!services) {
+    return { ok: false as const, reason: "Leaderboard is not configured." };
+  }
+
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  const currentUser = services.auth.currentUser ?? (await ensureAnonymousAuth(services.auth));
+
+  try {
+    const credential = currentUser.isAnonymous
+      ? await linkWithPopup(currentUser, provider)
+      : await signInWithPopup(services.auth, provider);
+    return { ok: true as const, identity: createLeaderboardIdentity(credential.user) };
+  } catch (error) {
+    if (shouldFallbackToGoogleSignIn(error)) {
+      const credential = await signInWithPopup(services.auth, provider);
+      return { ok: true as const, identity: createLeaderboardIdentity(credential.user) };
+    }
+    throw error;
+  }
 }
 
 export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) {
@@ -175,6 +225,26 @@ function initializeOptionalAppCheck(app: FirebaseApp) {
     isTokenAutoRefreshEnabled: true,
   });
   appCheckInitialized = true;
+}
+
+function createLeaderboardIdentity(user: User): LeaderboardIdentity {
+  return {
+    playerId: user.uid,
+    isAnonymous: user.isAnonymous,
+    isGoogleLinked: user.providerData.some((provider) => provider.providerId === GoogleAuthProvider.PROVIDER_ID),
+    email: user.email,
+    displayName: user.displayName,
+  };
+}
+
+function shouldFallbackToGoogleSignIn(error: unknown) {
+  const code = typeof error === "object" && error && "code" in error ? String((error as { code?: unknown }).code) : "";
+  return (
+    code === "auth/credential-already-in-use" ||
+    code === "auth/email-already-in-use" ||
+    code === "auth/account-exists-with-different-credential" ||
+    code === "auth/provider-already-linked"
+  );
 }
 
 async function ensureAnonymousAuth(auth: Auth) {

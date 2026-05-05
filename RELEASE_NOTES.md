@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.201
+### English
+- Added optional Google account linking after score submission so leaderboard player IDs can persist across browsers and devices while still allowing unregistered play.
+### Japanese
+- スコア登録後に任意でGoogleアカウントと連携できる案内を追加し、未登録のまま遊べる状態を残しつつ、連携後はリーダーボードIDを別ブラウザや別端末でも維持できるようにしました。
+
 ## v0.1.200
 ### English
 - Preserved the stage editor enabled state and in-progress edited stage layout across R-key and miss restarts.
