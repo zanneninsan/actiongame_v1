@@ -80,10 +80,9 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.220";
+const DEBUG_VERSION = "v0.1.221";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
-const MOVING_PLATFORM_DEBUG_STORAGE_KEY = "actiongame_debug_moving_platforms";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
@@ -1064,7 +1063,6 @@ class PrototypeScene extends Phaser.Scene {
       soundVolumePercent: this.soundVolumePercent,
       soundMuted: this.soundMuted,
       danmakuEnabled: this.danmakuEnabled,
-      movingPlatformsDebug: this.getMovingPlatformsDebugEnabled(),
     };
   }
 
@@ -1092,9 +1090,6 @@ class PrototypeScene extends Phaser.Scene {
         this.danmakuEnabled = settings.danmakuEnabled;
         this.setCookieValue("actiongame_danmaku_disabled", settings.danmakuEnabled ? "0" : "1");
       }
-      if (typeof settings.movingPlatformsDebug === "boolean") {
-        this.setMovingPlatformsDebugEnabled(settings.movingPlatformsDebug);
-      }
       this.applySoundSettings();
       this.refreshLocalizedUI();
       if (this.startModal) {
@@ -1121,22 +1116,6 @@ class PrototypeScene extends Phaser.Scene {
         console.warn("Could not save leaderboard user settings.", error);
       });
     }, 400);
-  }
-
-  private getMovingPlatformsDebugEnabled() {
-    try {
-      return window.localStorage.getItem(MOVING_PLATFORM_DEBUG_STORAGE_KEY) === "1";
-    } catch {
-      return false;
-    }
-  }
-
-  private setMovingPlatformsDebugEnabled(enabled: boolean) {
-    try {
-      window.localStorage.setItem(MOVING_PLATFORM_DEBUG_STORAGE_KEY, enabled ? "1" : "0");
-    } catch {
-      // Ignore storage failures; this debug preference is optional.
-    }
   }
 
   private getSavedLocale() {

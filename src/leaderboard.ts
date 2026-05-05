@@ -79,7 +79,6 @@ export type LeaderboardUserSettings = {
   soundVolumePercent?: number;
   soundMuted?: boolean;
   danmakuEnabled?: boolean;
-  movingPlatformsDebug?: boolean;
 };
 
 type FirebaseServices = {
@@ -413,9 +412,6 @@ function sanitizeUserSettings(data: unknown): LeaderboardUserSettings {
   }
   if (typeof source.danmakuEnabled === "boolean") {
     settings.danmakuEnabled = source.danmakuEnabled;
-  }
-  if (typeof source.movingPlatformsDebug === "boolean") {
-    settings.movingPlatformsDebug = source.movingPlatformsDebug;
   }
   return settings;
 }

@@ -2,11 +2,17 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.221
+### English
+- Removed the old moving-platform debug logging preference from the game and Google account settings sync.
+### Japanese
+- 使わなくなった動く足場のデバッグログ設定を、ゲーム本体とGoogleアカウント同期対象から削除しました。
+
 ## v0.1.220
 ### English
-- Sync player preferences to the linked Google account, including name, language, stage, sound, danmaku, and moving-platform debug settings.
+- Sync player preferences to the linked Google account, including name, language, stage, sound, and danmaku settings.
 ### Japanese
-- プレイヤー名、言語、ステージ、サウンド、弾幕、動く足場デバッグ設定を、連携済みGoogleアカウントに同期するようにしました。
+- プレイヤー名、言語、ステージ、サウンド、弾幕設定を、連携済みGoogleアカウントに同期するようにしました。
 
 ## v0.1.219
 ### English
