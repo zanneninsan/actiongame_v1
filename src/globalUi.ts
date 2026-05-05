@@ -19,6 +19,7 @@ type GlobalUiOptions = {
   onDanmakuChange: (enabled: boolean) => void;
   onLocaleChange: (locale: Locale) => void;
   onLeaderboardOpen: () => void;
+  onAccountOpen: () => void;
 };
 
 export const createGlobalUI = (options: GlobalUiOptions) => {
@@ -33,6 +34,10 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
     <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch rear background">RB1</button>
     <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">MG1</button>
     <button id="leaderboard-toggle" class="ui-button" type="button" aria-label="Open leaderboard">&#127942;</button>
+    <button id="account-toggle" class="ui-button account-toggle" type="button" aria-label="${t(
+      options.locale,
+      "aria.account",
+    )}">${t(options.locale, "global.accountShort")}</button>
     <button id="player-spec-toggle" class="ui-button spec-toggle" type="button" aria-label="${t(
       options.locale,
       "aria.playerSpec",
@@ -73,6 +78,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const rearDebugToggle = document.getElementById("rear-debug-toggle") as HTMLButtonElement;
   const midgroundDebugToggle = document.getElementById("midground-debug-toggle") as HTMLButtonElement;
   const leaderboardToggle = document.getElementById("leaderboard-toggle") as HTMLButtonElement;
+  const accountToggle = document.getElementById("account-toggle") as HTMLButtonElement;
   const playerSpecToggle = document.getElementById("player-spec-toggle") as HTMLButtonElement;
   const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
   const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
@@ -97,6 +103,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   rearDebugToggle.addEventListener("click", () => options.onRearBackgroundToggle(rearDebugToggle));
   midgroundDebugToggle.addEventListener("click", () => options.onMidgroundBackgroundToggle(midgroundDebugToggle));
   leaderboardToggle.addEventListener("click", () => options.onLeaderboardOpen());
+  accountToggle.addEventListener("click", () => options.onAccountOpen());
   playerSpecToggle.addEventListener("click", () => window.open(getPlayerSpecUrl(options.locale), "_blank", "noopener"));
 
   bgmToggle.addEventListener("click", () => {
@@ -150,6 +157,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
 export const removeGlobalUI = () => {
   document.getElementById("global-ui")?.remove();
   document.getElementById("options-modal")?.remove();
+  document.getElementById("account-modal")?.remove();
 };
 
 export const setPlayerPositionDebugUI = (enabled: boolean, x: number, y: number) => {

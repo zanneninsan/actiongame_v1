@@ -60,19 +60,22 @@ import {
 import { DanmakuOverlay } from "./danmaku";
 import {
   fetchLeaderboardEntries,
+  fetchMyLeaderboardEntries,
   getLeaderboardIdentity,
   isLeaderboardConfigured,
   signInLeaderboardWithGoogle,
   submitLeaderboardScore,
+  unlinkLeaderboardGoogleAccount,
 } from "./leaderboard";
 import { showLeaderboardPanel } from "./leaderboardUi";
+import { showAccountPanel } from "./accountUi";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.210";
+const DEBUG_VERSION = "v0.1.211";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1289,6 +1292,7 @@ class PrototypeScene extends Phaser.Scene {
         this.createGlobalUI();
       },
       onLeaderboardOpen: () => this.showLeaderboard(),
+      onAccountOpen: () => this.showAccount(),
     });
   }
 
@@ -1587,7 +1591,9 @@ class PrototypeScene extends Phaser.Scene {
       accountPrompt: showAccountPrompt
         ? {
             show: !this.leaderboardGoogleLinked,
-            onGoogleSignIn: () => this.linkLeaderboardGoogleAccount(),
+            onGoogleSignIn: async () => {
+              await this.linkLeaderboardGoogleAccount();
+            },
           }
         : undefined,
       fetchEntries: () => fetchLeaderboardEntries(this.currentStageId),
@@ -1603,6 +1609,32 @@ class PrototypeScene extends Phaser.Scene {
     this.leaderboardPlayerId = result.identity.playerId;
     this.leaderboardGoogleLinked = result.identity.isGoogleLinked;
     this.updatePlayerNameText();
+    return result.identity;
+  }
+
+  private async unlinkLeaderboardGoogleAccount() {
+    const result = await unlinkLeaderboardGoogleAccount();
+    if (!result.ok) {
+      throw new Error(result.reason);
+    }
+
+    this.leaderboardPlayerId = result.identity.playerId;
+    this.leaderboardGoogleLinked = result.identity.isGoogleLinked;
+    this.updatePlayerNameText();
+    return result.identity;
+  }
+
+  private showAccount() {
+    showAccountPanel({
+      locale: this.locale,
+      getIdentity: async () => {
+        const identity = await this.refreshLeaderboardIdentity();
+        return identity;
+      },
+      fetchEntries: () => fetchMyLeaderboardEntries(),
+      onGoogleSignIn: () => this.linkLeaderboardGoogleAccount(),
+      onGoogleUnlink: () => this.unlinkLeaderboardGoogleAccount(),
+    });
   }
 
   private async submitWinScore(finalScore: number, itemScore: number, timeBonus: number, remainingMs: number) {

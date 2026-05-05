@@ -6,6 +6,7 @@ import {
   linkWithPopup,
   signInAnonymously,
   signInWithPopup,
+  unlink,
   type Auth,
   type User,
 } from "firebase/auth";
@@ -115,6 +116,21 @@ export async function signInLeaderboardWithGoogle() {
   }
 }
 
+export async function unlinkLeaderboardGoogleAccount() {
+  const services = await getFirebaseServices();
+  if (!services) {
+    return { ok: false as const, reason: "Leaderboard is not configured." };
+  }
+
+  const user = services.auth.currentUser ?? (await ensureAnonymousAuth(services.auth));
+  if (!isGoogleLinkedUser(user)) {
+    return { ok: true as const, identity: createLeaderboardIdentity(user) };
+  }
+
+  const unlinkedUser = await unlink(user, GoogleAuthProvider.PROVIDER_ID);
+  return { ok: true as const, identity: createLeaderboardIdentity(unlinkedUser) };
+}
+
 export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) {
   const services = await getFirebaseServices();
   if (!services) {
@@ -175,6 +191,38 @@ export async function fetchLeaderboardEntries(stageId: string, maxEntries = DEFA
     .filter((entry) => entry.playerId);
 }
 
+export async function fetchMyLeaderboardEntries(): Promise<LeaderboardEntry[]> {
+  const services = await getFirebaseServices();
+  if (!services) {
+    return [];
+  }
+
+  const user = await ensureAnonymousAuth(services.auth);
+  const entriesQuery = query(collection(services.firestore, LEADERBOARD_COLLECTION), where("playerId", "==", user.uid));
+  const snapshot = await getDocs(entriesQuery);
+  return snapshot.docs
+    .map((doc) => {
+      const data = doc.data();
+      const playerId = sanitizePlayerId(data.playerId);
+      const createdAtValue = data.createdAt as { toDate?: () => Date } | undefined;
+      return {
+        status: getEntryStatus(data),
+        id: doc.id,
+        submissionId: typeof data.submissionId === "string" ? data.submissionId : "",
+        playerId,
+        playerName: typeof data.playerName === "string" ? data.playerName : "PLAYER",
+        score: typeof data.score === "number" ? data.score : 0,
+        stageId: typeof data.stageId === "string" ? data.stageId : "",
+        stageName: typeof data.stageName === "string" ? data.stageName : "",
+        gameVersion: typeof data.gameVersion === "string" ? data.gameVersion : "",
+        createdAt: createdAtValue?.toDate?.() ?? null,
+      };
+    })
+    .filter((entry) => entry.playerId === user.uid && entry.stageId && entry.status === "accepted")
+    .map(({status: _status, ...entry}) => entry)
+    .sort((a, b) => a.stageName.localeCompare(b.stageName) || b.score - a.score);
+}
+
 function getFirebaseServices() {
   servicesPromise ??= initializeFirebaseServices();
   return servicesPromise;
@@ -231,10 +279,18 @@ function createLeaderboardIdentity(user: User): LeaderboardIdentity {
   return {
     playerId: user.uid,
     isAnonymous: user.isAnonymous,
-    isGoogleLinked: user.providerData.some((provider) => provider.providerId === GoogleAuthProvider.PROVIDER_ID),
+    isGoogleLinked: isGoogleLinkedUser(user),
     email: user.email,
     displayName: user.displayName,
   };
+}
+
+function isGoogleLinkedUser(user: User) {
+  return user.providerData.some((provider) => provider.providerId === GoogleAuthProvider.PROVIDER_ID);
+}
+
+function getEntryStatus(data: Record<string, unknown> | undefined) {
+  return typeof data?.status === "string" ? data.status : "";
 }
 
 function shouldFallbackToGoogleSignIn(error: unknown) {

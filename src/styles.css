@@ -566,6 +566,12 @@ canvas {
   letter-spacing: 0;
 }
 
+.account-toggle {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
 .debug-toggle {
   font-family: monospace;
   font-size: 12px;
@@ -667,6 +673,207 @@ canvas {
   font-weight: 800;
 }
 
+#account-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 26;
+  display: grid;
+  place-items: center;
+  padding: clamp(10px, 2.5vw, 24px);
+  overflow: auto;
+  background: rgba(4, 8, 18, 0.78);
+  color: #f8fafc;
+  font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+}
+
+.account-dialog {
+  box-sizing: border-box;
+  width: min(760px, calc(100vw - clamp(20px, 5vw, 48px)));
+  max-height: calc(100dvh - clamp(20px, 5vw, 48px));
+  display: grid;
+  gap: clamp(10px, 1.5vw, 16px);
+  padding: clamp(72px, 7vw, 90px) clamp(58px, 7vw, 86px) clamp(48px, 5vw, 68px);
+  background: url("../public/assets/ui/fantasy/leaderboard_window.webp") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
+  overflow: auto;
+}
+
+.account-dialog h2 {
+  margin: 0;
+  justify-self: center;
+  width: min(100%, 620px);
+  min-height: 52px;
+  display: grid;
+  place-items: center;
+  padding: 0 28px;
+  background: url("../public/assets/ui/fantasy/leaderboard_title_plate.png") center / 100% 100% no-repeat;
+  font-size: clamp(22px, 3.6vw, 34px);
+  font-weight: 800;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 10px rgba(245, 199, 106, 0.22);
+}
+
+.account-status {
+  min-height: 18px;
+  margin: 0;
+  text-align: center;
+  color: #f5c76a;
+  font-size: 13px;
+  font-weight: 800;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9);
+}
+
+.account-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px 18px;
+  border: 1px solid rgba(184, 233, 255, 0.26);
+  background: rgba(3, 20, 34, 0.42);
+}
+
+.account-card h3 {
+  margin: 0;
+  color: #f5c76a;
+  font-size: clamp(14px, 1.8vw, 18px);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.account-detail-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.account-detail-list div,
+.account-score-header,
+.account-score-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.8fr) minmax(0, 1.2fr) minmax(88px, 0.8fr);
+  gap: 12px;
+  align-items: center;
+}
+
+.account-detail-list dt {
+  color: #b8e9ff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.account-detail-list dd {
+  grid-column: 2 / 4;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: #f8fafc;
+  font-size: 15px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.account-actions button {
+  min-height: 42px;
+  border: 0;
+  padding: 0 14px;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #f8fafc;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+  cursor: pointer;
+}
+
+.account-actions button[hidden] {
+  display: none;
+}
+
+.account-actions button:disabled {
+  opacity: 0.72;
+  cursor: wait;
+}
+
+.account-note {
+  margin: 0;
+  color: #b8e9ff;
+  font-size: 12px;
+  line-height: 1.45;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.account-score-header {
+  color: #b8e9ff;
+  font-size: 11px;
+  font-weight: 900;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.account-score-header span:nth-child(2),
+.account-score-header span:nth-child(3),
+.account-score-value,
+.account-score-date {
+  text-align: right;
+}
+
+.account-score-list {
+  min-height: 0;
+  max-height: 220px;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+}
+
+.account-score-row {
+  min-height: 38px;
+  padding: 0 12px;
+  background: url("../public/assets/ui/fantasy/leaderboard_row_plate.png") center / 100% 100% no-repeat;
+  font-size: 14px;
+  font-weight: 800;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.account-score-stage {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-score-value {
+  color: #f5c76a;
+}
+
+.account-score-date,
+.account-score-empty {
+  color: #b8e9ff;
+}
+
+.account-score-empty {
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  text-align: center;
+}
+
+#account-close {
+  justify-self: center;
+  width: min(78%, 520px);
+  background-image: url("../public/assets/ui/fantasy/leaderboard_button_plate.png");
+  min-height: 46px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
 @media (max-width: 480px) {
   #options-modal {
     place-items: start center;
@@ -690,6 +897,59 @@ canvas {
   .options-dialog select {
     height: 38px;
     font-size: 15px;
+  }
+
+  #account-modal {
+    place-items: start center;
+    padding: 6px;
+  }
+
+  .account-dialog {
+    width: min(calc(100vw - 12px), 430px);
+    max-height: calc(100dvh - 12px);
+    gap: 8px;
+    padding: 48px 16px 24px;
+  }
+
+  .account-dialog h2 {
+    min-height: 42px;
+    padding: 0 18px;
+    font-size: 20px;
+  }
+
+  .account-card {
+    padding: 10px;
+  }
+
+  .account-detail-list div,
+  .account-score-header,
+  .account-score-row {
+    grid-template-columns: minmax(0, 1fr) 78px;
+    gap: 8px;
+  }
+
+  .account-detail-list dd {
+    grid-column: 2;
+    text-align: right;
+  }
+
+  .account-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .account-score-header span:nth-child(3),
+  .account-score-date {
+    display: none;
+  }
+
+  .account-score-list {
+    max-height: 180px;
+  }
+
+  #account-close {
+    width: 100%;
+    min-height: 42px;
+    font-size: 16px;
   }
 }
 

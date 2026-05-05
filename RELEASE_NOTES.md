@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.211
+### English
+- Added an account window that shows Google link status, allows unlinking Google, and lists the player's registered scores by stage.
+### Japanese
+- Google連携状況の確認、Google連携の解除、自分のステージ別登録スコアを確認できるアカウント画面を追加しました。
+
 ## v0.1.210
 ### English
 - Renamed the Player Spec display label to Game Spec across the game UI and spec page titles.
