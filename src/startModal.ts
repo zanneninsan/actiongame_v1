@@ -37,6 +37,9 @@ type StartModalOptions = {
   onSubmit: (settings: { playerName: string; controlMode: ControlMode; stageId: string; soundOn: boolean; locale: Locale }) => void;
 };
 
+type StartSettings = { playerName: string; controlMode: ControlMode; stageId: string; soundOn: boolean; locale: Locale };
+type OrientationPromptMode = "initial" | "startConfirm";
+
 export class StartModal {
   private readonly options: StartModalOptions;
   private overlay?: HTMLDivElement;
@@ -153,6 +156,8 @@ export class StartModal {
     let soundOn = this.options.soundOn;
     let selectedLocale = this.options.locale;
     let localGhostFileLoaded = false;
+    let orientationPromptMode: OrientationPromptMode = "initial";
+    let pendingStartSettings: StartSettings | undefined;
 
     input.addEventListener("keydown", (event) => event.stopPropagation());
     input.addEventListener("keyup", (event) => event.stopPropagation());
@@ -169,14 +174,26 @@ export class StartModal {
     ghostSelect.addEventListener("keydown", (event) => event.stopPropagation());
     ghostSelect.addEventListener("keyup", (event) => event.stopPropagation());
     ghostSelect.addEventListener("keypress", (event) => event.stopPropagation());
-    const showOrientationPrompt = (failed = false) => {
-      if (this.orientationPromptDismissed || this.orientationPromptSatisfied || !shouldSuggestMobileFullscreen()) {
+    const updateOrientationPromptText = (failed = false, mode: OrientationPromptMode = orientationPromptMode) => {
+      orientationPromptMode = mode;
+      orientationMessage.textContent =
+        mode === "startConfirm" ? t(this.options.locale, "start.orientationStartPrompt") : t(this.options.locale, "start.orientationPrompt");
+      orientationNote.hidden = !failed;
+      orientationNote.textContent = failed ? t(this.options.locale, "start.orientationFallback") : "";
+      orientationYes.hidden = false;
+      orientationNo.hidden = false;
+      orientationYes.textContent =
+        mode === "startConfirm" ? t(this.options.locale, "start.orientationTurnLandscape") : t(this.options.locale, "start.orientationYes");
+      orientationNo.textContent =
+        mode === "startConfirm" ? t(this.options.locale, "start.orientationContinuePortrait") : t(this.options.locale, "start.orientationNo");
+    };
+
+    const showOrientationPrompt = (failed = false, mode: OrientationPromptMode = "initial") => {
+      if ((mode === "initial" && this.orientationPromptDismissed) || this.orientationPromptSatisfied || !shouldSuggestMobileFullscreen()) {
         orientationPrompt.hidden = true;
         return;
       }
-      orientationMessage.textContent = t(this.options.locale, "start.orientationPrompt");
-      orientationNote.hidden = !failed;
-      orientationNote.textContent = failed ? t(this.options.locale, "start.orientationFallback") : "";
+      updateOrientationPromptText(failed, mode);
       orientationPrompt.hidden = false;
       orientationYes.focus();
     };
@@ -187,7 +204,7 @@ export class StartModal {
         orientationPrompt.hidden = true;
         return;
       }
-      showOrientationPrompt(!orientationNote.hidden);
+      showOrientationPrompt(!orientationNote.hidden, orientationPromptMode);
     };
 
     const refreshGhostFullscreenButton = () => {
@@ -206,17 +223,38 @@ export class StartModal {
         scheduleGameLayoutRefresh();
         this.orientationPromptSatisfied = succeeded || isLandscapeViewport();
         if (this.orientationPromptSatisfied) {
-          orientationPrompt.hidden = true;
+          orientationMessage.textContent = t(this.options.locale, "start.orientationSuccess");
+          orientationNote.hidden = true;
+          orientationYes.hidden = true;
+          orientationNo.hidden = true;
+          if (pendingStartSettings) {
+            const settings = pendingStartSettings;
+            pendingStartSettings = undefined;
+            window.setTimeout(() => this.options.onSubmit({ ...settings, controlMode: selectedMode }), 350);
+          } else {
+            window.setTimeout(() => {
+              orientationPrompt.hidden = true;
+            }, 850);
+          }
         } else {
-          showOrientationPrompt(true);
+          showOrientationPrompt(true, orientationPromptMode);
         }
       } finally {
         orientationYes.disabled = false;
         orientationNo.disabled = false;
-        orientationYes.textContent = t(this.options.locale, "start.orientationYes");
+        if (!this.orientationPromptSatisfied) {
+          updateOrientationPromptText(!orientationNote.hidden, orientationPromptMode);
+        }
       }
     });
     orientationNo.addEventListener("click", () => {
+      if (orientationPromptMode === "startConfirm" && pendingStartSettings) {
+        const settings = pendingStartSettings;
+        pendingStartSettings = undefined;
+        orientationPrompt.hidden = true;
+        this.options.onSubmit(settings);
+        return;
+      }
       this.orientationPromptDismissed = true;
       orientationPrompt.hidden = true;
       input.focus();
@@ -404,13 +442,19 @@ export class StartModal {
 
     form.addEventListener("submit", (event) => {
       event.preventDefault();
-      this.options.onSubmit({
+      const settings = {
         playerName: input.value.trim() || "PLAYER",
         controlMode: selectedMode,
         stageId: selectedStageId,
         soundOn,
         locale: selectedLocale,
-      });
+      };
+      if (shouldSuggestMobileFullscreen() && !this.orientationPromptSatisfied) {
+        pendingStartSettings = settings;
+        showOrientationPrompt(false, "startConfirm");
+        return;
+      }
+      this.options.onSubmit(settings);
     });
 
     refreshMode();
