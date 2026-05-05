@@ -177,12 +177,18 @@ export class DanmakuOverlay {
   }
 
   emitTimeUp() {
-    this.emitCenterBurst(TIME_UP_SCENE_COMMENTS, 28, 58, {
+    const style = {
       color: "#fef08a",
       stroke: "#7f1d1d",
       fontSize: 29,
-      duration: 2400,
-    });
+      duration: 3800,
+    };
+    if (this.mode === "liveChat") {
+      this.emitBurst(TIME_UP_SCENE_COMMENTS, 16, 85, style);
+      return;
+    }
+
+    this.emitDeathReaction(TIME_UP_SCENE_COMMENTS);
   }
 
   clear() {

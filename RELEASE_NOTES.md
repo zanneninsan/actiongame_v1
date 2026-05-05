@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.239
+### English
+- Changed the time-up danmaku presentation to use the same centered fixed reaction-wave style as MISS while keeping dedicated timeout comments.
+### Japanese
+- 時間切れ時の弾幕演出を、専用コメントのままMISS時と同じ中央揃えの固定リアクション波に変更しました。
+
 ## v0.1.238
 ### English
 - Added a dedicated timeout-scene danmaku comment set so time-up reactions no longer reuse generic miss wording.
