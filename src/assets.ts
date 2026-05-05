@@ -24,8 +24,17 @@ export type EnemyType =
   | "hornedCyborg"
   | "coneGolem"
   | "rabbitTraveler"
-  | "neonIdolShooter";
-export type EnemyAiType = "patrol" | "flyingPatrol" | "hoppingPatrol" | "chase" | "shooter" | "projectile";
+  | "neonIdolShooter"
+  | "heartCannonTurret";
+export type EnemyAiType =
+  | "patrol"
+  | "flyingPatrol"
+  | "hoppingPatrol"
+  | "chase"
+  | "shooter"
+  | "turret"
+  | "projectile"
+  | "cannonProjectile";
 export const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
 export const ITEM_GLOW_COLORS: Record<ItemType, number> = {
   energyDrink: 0x8cffd2,
@@ -304,5 +313,17 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetX: 20,
     bodyOffsetY: 28,
     aiType: "shooter",
+  },
+  heartCannonTurret: {
+    key: "enemy-heart-cannon-turret",
+    label: "Heart Cannon",
+    assetPath: "assets/enemies/heart_cannon_turret.png",
+    displayWidth: 104,
+    displayHeight: 82,
+    bodyWidth: 70,
+    bodyHeight: 48,
+    bodyOffsetX: 18,
+    bodyOffsetY: 26,
+    aiType: "turret",
   },
 };

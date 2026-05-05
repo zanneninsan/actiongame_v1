@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.183
+### English
+- Added Heart Cannon turret enemies with generated raster art, aimed heart shots, and new placements in Neo Shibuya City and Skybridge Sprint.
+- Added a secret upper-route branch in Neo Shibuya City with hidden dash-ring access, bonus coins, and fragile/moving platforms.
+### Japanese
+- 画像生成で作成したハートキャノン砲台を追加し、狙い撃ちのハート弾とネオシブヤシティ、スカイブリッジ・スプリントへの配置を実装しました。
+- ネオシブヤシティに、隠しダッシュリングから入れる上側の秘密ルートを追加し、ボーナスコイン、壊れやすい足場、動く足場を組み込みました。
+
 ## v0.1.182
 ### English
 - Split the enhanced Shibuya City layout into a new Neo Shibuya City stage while restoring Shibuya City to the main-branch layout from `04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`.

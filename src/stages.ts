@@ -143,6 +143,30 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "units": 4
     },
     {
+      "x": 5660,
+      "y": 164,
+      "units": 2
+    },
+    {
+      "x": 5940,
+      "y": 108,
+      "units": 2,
+      "moving": {
+        "axis": "x",
+        "distance": 280,
+        "speed": 72
+      }
+    },
+    {
+      "x": 6320,
+      "y": 180,
+      "units": 3,
+      "fragile": {
+        "delayMs": 520,
+        "respawnMs": 2600
+      }
+    },
+    {
       "x": 5900,
       "y": 548,
       "units": 7
@@ -986,6 +1010,21 @@ export const NEO_SHIBUYA_STAGE: StageDefinition = {
       "y": 320
     },
     {
+      "type": "coin",
+      "x": 5700,
+      "y": 108
+    },
+    {
+      "type": "coin",
+      "x": 5980,
+      "y": 52
+    },
+    {
+      "type": "dashRing",
+      "x": 6380,
+      "y": 124
+    },
+    {
       "type": "bubbleTea",
       "x": 864,
       "y": 352
@@ -1125,6 +1164,12 @@ export const NEO_SHIBUYA_STAGE: StageDefinition = {
       "reward": "star"
     },
     {
+      "type": "hidden",
+      "x": 5620,
+      "y": 120,
+      "reward": "dashRing"
+    },
+    {
       "type": "question",
       "x": 8420,
       "y": 332,
@@ -1184,6 +1229,14 @@ export const NEO_SHIBUYA_STAGE: StageDefinition = {
       "speed": 96
     },
     {
+      "type": "heartCannonTurret",
+      "x": 5480,
+      "y": 190,
+      "patrolLeft": 5480,
+      "patrolRight": 5480,
+      "speed": 0
+    },
+    {
       "type": "neonIdolShooter",
       "x": 7040,
       "y": 292,
@@ -1198,6 +1251,14 @@ export const NEO_SHIBUYA_STAGE: StageDefinition = {
       "patrolLeft": 9280,
       "patrolRight": 9840,
       "speed": 108
+    },
+    {
+      "type": "heartCannonTurret",
+      "x": 10180,
+      "y": 386,
+      "patrolLeft": 10180,
+      "patrolRight": 10180,
+      "speed": 0
     },
     {
       "x": 11880,
@@ -1332,6 +1393,7 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     { type: "hornedCyborg", x: 5850, y: 344, patrolLeft: 5750, patrolRight: 6260, speed: 68 },
     { type: "neonIdolShooter", x: 6320, y: 260, patrolLeft: 6320, patrolRight: 6320, speed: 0 },
     { type: "aquaMascot", x: 7160, y: 448, patrolLeft: 7040, patrolRight: 7400, speed: 94 },
+    { type: "heartCannonTurret", x: 7920, y: 276, patrolLeft: 7920, patrolRight: 7920, speed: 0 },
     { type: "aquaMascot", x: 8460, y: 476, patrolLeft: 8240, patrolRight: 8840, speed: 108 },
   ],
 };
