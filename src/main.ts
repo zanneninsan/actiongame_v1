@@ -84,7 +84,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.259";
+const DEBUG_VERSION = "v0.1.260";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -93,6 +93,7 @@ const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
 };
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
+const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
@@ -305,6 +306,10 @@ class PrototypeScene extends Phaser.Scene {
   private stageEditor?: StageEditor;
   private restartStageEditorEnabled = false;
   private restartEditorStage?: StageDefinition;
+  private readonly handleGameLayoutRefresh = () => {
+    this.scale.refresh();
+    this.applyHudScale();
+  };
   private storyDialogue?: StoryDialogueController;
   private storyDialogueQueue: QueuedStoryDialogue[] = [];
   private hasAdvancedStoryDialogueAtX = false;
@@ -611,6 +616,8 @@ class PrototypeScene extends Phaser.Scene {
     this.applyHudScale();
     this.scale.off("resize", this.handleScaleResize, this);
     this.scale.on("resize", this.handleScaleResize, this);
+    window.removeEventListener(GAME_LAYOUT_REFRESH_EVENT, this.handleGameLayoutRefresh);
+    window.addEventListener(GAME_LAYOUT_REFRESH_EVENT, this.handleGameLayoutRefresh);
     this.updateControlHintText();
     this.danmaku = new DanmakuOverlay(this, GAME_WIDTH, GAME_HEIGHT);
     this.danmaku.setMode(this.danmakuMode);
@@ -871,6 +878,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private resetRunState() {
     this.scale.off("resize", this.handleScaleResize, this);
+    window.removeEventListener(GAME_LAYOUT_REFRESH_EVENT, this.handleGameLayoutRefresh);
     this.removeStartModal();
     this.removeMobileControls();
     this.removeStageEditor();

@@ -1,5 +1,7 @@
 import { LOCALE_OPTIONS, t, type Locale } from "./i18n";
 
+const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
+
 export type ControlMode = "pc" | "mobile";
 export type StageOption = { id: string; label: Record<Locale, string> };
 export type StartAccountStatus = {
@@ -201,6 +203,7 @@ export class StartModal {
       orientationYes.textContent = t(this.options.locale, "start.orientationTrying");
       try {
         const succeeded = await requestFullscreenAndLandscape();
+        scheduleGameLayoutRefresh();
         this.orientationPromptSatisfied = succeeded || isLandscapeViewport();
         if (this.orientationPromptSatisfied) {
           orientationPrompt.hidden = true;
@@ -366,6 +369,7 @@ export class StartModal {
       ghostFullscreenButton.textContent = t(this.options.locale, "start.orientationTrying");
       try {
         const succeeded = await requestFullscreenAndLandscape();
+        scheduleGameLayoutRefresh();
         this.orientationPromptSatisfied = succeeded || isLandscapeViewport();
         refreshGhostFullscreenButton();
       } finally {
@@ -494,6 +498,15 @@ async function requestFullscreenAndLandscape() {
   }
 
   return fullscreenSucceeded && orientationSucceeded;
+}
+
+function scheduleGameLayoutRefresh() {
+  for (const delayMs of [0, 80, 180, 360, 720]) {
+    window.setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+      window.dispatchEvent(new Event(GAME_LAYOUT_REFRESH_EVENT));
+    }, delayMs);
+  }
 }
 
 function escapeHtml(value: string) {

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.260
+### English
+- Forced Phaser to refresh its scale layout after landscape fullscreen restoration so the canvas no longer keeps a portrait-sized drawing area.
+### Japanese
+- 横フルスクリーンへ戻した後にPhaserのスケール計算を明示的に更新し、描画領域が縦画面サイズのまま残らないようにしました。
+
 ## v0.1.259
 ### English
 - Added a mobile restore button after loading a local ghost JSON file so players can re-enter landscape fullscreen when the file picker exits fullscreen or rotates the screen.
