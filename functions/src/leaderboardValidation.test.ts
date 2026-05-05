@@ -65,6 +65,49 @@ test("accepts impossible instant clears while anti-cheat is disabled", () => {
   assert.equal(payload.expectedScore, 7850);
 });
 
+test("accepts a matching ghost replay payload", () => {
+  const payload = cleanLeaderboardPayload({
+    ...basePayload,
+    ghostReplay: {
+      schema: "zannenin-ghost-v1",
+      gameVersion: "v0.1.240",
+      stageId: "neonCanal",
+      playerName: "PLAYER",
+      controlMode: "pc",
+      createdAt: "2026-05-06T00:00:00.000Z",
+      durationMs: 100,
+      frames: [
+        {t: 0, x: 100, y: 200, left: false, right: false, up: false, down: false, dash: false, flipX: false, anim: "player-idle"},
+        {t: 50, x: 102, y: 198, left: false, right: true, up: true, down: false, dash: false, flipX: false, anim: "player-air"},
+      ],
+    },
+  });
+
+  assert.equal(payload.ghostReplay?.stageId, "neonCanal");
+  assert.equal(payload.ghostReplay?.frames.length, 2);
+});
+
+test("rejects a ghost replay for a different stage", () => {
+  assertHttpsError(
+    () =>
+      cleanLeaderboardPayload({
+        ...basePayload,
+        ghostReplay: {
+          schema: "zannenin-ghost-v1",
+          stageId: "skybridgeSprint",
+          playerName: "PLAYER",
+          controlMode: "pc",
+          durationMs: 100,
+          frames: [
+            {t: 0, x: 100, y: 200},
+            {t: 50, x: 102, y: 198},
+          ],
+        },
+      }),
+    "invalid-argument",
+  );
+});
+
 function assertHttpsError(fn: () => unknown, code: HttpsError["code"]) {
   assert.throws(fn, (error) => error instanceof HttpsError && error.code === code);
 }

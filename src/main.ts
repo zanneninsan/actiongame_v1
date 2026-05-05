@@ -80,7 +80,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.239";
+const DEBUG_VERSION = "v0.1.240";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -2057,7 +2057,11 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private buildGhostReplayJson() {
-    const replay: GhostReplayData = {
+    return JSON.stringify(this.buildGhostReplayData(), null, 2);
+  }
+
+  private buildGhostReplayData(): GhostReplayData {
+    return {
       schema: GHOST_REPLAY_SCHEMA,
       gameVersion: DEBUG_VERSION,
       stageId: this.currentStageId,
@@ -2067,7 +2071,6 @@ class PrototypeScene extends Phaser.Scene {
       durationMs: this.getRunElapsedMilliseconds(),
       frames: this.ghostRecordingFrames,
     };
-    return JSON.stringify(replay, null, 2);
   }
 
   private showGhostExportButton() {
@@ -2420,6 +2423,8 @@ class PrototypeScene extends Phaser.Scene {
         timeBonus,
         elapsedMs,
         remainingMs,
+        ghostReplay:
+          !this.ghostRecordingDisabled && this.ghostRecordingFrames.length >= 2 ? this.buildGhostReplayData() : undefined,
       });
 
         if (!result.ok) {

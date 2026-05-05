@@ -7,6 +7,8 @@ import {cleanLeaderboardPayload, roundScore} from "./leaderboardValidation.js";
 initializeApp();
 setGlobalOptions({maxInstances: 10});
 
+const TOP_GHOST_RANK_LIMIT = 10;
+
 export const submitScore = onCall({region: "asia-northeast1", cors: true, invoker: "public"}, async (request) => {
   if (!request.auth) {
     throw new HttpsError("unauthenticated", "Anonymous auth is required.");
@@ -66,8 +68,96 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
   }
 
   const rank = scoreUpdated ? await getLeaderboardRankSafely(firestore, payload.stageId, payload.expectedScore) : undefined;
-  return {ok: true, status: "accepted", submissionId: payload.submissionId, scoreUpdated, rank};
+  const ghostSaved = scoreUpdated ?
+    await saveTopRankGhostSafely(firestore, payload, uid, rank) :
+    false;
+  return {ok: true, status: "accepted", submissionId: payload.submissionId, scoreUpdated, rank, ghostSaved};
 });
+
+async function saveTopRankGhostSafely(
+  firestore: Firestore,
+  payload: ReturnType<typeof cleanLeaderboardPayload>,
+  uid: string,
+  rank: number | undefined,
+) {
+  try {
+    return await saveTopRankGhost(firestore, payload, uid, rank);
+  } catch (error) {
+    console.warn("Leaderboard ghost save failed.", {
+      error,
+      playerId: payload.playerId,
+      stageId: payload.stageId,
+      submissionId: payload.submissionId,
+    });
+    return false;
+  }
+}
+
+async function saveTopRankGhost(
+  firestore: Firestore,
+  payload: ReturnType<typeof cleanLeaderboardPayload>,
+  uid: string,
+  rank: number | undefined,
+) {
+  const scoreRef = firestore.collection("leaderboardScores").doc(`${payload.stageId}_${payload.playerId}`);
+  const ghostRef = firestore.collection("leaderboardGhosts").doc(`${payload.stageId}_${payload.playerId}`);
+  const ghostReplay = payload.ghostReplay;
+  const shouldSaveGhost = typeof rank === "number" && rank <= TOP_GHOST_RANK_LIMIT && Boolean(ghostReplay);
+
+  if (!shouldSaveGhost || !ghostReplay) {
+    await Promise.all([
+      ghostRef.delete().catch(() => undefined),
+      scoreRef.set({hasGhost: false, ghostUpdatedAt: FieldValue.serverTimestamp()}, {merge: true}),
+    ]);
+    return false;
+  }
+
+  await Promise.all([
+    ghostRef.set({
+      uid,
+      playerId: payload.playerId,
+      stageId: payload.stageId,
+      stageName: payload.stageName,
+      submissionId: payload.submissionId,
+      gameVersion: payload.gameVersion,
+      playerName: payload.playerName,
+      score: payload.expectedScore,
+      rank,
+      ghostReplay: compactGhostReplay(ghostReplay),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+    }),
+    scoreRef.set({hasGhost: true, ghostUpdatedAt: FieldValue.serverTimestamp()}, {merge: true}),
+  ]);
+  return true;
+}
+
+function compactGhostReplay(ghostReplay: NonNullable<ReturnType<typeof cleanLeaderboardPayload>["ghostReplay"]>) {
+  const animations = Array.from(new Set(ghostReplay.frames.map((frame) => frame.anim ?? "")));
+  return {
+    schema: ghostReplay.schema,
+    format: "compact-v1",
+    gameVersion: ghostReplay.gameVersion,
+    stageId: ghostReplay.stageId,
+    playerName: ghostReplay.playerName,
+    controlMode: ghostReplay.controlMode,
+    createdAt: ghostReplay.createdAt,
+    durationMs: ghostReplay.durationMs,
+    animations,
+    frames: ghostReplay.frames.map((frame) => [
+      frame.t,
+      frame.x,
+      frame.y,
+      (frame.left ? 1 : 0) |
+        (frame.right ? 2 : 0) |
+        (frame.up ? 4 : 0) |
+        (frame.down ? 8 : 0) |
+        (frame.dash ? 16 : 0) |
+        (frame.flipX ? 32 : 0),
+      Math.max(0, animations.indexOf(frame.anim ?? "")),
+    ]),
+  };
+}
 
 async function getLeaderboardRankSafely(firestore: Firestore, stageId: string, score: number) {
   try {

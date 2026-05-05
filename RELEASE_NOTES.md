@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.240
+### English
+- Save ghost replay data to Firebase when an accepted leaderboard submission reaches the stage top 10.
+### Japanese
+- ランキング登録でステージ10位以内に入ったプレイのゴーストリプレイをFirebaseに保存するようにしました。
+
 ## v0.1.239
 ### English
 - Added ghost replay JSON recording, export after clearing a stage, and ghost JSON loading from the start screen.

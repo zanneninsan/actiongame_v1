@@ -52,6 +52,7 @@ export type LeaderboardSubmitPayload = {
   timeBonus: number;
   elapsedMs: number;
   remainingMs: number;
+  ghostReplay?: unknown;
 };
 
 export type LeaderboardSubmitResult =
@@ -61,6 +62,7 @@ export type LeaderboardSubmitResult =
       submissionId?: string;
       scoreUpdated: boolean;
       rank?: number;
+      ghostSaved?: boolean;
     }
   | { ok: false; reason: string };
 
