@@ -11,8 +11,10 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 ## v0.1.244
 ### English
 - Limited dash-boosted jumps to moments when dash input is actively held, preventing dash linger momentum from turning normal jumps into super jumps.
+- Hid leaderboard ghost choices when the saved ghost replay document is missing or unreadable, preventing unavailable ghosts from being selected.
 ### Japanese
 - ダッシュ強化ジャンプはShift/ダッシュ入力を実際に押している時だけ発生するようにし、ダッシュ残留中の慣性で通常ジャンプがスーパージャンプ化しないようにしました。
+- 保存済みゴーストの実体が存在しないランキング項目は、スタート画面のゴースト選択肢に出さないようにしました。
 
 ## v0.1.243
 ### English

@@ -268,10 +268,28 @@ export async function fetchLeaderboardEntries(stageId: string, maxEntries = DEFA
 }
 
 export async function fetchLeaderboardGhostOptions(stageId: string, maxEntries = 10): Promise<LeaderboardGhostOption[]> {
+  const services = await getFirebaseServices();
+  if (!services) {
+    return [];
+  }
+
   const entries = await fetchLeaderboardEntries(stageId, maxEntries);
-  return entries
+  const ghostCandidates = entries
     .map((entry, index) => ({ entry, rank: index + 1 }))
-    .filter(({ entry }) => entry.hasGhost)
+    .filter(({ entry }) => entry.hasGhost);
+  const availableGhosts = await Promise.all(
+    ghostCandidates.map(async ({ entry, rank }) => {
+      try {
+        const snapshot = await getDoc(doc(services.firestore, "leaderboardGhosts", entry.id));
+        return snapshot.exists() && expandCompactGhostReplay(snapshot.data().ghostReplay) ? { entry, rank } : undefined;
+      } catch {
+        return undefined;
+      }
+    }),
+  );
+
+  return availableGhosts
+    .filter((option): option is { entry: LeaderboardEntry; rank: number } => Boolean(option))
     .map(({ entry, rank }) => ({
       id: entry.id,
       stageId: entry.stageId,
