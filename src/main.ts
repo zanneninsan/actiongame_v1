@@ -80,7 +80,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.231";
+const DEBUG_VERSION = "v0.1.232";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -330,6 +330,7 @@ class PrototypeScene extends Phaser.Scene {
     this.load.image(GOAL_TEXTURE_KEY, `${ASSET_BASE}assets/stage_objects/goal_gate.webp`);
     this.load.audio("game-bgm", `${ASSET_BASE}assets/audio/gamebgm_default.mp3`);
     this.load.audio("item-pickup", `${ASSET_BASE}assets/audio/item_pickup.wav`);
+    this.load.audio("player-jump-sfx", `${ASSET_BASE}assets/audio/player_jump.wav`);
     this.load.audio("countdown-tick", `${ASSET_BASE}assets/audio/countdown_tick.wav`);
     this.load.audio("countdown-go", `${ASSET_BASE}assets/audio/countdown_go.wav`);
   }
@@ -658,6 +659,7 @@ class PrototypeScene extends Phaser.Scene {
       startedJump = true;
       this.resetPlayerIdleState();
       this.player.anims.play("player-jump-start", true);
+      this.sound.play("player-jump-sfx", { volume: 0.42 });
     }
 
     const isMovingHorizontally = Math.abs(this.player.body.velocity.x) > 8;

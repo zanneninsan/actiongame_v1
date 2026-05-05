@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.232
+### English
+- Reworked the item pickup sound into a brighter collection chime and reused the previous pickup sound as the player jump sound effect.
+### Japanese
+- アイテム取得音をより取得音らしい明るいチャイムに差し替え、これまでの取得音をプレイヤーのジャンプ音として使うようにしました。
+
 ## v0.1.231
 ### English
 - Added a danmaku display style setting with a live chat column mode that stacks comments upward from the lower-left side of the screen.
