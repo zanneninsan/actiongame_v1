@@ -80,7 +80,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.228";
+const DEBUG_VERSION = "v0.1.229";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -149,6 +149,10 @@ const HUD_MAX_SCALE = 1.45;
 const HUD_PLAYER_NAME_FONT_SIZE = 15;
 const HUD_MAIN_FONT_SIZE = 12;
 const HUD_HINT_FONT_SIZE = 11;
+const HUD_PLAYER_NAME_Y = 28;
+const HUD_SCORE_Y = 56;
+const HUD_STAMINA_Y = 80;
+const HUD_STAMINA_BAR_Y = 89;
 const HUD_STAMINA_BAR_WIDTH = 132;
 const HUD_STAMINA_BAR_HEIGHT = 9;
 const HUD_STAMINA_FILL_WIDTH = 128;
@@ -453,7 +457,7 @@ class PrototypeScene extends Phaser.Scene {
     this.collisionDebugGraphics = this.add.graphics().setDepth(300);
 
     this.playerNameText = this.add
-      .text(58, 40, "", {
+      .text(58, HUD_PLAYER_NAME_Y, "", {
         fontFamily: "monospace",
         fontSize: `${HUD_PLAYER_NAME_FONT_SIZE}px`,
         color: "#e0f2fe",
@@ -463,7 +467,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0);
 
     this.scoreText = this.add
-      .text(58, 68, "", {
+      .text(58, HUD_SCORE_Y, "", {
         fontFamily: "monospace",
         fontSize: `${HUD_MAIN_FONT_SIZE}px`,
         color: "#f8fafc",
@@ -485,7 +489,7 @@ class PrototypeScene extends Phaser.Scene {
     this.updateTimerText();
 
     this.staminaText = this.add
-      .text(58, 92, "", {
+      .text(58, HUD_STAMINA_Y, "", {
         fontFamily: "monospace",
         fontSize: `${HUD_MAIN_FONT_SIZE}px`,
         color: "#bbf7d0",
@@ -493,9 +497,17 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(100)
       .setShadow(1, 1, "#020617", 2, true, true);
-    this.staminaBarBack = this.add.rectangle(150, 101, 132, 9, 0x0f172a, 0.78).setOrigin(0, 0.5).setScrollFactor(0).setDepth(99);
+    this.staminaBarBack = this.add
+      .rectangle(150, HUD_STAMINA_BAR_Y, 132, 9, 0x0f172a, 0.78)
+      .setOrigin(0, 0.5)
+      .setScrollFactor(0)
+      .setDepth(99);
     this.staminaBarBack.setStrokeStyle(1, 0x86efac, 0.8);
-    this.staminaBarFill = this.add.rectangle(152, 101, 128, 5, 0x86efac, 0.95).setOrigin(0, 0.5).setScrollFactor(0).setDepth(100);
+    this.staminaBarFill = this.add
+      .rectangle(152, HUD_STAMINA_BAR_Y, 128, 5, 0x86efac, 0.95)
+      .setOrigin(0, 0.5)
+      .setScrollFactor(0)
+      .setDepth(100);
     this.updateStaminaHud();
 
     this.controlHintText = this.add
@@ -1218,12 +1230,12 @@ class PrototypeScene extends Phaser.Scene {
     this.hudScale = scale;
 
     if (this.playerNameText) {
-      this.playerNameText.setPosition(58 * scale, 40 * scale);
+      this.playerNameText.setPosition(58 * scale, HUD_PLAYER_NAME_Y * scale);
       this.playerNameText.setFontSize(`${Math.round(HUD_PLAYER_NAME_FONT_SIZE * scale)}px`);
     }
 
     if (this.scoreText) {
-      this.scoreText.setPosition(58 * scale, 68 * scale);
+      this.scoreText.setPosition(58 * scale, HUD_SCORE_Y * scale);
       this.scoreText.setFontSize(`${Math.round(HUD_MAIN_FONT_SIZE * scale)}px`);
     }
 
@@ -1233,19 +1245,19 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     if (this.staminaText) {
-      this.staminaText.setPosition(58 * scale, 92 * scale);
+      this.staminaText.setPosition(58 * scale, HUD_STAMINA_Y * scale);
       this.staminaText.setFontSize(`${Math.round(HUD_MAIN_FONT_SIZE * scale)}px`);
     }
 
     if (this.staminaBarBack) {
-      this.staminaBarBack.setPosition(150 * scale, 101 * scale);
+      this.staminaBarBack.setPosition(150 * scale, HUD_STAMINA_BAR_Y * scale);
       this.staminaBarBack.width = HUD_STAMINA_BAR_WIDTH * scale;
       this.staminaBarBack.height = HUD_STAMINA_BAR_HEIGHT * scale;
       this.staminaBarBack.setStrokeStyle(Math.max(1, Math.round(scale)), 0x86efac, 0.8);
     }
 
     if (this.staminaBarFill) {
-      this.staminaBarFill.setPosition(152 * scale, 101 * scale);
+      this.staminaBarFill.setPosition(152 * scale, HUD_STAMINA_BAR_Y * scale);
       this.staminaBarFill.height = HUD_STAMINA_FILL_HEIGHT * scale;
       this.updateStaminaHud();
     }

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.229
+### English
+- Moved the player, score, and stamina HUD elements slightly upward.
+### Japanese
+- プレイヤー名、スコア、スタミナのHUD表示を少し上へ移動しました。
+
 ## v0.1.228
 ### English
 - Added a global title button that returns the current session to the start screen.
