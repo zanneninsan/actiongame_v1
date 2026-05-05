@@ -69,7 +69,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.187";
+const DEBUG_VERSION = "v0.1.188";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1470,6 +1470,12 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private updateCollisionDebug() {
+    if (!this.player) {
+      setPlayerPositionDebugUI(false, 0, 0);
+      this.collisionDebugGraphics?.clear();
+      return;
+    }
+
     setPlayerPositionDebugUI(this.collisionDebugEnabled, this.player.x, this.player.y);
     if (!this.collisionDebugGraphics) {
       return;

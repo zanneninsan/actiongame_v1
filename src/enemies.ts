@@ -22,15 +22,24 @@ export const createEnemyAnimations = (scene: Phaser.Scene) => {
       return;
     }
 
-    scene.anims.create({
-      key: animation.key,
-      frames: scene.anims.generateFrameNumbers(animation.key, {
-        start: 0,
-        end: animation.frameCount - 1,
-      }),
-      frameRate: animation.frameRate,
-      repeat: -1,
-    });
+    if (!scene.textures.exists(animation.key)) {
+      console.warn(`Skipping enemy animation "${animation.key}" because its texture was not loaded.`);
+      return;
+    }
+
+    try {
+      scene.anims.create({
+        key: animation.key,
+        frames: scene.anims.generateFrameNumbers(animation.key, {
+          start: 0,
+          end: animation.frameCount - 1,
+        }),
+        frameRate: animation.frameRate,
+        repeat: -1,
+      });
+    } catch (error) {
+      console.warn(`Skipping enemy animation "${animation.key}" because its frames could not be created.`, error);
+    }
   });
   createProjectileTexture(scene);
   createTurretProjectileTexture(scene);
@@ -337,7 +346,17 @@ export const freezeEnemies = (enemiesGroup?: Phaser.Physics.Arcade.Group) => {
 const createEnemySprite = (enemiesGroup: Phaser.Physics.Arcade.Group, placement: EnemyPlacement) => {
   const definition = ENEMY_DEFINITIONS[placement.type ?? "aquaMascot"];
   const animation = definition.animation;
-  const enemy = enemiesGroup.create(placement.x, placement.y, animation?.key ?? definition.key) as Phaser.Physics.Arcade.Sprite;
+  const animationReady =
+    animation !== undefined &&
+    enemiesGroup.scene.textures.exists(animation.key) &&
+    enemiesGroup.scene.anims.exists(animation.key);
+  const textureKey =
+    animationReady || definition.assetPath
+      ? animationReady
+        ? animation.key
+        : definition.key
+      : getFallbackEnemyTextureKey(enemiesGroup.scene);
+  const enemy = enemiesGroup.create(placement.x, placement.y, textureKey) as Phaser.Physics.Arcade.Sprite;
   const speed = placement.speed ?? ENEMY_DEFAULT_SPEED;
   const direction = speed >= 0 ? 1 : -1;
   enemy.setDisplaySize(definition.displayWidth, definition.displayHeight);
@@ -355,10 +374,18 @@ const createEnemySprite = (enemiesGroup: Phaser.Physics.Arcade.Group, placement:
   enemy.setOffset(definition.bodyOffsetX / Math.abs(enemy.scaleX), definition.bodyOffsetY / Math.abs(enemy.scaleY));
   enemy.setVelocityX(definition.aiType === "turret" ? 0 : Math.abs(speed) * direction);
   enemy.setFlipX(direction < 0);
-  if (animation) {
+  if (animationReady) {
     enemy.play(animation.key);
   }
   const body = enemy.body as Phaser.Physics.Arcade.Body;
   body.setAllowGravity(definition.aiType !== "flyingPatrol");
   body.setImmovable(definition.aiType === "turret");
+};
+
+const getFallbackEnemyTextureKey = (scene: Phaser.Scene) => {
+  const fallbackAnimation = ENEMY_DEFINITIONS.aquaMascot.animation?.key;
+  if (fallbackAnimation && scene.textures.exists(fallbackAnimation)) {
+    return fallbackAnimation;
+  }
+  return "__DEFAULT";
 };

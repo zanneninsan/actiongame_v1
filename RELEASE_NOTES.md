@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.188
+### English
+- Fixed startup stopping after stage rendering when the HIT debug position readout ran before the player sprite existed.
+- Added defensive enemy animation handling so one broken enemy sheet cannot stop the rest of the game scene from starting.
+### Japanese
+- HITデバッグの座標表示がプレイヤー生成前に走って、ステージ描画後に起動が止まる問題を修正しました。
+- 敵アニメーション素材に問題があっても、ゲームシーン全体の開始が止まらないように防御処理を追加しました。
+
 ## v0.1.187
 ### English
 - Added a live player position readout beside the HIT debug toggle while collision debug is enabled.
