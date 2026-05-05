@@ -86,6 +86,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
 
   fetchEntriesWithRetry(options.fetchEntries)
     .then((entries) => {
+      status.classList.remove("is-error");
       if (entries.length === 0) {
         status.textContent = options.statusMessage ?? t(locale, "leaderboard.empty");
         return;
@@ -102,6 +103,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
     .catch((error) => {
       const errorCode = getErrorCode(error);
       console.warn("Leaderboard entries could not be fetched.", { errorCode, error });
+      status.classList.add("is-error");
       status.textContent = getLeaderboardErrorMessage(locale, errorCode);
     });
 }

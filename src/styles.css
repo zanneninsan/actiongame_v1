@@ -723,15 +723,15 @@ body.is-account-modal-open #mobile-controls {
 }
 
 .mobile-pad {
-  left: var(--mobile-edge-gap);
-  bottom: var(--mobile-edge-gap);
+  left: calc(var(--mobile-edge-gap) + env(safe-area-inset-left));
+  bottom: calc(var(--mobile-edge-gap) + env(safe-area-inset-bottom));
   grid-template-columns: repeat(3, var(--mobile-button-size));
   grid-template-rows: repeat(2, var(--mobile-button-size));
 }
 
 .mobile-actions {
-  right: var(--mobile-edge-gap);
-  bottom: var(--mobile-edge-gap);
+  right: calc(var(--mobile-edge-gap) + env(safe-area-inset-right));
+  bottom: calc(var(--mobile-edge-gap) + env(safe-area-inset-bottom));
 }
 
 .mobile-button {
@@ -982,8 +982,8 @@ body.is-account-modal-open #mobile-controls {
 
 #global-ui {
   position: fixed;
-  top: 12px;
-  right: 12px;
+  top: calc(12px + env(safe-area-inset-top));
+  right: calc(12px + env(safe-area-inset-right));
   z-index: 18;
   display: flex;
   align-items: center;
@@ -1073,8 +1073,8 @@ body.is-account-modal-open #mobile-controls {
 
 @media (max-width: 820px), (max-height: 560px) {
   #global-ui {
-    top: 10px;
-    right: 10px;
+    top: calc(10px + env(safe-area-inset-top));
+    right: calc(10px + env(safe-area-inset-right));
     gap: 6px;
   }
 
@@ -1088,8 +1088,8 @@ body.is-account-modal-open #mobile-controls {
 
   .global-ui-drawer {
     position: fixed;
-    top: 58px;
-    right: 10px;
+    top: calc(58px + env(safe-area-inset-top));
+    right: calc(10px + env(safe-area-inset-right));
     display: grid;
     grid-template-columns: repeat(3, 40px);
     gap: 8px;
@@ -1118,8 +1118,8 @@ body.is-account-modal-open #mobile-controls {
   }
 
   #stage-editor {
-    top: 204px;
-    right: 10px;
+    top: calc(204px + env(safe-area-inset-top));
+    right: calc(10px + env(safe-area-inset-right));
     left: auto;
     width: min(320px, calc(100vw - 20px));
     opacity: 0;
@@ -1132,6 +1132,26 @@ body.is-account-modal-open #mobile-controls {
   body.is-global-menu-open #stage-editor {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@media (max-height: 560px) and (orientation: landscape) {
+  #mobile-controls {
+    --mobile-button-size: clamp(42px, 10.5vmin, 56px);
+    --mobile-button-gap: clamp(5px, 1.4vmin, 9px);
+    --mobile-edge-gap: clamp(7px, 2vmin, 14px);
+  }
+
+  .mobile-button {
+    border-width: 1px;
+  }
+
+  .dash-button {
+    font-size: calc(var(--mobile-button-size) * 0.2);
+  }
+
+  .fullscreen-button {
+    font-size: calc(var(--mobile-button-size) * 0.18);
   }
 }
 
@@ -1273,6 +1293,12 @@ body.is-account-modal-open #mobile-controls {
   font-size: 13px;
   font-weight: 800;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9);
+}
+
+.account-status.is-error,
+.leaderboard-status.is-error {
+  color: #fecaca;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 10px rgba(248, 113, 113, 0.36);
 }
 
 .account-card {

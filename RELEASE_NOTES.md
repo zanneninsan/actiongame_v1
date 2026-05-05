@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.265
+### English
+- Made leaderboard and Google account failure messages clearer about whether play can continue, highlighted account/ranking errors, and improved mobile safe-area spacing for controls and the top menu.
+### Japanese
+- ランキングやGoogle連携の失敗時にプレイ継続可否が分かる文言へ調整し、エラー表示を目立たせ、スマホ操作ボタンと上部メニューのsafe-area対応を強化しました。
+
 ## v0.1.264
 ### English
 - Improved the smartphone startup flow with a success message after landscape fullscreen setup and a portrait-start confirmation that can either retry landscape fullscreen or start anyway.
