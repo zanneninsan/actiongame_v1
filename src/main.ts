@@ -72,12 +72,14 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.210";
+const DEBUG_VERSION = "v0.1.211";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
+const SPRING_BIG_JUMP_INPUT_BUFFER_MS = 160;
+const SPRING_LAUNCH_NORMAL_JUMP_SUPPRESS_MS = 80;
 const STORY_DIALOGUE_ADVANCE_X = 600;
 const STORY_DIALOGUE_STEP_DELAY_MS = 8000;
 const TIME_BONUS_PER_SECOND = 10;
@@ -202,6 +204,8 @@ class PrototypeScene extends Phaser.Scene {
   private hasCrouchDanmakuPlayed = false;
   private jumpChainCount = 0;
   private hasJumpChainDanmakuPlayed = false;
+  private lastJumpInputAt = -Infinity;
+  private lastSpringLaunchAt = -Infinity;
   private wasOnFloor = false;
   private isLanding = false;
   private landingFastForwarded = false;
@@ -456,6 +460,10 @@ class PrototypeScene extends Phaser.Scene {
 
     this.input.keyboard!.off("keydown-R");
     this.input.keyboard!.on("keydown-R", () => this.handleRestartKey());
+    this.input.keyboard!.off("keydown-W");
+    this.input.keyboard!.off("keydown-SPACE");
+    this.input.keyboard!.on("keydown-W", () => this.noteJumpInput());
+    this.input.keyboard!.on("keydown-SPACE", () => this.noteJumpInput());
     this.createStageEditor();
     this.createGlobalUI();
 
@@ -524,9 +532,16 @@ class PrototypeScene extends Phaser.Scene {
     );
     this.updateCollisionDebug();
     const debugJump = Phaser.Input.Keyboard.JustDown(this.keys.w) || this.mobileJumpQueued;
+    if (this.mobileJumpQueued) {
+      this.noteJumpInput();
+    }
     this.mobileJumpQueued = false;
     const normalJump = Phaser.Input.Keyboard.JustDown(this.cursors.space);
-    const jump = debugJump || normalJump;
+    if (normalJump || debugJump) {
+      this.noteJumpInput();
+    }
+    const springLaunchedRecently = this.time.now - this.lastSpringLaunchAt <= SPRING_LAUNCH_NORMAL_JUMP_SUPPRESS_MS;
+    const jump = (debugJump || normalJump) && !springLaunchedRecently;
     const canJump = onFloor || debugJump;
     let startedJump = false;
     const baseHorizontalAcceleration = onFloor
@@ -675,6 +690,8 @@ class PrototypeScene extends Phaser.Scene {
     this.hasCrouchDanmakuPlayed = false;
     this.jumpChainCount = 0;
     this.hasJumpChainDanmakuPlayed = false;
+    this.lastJumpInputAt = -Infinity;
+    this.lastSpringLaunchAt = -Infinity;
     this.wasOnFloor = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
@@ -1102,11 +1119,21 @@ class PrototypeScene extends Phaser.Scene {
       player: this.player,
       platformObject,
       canInteract: () => this.isRunActive && !this.stageEditor?.isEnabled,
+      shouldSpringBigJump: () => this.isSpringBigJumpInputBuffered(),
       onLaunch: () => {
-      this.isLanding = false;
-      this.landingFastForwarded = false;
+        this.lastSpringLaunchAt = this.time.now;
+        this.isLanding = false;
+        this.landingFastForwarded = false;
       },
     });
+  }
+
+  private noteJumpInput() {
+    this.lastJumpInputAt = this.time.now;
+  }
+
+  private isSpringBigJumpInputBuffered() {
+    return this.time.now - this.lastJumpInputAt <= SPRING_BIG_JUMP_INPUT_BUFFER_MS;
   }
 
   private canLandOnDecorationPlatform(

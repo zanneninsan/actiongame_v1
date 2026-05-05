@@ -4,6 +4,7 @@ import type { StageId } from "./stages";
 
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const SPRING_PLATFORM_DEFAULT_VELOCITY = -820;
+const SPRING_PLATFORM_BIG_JUMP_MULTIPLIER = 1.28;
 const FRAGILE_PLATFORM_DELAY_MS = 360;
 const FRAGILE_PLATFORM_RESPAWN_MS = 2800;
 const reachedCheckpoints = new Map<StageId, { x: number; y: number }>();
@@ -142,6 +143,7 @@ export const handleSpecialPlatformCollision = (options: {
   player: PlayerSprite;
   platformObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile;
   canInteract: () => boolean;
+  shouldSpringBigJump?: () => boolean;
   onLaunch: () => void;
 }) => {
   if (!options.canInteract()) {
@@ -155,10 +157,12 @@ export const handleSpecialPlatformCollision = (options: {
   }
 
   if (behavior === "spring") {
-    const velocity = platform.getData("springVelocity") as number | undefined;
-    options.player.setVelocityY(velocity ?? SPRING_PLATFORM_DEFAULT_VELOCITY);
+    const baseVelocity = platform.getData("springVelocity") as number | undefined;
+    const velocity = baseVelocity ?? SPRING_PLATFORM_DEFAULT_VELOCITY;
+    const isBigJump = options.shouldSpringBigJump?.() ?? false;
+    options.player.setVelocityY(isBigJump ? velocity * SPRING_PLATFORM_BIG_JUMP_MULTIPLIER : velocity);
     options.player.anims.play("player-air", true);
-    options.scene.cameras.main.shake(80, 0.002);
+    options.scene.cameras.main.shake(isBigJump ? 120 : 80, isBigJump ? 0.003 : 0.002);
     options.onLaunch();
   } else if (behavior === "fragile") {
     queueFragilePlatformCollapse(options.scene, platform);

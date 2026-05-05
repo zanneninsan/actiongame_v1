@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.211
+### English
+- Added a big spring jump when jump input is timed just before or as the player lands on a spring platform.
+### Japanese
+- ジャンプ台に乗る直前または同時にジャンプ入力を押すと、通常より高く跳べる大ジャンプを追加しました。
+
 ## v0.1.210
 ### English
 - Renamed the Player Spec display label to Game Spec across the game UI and spec page titles.
