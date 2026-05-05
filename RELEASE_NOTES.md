@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.275
+### English
+- Added a one-time 3.5-second story message when stamina first reaches zero during a stage.
+### Japanese
+- ステージ中に初めてスタミナが0になった時、息切れのメッセージを3.5秒だけ表示するようにしました。
+
 ## v0.1.274
 ### English
 - Added a one-time danmaku reaction when gameplay controls are left untouched for 15 seconds, with comments wondering whether the player stepped away, fell asleep, or disconnected.

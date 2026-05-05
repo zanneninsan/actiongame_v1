@@ -88,9 +88,10 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.274";
+const DEBUG_VERSION = "v0.1.275";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
+const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
   message: "ひゃっ...ぷいりちゃん、ごめんなさいっ",
@@ -100,6 +101,11 @@ const STAGE_MIDPOINT_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
   message: "そろそろ中間まで来ましたね...少々疲れました...",
   portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_05_shy.webp`,
+};
+const STAMINA_EMPTY_DIALOGUE: StoryDialogueLine = {
+  characterName: "残念院さん",
+  message: "ハァ・・・ハァ・・・ハァッ・・・💦",
+  portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_07_sad.png`,
 };
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
@@ -354,6 +360,7 @@ class PrototypeScene extends Phaser.Scene {
   private hasWon = false;
   private hasScoreMilestoneDanmakuPlayed = false;
   private hasShownAquaMascotStompDialogue = false;
+  private hasShownStaminaEmptyDialogue = false;
   private crouchDanmakuStartedAt = 0;
   private hasCrouchDanmakuPlayed = false;
   private jumpChainCount = 0;
@@ -943,6 +950,7 @@ class PrototypeScene extends Phaser.Scene {
     this.storyDialogue = undefined;
     this.hasAdvancedStoryDialogueAtX = false;
     this.hasShownAquaMascotStompDialogue = false;
+    this.hasShownStaminaEmptyDialogue = false;
     this.countdownOverlay?.clear();
     this.countdownOverlay = undefined;
     this.missText?.destroy();
@@ -2152,6 +2160,7 @@ class PrototypeScene extends Phaser.Scene {
     if (wantsDash && this.stamina > 0) {
       this.stamina = Math.max(0, this.stamina - DASH_STAMINA_DRAIN_PER_SECOND * deltaSeconds);
       this.dashLingerUntil = this.time.now + DASH_LINGER_MS;
+      this.tryShowStaminaEmptyDialogue();
     } else if (onFloor && !wantsDash) {
       const recoveryMultiplier = isCrouching ? CROUCH_STAMINA_RECOVERY_MULTIPLIER : 1;
       this.stamina = Math.min(MAX_STAMINA, this.stamina + STAMINA_RECOVERY_PER_SECOND * recoveryMultiplier * deltaSeconds);
@@ -2167,8 +2176,21 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.stamina = Math.max(0, this.stamina - cost);
+    this.tryShowStaminaEmptyDialogue();
     this.updateStaminaHud();
     return true;
+  }
+
+  private tryShowStaminaEmptyDialogue() {
+    if (this.hasShownStaminaEmptyDialogue || this.stamina > 0 || this.stageEditor?.isEnabled) {
+      return;
+    }
+
+    this.hasShownStaminaEmptyDialogue = true;
+    this.enqueueStoryDialogue({
+      lines: [STAMINA_EMPTY_DIALOGUE],
+      durationMs: STAMINA_EMPTY_DIALOGUE_DURATION_MS,
+    });
   }
 
   private updateStaminaHud() {
