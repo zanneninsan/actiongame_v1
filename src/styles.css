@@ -1049,9 +1049,10 @@ body.is-account-modal-open #mobile-controls {
 }
 
 .title-toggle {
-  font-size: 8px;
+  font-size: 24px;
   font-weight: 900;
   letter-spacing: 0;
+  line-height: 1;
 }
 
 .account-toggle {
