@@ -72,7 +72,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.206";
+const DEBUG_VERSION = "v0.1.207";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -741,7 +741,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.dismissLeaderboard();
     this.restartStageEditorEnabled = this.stageEditor?.isEnabled ?? false;
-    this.restartEditorStage = this.restartStageEditorEnabled ? cloneStage(this.editorStage) : undefined;
+    this.restartEditorStage = cloneStage(this.editorStage);
     this.isRestarting = true;
     this.resetRunState();
     this.bgm?.stop();
