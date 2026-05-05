@@ -33,25 +33,31 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   uiContainer.id = "global-ui";
   uiContainer.innerHTML = `
     <span id="version-label">${options.version}</span>
-    <span id="player-position-label" hidden>POS --,--</span>
-    <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(options.locale, "aria.toggleCollision")}">HIT</button>
-    <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch rear background">RB1</button>
-    <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">MG1</button>
-    <button id="leaderboard-toggle" class="ui-button" type="button" aria-label="Open leaderboard">&#127942;</button>
-    <button id="account-toggle" class="ui-button account-toggle" type="button" aria-label="${t(
+    <button id="global-menu-toggle" class="ui-button global-menu-toggle" type="button" aria-label="${t(
       options.locale,
-      "aria.account",
-    )}">${t(options.locale, "global.accountShort")}</button>
-    <button id="player-spec-toggle" class="ui-button spec-toggle" type="button" aria-label="${t(
-      options.locale,
-      "aria.playerSpec",
-    )}">${t(options.locale, "global.playerSpecShort")}</button>
-    <button id="title-toggle" class="ui-button title-toggle" type="button" aria-label="${t(
-      options.locale,
-      "aria.returnToTitle",
-    )}">${t(options.locale, "global.titleShort")}</button>
-    <button id="bgm-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.toggleSound")}">&#128266;</button>
-    <button id="options-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.options")}">&#9881;&#65039;</button>
+      "aria.globalMenu",
+    )}" aria-controls="global-ui-drawer" aria-expanded="false">&#9776;</button>
+    <div id="global-ui-drawer" class="global-ui-drawer">
+      <span id="player-position-label" hidden>POS --,--</span>
+      <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(options.locale, "aria.toggleCollision")}">HIT</button>
+      <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch rear background">RB1</button>
+      <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">MG1</button>
+      <button id="leaderboard-toggle" class="ui-button" type="button" aria-label="Open leaderboard">&#127942;</button>
+      <button id="account-toggle" class="ui-button account-toggle" type="button" aria-label="${t(
+        options.locale,
+        "aria.account",
+      )}">${t(options.locale, "global.accountShort")}</button>
+      <button id="player-spec-toggle" class="ui-button spec-toggle" type="button" aria-label="${t(
+        options.locale,
+        "aria.playerSpec",
+      )}">${t(options.locale, "global.playerSpecShort")}</button>
+      <button id="title-toggle" class="ui-button title-toggle" type="button" aria-label="${t(
+        options.locale,
+        "aria.returnToTitle",
+      )}">${t(options.locale, "global.titleShort")}</button>
+      <button id="bgm-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.toggleSound")}">&#128266;</button>
+      <button id="options-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.options")}">&#9881;&#65039;</button>
+    </div>
   `;
   document.body.appendChild(uiContainer);
 
@@ -89,6 +95,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   document.body.appendChild(optionsModal);
 
   const bgmToggle = document.getElementById("bgm-toggle") as HTMLButtonElement;
+  const globalMenuToggle = document.getElementById("global-menu-toggle") as HTMLButtonElement;
   const collisionDebugToggle = document.getElementById("collision-debug-toggle") as HTMLButtonElement;
   const rearDebugToggle = document.getElementById("rear-debug-toggle") as HTMLButtonElement;
   const midgroundDebugToggle = document.getElementById("midground-debug-toggle") as HTMLButtonElement;
@@ -102,6 +109,11 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const languageSelect = document.getElementById("language-select") as HTMLSelectElement;
   const danmakuToggle = document.getElementById("danmaku-toggle") as HTMLInputElement;
   const danmakuModeSelect = document.getElementById("danmaku-mode-select") as HTMLSelectElement;
+  const setGlobalMenuOpen = (open: boolean) => {
+    document.body.classList.toggle("is-global-menu-open", open);
+    globalMenuToggle.setAttribute("aria-expanded", String(open));
+  };
+  const closeGlobalMenu = () => setGlobalMenuOpen(false);
 
   let currentVolumePercent = options.soundVolumePercent;
   let currentMuted = options.soundMuted;
@@ -116,13 +128,35 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   options.updateRearBackgroundToggle(rearDebugToggle);
   options.updateMidgroundBackgroundToggle(midgroundDebugToggle);
 
-  collisionDebugToggle.addEventListener("click", () => options.onCollisionToggle(collisionDebugToggle));
-  rearDebugToggle.addEventListener("click", () => options.onRearBackgroundToggle(rearDebugToggle));
-  midgroundDebugToggle.addEventListener("click", () => options.onMidgroundBackgroundToggle(midgroundDebugToggle));
-  leaderboardToggle.addEventListener("click", () => options.onLeaderboardOpen());
-  accountToggle.addEventListener("click", () => options.onAccountOpen());
-  playerSpecToggle.addEventListener("click", () => window.open(getPlayerSpecUrl(options.locale), "_blank", "noopener"));
-  titleToggle.addEventListener("click", () => options.onReturnToTitle());
+  globalMenuToggle.addEventListener("click", () => setGlobalMenuOpen(!document.body.classList.contains("is-global-menu-open")));
+  collisionDebugToggle.addEventListener("click", () => {
+    options.onCollisionToggle(collisionDebugToggle);
+    closeGlobalMenu();
+  });
+  rearDebugToggle.addEventListener("click", () => {
+    options.onRearBackgroundToggle(rearDebugToggle);
+    closeGlobalMenu();
+  });
+  midgroundDebugToggle.addEventListener("click", () => {
+    options.onMidgroundBackgroundToggle(midgroundDebugToggle);
+    closeGlobalMenu();
+  });
+  leaderboardToggle.addEventListener("click", () => {
+    options.onLeaderboardOpen();
+    closeGlobalMenu();
+  });
+  accountToggle.addEventListener("click", () => {
+    options.onAccountOpen();
+    closeGlobalMenu();
+  });
+  playerSpecToggle.addEventListener("click", () => {
+    window.open(getPlayerSpecUrl(options.locale), "_blank", "noopener");
+    closeGlobalMenu();
+  });
+  titleToggle.addEventListener("click", () => {
+    options.onReturnToTitle();
+    closeGlobalMenu();
+  });
 
   bgmToggle.addEventListener("click", () => {
     const currentVolume = parseInt(volumeSlider.value, 10);
@@ -131,11 +165,13 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
     } else {
       changeSound(currentVolume, !currentMuted);
     }
+    closeGlobalMenu();
   });
 
   optionsToggle.addEventListener("click", () => {
     optionsModal.style.display = "grid";
     document.body.classList.add("is-options-modal-open");
+    closeGlobalMenu();
   });
 
   optionsClose.addEventListener("click", () => {
@@ -185,7 +221,7 @@ export const removeGlobalUI = () => {
   document.getElementById("global-ui")?.remove();
   document.getElementById("options-modal")?.remove();
   document.getElementById("account-modal")?.remove();
-  document.body.classList.remove("is-options-modal-open", "is-account-modal-open", "is-leaderboard-modal-open");
+  document.body.classList.remove("is-options-modal-open", "is-account-modal-open", "is-leaderboard-modal-open", "is-global-menu-open");
 };
 
 export const setPlayerPositionDebugUI = (enabled: boolean, x: number, y: number) => {

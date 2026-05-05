@@ -2,6 +2,18 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.258
+### English
+- Changed the clear result text to use a thin outline.
+- Added a Back to Menu button below the clear-screen ghost JSON export button that returns to the initial menu like the Title control.
+- Added a mobile-only function menu button that slides out the top-right controls while keeping the version label visible.
+- Moved the stage editor panel into the same mobile slide-out flow so it stays tucked away until the menu is opened.
+### Japanese
+- クリア時の結果表示を細い縁取りに変更しました。
+- クリア画面のゴーストJSON出力ボタンの下に「メニューに戻る」を追加し、タイトル操作と同じように最初のメニューへ戻れるようにしました。
+- スマホ表示時だけ右上の機能ボタンをメニューアイコンにまとめ、押すと横からスライド表示されるようにしました。
+- ステージ編集パネルも同じスマホ用メニューの開閉に合わせて表示し、バージョン表記は常に見えるようにしました。
+
 ## v0.1.257
 ### English
 - Renamed the game to スーパー残念院さんランド / SUPER ZANNENIN=SAN LAND and renamed Neo Shibuya City to WIP Neo Shibuya City.

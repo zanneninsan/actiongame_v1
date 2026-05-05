@@ -84,7 +84,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.257";
+const DEBUG_VERSION = "v0.1.258";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -182,6 +182,7 @@ const GHOST_REPLAY_SCHEMA = "zannenin-ghost-v1";
 const GHOST_RECORD_INTERVAL_MS = 50;
 const GHOST_EXPORT_BUTTON_X = GAME_WIDTH - 168;
 const GHOST_EXPORT_BUTTON_Y = 118;
+const CLEAR_MENU_BUTTON_Y = GHOST_EXPORT_BUTTON_Y + 46;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
@@ -264,6 +265,7 @@ class PrototypeScene extends Phaser.Scene {
   private ghostRecordingDisabled = false;
   private lastGhostRecordAt = -Infinity;
   private ghostExportButton?: Phaser.GameObjects.Text;
+  private clearMenuButton?: Phaser.GameObjects.Text;
   private dashLingerUntil = -Infinity;
   private countdownOverlay?: StartCountdownOverlay;
   private finalScoreText?: Phaser.GameObjects.Text;
@@ -889,6 +891,8 @@ class PrototypeScene extends Phaser.Scene {
     this.ghostReplayFrameIndex = 0;
     this.ghostExportButton?.destroy();
     this.ghostExportButton = undefined;
+    this.clearMenuButton?.destroy();
+    this.clearMenuButton = undefined;
     this.ghostRecordingFrames = [];
     this.ghostRecordingActive = false;
     this.ghostRecordingDisabled = false;
@@ -936,6 +940,7 @@ class PrototypeScene extends Phaser.Scene {
     this.oneWayGateController = undefined;
     this.enemiesGroup = undefined;
     this.goal = undefined;
+    this.finalScoreText?.destroy();
     this.finalScoreText = undefined;
     this.missText = undefined;
   }
@@ -2194,6 +2199,23 @@ class PrototypeScene extends Phaser.Scene {
       .on("pointerdown", () => this.downloadGhostReplayJson());
   }
 
+  private showClearMenuButton() {
+    this.clearMenuButton?.destroy();
+    this.clearMenuButton = this.add
+      .text(GHOST_EXPORT_BUTTON_X, CLEAR_MENU_BUTTON_Y, t(this.locale, "menu.backToMenu"), {
+        fontFamily: "monospace",
+        fontSize: "18px",
+        color: "#e0f2fe",
+        backgroundColor: "#0f172acc",
+        padding: { x: 14, y: 8 },
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(210)
+      .setInteractive({ useHandCursor: true })
+      .on("pointerdown", () => this.returnToTitle());
+  }
+
   private downloadGhostReplayJson() {
     const blob = new Blob([this.buildGhostReplayJson()], { type: "application/json" });
     const url = URL.createObjectURL(blob);
@@ -2903,14 +2925,16 @@ class PrototypeScene extends Phaser.Scene {
           fontFamily: "monospace",
           fontSize: "48px",
           color: "#f8fafc",
+          stroke: "#020617",
+          strokeThickness: 2,
           align: "center",
         },
       )
       .setOrigin(0.5)
       .setScrollFactor(0)
-      .setDepth(200)
-      .setShadow(3, 3, "#020617", 4, true, true);
+      .setDepth(200);
     this.showGhostExportButton();
+    this.showClearMenuButton();
     this.submitWinScore(finalScore, itemScore, timeBonus, remaining);
   }
 
