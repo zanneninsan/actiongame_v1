@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.238
+### English
+- Added a dedicated timeout-scene danmaku comment set so time-up reactions no longer reuse generic miss wording.
+### Japanese
+- 時間切れシーン専用の弾幕コメントを新しく用意し、通常のMISSとは違うリアクションが出るようにしました。
+
 ## v0.1.237
 ### English
 - Expanded the classic MISS danmaku reaction across the full screen height and removed fade-in/fade-out from its fixed comments.
