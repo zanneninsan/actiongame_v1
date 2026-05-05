@@ -252,9 +252,9 @@ export class DanmakuOverlay {
   private emitDeathReaction(comments: readonly string[]) {
     const waves = [
       { delay: 0, rows: [0] },
-      { delay: 430, rows: [-1, 1, 0.55] },
-      { delay: 850, rows: [-2.05, -1.45, 1.45, 2.05] },
-      { delay: 1260, rows: [-0.42, 0.18, 0.9, 1.72, -2.48] },
+      { delay: 430, rows: [-2.25, 2.25, 0.9] },
+      { delay: 850, rows: [-4.2, -3.15, 3.1, 4.2] },
+      { delay: 1260, rows: [-1.25, 0.25, 1.65, 3.75, -3.75] },
     ];
     waves.forEach((wave) => {
       wave.rows.forEach((row, rowIndex) => {
@@ -269,7 +269,7 @@ export class DanmakuOverlay {
 
   private emitDeathReactionComment(message: string, row: number) {
     const comment = this.scene.add
-      .text(this.width / 2 + Phaser.Math.Between(-18, 18), this.height / 2 - 70 + row * 38, message, {
+      .text(this.width / 2 + Phaser.Math.Between(-18, 18), this.height / 2 + row * 72, message, {
         fontFamily: "monospace",
         fontSize: `${Phaser.Math.Between(38, 48)}px`,
         fontStyle: "bold",
@@ -280,43 +280,15 @@ export class DanmakuOverlay {
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(184 + Phaser.Math.Between(0, 5))
-      .setAlpha(0)
-      .setScale(0.94)
+      .setAlpha(0.96)
       .setShadow(2, 2, "#000000", 2, true, true) as ActiveComment;
 
     this.activeComments.add(comment);
     this.deathStackComments.push(comment);
-    this.scene.tweens.add({
-      targets: comment,
-      alpha: 0.96,
-      scale: 1,
-      duration: Phaser.Math.Between(200, 300),
-      ease: "Sine.easeOut",
-    });
     while (this.deathStackComments.length > 10) {
-      this.fadeDeathStackComment(this.deathStackComments[0]);
+      this.removeComment(this.deathStackComments[0]);
     }
-    comment.destroyTimer = this.scene.time.delayedCall(5200, () => this.fadeDeathStackComment(comment));
-  }
-
-  private fadeDeathStackComment(comment: ActiveComment) {
-    if (!this.activeComments.has(comment)) {
-      return;
-    }
-
-    const stackIndex = this.deathStackComments.indexOf(comment);
-    if (stackIndex >= 0) {
-      this.deathStackComments.splice(stackIndex, 1);
-    }
-    comment.destroyTimer?.remove(false);
-    comment.destroyTimer = undefined;
-    this.scene.tweens.add({
-      targets: comment,
-      alpha: 0,
-      duration: 260,
-      ease: "Sine.easeIn",
-      onComplete: () => this.removeComment(comment),
-    });
+    comment.destroyTimer = this.scene.time.delayedCall(5200, () => this.removeComment(comment));
   }
 
   private emitCenterBurst(

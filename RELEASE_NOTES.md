@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.237
+### English
+- Expanded the classic MISS danmaku reaction across the full screen height and removed fade-in/fade-out from its fixed comments.
+### Japanese
+- ニコ動風モードのMISS弾幕を画面の縦幅いっぱいに広げ、固定コメントの出現時・消滅時のフェード演出をなくしました。
+
 ## v0.1.236
 ### English
 - Reworked the classic miss danmaku into dense fixed reaction waves that start from the screen center, add multiple centered rows in bursts, and allow some overlap without scrolling.
