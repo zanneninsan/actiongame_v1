@@ -80,7 +80,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.237";
+const DEBUG_VERSION = "v0.1.238";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -159,6 +159,11 @@ const HUD_STAMINA_BAR_WIDTH = 132;
 const HUD_STAMINA_BAR_HEIGHT = 9;
 const HUD_STAMINA_FILL_WIDTH = 128;
 const HUD_STAMINA_FILL_HEIGHT = 5;
+const OVERHEAD_STAMINA_BAR_WIDTH = 76;
+const OVERHEAD_STAMINA_BAR_HEIGHT = 8;
+const OVERHEAD_STAMINA_FILL_WIDTH = 70;
+const OVERHEAD_STAMINA_FILL_HEIGHT = 4;
+const OVERHEAD_STAMINA_OFFSET_Y = 18;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
@@ -197,6 +202,8 @@ class PrototypeScene extends Phaser.Scene {
   private staminaText!: Phaser.GameObjects.Text;
   private staminaBarBack!: Phaser.GameObjects.Rectangle;
   private staminaBarFill!: Phaser.GameObjects.Rectangle;
+  private overheadStaminaBarBack!: Phaser.GameObjects.Rectangle;
+  private overheadStaminaBarFill!: Phaser.GameObjects.Rectangle;
   private controlHintText!: Phaser.GameObjects.Text;
   private hudScale = 1;
   private countdownOverlay?: StartCountdownOverlay;
@@ -513,6 +520,17 @@ class PrototypeScene extends Phaser.Scene {
       .setOrigin(0, 0.5)
       .setScrollFactor(0)
       .setDepth(100);
+    this.overheadStaminaBarBack = this.add
+      .rectangle(this.player.x, this.player.y, OVERHEAD_STAMINA_BAR_WIDTH, OVERHEAD_STAMINA_BAR_HEIGHT, 0x020617, 0.78)
+      .setOrigin(0.5, 0.5)
+      .setDepth(130)
+      .setVisible(false);
+    this.overheadStaminaBarBack.setStrokeStyle(1, 0xbbf7d0, 0.82);
+    this.overheadStaminaBarFill = this.add
+      .rectangle(this.player.x, this.player.y, OVERHEAD_STAMINA_FILL_WIDTH, OVERHEAD_STAMINA_FILL_HEIGHT, 0x86efac, 0.98)
+      .setOrigin(0, 0.5)
+      .setDepth(131)
+      .setVisible(false);
     this.updateStaminaHud();
 
     this.controlHintText = this.add
@@ -555,6 +573,7 @@ class PrototypeScene extends Phaser.Scene {
   update(_time: number, deltaMs: number) {
     this.updateBackground();
     this.updateTimerText();
+    this.updateOverheadStaminaBar();
     const movingPlatformsActive = this.isRunActive && !this.stageEditor?.isEnabled;
     updateMovingPlatforms(this.movingPlatformInstances, movingPlatformsActive, deltaMs);
     if (!this.isRunActive) {
@@ -1802,10 +1821,34 @@ class PrototypeScene extends Phaser.Scene {
     const staminaValue = Math.max(0, Math.min(MAX_STAMINA, this.stamina));
     const ratio = staminaValue / MAX_STAMINA;
     const scale = this.hudScale || 1;
+    const fillColor = ratio > 0.5 ? 0x86efac : ratio > 0.22 ? 0xfde68a : 0xfb7185;
     this.staminaText.setText(`${t(this.locale, "hud.stamina")}:${Math.round(staminaValue)}`);
     this.staminaBarFill.width = HUD_STAMINA_FILL_WIDTH * ratio * scale;
     this.staminaBarFill.height = HUD_STAMINA_FILL_HEIGHT * scale;
-    this.staminaBarFill.setFillStyle(ratio > 0.5 ? 0x86efac : ratio > 0.22 ? 0xfde68a : 0xfb7185, 0.95);
+    this.staminaBarFill.setFillStyle(fillColor, 0.95);
+    this.updateOverheadStaminaBar(ratio, fillColor);
+  }
+
+  private updateOverheadStaminaBar(staminaRatio?: number, fillColor?: number) {
+    if (!this.overheadStaminaBarBack || !this.overheadStaminaBarFill || !this.player?.body) {
+      return;
+    }
+
+    const ratio = staminaRatio ?? Math.max(0, Math.min(MAX_STAMINA, this.stamina)) / MAX_STAMINA;
+    const isVisible = ratio < 1;
+    this.overheadStaminaBarBack.setVisible(isVisible);
+    this.overheadStaminaBarFill.setVisible(isVisible);
+    if (!isVisible) {
+      return;
+    }
+
+    const playerBody = this.player.body;
+    const centerX = playerBody.x + playerBody.width / 2;
+    const centerY = playerBody.y - OVERHEAD_STAMINA_OFFSET_Y;
+    this.overheadStaminaBarBack.setPosition(centerX, centerY);
+    this.overheadStaminaBarFill.setPosition(centerX - OVERHEAD_STAMINA_FILL_WIDTH / 2, centerY);
+    this.overheadStaminaBarFill.width = OVERHEAD_STAMINA_FILL_WIDTH * ratio;
+    this.overheadStaminaBarFill.setFillStyle(fillColor ?? (ratio > 0.5 ? 0x86efac : ratio > 0.22 ? 0xfde68a : 0xfb7185), 0.98);
   }
 
   private tryEmitScoreDanmaku() {

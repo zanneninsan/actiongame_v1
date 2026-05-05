@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.238
+### English
+- Added an overhead stamina gauge that appears above the player while stamina is reduced and hides again at full recovery.
+### Japanese
+- スタミナが減っている間だけプレイヤーの頭上にスタミナゲージを表示し、全回復すると消えるようにしました。
+
 ## v0.1.237
 ### English
 - Expanded the classic MISS danmaku reaction across the full screen height and removed fade-in/fade-out from its fixed comments.
