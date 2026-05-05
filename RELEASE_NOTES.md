@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.236
+### English
+- Reworked the classic miss danmaku into dense fixed reaction waves that start from the screen center, add multiple centered rows in bursts, and allow some overlap without scrolling.
+### Japanese
+- ニコ動風モードのMISS時弾幕を、画面中央から始まり、呼応するように複数行が一気に増える固定リアクション演出へ変更しました。スクロールせず、密度高めで一部の行が重なるようにしています。
+
 ## v0.1.235
 ### English
 - Changed the classic danmaku miss effect to fixed red, bold, center-aligned comments that stack downward one by one and fade out when the stack is full.

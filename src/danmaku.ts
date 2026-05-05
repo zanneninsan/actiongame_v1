@@ -169,7 +169,7 @@ export class DanmakuOverlay {
       return;
     }
 
-    this.emitDeathStack(MISS_COMMENTS, 12, 500);
+    this.emitDeathReaction(MISS_COMMENTS);
   }
 
   emitTimeUp() {
@@ -249,31 +249,39 @@ export class DanmakuOverlay {
     comment.destroyTimer = this.scene.time.delayedCall(style.duration + 1200, () => this.removeComment(comment));
   }
 
-  private emitDeathStack(comments: readonly string[], count: number, staggerMs: number) {
-    for (let index = 0; index < count; index += 1) {
-      const timer = this.scene.time.delayedCall(index * staggerMs, () => {
-        this.pendingTimers.delete(timer);
-        this.emitDeathStackComment(comments[Phaser.Math.Between(0, comments.length - 1)]);
+  private emitDeathReaction(comments: readonly string[]) {
+    const waves = [
+      { delay: 0, rows: [0] },
+      { delay: 430, rows: [-1, 1, 0.55] },
+      { delay: 850, rows: [-2.05, -1.45, 1.45, 2.05] },
+      { delay: 1260, rows: [-0.42, 0.18, 0.9, 1.72, -2.48] },
+    ];
+    waves.forEach((wave) => {
+      wave.rows.forEach((row, rowIndex) => {
+        const timer = this.scene.time.delayedCall(wave.delay + rowIndex * 58, () => {
+          this.pendingTimers.delete(timer);
+          this.emitDeathReactionComment(comments[Phaser.Math.Between(0, comments.length - 1)], row);
+        });
+        this.pendingTimers.add(timer);
       });
-      this.pendingTimers.add(timer);
-    }
+    });
   }
 
-  private emitDeathStackComment(message: string) {
-    const maxVisible = 7;
+  private emitDeathReactionComment(message: string, row: number) {
     const comment = this.scene.add
-      .text(this.width / 2, this.getDeathStackY(this.deathStackComments.length), message, {
+      .text(this.width / 2 + Phaser.Math.Between(-18, 18), this.height / 2 - 70 + row * 38, message, {
         fontFamily: "monospace",
-        fontSize: "32px",
+        fontSize: `${Phaser.Math.Between(38, 48)}px`,
         fontStyle: "bold",
         color: "#ff1744",
         stroke: "#000000",
-        strokeThickness: 8,
+        strokeThickness: 9,
       })
-      .setOrigin(0.5, 0)
+      .setOrigin(0.5)
       .setScrollFactor(0)
-      .setDepth(184)
+      .setDepth(184 + Phaser.Math.Between(0, 5))
       .setAlpha(0)
+      .setScale(0.94)
       .setShadow(2, 2, "#000000", 2, true, true) as ActiveComment;
 
     this.activeComments.add(comment);
@@ -281,28 +289,14 @@ export class DanmakuOverlay {
     this.scene.tweens.add({
       targets: comment,
       alpha: 0.96,
+      scale: 1,
       duration: Phaser.Math.Between(200, 300),
       ease: "Sine.easeOut",
     });
-    while (this.deathStackComments.length > maxVisible) {
+    while (this.deathStackComments.length > 10) {
       this.fadeDeathStackComment(this.deathStackComments[0]);
     }
-    comment.destroyTimer = this.scene.time.delayedCall(5600, () => this.fadeDeathStackComment(comment));
-  }
-
-  private getDeathStackY(index: number) {
-    return 86 + index * 46;
-  }
-
-  private layoutDeathStackComments() {
-    this.deathStackComments.forEach((comment, index) => {
-      this.scene.tweens.add({
-        targets: comment,
-        y: this.getDeathStackY(index),
-        duration: 180,
-        ease: "Sine.easeOut",
-      });
-    });
+    comment.destroyTimer = this.scene.time.delayedCall(5200, () => this.fadeDeathStackComment(comment));
   }
 
   private fadeDeathStackComment(comment: ActiveComment) {
@@ -313,7 +307,6 @@ export class DanmakuOverlay {
     const stackIndex = this.deathStackComments.indexOf(comment);
     if (stackIndex >= 0) {
       this.deathStackComments.splice(stackIndex, 1);
-      this.layoutDeathStackComments();
     }
     comment.destroyTimer?.remove(false);
     comment.destroyTimer = undefined;
@@ -522,8 +515,6 @@ export class DanmakuOverlay {
     comment.destroy();
     if (liveIndex >= 0) {
       this.layoutLiveChatComments();
-    } else if (deathStackIndex >= 0) {
-      this.layoutDeathStackComments();
     }
   }
 }
