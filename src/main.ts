@@ -61,7 +61,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.180";
+const DEBUG_VERSION = "v0.1.181";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1471,6 +1471,10 @@ class PrototypeScene extends Phaser.Scene {
     return score.toFixed(2);
   }
 
+  private roundScoreValue(score: number) {
+    return Math.round(score * 100) / 100;
+  }
+
   private showLeaderboard(
     statusMessage?: string,
     currentSubmissionId?: string,
@@ -1520,7 +1524,10 @@ class PrototypeScene extends Phaser.Scene {
           currentScore,
         );
       })
-      .catch(() => this.showLeaderboard("Score could not be submitted."));
+      .catch((error) => {
+        console.warn("Score submission failed.", error);
+        this.showLeaderboard("Score could not be submitted.");
+      });
   }
 
   private createPixelTexture(key: string, width: number, height: number, fill: number, stroke: number) {
@@ -1776,9 +1783,9 @@ class PrototypeScene extends Phaser.Scene {
 
     this.hasWon = true;
     const remaining = this.getRemainingMilliseconds();
-    const timeBonus = (remaining / 1000) * TIME_BONUS_PER_SECOND;
-    const itemScore = this.getItemScore();
-    const finalScore = itemScore + timeBonus;
+    const timeBonus = this.roundScoreValue((remaining / 1000) * TIME_BONUS_PER_SECOND);
+    const itemScore = this.roundScoreValue(this.getItemScore());
+    const finalScore = this.roundScoreValue(itemScore + timeBonus);
     this.timerText.setText(
       `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,
     );

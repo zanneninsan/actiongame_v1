@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.181
+### English
+- Normalized leaderboard score payload rounding so Sky Shaft Climb clear scores pass the server-side score validation.
+### Japanese
+- スカイシャフト・クライムのクリアスコアがサーバー側の検証を通るように、ランキング送信時のスコア丸め処理を揃えました。
+
 ## v0.1.180
 ### English
 - Fixed descending moving platform carry to align the player's physics body directly to the platform top, avoiding the Game Object sync mismatch shown in debug logs.

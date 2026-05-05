@@ -86,6 +86,7 @@ export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) 
     playerId,
     playerName: sanitizePlayerName(payload.playerName),
     score: roundScore(payload.score),
+    itemScore: roundScore(payload.itemScore),
     timeBonus: roundScore(payload.timeBonus),
   }).then((result) => result.data);
 }
