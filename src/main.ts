@@ -81,7 +81,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.241";
+const DEBUG_VERSION = "v0.1.242";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -150,6 +150,7 @@ const MAX_STAMINA = 100;
 const AIR_JUMP_STAMINA_COST = 20;
 const DASH_STAMINA_DRAIN_PER_SECOND = 32;
 const STAMINA_RECOVERY_PER_SECOND = 42;
+const CROUCH_STAMINA_RECOVERY_MULTIPLIER = 2;
 const HUD_SCALE_BASE_WIDTH = 1280;
 const HUD_SCALE_BASE_HEIGHT = 720;
 const HUD_MIN_SCALE = 1;
@@ -620,10 +621,10 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    const isShiftSpeedActive = this.updateStamina(onFloor, wantsDash, deltaMs);
+    const isCrouchInputActive = down && onFloor;
+    const isShiftSpeedActive = this.updateStamina(onFloor, wantsDash, isCrouchInputActive, deltaMs);
     const speedMultiplier = (isShiftSpeedActive ? DASH_SPEED_MULTIPLIER : 1) * (this.rewards?.getSpeedMultiplier() ?? 1);
     const jumpMultiplier = this.rewards?.getJumpMultiplier() ?? 1;
-    const isCrouchInputActive = down && onFloor;
     this.updateDecorationPlatformDrop(down, onFloor);
     this.applyPlayerBody(isCrouchInputActive);
     this.player.setMaxVelocity(
@@ -1834,7 +1835,7 @@ class PrototypeScene extends Phaser.Scene {
     this.scoreText.setText(`${t(this.locale, "hud.score")}:${total}`);
   }
 
-  private updateStamina(onFloor: boolean, wantsDash: boolean, deltaMs: number) {
+  private updateStamina(onFloor: boolean, wantsDash: boolean, isCrouching: boolean, deltaMs: number) {
     const deltaSeconds = deltaMs / 1000;
     let dashActive = false;
 
@@ -1842,7 +1843,8 @@ class PrototypeScene extends Phaser.Scene {
       dashActive = true;
       this.stamina = Math.max(0, this.stamina - DASH_STAMINA_DRAIN_PER_SECOND * deltaSeconds);
     } else if (onFloor && !wantsDash) {
-      this.stamina = Math.min(MAX_STAMINA, this.stamina + STAMINA_RECOVERY_PER_SECOND * deltaSeconds);
+      const recoveryMultiplier = isCrouching ? CROUCH_STAMINA_RECOVERY_MULTIPLIER : 1;
+      this.stamina = Math.min(MAX_STAMINA, this.stamina + STAMINA_RECOVERY_PER_SECOND * recoveryMultiplier * deltaSeconds);
     }
 
     this.updateStaminaHud();

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.242
+### English
+- Made stamina recover twice as fast while crouching, and documented crouch recovery plus drop-through floors in the player spec and control hints.
+### Japanese
+- しゃがみ中はスタミナが通常の2倍速で回復するようにし、取説と操作ヒントにしゃがみ回復と床すり抜けの説明を追記しました。
+
 ## v0.1.241
 ### English
 - Halved the display timing for the X-position story dialogue and its follow-up message.
