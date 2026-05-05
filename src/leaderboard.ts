@@ -4,6 +4,8 @@ import {
   GoogleAuthProvider,
   getAuth,
   linkWithPopup,
+  browserLocalPersistence,
+  setPersistence,
   signInAnonymously,
   signInWithPopup,
   unlink,
@@ -114,6 +116,18 @@ export async function signInLeaderboardWithGoogle() {
     }
     throw error;
   }
+}
+
+export async function logInLeaderboardWithGoogle() {
+  const services = await getFirebaseServices();
+  if (!services) {
+    return { ok: false as const, reason: "Leaderboard is not configured." };
+  }
+
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  const credential = await signInWithPopup(services.auth, provider);
+  return { ok: true as const, identity: createLeaderboardIdentity(credential.user) };
 }
 
 export async function unlinkLeaderboardGoogleAccount() {
@@ -237,8 +251,11 @@ async function initializeFirebaseServices(): Promise<FirebaseServices | undefine
   const app = getApps().length > 0 ? getApp() : initializeApp(config);
   initializeOptionalAppCheck(app);
 
+  const auth = getAuth(app);
+  await setPersistence(auth, browserLocalPersistence);
+
   return {
-    auth: getAuth(app),
+    auth,
     firestore: getFirestore(app),
     functions: getFunctions(app, import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || undefined),
   };

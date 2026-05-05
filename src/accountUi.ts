@@ -7,6 +7,7 @@ type AccountPanelOptions = {
   getIdentity: () => Promise<LeaderboardIdentity | undefined>;
   fetchEntries: () => Promise<LeaderboardEntry[]>;
   onGoogleSignIn: () => Promise<LeaderboardIdentity | undefined>;
+  onGoogleLogin: () => Promise<LeaderboardIdentity | undefined>;
   onGoogleUnlink: () => Promise<LeaderboardIdentity | undefined>;
 };
 
@@ -38,6 +39,7 @@ export function showAccountPanel(options: AccountPanelOptions) {
         </dl>
         <div class="account-actions">
           <button class="account-google-link" type="button">${escapeHtml(t(locale, "account.linkGoogle"))}</button>
+          <button class="account-google-login" type="button">${escapeHtml(t(locale, "account.loginGoogle"))}</button>
           <button class="account-google-unlink" type="button">${escapeHtml(t(locale, "account.unlinkGoogle"))}</button>
         </div>
         <p class="account-note">${escapeHtml(t(locale, "account.unlinkNote"))}</p>
@@ -61,6 +63,7 @@ export function showAccountPanel(options: AccountPanelOptions) {
   const googleStatus = modal.querySelector<HTMLElement>(".account-google-status")!;
   const googleUser = modal.querySelector<HTMLElement>(".account-google-user")!;
   const linkButton = modal.querySelector<HTMLButtonElement>(".account-google-link")!;
+  const loginButton = modal.querySelector<HTMLButtonElement>(".account-google-login")!;
   const unlinkButton = modal.querySelector<HTMLButtonElement>(".account-google-unlink")!;
   const scoreList = modal.querySelector<HTMLOListElement>(".account-score-list")!;
   const closeButton = modal.querySelector<HTMLButtonElement>("#account-close")!;
@@ -70,6 +73,7 @@ export function showAccountPanel(options: AccountPanelOptions) {
     googleStatus.textContent = identity?.isGoogleLinked ? t(locale, "account.linked") : t(locale, "account.notLinked");
     googleUser.textContent = identity?.email || identity?.displayName || "-";
     linkButton.hidden = Boolean(identity?.isGoogleLinked);
+    loginButton.hidden = Boolean(identity?.isGoogleLinked);
     unlinkButton.hidden = !identity?.isGoogleLinked;
   };
 
@@ -88,6 +92,7 @@ export function showAccountPanel(options: AccountPanelOptions) {
 
   linkButton.addEventListener("click", () => {
     linkButton.disabled = true;
+    loginButton.disabled = true;
     status.textContent = t(locale, "account.linking");
     options
       .onGoogleSignIn()
@@ -101,6 +106,29 @@ export function showAccountPanel(options: AccountPanelOptions) {
       })
       .finally(() => {
         linkButton.disabled = false;
+        loginButton.disabled = false;
+      });
+  });
+
+  loginButton.addEventListener("click", () => {
+    linkButton.disabled = true;
+    loginButton.disabled = true;
+    status.textContent = t(locale, "account.loggingIn");
+    options
+      .onGoogleLogin()
+      .then((identity) => {
+        renderIdentity(identity);
+        status.textContent = t(locale, "account.loggedInMessage");
+        return options.fetchEntries();
+      })
+      .then((entries) => renderScores(scoreList, entries, locale))
+      .catch((error) => {
+        console.warn("Google account login failed.", error);
+        status.textContent = t(locale, "account.loginFailed");
+      })
+      .finally(() => {
+        linkButton.disabled = false;
+        loginButton.disabled = false;
       });
   });
 

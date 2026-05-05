@@ -63,6 +63,7 @@ import {
   fetchMyLeaderboardEntries,
   getLeaderboardIdentity,
   isLeaderboardConfigured,
+  logInLeaderboardWithGoogle,
   signInLeaderboardWithGoogle,
   submitLeaderboardScore,
   unlinkLeaderboardGoogleAccount,
@@ -75,7 +76,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.211";
+const DEBUG_VERSION = "v0.1.212";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1612,6 +1613,18 @@ class PrototypeScene extends Phaser.Scene {
     return result.identity;
   }
 
+  private async logInLeaderboardGoogleAccount() {
+    const result = await logInLeaderboardWithGoogle();
+    if (!result.ok) {
+      throw new Error(result.reason);
+    }
+
+    this.leaderboardPlayerId = result.identity.playerId;
+    this.leaderboardGoogleLinked = result.identity.isGoogleLinked;
+    this.updatePlayerNameText();
+    return result.identity;
+  }
+
   private async unlinkLeaderboardGoogleAccount() {
     const result = await unlinkLeaderboardGoogleAccount();
     if (!result.ok) {
@@ -1633,6 +1646,7 @@ class PrototypeScene extends Phaser.Scene {
       },
       fetchEntries: () => fetchMyLeaderboardEntries(),
       onGoogleSignIn: () => this.linkLeaderboardGoogleAccount(),
+      onGoogleLogin: () => this.logInLeaderboardGoogleAccount(),
       onGoogleUnlink: () => this.unlinkLeaderboardGoogleAccount(),
     });
   }

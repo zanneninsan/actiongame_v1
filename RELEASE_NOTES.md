@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.212
+### English
+- Added a Google login path for already-linked leaderboard accounts and made Firebase Auth persistence explicit to keep player IDs stable across reloads.
+### Japanese
+- 連携済みのランキング用Googleアカウントでログインできる導線を追加し、リロード後もプレイヤーIDが維持されるようFirebase Authの永続化を明示しました。
+
 ## v0.1.211
 ### English
 - Added an account window that shows Google link status, allows unlinking Google, and lists the player's registered scores by stage.
