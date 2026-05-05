@@ -15,6 +15,9 @@ type MobileControlsOptions = {
   onToggleFullscreen: () => void;
 };
 
+const MOBILE_CONTROLS_HINT_STORAGE_KEY = "actiongame_mobile_controls_hint_seen";
+const MOBILE_CONTROLS_HINT_MS = 4200;
+
 export const createMobileControls = (options: MobileControlsOptions) => {
   document.getElementById("mobile-controls")?.remove();
 
@@ -37,6 +40,20 @@ export const createMobileControls = (options: MobileControlsOptions) => {
     </div>
   `;
   document.body.appendChild(controls);
+
+  if (shouldShowMobileControlsHint()) {
+    controls.classList.add("is-first-run-highlight");
+    const clearFirstRunHighlight = () => {
+      controls.classList.remove("is-first-run-highlight");
+      setMobileControlsHintSeen();
+    };
+    const hintTimeoutId = window.setTimeout(clearFirstRunHighlight, MOBILE_CONTROLS_HINT_MS);
+    controls.addEventListener("pointerdown", clearFirstRunHighlight, { once: true });
+    cleanup.push(() => {
+      window.clearTimeout(hintTimeoutId);
+      controls.removeEventListener("pointerdown", clearFirstRunHighlight);
+    });
+  }
 
   const pressedCounts = new Map<MobileInputKey, number>();
   controls.querySelectorAll<HTMLButtonElement>("[data-key]").forEach((button) => {
@@ -139,3 +156,19 @@ const bindMobileButton = (button: HTMLButtonElement, onPressedChange: (pressed: 
     document.removeEventListener("visibilitychange", clearPressed);
   };
 };
+
+function shouldShowMobileControlsHint() {
+  try {
+    return window.localStorage.getItem(MOBILE_CONTROLS_HINT_STORAGE_KEY) !== "1";
+  } catch {
+    return true;
+  }
+}
+
+function setMobileControlsHintSeen() {
+  try {
+    window.localStorage.setItem(MOBILE_CONTROLS_HINT_STORAGE_KEY, "1");
+  } catch {
+    // If storage is blocked, the short highlight can safely appear again.
+  }
+}

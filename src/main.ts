@@ -78,13 +78,14 @@ import {
 } from "./leaderboard";
 import { showLeaderboardPanel, type LeaderboardGhostSaveStatus } from "./leaderboardUi";
 import { showAccountPanel } from "./accountUi";
+import { initializePwaInstall } from "./pwaInstall";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.265";
+const DEBUG_VERSION = "v0.1.266";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -3009,6 +3010,9 @@ document.addEventListener("contextmenu", (event) => {
   event.preventDefault();
 });
 
+initializePwaInstall();
+registerServiceWorker();
+
 new Phaser.Game({
   type: Phaser.AUTO,
   parent: "game",
@@ -3029,3 +3033,15 @@ new Phaser.Game({
   },
   scene: PrototypeScene,
 });
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register(`${ASSET_BASE}sw.js`).catch((error) => {
+      console.warn("Service worker registration failed.", error);
+    });
+  });
+}

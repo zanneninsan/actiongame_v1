@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.266
+### English
+- Added a smartphone home-screen install path with PWA metadata, a service worker, and start-screen guidance.
+- Highlighted the mobile control buttons the first time mobile mode starts so new players can spot the touch layout quickly.
+### Japanese
+- スマートフォン向けにホーム画面追加の導線を追加し、PWA用のメタ情報とサービスワーカー、開始画面での案内を整えました。
+- モバイルモード初回開始時だけ操作ボタンをハイライトし、タッチ操作の配置をすぐ把握しやすくしました。
+
 ## v0.1.265
 ### English
 - Made leaderboard and Google account failure messages clearer about whether play can continue, highlighted account/ranking errors, and improved mobile safe-area spacing for controls and the top menu.

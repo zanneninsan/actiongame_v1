@@ -407,6 +407,64 @@ canvas {
   white-space: nowrap;
 }
 
+.start-install-panel {
+  box-sizing: border-box;
+  width: min(100%, calc(100% - 34px));
+  justify-self: center;
+  display: grid;
+  gap: 7px;
+  padding: 10px 12px;
+  border: 1px solid rgba(125, 211, 252, 0.3);
+  border-radius: 6px;
+  background: rgba(3, 20, 34, 0.58);
+  color: #dbeafe;
+  font-weight: 800;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.start-install-panel[hidden] {
+  display: none;
+}
+
+.start-install-panel strong {
+  color: #f5c76a;
+  font-size: 13px;
+}
+
+.start-install-panel span,
+.start-install-note {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.start-install-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.start-install-actions button {
+  min-height: 34px;
+  border: 0;
+  padding: 0 14px;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #f8fafc;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.start-install-actions button:disabled {
+  cursor: default;
+  filter: brightness(0.66) saturate(0.72);
+  opacity: 0.78;
+}
+
 .start-advanced-panel {
   width: min(100%, calc(100% - 34px));
   justify-self: center;
@@ -437,7 +495,9 @@ canvas {
 .start-button:hover,
 .start-button:focus-visible,
 .start-google-login:not(:disabled):hover,
-.start-google-login:not(:disabled):focus-visible {
+.start-google-login:not(:disabled):focus-visible,
+.start-install-actions button:not(:disabled):hover,
+.start-install-actions button:not(:disabled):focus-visible {
   filter: brightness(1.5) saturate(1.34) drop-shadow(0 0 16px rgba(253, 230, 138, 0.58));
 }
 
@@ -517,6 +577,7 @@ canvas {
   .sound-row,
   .start-account-panel,
   .start-button,
+  .start-install-panel,
   .start-advanced-panel {
     width: 100%;
   }
@@ -540,6 +601,7 @@ canvas {
 
   .mode-row,
   .sound-row,
+  .start-install-actions,
   .start-account-actions {
     grid-template-columns: 1fr;
     gap: 8px;
@@ -547,7 +609,8 @@ canvas {
 
   .mode-button,
   .sound-button,
-  .start-google-login {
+  .start-google-login,
+  .start-install-actions button {
     min-height: 46px;
     height: auto;
     font-size: 16px;
@@ -604,6 +667,10 @@ canvas {
     font-size: 12px;
     max-height: 2.6em;
   }
+
+  .start-install-panel {
+    padding: 10px;
+  }
 }
 
 @media (max-height: 560px) and (min-width: 561px) {
@@ -653,6 +720,7 @@ canvas {
   .mode-button,
   .sound-button,
   .start-google-login,
+  .start-install-actions button,
   .start-ghost-load,
   .start-ghost-select {
     min-height: 34px;
@@ -768,6 +836,48 @@ body.is-account-modal-open #mobile-controls {
 .mobile-button.is-active {
   border-color: rgba(134, 239, 172, 0.95);
   background: rgba(22, 163, 74, 0.78);
+}
+
+#mobile-controls.is-first-run-highlight .mobile-button {
+  animation: mobile-control-guide-pulse 900ms ease-in-out infinite alternate;
+  border-color: rgba(253, 230, 138, 0.98);
+  box-shadow:
+    0 0 0 3px rgba(253, 230, 138, 0.2),
+    0 0 18px rgba(56, 189, 248, 0.62);
+}
+
+#mobile-controls.is-first-run-highlight .pad-left,
+#mobile-controls.is-first-run-highlight .pad-right {
+  animation-delay: 120ms;
+}
+
+#mobile-controls.is-first-run-highlight .pad-up,
+#mobile-controls.is-first-run-highlight .pad-down {
+  animation-delay: 240ms;
+}
+
+#mobile-controls.is-first-run-highlight .dash-button {
+  animation-delay: 360ms;
+}
+
+@keyframes mobile-control-guide-pulse {
+  from {
+    transform: translateY(0) scale(1);
+    background: rgba(15, 23, 42, 0.72);
+  }
+  to {
+    transform: translateY(-3px) scale(1.05);
+    background: rgba(8, 145, 178, 0.84);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #mobile-controls.is-first-run-highlight .mobile-button {
+    animation: none;
+    box-shadow:
+      0 0 0 3px rgba(253, 230, 138, 0.28),
+      0 0 16px rgba(56, 189, 248, 0.54);
+  }
 }
 
 .pad-up {

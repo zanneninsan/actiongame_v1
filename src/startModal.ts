@@ -1,6 +1,8 @@
 import { LOCALE_OPTIONS, t, type Locale } from "./i18n";
+import { canPromptPwaInstall, isPwaInstalled, promptPwaInstall } from "./pwaInstall";
 
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
+const PWA_INSTALL_DISMISSED_KEY = "actiongame_pwa_install_dismissed";
 
 export type ControlMode = "pc" | "mobile";
 export type StageOption = { id: string; label: Record<Locale, string> };
@@ -107,6 +109,15 @@ export class StartModal {
             <button type="button" data-sound="off" class="sound-button">&#128263; ${t(this.options.locale, "start.soundOff")}</button>
           </div>
         </div>
+        <div class="start-install-panel" hidden>
+          <strong>${t(this.options.locale, "start.installTitle")}</strong>
+          <span>${t(this.options.locale, "start.installBody")}</span>
+          <div class="start-install-actions">
+            <button type="button" class="start-install-button">${t(this.options.locale, "start.installButton")}</button>
+            <button type="button" class="start-install-dismiss">${t(this.options.locale, "start.installLater")}</button>
+          </div>
+          <p class="start-install-note" hidden></p>
+        </div>
         <details class="start-advanced-panel">
           <summary>${t(this.options.locale, "start.advanced")}</summary>
           <div class="start-ghost-panel">
@@ -146,6 +157,10 @@ export class StartModal {
     const accountStatus = overlay.querySelector<HTMLSpanElement>(".start-account-status")!;
     const startButton = overlay.querySelector<HTMLButtonElement>(".start-button")!;
     const googleLoginButton = overlay.querySelector<HTMLButtonElement>(".start-google-login")!;
+    const installPanel = overlay.querySelector<HTMLDivElement>(".start-install-panel")!;
+    const installButton = overlay.querySelector<HTMLButtonElement>(".start-install-button")!;
+    const installDismissButton = overlay.querySelector<HTMLButtonElement>(".start-install-dismiss")!;
+    const installNote = overlay.querySelector<HTMLParagraphElement>(".start-install-note")!;
     const orientationPrompt = overlay.querySelector<HTMLDivElement>(".start-orientation-prompt")!;
     const orientationMessage = overlay.querySelector<HTMLParagraphElement>(".start-orientation-message")!;
     const orientationNote = overlay.querySelector<HTMLParagraphElement>(".start-orientation-note")!;
@@ -174,6 +189,42 @@ export class StartModal {
     ghostSelect.addEventListener("keydown", (event) => event.stopPropagation());
     ghostSelect.addEventListener("keyup", (event) => event.stopPropagation());
     ghostSelect.addEventListener("keypress", (event) => event.stopPropagation());
+    const refreshInstallPanel = () => {
+      const shouldShow = isProbablySmartphone() && !isPwaInstalled() && getStorageValue(PWA_INSTALL_DISMISSED_KEY) !== "1";
+      installPanel.hidden = !shouldShow;
+      installNote.hidden = true;
+      installButton.textContent = canPromptPwaInstall()
+        ? t(this.options.locale, "start.installButton")
+        : t(this.options.locale, "start.installHowTo");
+    };
+
+    installButton.addEventListener("click", async () => {
+      installButton.disabled = true;
+      try {
+        if (canPromptPwaInstall()) {
+          const result = await promptPwaInstall();
+          installNote.textContent = result === "accepted" ? t(this.options.locale, "start.installAccepted") : t(this.options.locale, "start.installDismissed");
+          installNote.hidden = false;
+          if (result === "accepted") {
+            installPanel.hidden = true;
+          }
+        } else {
+          installNote.textContent = getManualInstallMessage(this.options.locale);
+          installNote.hidden = false;
+        }
+      } finally {
+        installButton.disabled = false;
+        installButton.textContent = canPromptPwaInstall()
+          ? t(this.options.locale, "start.installButton")
+          : t(this.options.locale, "start.installHowTo");
+      }
+    });
+    installDismissButton.addEventListener("click", () => {
+      setStorageValue(PWA_INSTALL_DISMISSED_KEY, "1");
+      installPanel.hidden = true;
+    });
+    window.addEventListener("actiongame:pwa-install-ready", refreshInstallPanel);
+    window.addEventListener("actiongame:pwa-installed", refreshInstallPanel);
     const updateOrientationPromptText = (failed = false, mode: OrientationPromptMode = orientationPromptMode) => {
       orientationPromptMode = mode;
       orientationMessage.textContent =
@@ -272,6 +323,8 @@ export class StartModal {
       document.removeEventListener("fullscreenchange", refreshGhostFullscreenButton);
       window.removeEventListener("resize", refreshGhostFullscreenButton);
       screen.orientation?.removeEventListener?.("change", refreshGhostFullscreenButton);
+      window.removeEventListener("actiongame:pwa-install-ready", refreshInstallPanel);
+      window.removeEventListener("actiongame:pwa-installed", refreshInstallPanel);
     };
     const loadGhostOptions = async () => {
       ghostSelect.innerHTML = `<option value="">${t(this.options.locale, "start.ghostRankingLoading")}</option>`;
@@ -460,6 +513,7 @@ export class StartModal {
     refreshMode();
     refreshSound();
     refreshAccount();
+    refreshInstallPanel();
     void loadGhostOptions();
     showOrientationPrompt();
     if (orientationPrompt.hidden) {
@@ -513,6 +567,29 @@ function isProbablySmartphone() {
   const shortSide = Math.min(window.innerWidth, window.innerHeight);
   const longSide = Math.max(window.innerWidth, window.innerHeight);
   return uaLooksMobile || (hasTouch && shortSide <= 560 && longSide <= 980);
+}
+
+function getManualInstallMessage(locale: Locale) {
+  if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    return t(locale, "start.installIos");
+  }
+  return t(locale, "start.installManual");
+}
+
+function getStorageValue(key: string) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function setStorageValue(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // Ignore storage failures; the prompt can simply appear again next session.
+  }
 }
 
 function isLandscapeViewport() {
