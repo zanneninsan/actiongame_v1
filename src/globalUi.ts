@@ -1,5 +1,7 @@
 import { isLocale, LOCALE_OPTIONS, t, type Locale } from "./i18n";
 
+const PLAYER_SPEC_URL = `${import.meta.env.BASE_URL}player-spec/index.html`;
+
 type GlobalUiOptions = {
   version: string;
   locale: Locale;
@@ -30,6 +32,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
     <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch rear background">RB1</button>
     <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">MG1</button>
     <button id="leaderboard-toggle" class="ui-button" type="button" aria-label="Open leaderboard">&#127942;</button>
+    <button id="player-spec-toggle" class="ui-button spec-toggle" type="button" aria-label="Open player spec">SPEC</button>
     <button id="bgm-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.toggleSound")}">&#128266;</button>
     <button id="options-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.options")}">&#9881;&#65039;</button>
   `;
@@ -66,6 +69,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const rearDebugToggle = document.getElementById("rear-debug-toggle") as HTMLButtonElement;
   const midgroundDebugToggle = document.getElementById("midground-debug-toggle") as HTMLButtonElement;
   const leaderboardToggle = document.getElementById("leaderboard-toggle") as HTMLButtonElement;
+  const playerSpecToggle = document.getElementById("player-spec-toggle") as HTMLButtonElement;
   const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
   const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
   const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
@@ -89,6 +93,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   rearDebugToggle.addEventListener("click", () => options.onRearBackgroundToggle(rearDebugToggle));
   midgroundDebugToggle.addEventListener("click", () => options.onMidgroundBackgroundToggle(midgroundDebugToggle));
   leaderboardToggle.addEventListener("click", () => options.onLeaderboardOpen());
+  playerSpecToggle.addEventListener("click", () => window.open(PLAYER_SPEC_URL, "_blank", "noopener"));
 
   bgmToggle.addEventListener("click", () => {
     const currentVolume = parseInt(volumeSlider.value, 10);
