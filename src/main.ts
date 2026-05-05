@@ -61,7 +61,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.186";
+const DEBUG_VERSION = "v0.1.187";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1778,6 +1778,10 @@ function createSubmissionId() {
 function isLeaderboardPlayerId(playerId: string) {
   return /^[a-zA-Z0-9_-]{8,80}$/.test(playerId);
 }
+
+document.addEventListener("contextmenu", (event) => {
+  event.preventDefault();
+});
 
 new Phaser.Game({
   type: Phaser.AUTO,

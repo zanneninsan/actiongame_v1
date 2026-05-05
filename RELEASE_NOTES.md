@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.187
+### English
+- Disabled the browser context menu so right-clicking the game screen no longer opens the default menu.
+### Japanese
+- ゲーム画面で右クリックしてもブラウザ標準のメニューが開かないようにしました。
+
 ## v0.1.186
 ### English
 - Localized leaderboard titles, status messages, current score labels, and score submission result messages for English and Japanese while keeping the table column headers unchanged.
