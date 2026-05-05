@@ -186,6 +186,9 @@ export class StartModal {
     };
 
     orientationYes.addEventListener("click", async () => {
+      selectedMode = "mobile";
+      this.options.controlMode = selectedMode;
+      refreshMode();
       orientationYes.disabled = true;
       orientationNo.disabled = true;
       orientationYes.textContent = t(this.options.locale, "start.orientationTrying");
