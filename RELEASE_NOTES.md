@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.201
+### English
+- Added the Firestore index needed by leaderboard rank calculation and made rank lookup fail-safe so score submission no longer returns 500 when ranking is temporarily unavailable.
+### Japanese
+- ランキング順位計算に必要なFirestoreインデックスを追加し、順位取得に失敗してもスコア登録が500エラーにならないようにしました。
+
 ## v0.1.200
 ### English
 - Preserved the stage editor enabled state and in-progress edited stage layout across R-key and miss restarts.

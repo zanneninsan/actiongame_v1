@@ -84,9 +84,18 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
     }, {merge: true});
   });
 
-  const rank = scoreUpdated ? await getLeaderboardRank(firestore, stageId, expectedScore) : undefined;
+  const rank = scoreUpdated ? await getLeaderboardRankSafely(firestore, stageId, expectedScore) : undefined;
   return {ok: true, status: "accepted", submissionId, scoreUpdated, rank};
 });
+
+async function getLeaderboardRankSafely(firestore: Firestore, stageId: string, score: number) {
+  try {
+    return await getLeaderboardRank(firestore, stageId, score);
+  } catch (error) {
+    console.warn("Leaderboard rank calculation failed.", error);
+    return undefined;
+  }
+}
 
 async function getLeaderboardRank(firestore: Firestore, stageId: string, score: number) {
   const higherScores = await firestore
