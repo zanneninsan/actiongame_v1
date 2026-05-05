@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.254
+### English
+- Updated the start screen and browser title to 作成中ネオシブヤシティ.
+- Reduced the Skybridge Sprint midground opacity to improve stage readability.
+### Japanese
+- スタート画面とブラウザタイトルを「作成中ネオシブヤシティ」に変更しました。
+- 動物園ステージの視認性を上げるため、中景を少し薄く表示するようにしました。
+
 ## v0.1.253
 ### English
 - Prevented stomp combo resets during the brief post-stomp free-jump window, avoiding accidental combo loss from transient landing detection.

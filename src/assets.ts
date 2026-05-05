@@ -81,7 +81,7 @@ export type CheckpointPlacement = { x: number; y: number };
 export type OneWayGatePlacement = { x: number; y: number; height?: number };
 export type StageLocalizedName = { jp: string; en: string };
 export type StageName = string | StageLocalizedName;
-export type StageBackgroundSelection = { rearKey?: string; midgroundKey?: string };
+export type StageBackgroundSelection = { rearKey?: string; midgroundKey?: string; midgroundAlpha?: number };
 export type StageLocalizedText = { ja: string; en: string };
 export type StageStoryDialogueLine = {
   characterName: StageLocalizedText;

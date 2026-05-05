@@ -64,7 +64,7 @@ canvas {
   place-items: center;
   padding: 0 22px;
   background: url("../public/assets/ui/fantasy/title_plate_safe.webp") center / 100% 100% no-repeat;
-  font-size: clamp(18px, 3.4vw, 25px);
+  font-size: clamp(17px, 3vw, 23px);
   font-weight: 800;
   line-height: 1.1;
   text-align: center;

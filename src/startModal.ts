@@ -50,7 +50,7 @@ export class StartModal {
     overlay.id = "start-modal";
     overlay.innerHTML = `
       <form class="start-dialog">
-        <h1>SUPER ZANNENIN SISTERS</h1>
+        <h1>作成中ネオシブヤシティ</h1>
         <label class="start-field">
           <span>${t(this.options.locale, "start.playerName")}</span>
           <input name="playerName" type="text" maxlength="16" autocomplete="off" value="${escapeHtml(this.options.playerName)}" />

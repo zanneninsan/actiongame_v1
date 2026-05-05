@@ -10,6 +10,7 @@ export class BackgroundController {
   private rearBackgroundIndex = selectedRearBackgroundIndex;
   private midgroundBackground?: Phaser.GameObjects.TileSprite;
   private midgroundBackgroundIndex = selectedMidgroundBackgroundIndex;
+  private midgroundAlpha = 1;
 
   constructor(
     private readonly scene: Phaser.Scene,
@@ -38,7 +39,8 @@ export class BackgroundController {
       this.midgroundBackgroundIndex,
     );
     selectedMidgroundBackgroundIndex = this.midgroundBackgroundIndex;
-    this.midgroundBackground?.setTexture(this.getCurrentMidgroundBackground().key);
+    this.midgroundAlpha = clampAlpha(defaults?.midgroundAlpha ?? 1);
+    this.midgroundBackground?.setTexture(this.getCurrentMidgroundBackground().key).setAlpha(this.midgroundAlpha);
   }
 
   update(scrollX: number, scrollY: number) {
@@ -70,7 +72,7 @@ export class BackgroundController {
     this.midgroundBackgroundIndex = (this.midgroundBackgroundIndex + 1) % MIDGROUND_BACKGROUNDS.length;
     selectedMidgroundBackgroundIndex = this.midgroundBackgroundIndex;
     const background = this.getCurrentMidgroundBackground();
-    this.midgroundBackground?.setTexture(background.key);
+    this.midgroundBackground?.setTexture(background.key).setAlpha(this.midgroundAlpha);
     this.updateMidgroundDebugToggle(toggleButton);
   }
 
@@ -108,7 +110,8 @@ export class BackgroundController {
       .tileSprite(0, 0, this.width, this.height, this.getCurrentMidgroundBackground().key)
       .setOrigin(0, 0)
       .setScrollFactor(0)
-      .setDepth(-15);
+      .setDepth(-15)
+      .setAlpha(this.midgroundAlpha);
   }
 
   private getCurrentMidgroundBackground() {
@@ -127,4 +130,8 @@ function resolveBackgroundIndex(
 
   const index = backgrounds.findIndex((background) => background.key === key);
   return index >= 0 ? index : fallbackIndex;
+}
+
+function clampAlpha(alpha: number) {
+  return Phaser.Math.Clamp(alpha, 0, 1);
 }

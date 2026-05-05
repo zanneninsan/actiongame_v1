@@ -1310,6 +1310,7 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
   backgrounds: {
     rearKey: "rear-620c2900-ce9f-46e9-974e-b40916d5aa0c",
     midgroundKey: "midground-photoroom-20260504-035157",
+    midgroundAlpha: 0.72,
   },
   storyDialogue: {
     triggerX: 520,

@@ -824,7 +824,8 @@ export class StageEditor {
     return (
       this.isRecord(value) &&
       (value.rearKey === undefined || typeof value.rearKey === "string") &&
-      (value.midgroundKey === undefined || typeof value.midgroundKey === "string")
+      (value.midgroundKey === undefined || typeof value.midgroundKey === "string") &&
+      (value.midgroundAlpha === undefined || this.isNumber(value.midgroundAlpha))
     );
   }
 
