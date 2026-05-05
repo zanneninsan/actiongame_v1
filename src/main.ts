@@ -84,7 +84,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.248";
+const DEBUG_VERSION = "v0.1.249";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -179,7 +179,8 @@ const OVERHEAD_STAMINA_FILL_HEIGHT = 4;
 const OVERHEAD_STAMINA_OFFSET_Y = 18;
 const GHOST_REPLAY_SCHEMA = "zannenin-ghost-v1";
 const GHOST_RECORD_INTERVAL_MS = 50;
-const GHOST_EXPORT_BUTTON_Y = GAME_HEIGHT / 2 + 180;
+const GHOST_EXPORT_BUTTON_X = GAME_WIDTH - 168;
+const GHOST_EXPORT_BUTTON_Y = 118;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
@@ -2169,12 +2170,12 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.ghostExportButton = this.add
-      .text(GAME_WIDTH / 2, GHOST_EXPORT_BUTTON_Y, t(this.locale, "ghost.exportJson"), {
+      .text(GHOST_EXPORT_BUTTON_X, GHOST_EXPORT_BUTTON_Y, t(this.locale, "ghost.exportJson"), {
         fontFamily: "monospace",
-        fontSize: "22px",
+        fontSize: "18px",
         color: "#dcfce7",
         backgroundColor: "#14532dcc",
-        padding: { x: 18, y: 10 },
+        padding: { x: 14, y: 8 },
       })
       .setOrigin(0.5)
       .setScrollFactor(0)

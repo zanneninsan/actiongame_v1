@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.249
+### English
+- Moved the ghost JSON export button to the upper-right of the clear screen so closing the leaderboard modal does not accidentally trigger a download.
+### Japanese
+- ゴーストJSON出力ボタンをクリア画面の右上に移動し、ランキング画面を閉じる操作で誤ってダウンロードされにくくしました。
+
 ## v0.1.248
 ### English
 - Added a short Ranking Check stage with a nearby goal and several items for quick leaderboard and ghost replay testing.
