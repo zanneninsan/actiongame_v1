@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.267
+### English
+- Split option-screen audio controls into separate BGM and SE volume sliders while keeping the top sound button as a global mute toggle.
+- Migrated existing single-volume settings into both BGM and SE volumes and included the new values in Google-linked setting sync.
+### Japanese
+- オプション画面の音量設定をBGM音量とSE音量に分け、上部のサウンドボタンは全体ミュートとして使えるようにしました。
+- 既存の単一音量設定はBGM/SEの両方へ引き継ぎ、Google連携時の設定同期にも新しい音量値を含めるようにしました。
+
 ## v0.1.266
 ### English
 - Added a smartphone home-screen install path with PWA metadata, a service worker, and start-screen guidance.

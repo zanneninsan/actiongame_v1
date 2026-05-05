@@ -86,6 +86,8 @@ export type LeaderboardUserSettings = {
   locale?: string;
   stageId?: string;
   soundVolumePercent?: number;
+  bgmVolumePercent?: number;
+  seVolumePercent?: number;
   soundMuted?: boolean;
   danmakuEnabled?: boolean;
   danmakuMode?: string;
@@ -526,6 +528,12 @@ function sanitizeUserSettings(data: unknown): LeaderboardUserSettings {
   }
   if (typeof source.soundVolumePercent === "number" && Number.isFinite(source.soundVolumePercent)) {
     settings.soundVolumePercent = Math.max(0, Math.min(100, Math.round(source.soundVolumePercent)));
+  }
+  if (typeof source.bgmVolumePercent === "number" && Number.isFinite(source.bgmVolumePercent)) {
+    settings.bgmVolumePercent = Math.max(0, Math.min(100, Math.round(source.bgmVolumePercent)));
+  }
+  if (typeof source.seVolumePercent === "number" && Number.isFinite(source.seVolumePercent)) {
+    settings.seVolumePercent = Math.max(0, Math.min(100, Math.round(source.seVolumePercent)));
   }
   if (typeof source.soundMuted === "boolean") {
     settings.soundMuted = source.soundMuted;
