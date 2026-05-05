@@ -113,6 +113,7 @@ const translations = {
     "leaderboard.googleSigningIn": "Linking...",
     "leaderboard.accountLinkedTitle": "Google account linked",
     "leaderboard.accountLinkedBody": "Your leaderboard ID is now tied to this Google account.",
+    "leaderboard.editedStageNotSubmitted": "Edited-stage runs are not submitted.",
   },
   ja: {
     "start.playerName": "プレイヤー名",
@@ -219,6 +220,7 @@ const translations = {
     "leaderboard.googleSigningIn": "連携中...",
     "leaderboard.accountLinkedTitle": "Googleアカウントと連携しました",
     "leaderboard.accountLinkedBody": "リーダーボードIDがこのGoogleアカウントに紐づきました。",
+    "leaderboard.editedStageNotSubmitted": "ステージ編集を使ったランはランキングに登録されません。",
   },
 } as const;
 

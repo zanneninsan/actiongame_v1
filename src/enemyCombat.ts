@@ -3,10 +3,9 @@ import Phaser from "phaser";
 const ENEMY_STOMP_TOLERANCE = 18;
 const ENEMY_STOMP_BOUNCE_Y = -455;
 
-export const tryStompEnemy = (
+export const canStompEnemy = (
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   enemy: Phaser.Physics.Arcade.Sprite,
-  onStomp: () => void,
 ) => {
   const playerBody = player.body;
   const enemyBody = enemy.body as Phaser.Physics.Arcade.Body | undefined;
@@ -16,7 +15,40 @@ export const tryStompEnemy = (
 
   const playerPreviousBottom = playerBody.prev.y + playerBody.height;
   const enemyTop = enemyBody.y;
-  if (playerPreviousBottom > enemyTop + ENEMY_STOMP_TOLERANCE) {
+  return playerPreviousBottom <= enemyTop + ENEMY_STOMP_TOLERANCE;
+};
+
+export const findOverlappingStompEnemy = (
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+  enemies: Phaser.Physics.Arcade.Group | undefined,
+) => {
+  if (!enemies) {
+    return undefined;
+  }
+
+  const playerBody = player.body;
+  if (!playerBody) {
+    return undefined;
+  }
+
+  return enemies
+    .getChildren()
+    .filter((child): child is Phaser.Physics.Arcade.Sprite => child instanceof Phaser.Physics.Arcade.Sprite)
+    .filter((enemy) => enemy.active && isOverlapping(playerBody, enemy.body as Phaser.Physics.Arcade.Body | undefined))
+    .filter((enemy) => canStompEnemy(player, enemy))
+    .sort((a, b) => {
+      const aBody = a.body as Phaser.Physics.Arcade.Body;
+      const bBody = b.body as Phaser.Physics.Arcade.Body;
+      return aBody.y - bBody.y;
+    })[0];
+};
+
+export const tryStompEnemy = (
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+  enemy: Phaser.Physics.Arcade.Sprite,
+  onStomp: () => void,
+) => {
+  if (!canStompEnemy(player, enemy)) {
     return false;
   }
 
@@ -46,4 +78,12 @@ export const defeatEnemy = (enemy: Phaser.Physics.Arcade.Sprite, squash: boolean
     ease: "Back.easeIn",
     onComplete: () => enemy.destroy(),
   });
+};
+
+const isOverlapping = (a: Phaser.Physics.Arcade.Body, b: Phaser.Physics.Arcade.Body | undefined) => {
+  if (!b || !b.enable) {
+    return false;
+  }
+
+  return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
 };
