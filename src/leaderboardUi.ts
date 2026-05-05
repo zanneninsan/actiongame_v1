@@ -19,6 +19,8 @@ type LeaderboardCurrentScore = {
   scoreUpdated: boolean;
 };
 
+const LEADERBOARD_FETCH_RETRY_MS = 800;
+
 export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
   document.getElementById("leaderboard-modal")?.remove();
 
@@ -66,8 +68,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
     }
   });
 
-  options
-    .fetchEntries()
+  fetchEntriesWithRetry(options.fetchEntries)
     .then((entries) => {
       if (entries.length === 0) {
         status.textContent = options.statusMessage ?? t(locale, "leaderboard.empty");
@@ -82,9 +83,43 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
       );
       list.querySelector(".leaderboard-entry.is-current-score")?.scrollIntoView({ block: "center" });
     })
-    .catch(() => {
-      status.textContent = t(locale, "leaderboard.unavailable");
+    .catch((error) => {
+      const errorCode = getErrorCode(error);
+      console.warn("Leaderboard entries could not be fetched.", { errorCode, error });
+      status.textContent = getLeaderboardErrorMessage(locale, errorCode);
     });
+}
+
+async function fetchEntriesWithRetry(fetchEntries: () => Promise<LeaderboardEntry[]>) {
+  try {
+    return await fetchEntries();
+  } catch (error) {
+    if (!shouldRetryFetch(error)) {
+      throw error;
+    }
+    await wait(LEADERBOARD_FETCH_RETRY_MS);
+    return fetchEntries();
+  }
+}
+
+function shouldRetryFetch(error: unknown) {
+  const code = getErrorCode(error);
+  return code === "unavailable" || code === "deadline-exceeded" || code === "resource-exhausted";
+}
+
+function getLeaderboardErrorMessage(locale: Locale, errorCode: string) {
+  if (errorCode === "permission-denied" || errorCode === "unauthenticated" || errorCode === "failed-precondition") {
+    return t(locale, "leaderboard.notConfigured");
+  }
+  return t(locale, "leaderboard.unavailable");
+}
+
+function getErrorCode(error: unknown) {
+  return typeof error === "object" && error !== null && "code" in error ? String(error.code) : "";
+}
+
+function wait(milliseconds: number) {
+  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
 }
 
 function createEntryRow(

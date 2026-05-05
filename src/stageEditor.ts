@@ -28,6 +28,7 @@ type EditorSelection =
   | { kind: "goal" };
 
 type StageEditorOptions = {
+  initialEnabled?: boolean;
   tile: number;
   platformUnitWidth: number;
   platformUnitHeight: number;
@@ -71,6 +72,7 @@ export class StageEditor {
 
     this.panel = new StageEditorPanel({
       initialTool: this.tool,
+      initialEnabled: this.options.initialEnabled,
       locale: this.options.getLocale(),
       onToggle: (enabled) => {
         this.enabled = enabled;
@@ -92,6 +94,10 @@ export class StageEditor {
       onImport: (json) => this.importStage(json),
     });
     this.panel.show();
+    this.enabled = Boolean(this.options.initialEnabled);
+    if (this.enabled) {
+      this.options.onToggle?.(this.enabled);
+    }
     this.refreshExport();
     this.refreshHistoryControls();
     this.bindInput();
