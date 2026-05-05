@@ -2,11 +2,17 @@ import { t, type Locale } from "./i18n";
 
 export type MobileInputKey = "w" | "a" | "s" | "d" | "shift";
 
+type FullscreenDocument = Document & {
+  msFullscreenElement?: Element | null;
+  webkitFullscreenElement?: Element | null;
+};
+
 type MobileControlsOptions = {
   locale: Locale;
   onInputChange: (key: MobileInputKey, pressed: boolean) => void;
   onJumpQueued: () => void;
   onRestart: () => void;
+  onToggleFullscreen: () => void;
 };
 
 export const createMobileControls = (options: MobileControlsOptions) => {
@@ -24,6 +30,7 @@ export const createMobileControls = (options: MobileControlsOptions) => {
       <button class="mobile-button pad-right" data-key="d" type="button" aria-label="${t(options.locale, "aria.moveRight")}">&rarr;</button>
     </div>
     <div class="mobile-actions">
+      <button class="mobile-button fullscreen-button" data-action="fullscreen" type="button" aria-label="${options.locale === "ja" ? "全画面切り替え" : "Toggle fullscreen"}">FULL</button>
       <button class="mobile-button" data-key="w" type="button" aria-label="${t(options.locale, "aria.jump")}">&uarr;</button>
       <button class="mobile-button dash-button" data-key="shift" type="button" aria-label="${t(options.locale, "aria.dash")}">DASH</button>
       <button class="mobile-button restart-button" data-action="restart" type="button">R</button>
@@ -54,6 +61,31 @@ export const createMobileControls = (options: MobileControlsOptions) => {
           options.onRestart();
         }
       }),
+    );
+  }
+
+  const fullscreenButton = controls.querySelector<HTMLButtonElement>("[data-action='fullscreen']");
+  if (fullscreenButton) {
+    const updateFullscreenButton = () => {
+      const fullscreenDocument = document as FullscreenDocument;
+      fullscreenButton.classList.toggle(
+        "is-active",
+        Boolean(document.fullscreenElement ?? fullscreenDocument.webkitFullscreenElement ?? fullscreenDocument.msFullscreenElement),
+      );
+    };
+    updateFullscreenButton();
+    document.addEventListener("fullscreenchange", updateFullscreenButton);
+    document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
+    document.addEventListener("MSFullscreenChange", updateFullscreenButton);
+    cleanup.push(
+      bindMobileButton(fullscreenButton, (pressed) => {
+        if (pressed) {
+          options.onToggleFullscreen();
+        }
+      }),
+      () => document.removeEventListener("fullscreenchange", updateFullscreenButton),
+      () => document.removeEventListener("webkitfullscreenchange", updateFullscreenButton),
+      () => document.removeEventListener("MSFullscreenChange", updateFullscreenButton),
     );
   }
 

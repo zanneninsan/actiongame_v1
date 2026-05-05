@@ -2,7 +2,7 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
-## v0.1.190
+## v0.1.197
 ### English
 - Added floating score popups when collecting score items, matching the enemy defeat score feedback.
 - Increased floating score popup text size for both item pickups and enemy defeats.
@@ -10,7 +10,7 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 - スコア付きアイテムを取った時にも、敵撃破時と同じフローティングスコア表示を出すようにしました。
 - アイテム取得時と敵撃破時のフローティングスコア表示を、これまでより大きくしました。
 
-## v0.1.189
+## v0.1.196
 ### English
 - Added per-enemy stomp score settings, with enemies that do not specify a value defaulting to 10 points.
 - Tuned higher-risk enemy types with individual stomp score values for score balance.
@@ -18,7 +18,7 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 - 敵ごとに踏みつけ撃破時の得点を設定できるようにし、未設定の敵は10点になるようにしました。
 - 得点バランス調整用に、危険度の高い敵へ個別の踏みつけ得点を設定しました。
 
-## v0.1.188
+## v0.1.195
 ### English
 - Fixed startup stopping after stage rendering when the HIT debug position readout ran before the player sprite existed.
 - Added defensive enemy animation handling so one broken enemy sheet cannot stop the rest of the game scene from starting.
@@ -26,13 +26,13 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 - HITデバッグの座標表示がプレイヤー生成前に走って、ステージ描画後に起動が止まる問題を修正しました。
 - 敵アニメーション素材に問題があっても、ゲームシーン全体の開始が止まらないように防御処理を追加しました。
 
-## v0.1.187
+## v0.1.194
 ### English
 - Added a live player position readout beside the HIT debug toggle while collision debug is enabled.
 ### Japanese
 - HITデバッグを有効にしている間、プレイヤーの現在座標をHITボタンの横に表示するようにしました。
 
-## v0.1.186
+## v0.1.193
 ### English
 - Resolved build-time UI asset URL warnings by making CSS image references resolve through the project asset graph.
 - Raised the Vite chunk warning limit to match the current Phaser/Firebase game bundle size and avoid noisy chunk-size warnings.
@@ -40,13 +40,13 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 - CSS内のUI画像参照をビルド時に解決できる形へ直し、UI画像URL警告が出ないようにしました。
 - PhaserとFirebaseを含む現在のゲームバンドルサイズに合わせてViteのチャンク警告閾値を調整し、不要なチャンクサイズ警告を抑えました。
 
-## v0.1.185
+## v0.1.192
 ### English
 - Restored Shibuya City stage data to match `04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`, removing the moving, fragile, and secret-route additions from the base Shibuya City stage.
 ### Japanese
 - シブヤシティのステージデータを`04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`の状態に揃え、通常のシブヤシティから動く足場、落ちる足場、秘密ルート追加分を取り除きました。
 
-## v0.1.184
+## v0.1.191
 ### English
 - Rebuilt the Rabbit Traveler walk sprite from the pre-transparency source sheet with conservative background removal, and switched the runtime asset to WebP.
 - Added documented asset processing rules for WebP runtime outputs, reversible intermediates, and safe-side transparency cleanup.
@@ -54,7 +54,7 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 - ラビットトラベラーの歩行スプライトを透過前の元シートから作り直し、透過しすぎない控えめな背景除去に変更したうえで、実行時アセットをWebPに切り替えました。
 - 素材加工では最終成果物をWebPにすること、途中経過を可逆な状態で残すこと、透過処理は安全側に倒すことをドキュメントに追記しました。
 
-## v0.1.183
+## v0.1.190
 ### English
 - Added Heart Cannon turret enemies with generated raster art, aimed heart shots, and new placements in Neo Shibuya City and Skybridge Sprint.
 - Added a secret upper-route branch in Neo Shibuya City with hidden dash-ring access, bonus coins, and fragile/moving platforms.
@@ -62,17 +62,59 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 - 画像生成で作成したハートキャノン砲台を追加し、狙い撃ちのハート弾とネオシブヤシティ、スカイブリッジ・スプリントへの配置を実装しました。
 - ネオシブヤシティに、隠しダッシュリングから入れる上側の秘密ルートを追加し、ボーナスコイン、壊れやすい足場、動く足場を組み込みました。
 
-## v0.1.182
+## v0.1.189
 ### English
 - Split the enhanced Shibuya City layout into a new Neo Shibuya City stage while restoring Shibuya City to the main-branch layout from `04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`.
 ### Japanese
 - 強化版のシブヤシティを新しいステージ「ネオシブヤシティ」として分け、シブヤシティ本体は`04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`時点のmainブランチの構成に戻しました。
 
-## v0.1.181
+## v0.1.188
 ### English
 - Added a Mario-style feature pack with enemy stomps and combo scoring, spring and fragile platforms, coins, bonus blocks, powerups, checkpoints, clear ranks, missions, a neon idol shooter enemy, breakable blocks, and one-way gates.
 ### Japanese
 - 敵の踏みつけ撃破と連続ボーナス、ジャンプ台、崩れる足場、コイン、はてなブロックと隠しブロック、パワーアップ、チェックポイント、クリアランク、ミッション表示、ネオンアイドル系の射撃敵、壊せるブロック、一方通行ゲートを追加しました。
+
+## v0.1.187
+### English
+- Disabled the browser context menu so right-clicking the game screen no longer opens the default menu.
+### Japanese
+- ゲーム画面で右クリックしてもブラウザ標準のメニューが開かないようにしました。
+
+## v0.1.186
+### English
+- Localized leaderboard titles, status messages, current score labels, and score submission result messages for English and Japanese while keeping the table column headers unchanged.
+### Japanese
+- ランキング画面のタイトル、状態メッセージ、今回のスコア表示、スコア登録結果メッセージを日本語と英語の表示に対応しました。表の列見出しはこれまで通り英字表記のままにしています。
+
+## v0.1.185
+### English
+- Updated the options screen language label to match the start screen bilingual label format.
+### Japanese
+- オプション画面の言語ラベルも、開始画面と同じく現在の表示言語名と `Language` を併記する表示にしました。
+
+## v0.1.184
+### English
+- Updated the start screen language label to show both the current UI language label and `Language`.
+### Japanese
+- 開始画面の言語ラベルを、現在の表示言語名と `Language` を併記する表示にしました。
+
+## v0.1.183
+### English
+- Localized the story message UI lines and next-message accessibility label for English and Japanese.
+### Japanese
+- ストーリーメッセージUIの会話文と次メッセージボタンの読み上げラベルを、日本語と英語の表示に対応しました。
+
+## v0.1.182
+### English
+- Stopped forcing or waiting for landscape orientation in mobile mode and added a mobile fullscreen toggle button.
+### Japanese
+- スマホ操作時に横画面を強制したり待機したりする処理をやめ、モバイル操作ボタンに全画面化と解除を切り替えるボタンを追加しました。
+
+## v0.1.181
+### English
+- Normalized leaderboard score payload rounding so Sky Shaft Climb clear scores pass the server-side score validation.
+### Japanese
+- スカイシャフト・クライムのクリアスコアがサーバー側の検証を通るように、ランキング送信時のスコア丸め処理を揃えました。
 
 ## v0.1.180
 ### English

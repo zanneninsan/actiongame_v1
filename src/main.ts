@@ -16,7 +16,7 @@ import { StageEditor } from "./stageEditor";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
 import {
   createStoryDialogue,
-  DEFAULT_STORY_DIALOGUE_LINES,
+  getDefaultStoryDialogueLines,
   type StoryDialogueController,
 } from "./storyDialogue";
 import { getBrowserLocale, isLocale, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
@@ -69,7 +69,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.190";
+const DEBUG_VERSION = "v0.1.197";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -121,7 +121,6 @@ const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
 const DASH_SPEED_MULTIPLIER = 2;
 const DASH_MAX_VERTICAL_SPEED = Math.abs(BOOSTED_JUMP_VELOCITY) * DASH_SPEED_MULTIPLIER;
-const MOBILE_FULLSCREEN_MIN_LANDSCAPE_HEIGHT = 430;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
@@ -129,10 +128,11 @@ type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
   webkitRequestFullscreen?: () => Promise<void> | void;
 };
-type OrientationLockScreen = Screen & {
-  orientation?: ScreenOrientation & {
-    lock?: (orientation: OrientationLockType) => Promise<void>;
-  };
+type FullscreenDocument = Document & {
+  msFullscreenElement?: Element | null;
+  webkitFullscreenElement?: Element | null;
+  msExitFullscreen?: () => Promise<void> | void;
+  webkitExitFullscreen?: () => Promise<void> | void;
 };
 
 let extraTouchPointersAdded = false;
@@ -164,7 +164,6 @@ class PrototypeScene extends Phaser.Scene {
   private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false, shift: false };
   private mobileJumpQueued = false;
   private mobileControlCleanup: Array<() => void> = [];
-  private mobileOrientationCleanup: Array<() => void> = [];
   private rewards?: RewardSystem;
   private startTime = 0;
   private isRunActive = false;
@@ -640,7 +639,6 @@ class PrototypeScene extends Phaser.Scene {
   private resetRunState() {
     this.removeStartModal();
     this.removeMobileControls();
-    this.removeMobileOrientationPrompt();
     this.removeStageEditor();
     this.removeGlobalUI();
     this.clearStoryDialogueTimers();
@@ -694,7 +692,10 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.hasAdvancedStoryDialogueAtX = true;
-    this.storyDialogue = createStoryDialogue({ lines: DEFAULT_STORY_DIALOGUE_LINES });
+    this.storyDialogue = createStoryDialogue({
+      lines: getDefaultStoryDialogueLines(this.locale),
+      locale: this.locale,
+    });
     this.storyDialogueNextEvent = this.time.delayedCall(STORY_DIALOGUE_STEP_DELAY_MS, () => {
       this.storyDialogue?.next();
       this.storyDialogueNextEvent = undefined;
@@ -796,100 +797,10 @@ class PrototypeScene extends Phaser.Scene {
         this.setLocale(locale);
         this.setSoundEnabled(soundOn);
         this.setupComplete = true;
-        if (this.controlMode === "mobile") {
-          void this.startMobileRunInLandscape();
-          return;
-        }
         this.startRun();
       },
     });
     this.startModal.show();
-  }
-
-  private async startMobileRunInLandscape() {
-    this.createMobileOrientationPrompt();
-    this.requestMobileLandscapeLock();
-
-    if (!this.isPortraitViewport()) {
-      await this.requestMobileFullscreenIfShortLandscape();
-      this.startRun();
-      return;
-    }
-
-    this.removeStartModal();
-    const startWhenLandscape = () => {
-      if (this.isPortraitViewport()) {
-        return;
-      }
-      cleanup();
-      void this.startMobileRunAfterLandscapeReady();
-    };
-    const cleanup = () => {
-      window.removeEventListener("resize", startWhenLandscape);
-      window.removeEventListener("orientationchange", startWhenLandscape);
-      screen.orientation?.removeEventListener("change", startWhenLandscape);
-      this.mobileOrientationCleanup = this.mobileOrientationCleanup.filter((entry) => entry !== cleanup);
-    };
-
-    window.addEventListener("resize", startWhenLandscape);
-    window.addEventListener("orientationchange", startWhenLandscape);
-    screen.orientation?.addEventListener("change", startWhenLandscape);
-    this.mobileOrientationCleanup.push(cleanup);
-  }
-
-  private async startMobileRunAfterLandscapeReady() {
-    await this.requestMobileFullscreenIfShortLandscape();
-    this.startRun();
-  }
-
-  private requestMobileLandscapeLock() {
-    const orientation = (screen as OrientationLockScreen).orientation;
-    void orientation?.lock?.("landscape").catch(() => undefined);
-  }
-
-  private async requestMobileFullscreenIfShortLandscape() {
-    if (this.isPortraitViewport() || document.fullscreenElement || this.getMobileViewportHeight() >= MOBILE_FULLSCREEN_MIN_LANDSCAPE_HEIGHT) {
-      return;
-    }
-
-    const target = document.documentElement as FullscreenTarget;
-    const requestFullscreen =
-      target.requestFullscreen ?? target.webkitRequestFullscreen ?? target.msRequestFullscreen;
-
-    if (!requestFullscreen) {
-      return;
-    }
-
-    await Promise.resolve(requestFullscreen.call(target)).catch(() => undefined);
-  }
-
-  private getMobileViewportHeight() {
-    return Math.round(window.visualViewport?.height ?? window.innerHeight);
-  }
-
-  private isPortraitViewport() {
-    return window.matchMedia("(orientation: portrait)").matches;
-  }
-
-  private createMobileOrientationPrompt() {
-    document.getElementById("mobile-orientation-prompt")?.remove();
-
-    const prompt = document.createElement("div");
-    prompt.id = "mobile-orientation-prompt";
-    prompt.innerHTML = `
-      <div class="orientation-dialog">
-        <div class="orientation-icon" aria-hidden="true">&#8635;</div>
-        <div class="orientation-title">${this.locale === "ja" ? "横画面にしてください" : "Rotate to landscape"}</div>
-        <div class="orientation-message">${this.locale === "ja" ? "スマホモードは横向きでプレイできます。" : "Mobile mode plays in landscape."}</div>
-      </div>
-    `;
-    document.body.appendChild(prompt);
-  }
-
-  private removeMobileOrientationPrompt() {
-    this.mobileOrientationCleanup.forEach((cleanup) => cleanup());
-    this.mobileOrientationCleanup = [];
-    document.getElementById("mobile-orientation-prompt")?.remove();
   }
 
   private removeStartModal() {
@@ -1238,6 +1149,9 @@ class PrototypeScene extends Phaser.Scene {
         this.mobileJumpQueued = true;
       },
       onRestart: () => this.restartStage(),
+      onToggleFullscreen: () => {
+        void this.toggleMobileFullscreen();
+      },
     });
   }
 
@@ -1245,6 +1159,24 @@ class PrototypeScene extends Phaser.Scene {
     this.mobileControlCleanup.forEach((cleanup) => cleanup());
     this.mobileControlCleanup = [];
     document.getElementById("mobile-controls")?.remove();
+  }
+
+  private async toggleMobileFullscreen() {
+    const fullscreenDocument = document as FullscreenDocument;
+    const fullscreenElement =
+      document.fullscreenElement ?? fullscreenDocument.webkitFullscreenElement ?? fullscreenDocument.msFullscreenElement;
+    const exitFullscreen =
+      fullscreenDocument.exitFullscreen ?? fullscreenDocument.webkitExitFullscreen ?? fullscreenDocument.msExitFullscreen;
+
+    if (fullscreenElement) {
+      await Promise.resolve(exitFullscreen?.call(document)).catch(() => undefined);
+      return;
+    }
+
+    const target = document.documentElement as FullscreenTarget;
+    const requestFullscreen =
+      target.requestFullscreen ?? target.webkitRequestFullscreen ?? target.msRequestFullscreen;
+    await Promise.resolve(requestFullscreen?.call(target)).catch(() => undefined);
   }
 
   private createStageEditor() {
@@ -1571,7 +1503,8 @@ class PrototypeScene extends Phaser.Scene {
     showLeaderboardPanel({
       stageName: resolveStageName(this.editorStage.name, this.locale),
       gameVersion: DEBUG_VERSION,
-      statusMessage: isLeaderboardConfigured() ? statusMessage : "Leaderboard is not configured.",
+      locale: this.locale,
+      statusMessage: isLeaderboardConfigured() ? statusMessage : t(this.locale, "leaderboard.notConfigured"),
       currentSubmissionId,
       currentPlayerId: this.leaderboardPlayerId,
       currentScore,
@@ -1607,14 +1540,14 @@ class PrototypeScene extends Phaser.Scene {
         }
         const currentScore = { score: finalScore, rank: result.rank, scoreUpdated: result.scoreUpdated };
         this.showLeaderboard(
-          result.scoreUpdated ? "Score submitted." : "Score submitted. Best score was not updated.",
+          result.scoreUpdated ? t(this.locale, "leaderboard.scoreSubmitted") : t(this.locale, "leaderboard.scoreSubmittedBestNotUpdated"),
           result.scoreUpdated && "submissionId" in result ? result.submissionId ?? submissionId : undefined,
           currentScore,
         );
       })
       .catch((error) => {
         console.warn("Score submission failed.", error);
-        this.showLeaderboard("Score could not be submitted.");
+        this.showLeaderboard(t(this.locale, "leaderboard.scoreSubmitFailed"));
       });
   }
 
@@ -1935,6 +1868,10 @@ function createSubmissionId() {
 function isLeaderboardPlayerId(playerId: string) {
   return /^[a-zA-Z0-9_-]{8,80}$/.test(playerId);
 }
+
+document.addEventListener("contextmenu", (event) => {
+  event.preventDefault();
+});
 
 new Phaser.Game({
   type: Phaser.AUTO,

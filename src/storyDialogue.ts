@@ -1,3 +1,5 @@
+import type { Locale } from "./i18n";
+
 export type StoryDialogueLine = {
   characterName: string;
   message: string;
@@ -10,6 +12,7 @@ export type StoryDialogueOptions = {
   width?: number;
   top?: number;
   left?: number;
+  locale?: Locale;
 };
 
 export type StoryDialogueController = {
@@ -32,22 +35,29 @@ const MIN_DIALOGUE_FONT_SIZE = 10;
 const TV_SWITCH_IN_MS = 520;
 const TV_SWITCH_OUT_MS = 420;
 
-export const DEFAULT_STORY_DIALOGUE_LINES: StoryDialogueLine[] = [
-  {
-    characterName: "残念院さん",
-    message: "人が多いですね……ここが渋谷。",
-    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_05_shy.webp`,
-  },
-  {
-    characterName: "残念院さん",
-    message: "先へ進みましょう。何か手がかりが見つかるはずです。",
-    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_02_smile.webp`,
-  },
-];
+export const getDefaultStoryDialogueLines = (locale: Locale): StoryDialogueLine[] => {
+  const characterName = locale === "ja" ? "残念院さん" : "Zannenin";
+  return [
+    {
+      characterName,
+      message: locale === "ja" ? "人が多いですね……ここが渋谷。" : "So many people... this must be Shibuya.",
+      portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_05_shy.webp`,
+    },
+    {
+      characterName,
+      message:
+        locale === "ja"
+          ? "先へ進みましょう。何か手がかりが見つかるはずです。"
+          : "Let's keep moving. We should be able to find a clue ahead.",
+      portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_02_smile.webp`,
+    },
+  ];
+};
 
 export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogueController {
   const root = options.root ?? document.body;
   const lines = [...options.lines];
+  const locale = options.locale ?? "en";
   let currentIndex = 0;
 
   document.getElementById("story-dialogue")?.remove();
@@ -135,7 +145,7 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
 
   const nextButton = document.createElement("button");
   nextButton.type = "button";
-  nextButton.ariaLabel = "次のメッセージ";
+  nextButton.ariaLabel = locale === "ja" ? "次のメッセージ" : "Next message";
   applyStyle(nextButton, {
     position: "absolute",
     right: "4.8%",
