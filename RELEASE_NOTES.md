@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.218
+### English
+- Made the in-game HUD scale more dynamically with the displayed screen size, including player name, score, timer, stamina, and control hints.
+### Japanese
+- 画面の表示サイズに応じて、プレイヤー名、スコア、タイマー、スタミナ、操作ヒントなどのHUD表示がより大きく見えるように調整しました。
+
 ## v0.1.217
 ### English
 - Added a stamina gauge that limits W air jumps and Shift dash, with gradual recovery while grounded.
