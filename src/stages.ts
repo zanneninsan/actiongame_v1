@@ -143,30 +143,6 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       "units": 4
     },
     {
-      "x": 5660,
-      "y": 164,
-      "units": 2
-    },
-    {
-      "x": 5940,
-      "y": 108,
-      "units": 2,
-      "moving": {
-        "axis": "x",
-        "distance": 280,
-        "speed": 72
-      }
-    },
-    {
-      "x": 6320,
-      "y": 180,
-      "units": 3,
-      "fragile": {
-        "delayMs": 520,
-        "respawnMs": 2600
-      }
-    },
-    {
       "x": 5900,
       "y": 548,
       "units": 7

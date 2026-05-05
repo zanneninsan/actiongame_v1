@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.185
+### English
+- Restored Shibuya City stage data to match `04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`, removing the moving, fragile, and secret-route additions from the base Shibuya City stage.
+### Japanese
+- シブヤシティのステージデータを`04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`の状態に揃え、通常のシブヤシティから動く足場、落ちる足場、秘密ルート追加分を取り除きました。
+
 ## v0.1.184
 ### English
 - Rebuilt the Rabbit Traveler walk sprite from the pre-transparency source sheet with conservative background removal, and switched the runtime asset to WebP.
