@@ -89,6 +89,19 @@ const LIVE_CHAT_USERS = [
   { icon: "✦", name: "初見さん" },
 ];
 
+const LIVE_CHAT_EMOJI_BOMBS = [
+  "🔥🔥🔥🔥🔥",
+  "👏👏👏👏👏👏👏",
+  "😂😂😂😂😂",
+  "💥💥💥💥💥",
+  "✨✨✨✨✨",
+  "8888888888 👏👏👏",
+  "草草草草草 😂",
+  "ナイス！🔥👏✨",
+  "これは熱い 🔥🔥🔥",
+  "💎💎💎 神回 💎💎💎",
+];
+
 type ActiveComment = Phaser.GameObjects.Text & {
   destroyTimer?: Phaser.Time.TimerEvent;
 };
@@ -248,6 +261,7 @@ export class DanmakuOverlay {
   }
 
   private emitLiveChat(message: string, options: Partial<DanmakuStyle> = {}) {
+    const displayMessage = this.resolveLiveChatMessage(message);
     const style = {
       color: options.color ?? "#f8fafc",
       stroke: options.stroke ?? "#020617",
@@ -260,7 +274,7 @@ export class DanmakuOverlay {
     const user = this.getNextLiveChatUser();
 
     const comment = this.scene.add
-      .text(x, bottomY, `${user.icon} ${user.name}：${message}`, {
+      .text(x, bottomY, `${user.icon} ${user.name}：${displayMessage}`, {
         fontFamily: "monospace",
         fontSize: `${style.fontSize}px`,
         color: style.color,
@@ -287,6 +301,16 @@ export class DanmakuOverlay {
       ease: "Sine.easeOut",
     });
     comment.destroyTimer = this.scene.time.delayedCall(style.duration, () => this.fadeLiveChatComment(comment));
+  }
+
+  private resolveLiveChatMessage(message: string) {
+    if (Phaser.Math.Between(1, 100) <= 24) {
+      return LIVE_CHAT_EMOJI_BOMBS[Phaser.Math.Between(0, LIVE_CHAT_EMOJI_BOMBS.length - 1)];
+    }
+    if (Phaser.Math.Between(1, 100) <= 18) {
+      return `${message} ${LIVE_CHAT_EMOJI_BOMBS[Phaser.Math.Between(0, LIVE_CHAT_EMOJI_BOMBS.length - 1)]}`;
+    }
+    return message;
   }
 
   private getNextLiveChatUser() {

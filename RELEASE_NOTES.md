@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.234
+### English
+- Added YouTube Live-style emoji-heavy comments to the live chat danmaku mode.
+### Japanese
+- ライブチャット風の弾幕に、YouTube Liveらしい絵文字多めのコメントが混ざるようにしました。
+
 ## v0.1.233
 ### English
 - Updated live chat danmaku comments to show a user icon and name before each comment, and spaced stacked comments by their rendered height to prevent overlap.
