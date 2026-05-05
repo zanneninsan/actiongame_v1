@@ -88,12 +88,18 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.272";
+const DEBUG_VERSION = "v0.1.273";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
+const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
   message: "ひゃっ...ぷいりちゃん、ごめんなさいっ",
   portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_07_sad.png`,
+};
+const STAGE_MIDPOINT_DIALOGUE: StoryDialogueLine = {
+  characterName: "残念院さん",
+  message: "そろそろ中間まで来ましたね...少々疲れました...",
+  portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_05_shy.webp`,
 };
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
@@ -207,6 +213,11 @@ type QueuedStoryDialogue = {
   lines: StoryDialogueLine[];
   stepDelayMs?: number;
   durationMs?: number;
+};
+type StageMidpointProgress = {
+  axis: "x" | "y";
+  midpoint: number;
+  direction: 1 | -1;
 };
 
 type GhostReplayFrame = {
@@ -334,6 +345,8 @@ class PrototypeScene extends Phaser.Scene {
   private storyDialogue?: StoryDialogueController;
   private storyDialogueQueue: QueuedStoryDialogue[] = [];
   private hasAdvancedStoryDialogueAtX = false;
+  private stageMidpointProgress?: StageMidpointProgress;
+  private hasShownStageMidpointDialogue = false;
   private storyDialogueAdvanceEvents: Phaser.Time.TimerEvent[] = [];
   private storyDialogueRemoveEvent?: Phaser.Time.TimerEvent;
   private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
@@ -456,6 +469,7 @@ class PrototypeScene extends Phaser.Scene {
     this.resetRunState();
     this.isRestarting = false;
     this.stageConstants = resolveStageConstants(this.editorStage);
+    this.stageMidpointProgress = this.resolveStageMidpointProgress();
     if (!extraTouchPointersAdded) {
       this.input.addPointer(4);
       extraTouchPointersAdded = true;
@@ -698,6 +712,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.updateStoryDialogueProgress();
+    this.updateStageMidpointProgress();
     this.refreshDropThroughDecorationPlatform();
     this.oneWayGateController?.update();
     if (this.stageEditor?.isEnabled) {
@@ -977,6 +992,8 @@ class PrototypeScene extends Phaser.Scene {
     this.dropThroughDecorationPlatformBody = undefined;
     this.collisionDebugGraphics?.clear();
     this.collisionDebugGraphics = undefined;
+    this.stageMidpointProgress = undefined;
+    this.hasShownStageMidpointDialogue = false;
     this.itemsGroup = undefined;
     this.bonusBlocksGroup = undefined;
     this.checkpointController = undefined;
@@ -1004,6 +1021,37 @@ class PrototypeScene extends Phaser.Scene {
     this.enqueueStoryDialogue({
       lines: resolveStoryDialogueLines(storyDialogue, this.locale),
       stepDelayMs,
+    });
+  }
+
+  private resolveStageMidpointProgress(): StageMidpointProgress {
+    const isWideStage = this.editorStage.worldWidth >= this.stageConstants.worldHeight;
+    const axis = isWideStage ? "x" : "y";
+    const start = this.editorStage.playerStart[axis];
+    const goal = this.editorStage.goal[axis];
+    return {
+      axis,
+      midpoint: (start + goal) / 2,
+      direction: goal >= start ? 1 : -1,
+    };
+  }
+
+  private updateStageMidpointProgress() {
+    if (this.hasShownStageMidpointDialogue || !this.stageMidpointProgress || this.stageEditor?.isEnabled) {
+      return;
+    }
+
+    const { axis, midpoint, direction } = this.stageMidpointProgress;
+    const playerPosition = this.player[axis];
+    const hasPassedMidpoint = direction > 0 ? playerPosition >= midpoint : playerPosition <= midpoint;
+    if (!hasPassedMidpoint) {
+      return;
+    }
+
+    this.hasShownStageMidpointDialogue = true;
+    this.enqueueStoryDialogue({
+      lines: [STAGE_MIDPOINT_DIALOGUE],
+      durationMs: STAGE_MIDPOINT_DIALOGUE_DURATION_MS,
     });
   }
 

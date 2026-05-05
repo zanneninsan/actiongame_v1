@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.273
+### English
+- Added a one-time four-second story message when the player passes the stage midpoint, using the stage's wider axis for horizontal stages and taller axis for vertical stages.
+### Japanese
+- ステージが横長か縦長かを判定し、進行方向の中間点を越えた時に一度だけ4秒間のメッセージを表示するようにしました。
+
 ## v0.1.272
 ### English
 - Hid the PWA install prompt immediately after the install flow is accepted, including when returning focus to the original browser game screen.
