@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.207
+### English
+- Localized the Player Spec page with Japanese/English language switching and fixed the broken Japanese text on the page.
+### Japanese
+- Player Specページを日本語と英語で切り替えられるようにし、ページ内の文字化けしていた日本語を修正しました。
+
 ## v0.1.206
 ### English
 - Temporarily disabled leaderboard anti-cheat score and timer checks behind a server-side flag while keeping the validation mechanism in place.
