@@ -140,6 +140,11 @@ const translations = {
     "leaderboard.scoreSubmitted": "Score submitted.",
     "leaderboard.scoreSubmittedBestNotUpdated": "Score submitted. Best score was not updated.",
     "leaderboard.scoreSubmitFailed": "Score could not be submitted.",
+    "leaderboard.ghostSaved": "Ranking ghost saved and verified.",
+    "leaderboard.ghostMissing": "Ranking ghost was not saved. Check Functions deploy/logs.",
+    "leaderboard.ghostNotEligible": "Ranking ghost is saved only for top-10 best updates.",
+    "leaderboard.ghostNotRecorded": "Ranking ghost was not recorded for this run.",
+    "leaderboard.ghostUnknown": "Ranking ghost save could not be verified.",
     "leaderboard.accountPromptTitle": "Keep this player ID",
     "leaderboard.accountPromptBody":
       "You can keep playing without registration, but this ID and score history may be lost if browser data is cleared. Link a Google account to keep the same ID on other devices.",
@@ -312,6 +317,11 @@ const translations = {
     "leaderboard.scoreSubmitted": "スコアを登録しました。",
     "leaderboard.scoreSubmittedBestNotUpdated": "スコアを登録しました。ベストスコアは更新されませんでした。",
     "leaderboard.scoreSubmitFailed": "スコアを登録できませんでした。",
+    "leaderboard.ghostSaved": "ランキングゴーストを保存確認しました。",
+    "leaderboard.ghostMissing": "ランキングゴーストが保存されていません。Functionsのデプロイやログを確認してください。",
+    "leaderboard.ghostNotEligible": "ランキングゴースト保存対象は、ベスト更新かつ10位以内のみです。",
+    "leaderboard.ghostNotRecorded": "このランではランキングゴーストを記録できていません。",
+    "leaderboard.ghostUnknown": "ランキングゴースト保存を確認できませんでした。",
     "leaderboard.accountPromptTitle": "このプレイヤーIDを保護できます",
     "leaderboard.accountPromptBody":
       "登録しなくてもこのまま遊べますが、ブラウザのデータを削除するとIDやスコア履歴が失われる可能性があります。Googleアカウントと連携すると、別の端末でも同じIDを使えます。",

@@ -1314,6 +1314,16 @@ canvas {
   text-align: right;
 }
 
+.leaderboard-current-ghost {
+  grid-column: 1 / -1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #86efac;
+  font-size: 0.9em;
+}
+
 .leaderboard-account-prompt {
   min-height: clamp(58px, 6.2vw, 74px);
   display: grid;

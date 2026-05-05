@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.246
+### English
+- Added a clear result message after score submission that verifies whether the ranking ghost replay can actually be loaded from Firebase.
+### Japanese
+- スコア登録後に、ランキングゴーストがFirebaseから実際に読み込める状態かを確認して表示するようにしました。
+
 ## v0.1.245
 ### English
 - Restored the three jump-height tiers: normal jumps, speed-boosted jumps from horizontal momentum, and higher Shift dash jumps only while dash input is held.

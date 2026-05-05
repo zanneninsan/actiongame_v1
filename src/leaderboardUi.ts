@@ -18,12 +18,15 @@ type LeaderboardCurrentScore = {
   score: number;
   rank?: number;
   scoreUpdated: boolean;
+  ghostStatus?: LeaderboardGhostSaveStatus;
 };
 
 type LeaderboardAccountPrompt = {
   show: boolean;
   onGoogleSignIn: () => Promise<void>;
 };
+
+export type LeaderboardGhostSaveStatus = "saved" | "missing" | "notEligible" | "notRecorded" | "unknown";
 
 const LEADERBOARD_FETCH_RETRY_MS = 800;
 
@@ -191,7 +194,24 @@ function renderCurrentScore(container: HTMLElement, currentScore: LeaderboardCur
     <span class="leaderboard-current-status">${escapeHtml(
       currentScore.scoreUpdated ? t(locale, "leaderboard.bestUpdated") : t(locale, "leaderboard.bestNotUpdated"),
     )}</span>
+    ${currentScore.ghostStatus ? `<span class="leaderboard-current-ghost">${escapeHtml(getGhostStatusMessage(locale, currentScore.ghostStatus))}</span>` : ""}
   `;
+}
+
+function getGhostStatusMessage(locale: Locale, status: LeaderboardGhostSaveStatus) {
+  if (status === "saved") {
+    return t(locale, "leaderboard.ghostSaved");
+  }
+  if (status === "missing") {
+    return t(locale, "leaderboard.ghostMissing");
+  }
+  if (status === "notRecorded") {
+    return t(locale, "leaderboard.ghostNotRecorded");
+  }
+  if (status === "unknown") {
+    return t(locale, "leaderboard.ghostUnknown");
+  }
+  return t(locale, "leaderboard.ghostNotEligible");
 }
 
 function renderAccountPrompt(container: HTMLElement, accountPrompt: LeaderboardAccountPrompt | undefined, locale: Locale) {

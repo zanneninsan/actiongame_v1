@@ -72,10 +72,11 @@ import {
   signInLeaderboardWithGoogle,
   submitLeaderboardScore,
   type LeaderboardIdentity,
+  type LeaderboardSubmitResult,
   type LeaderboardUserSettings,
   unlinkLeaderboardGoogleAccount,
 } from "./leaderboard";
-import { showLeaderboardPanel } from "./leaderboardUi";
+import { showLeaderboardPanel, type LeaderboardGhostSaveStatus } from "./leaderboardUi";
 import { showAccountPanel } from "./accountUi";
 
 const GAME_WIDTH = 1280;
@@ -83,7 +84,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.245";
+const DEBUG_VERSION = "v0.1.246";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -2410,7 +2411,7 @@ class PrototypeScene extends Phaser.Scene {
   private showLeaderboard(
     statusMessage?: string,
     currentSubmissionId?: string,
-    currentScore?: { score: number; rank?: number; scoreUpdated: boolean },
+    currentScore?: { score: number; rank?: number; scoreUpdated: boolean; ghostStatus?: LeaderboardGhostSaveStatus },
     showAccountPrompt = false,
   ) {
     showLeaderboardPanel({
@@ -2497,6 +2498,8 @@ class PrototypeScene extends Phaser.Scene {
     this.leaderboardPlayerId = playerId;
     const elapsedMs = Math.max(0, GAME_TIME_MS - remainingMs);
     const submissionId = createSubmissionId();
+    const ghostReplay =
+      !this.ghostRecordingDisabled && this.ghostRecordingFrames.length >= 2 ? this.buildGhostReplayData() : undefined;
     try {
       const result = await submitLeaderboardScore({
         submissionId,
@@ -2510,14 +2513,14 @@ class PrototypeScene extends Phaser.Scene {
         timeBonus,
         elapsedMs,
         remainingMs,
-        ghostReplay:
-          !this.ghostRecordingDisabled && this.ghostRecordingFrames.length >= 2 ? this.buildGhostReplayData() : undefined,
+        ghostReplay,
       });
 
         if (!result.ok) {
           throw new Error("Leaderboard score was rejected.");
         }
-        const currentScore = { score: finalScore, rank: result.rank, scoreUpdated: result.scoreUpdated };
+        const ghostStatus = await this.verifySubmittedLeaderboardGhost(result, playerId, ghostReplay);
+        const currentScore = { score: finalScore, rank: result.rank, scoreUpdated: result.scoreUpdated, ghostStatus };
         this.showLeaderboard(
           result.scoreUpdated ? t(this.locale, "leaderboard.scoreSubmitted") : t(this.locale, "leaderboard.scoreSubmittedBestNotUpdated"),
           result.scoreUpdated && "submissionId" in result ? result.submissionId ?? submissionId : undefined,
@@ -2527,6 +2530,35 @@ class PrototypeScene extends Phaser.Scene {
     } catch (error) {
       console.warn("Score submission failed.", error);
       this.showLeaderboard(t(this.locale, "leaderboard.scoreSubmitFailed"));
+    }
+  }
+
+  private async verifySubmittedLeaderboardGhost(
+    result: Extract<LeaderboardSubmitResult, { ok: true }>,
+    playerId: string,
+    ghostReplay: GhostReplayData | undefined,
+  ): Promise<LeaderboardGhostSaveStatus> {
+    if (!result.scoreUpdated || typeof result.rank !== "number" || result.rank > 10) {
+      return "notEligible";
+    }
+    if (!ghostReplay) {
+      return "notRecorded";
+    }
+
+    const ghostId = `${this.currentStageId}_${playerId}`;
+    try {
+      await fetchLeaderboardGhostReplay(ghostId);
+      return "saved";
+    } catch (error) {
+      console.warn("Leaderboard ghost save could not be verified.", {
+        error,
+        ghostId,
+        ghostSaved: result.ghostSaved,
+        rank: result.rank,
+        scoreUpdated: result.scoreUpdated,
+        frames: ghostReplay.frames.length,
+      });
+      return result.ghostSaved === true ? "unknown" : "missing";
     }
   }
 
