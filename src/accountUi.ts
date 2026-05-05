@@ -57,6 +57,7 @@ export function showAccountPanel(options: AccountPanelOptions) {
     </div>
   `;
   document.body.appendChild(modal);
+  document.body.classList.add("is-account-modal-open");
 
   const status = modal.querySelector<HTMLElement>(".account-status")!;
   const playerId = modal.querySelector<HTMLElement>(".account-player-id")!;
@@ -67,6 +68,10 @@ export function showAccountPanel(options: AccountPanelOptions) {
   const unlinkButton = modal.querySelector<HTMLButtonElement>(".account-google-unlink")!;
   const scoreList = modal.querySelector<HTMLOListElement>(".account-score-list")!;
   const closeButton = modal.querySelector<HTMLButtonElement>("#account-close")!;
+  const close = () => {
+    modal.remove();
+    document.body.classList.remove("is-account-modal-open");
+  };
 
   const renderIdentity = (identity: LeaderboardIdentity | undefined) => {
     playerId.textContent = identity?.playerId ? `#${identity.playerId.slice(0, 8)}` : "-";
@@ -150,17 +155,17 @@ export function showAccountPanel(options: AccountPanelOptions) {
       });
   });
 
-  closeButton.addEventListener("click", () => modal.remove());
+  closeButton.addEventListener("click", close);
   modal.addEventListener("pointerdown", (event) => {
     if (event.target === modal) {
-      modal.remove();
+      close();
     }
     event.stopPropagation();
   });
   modal.addEventListener("keydown", (event) => {
     event.stopPropagation();
     if (event.key === "Escape") {
-      modal.remove();
+      close();
     }
   });
 

@@ -51,48 +51,55 @@ export class StartModal {
     overlay.innerHTML = `
       <form class="start-dialog">
         <h1>SUPER ZANNENIN SISTERS</h1>
-        <label class="start-field">
-          <span>${t(this.options.locale, "start.playerName")}</span>
-          <input name="playerName" type="text" maxlength="16" autocomplete="off" value="${escapeHtml(this.options.playerName)}" />
-        </label>
-        <label class="start-field">
-          <span>${t(this.options.locale, "start.language")}</span>
-          <select name="locale">
-            ${LOCALE_OPTIONS.map(
-              (option) =>
-                `<option value="${option.locale}"${option.locale === this.options.locale ? " selected" : ""}>${option.label}</option>`,
-            ).join("")}
-          </select>
-        </label>
-        <label class="start-field">
-          <span>${t(this.options.locale, "start.stage")}</span>
-          <select name="stage">
-            ${this.options.stageOptions
-              .map(
+        <div class="start-primary-panel">
+          <label class="start-field">
+            <span>${t(this.options.locale, "start.playerName")}</span>
+            <input name="playerName" type="text" maxlength="16" autocomplete="off" value="${escapeHtml(this.options.playerName)}" />
+          </label>
+          <label class="start-field">
+            <span>${t(this.options.locale, "start.language")}</span>
+            <select name="locale">
+              ${LOCALE_OPTIONS.map(
                 (option) =>
-                  `<option value="${escapeHtml(option.id)}"${option.id === this.options.stageId ? " selected" : ""}>${escapeHtml(
-                    option.label[this.options.locale],
-                  )}</option>`,
-              )
-              .join("")}
-          </select>
-        </label>
-        <div class="mode-row" role="group" aria-label="${t(this.options.locale, "start.controlMode")}">
-          <button type="button" data-mode="pc" class="mode-button">${t(this.options.locale, "start.modePc")}</button>
-          <button type="button" data-mode="mobile" class="mode-button">${t(this.options.locale, "start.modeMobile")}</button>
+                  `<option value="${option.locale}"${option.locale === this.options.locale ? " selected" : ""}>${option.label}</option>`,
+              ).join("")}
+            </select>
+          </label>
+          <label class="start-field">
+            <span>${t(this.options.locale, "start.stage")}</span>
+            <select name="stage">
+              ${this.options.stageOptions
+                .map(
+                  (option) =>
+                    `<option value="${escapeHtml(option.id)}"${option.id === this.options.stageId ? " selected" : ""}>${escapeHtml(
+                      option.label[this.options.locale],
+                    )}</option>`,
+                )
+                .join("")}
+            </select>
+          </label>
         </div>
-        <div class="sound-row" role="group" aria-label="${t(this.options.locale, "start.soundSetting")}">
-          <button type="button" data-sound="on" class="sound-button">&#128266; ${t(this.options.locale, "start.soundOn")}</button>
-          <button type="button" data-sound="off" class="sound-button">&#128263; ${t(this.options.locale, "start.soundOff")}</button>
+        <div class="start-choice-panel">
+          <div class="mode-row" role="group" aria-label="${t(this.options.locale, "start.controlMode")}">
+            <button type="button" data-mode="pc" class="mode-button">${t(this.options.locale, "start.modePc")}</button>
+            <button type="button" data-mode="mobile" class="mode-button">${t(this.options.locale, "start.modeMobile")}</button>
+          </div>
+          <div class="sound-row" role="group" aria-label="${t(this.options.locale, "start.soundSetting")}">
+            <button type="button" data-sound="on" class="sound-button">&#128266; ${t(this.options.locale, "start.soundOn")}</button>
+            <button type="button" data-sound="off" class="sound-button">&#128263; ${t(this.options.locale, "start.soundOff")}</button>
+          </div>
         </div>
-        <div class="start-ghost-panel">
-          <input id="start-ghost-file" class="start-ghost-file" type="file" accept="application/json,.json" />
-          <label for="start-ghost-file" class="start-ghost-load">${t(this.options.locale, "start.ghostLoad")}</label>
-          <select name="leaderboardGhost" class="start-ghost-select">
-            <option value="">${t(this.options.locale, "start.ghostRankingEmpty")}</option>
-          </select>
-          <span class="start-ghost-status">${t(this.options.locale, "start.ghostEmpty")}</span>
-        </div>
+        <details class="start-advanced-panel">
+          <summary>${t(this.options.locale, "start.advanced")}</summary>
+          <div class="start-ghost-panel">
+            <input id="start-ghost-file" class="start-ghost-file" type="file" accept="application/json,.json" />
+            <label for="start-ghost-file" class="start-ghost-load">${t(this.options.locale, "start.ghostLoad")}</label>
+            <select name="leaderboardGhost" class="start-ghost-select">
+              <option value="">${t(this.options.locale, "start.ghostRankingEmpty")}</option>
+            </select>
+            <span class="start-ghost-status">${t(this.options.locale, "start.ghostEmpty")}</span>
+          </div>
+        </details>
         <div class="start-account-panel">
           <span class="start-account-status"></span>
           <div class="start-account-actions">
@@ -104,6 +111,7 @@ export class StartModal {
     `;
 
     document.body.appendChild(overlay);
+    document.body.classList.add("is-start-modal-open");
     this.overlay = overlay;
 
     const form = overlay.querySelector("form")!;
@@ -313,6 +321,7 @@ export class StartModal {
     this.overlay = undefined;
     this.refreshAccountUi = undefined;
     document.getElementById("start-modal")?.remove();
+    document.body.classList.remove("is-start-modal-open");
   }
 
   private refreshAccountUi?: () => void;

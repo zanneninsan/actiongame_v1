@@ -56,13 +56,17 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
     </div>
   `;
   document.body.appendChild(modal);
+  document.body.classList.add("is-leaderboard-modal-open");
 
   const status = modal.querySelector<HTMLElement>(".leaderboard-status")!;
   const list = modal.querySelector<HTMLOListElement>(".leaderboard-list")!;
   const currentScore = modal.querySelector<HTMLElement>(".leaderboard-current-score")!;
   const accountPrompt = modal.querySelector<HTMLElement>(".leaderboard-account-prompt")!;
   const closeButton = modal.querySelector<HTMLButtonElement>("#leaderboard-close")!;
-  const close = () => modal.remove();
+  const close = () => {
+    modal.remove();
+    document.body.classList.remove("is-leaderboard-modal-open");
+  };
   renderCurrentScore(currentScore, options.currentScore, locale);
   renderAccountPrompt(accountPrompt, options.accountPrompt, locale);
 

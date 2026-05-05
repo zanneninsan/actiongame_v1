@@ -71,6 +71,12 @@ canvas {
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 10px rgba(245, 199, 106, 0.22);
 }
 
+.start-primary-panel,
+.start-choice-panel {
+  display: grid;
+  gap: 11px;
+}
+
 .start-field {
   width: min(100%, calc(100% - 34px));
   justify-self: center;
@@ -298,6 +304,33 @@ canvas {
   white-space: nowrap;
 }
 
+.start-advanced-panel {
+  width: min(100%, calc(100% - 34px));
+  justify-self: center;
+  color: #dbeafe;
+  font-weight: 800;
+}
+
+.start-advanced-panel summary {
+  min-height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0 18px;
+  background: rgba(2, 6, 23, 0.46);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.start-advanced-panel[open] summary {
+  margin-bottom: 8px;
+  border-color: rgba(253, 230, 138, 0.5);
+  color: #fef3c7;
+}
+
 .start-button:hover,
 .start-button:focus-visible,
 .start-google-login:not(:disabled):hover,
@@ -305,46 +338,73 @@ canvas {
   filter: brightness(1.5) saturate(1.34) drop-shadow(0 0 16px rgba(253, 230, 138, 0.58));
 }
 
-@media (max-width: 560px) {
+@media (max-width: 820px), (max-height: 560px) {
   #start-modal {
-    place-items: start center;
-    padding: 8px;
+    display: block;
+    padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+    overflow: hidden;
   }
 
   .start-dialog {
-    width: min(calc(100vw - 16px), 430px);
-    max-height: calc(100dvh - 16px);
+    width: min(100%, 480px);
+    height: calc(100dvh - max(8px, env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom)));
+    max-height: none;
+    margin: 0 auto;
     aspect-ratio: auto;
-    gap: 8px;
-    padding: 48px 28px 28px;
-    overflow: auto;
+    grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+    align-content: stretch;
+    gap: 10px;
+    padding: 18px 14px 12px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid rgba(245, 199, 106, 0.76);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(4, 10, 22, 0.96), rgba(2, 6, 23, 0.98)),
+      url("../public/assets/ui/fantasy/start_modal_window.webp") center / cover no-repeat;
   }
 
   .start-dialog h1 {
     width: 100%;
-    min-height: 46px;
-    padding: 0 18px;
-    font-size: 18px;
+    min-height: 44px;
+    padding: 0 14px;
+    font-size: clamp(17px, 5.2vw, 20px);
+    line-height: 1.05;
+    overflow-wrap: anywhere;
+  }
+
+  .start-primary-panel {
+    min-height: 0;
+    display: grid;
+    align-content: start;
+    gap: 12px;
   }
 
   .start-field,
   .mode-row,
   .sound-row,
   .start-account-panel,
-  .start-button {
+  .start-button,
+  .start-advanced-panel {
     width: 100%;
   }
 
   .start-dialog input,
   .start-dialog select {
-    height: 38px;
-    padding-left: 24px;
-    font-size: 16px;
+    height: 46px;
+    padding-left: 20px;
+    font-size: 18px;
   }
 
   .start-field {
-    grid-template-columns: minmax(76px, 0.34fr) minmax(0, 1fr);
-    gap: 8px;
+    grid-template-columns: 1fr;
+    gap: 5px;
+    font-size: 14px;
+  }
+
+  .start-field span {
+    white-space: normal;
   }
 
   .mode-row,
@@ -357,13 +417,157 @@ canvas {
   .mode-button,
   .sound-button,
   .start-google-login {
-    height: 40px;
+    min-height: 46px;
+    height: auto;
+    font-size: 16px;
+  }
+
+  .start-choice-panel {
+    gap: 8px;
+  }
+
+  .start-advanced-panel {
+    align-self: start;
+  }
+
+  .start-advanced-panel summary {
+    min-height: 42px;
     font-size: 14px;
+  }
+
+  .start-ghost-panel {
+    width: 100%;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 8px 0 2px;
+  }
+
+  .start-ghost-load,
+  .start-ghost-select {
+    height: 44px;
+    font-size: 15px;
+  }
+
+  .start-ghost-status {
+    white-space: normal;
+    text-align: center;
+  }
+
+  .start-account-panel {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin: 0 -2px;
+    padding: 8px 2px 2px;
+    background: linear-gradient(180deg, rgba(2, 6, 23, 0), rgba(2, 6, 23, 0.96) 28%);
+  }
+
+  .start-button {
+    height: 52px;
+    font-size: 21px;
   }
 
   .start-account-status {
     white-space: normal;
+    font-size: 12px;
+    max-height: 2.6em;
   }
+}
+
+@media (max-height: 560px) and (min-width: 561px) {
+  .start-dialog {
+    width: min(640px, calc(100vw - 20px));
+    height: calc(100dvh - 16px);
+    grid-template-rows: auto auto auto auto;
+    gap: 6px;
+    padding: 8px 14px;
+  }
+
+  .start-dialog h1 {
+    min-height: 34px;
+    font-size: 18px;
+  }
+
+  .start-primary-panel {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .start-field {
+    gap: 3px;
+    font-size: 12px;
+  }
+
+  .start-dialog input,
+  .start-dialog select {
+    height: 34px;
+    padding-left: 14px;
+    padding-right: 34px;
+    font-size: 14px;
+  }
+
+  .start-choice-panel {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .mode-row,
+  .sound-row,
+  .start-account-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .mode-button,
+  .sound-button,
+  .start-google-login,
+  .start-ghost-load,
+  .start-ghost-select {
+    min-height: 34px;
+    height: 34px;
+    font-size: 13px;
+  }
+
+  .start-advanced-panel summary {
+    min-height: 32px;
+    font-size: 12px;
+  }
+
+  .start-account-panel {
+    position: static;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+  }
+
+  .start-account-status {
+    min-height: 14px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .start-button {
+    height: 38px;
+    font-size: 17px;
+  }
+}
+
+body.is-start-modal-open #global-ui,
+body.is-options-modal-open #global-ui,
+body.is-leaderboard-modal-open #global-ui,
+body.is-account-modal-open #global-ui,
+body.is-start-modal-open #stage-editor,
+body.is-options-modal-open #stage-editor,
+body.is-leaderboard-modal-open #stage-editor,
+body.is-account-modal-open #stage-editor,
+body.is-start-modal-open #mobile-controls {
+  visibility: hidden;
+}
+
+body.is-options-modal-open #mobile-controls,
+body.is-leaderboard-modal-open #mobile-controls,
+body.is-account-modal-open #mobile-controls {
+  visibility: hidden;
 }
 
 #mobile-controls {
@@ -1014,41 +1218,69 @@ canvas {
   font-weight: 800;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 820px), (max-height: 560px) {
   #options-modal {
-    place-items: start center;
-    padding: 8px;
+    display: none;
+    place-items: stretch center;
+    padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+    overflow: hidden;
   }
 
   .options-dialog {
-    width: min(calc(100vw - 16px), 390px);
-    max-height: calc(100dvh - 16px);
+    width: min(100%, 440px);
+    max-height: none;
+    height: calc(100dvh - max(8px, env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom)));
     aspect-ratio: auto;
-    gap: 10px;
-    padding: 48px 28px 28px;
-    overflow: auto;
+    gap: 12px;
+    padding: 18px 16px 14px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid rgba(245, 199, 106, 0.72);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(4, 10, 22, 0.96), rgba(2, 6, 23, 0.98)),
+      url("../public/assets/ui/fantasy/options_modal_window.webp") center / cover no-repeat;
   }
 
   .options-dialog h2 {
-    min-height: 44px;
-    font-size: 18px;
+    min-height: 42px;
+    font-size: 20px;
   }
 
-  .options-dialog select {
-    height: 38px;
+  .options-dialog label {
     font-size: 15px;
   }
 
+  .options-dialog select {
+    height: 46px;
+    font-size: 17px;
+  }
+
+  #options-close {
+    min-height: 48px;
+    margin-top: auto;
+  }
+
   #account-modal {
-    place-items: start center;
-    padding: 6px;
+    display: block;
+    padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+    overflow: hidden;
   }
 
   .account-dialog {
-    width: min(calc(100vw - 12px), 430px);
-    max-height: calc(100dvh - 12px);
-    gap: 8px;
-    padding: 48px 16px 24px;
+    width: min(100%, 520px);
+    max-height: none;
+    height: calc(100dvh - max(8px, env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom)));
+    gap: 10px;
+    padding: 18px 14px 12px;
+    border: 1px solid rgba(245, 199, 106, 0.72);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(4, 10, 22, 0.96), rgba(2, 6, 23, 0.98)),
+      url("../public/assets/ui/fantasy/leaderboard_window.webp") center / cover no-repeat;
+    overscroll-behavior: contain;
   }
 
   .account-dialog h2 {
@@ -1058,19 +1290,30 @@ canvas {
   }
 
   .account-card {
-    padding: 10px;
+    padding: 12px;
+  }
+
+  .account-detail-list {
+    gap: 10px;
   }
 
   .account-detail-list div,
   .account-score-header,
   .account-score-row {
-    grid-template-columns: minmax(0, 1fr) 78px;
+    grid-template-columns: minmax(0, 1fr) 82px;
     gap: 8px;
   }
 
+  .account-detail-list div {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
+
   .account-detail-list dd {
-    grid-column: 2;
-    text-align: right;
+    grid-column: auto;
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   .account-actions {
@@ -1083,7 +1326,8 @@ canvas {
   }
 
   .account-score-list {
-    max-height: 180px;
+    max-height: none;
+    min-height: 140px;
   }
 
   #account-close {
@@ -1382,26 +1626,36 @@ canvas {
   font-weight: 800;
 }
 
-@media (max-width: 520px) {
+@media (max-width: 820px), (max-height: 560px) {
   #leaderboard-modal {
-    place-items: start center;
-    padding: 6px;
+    display: block;
+    padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+    overflow: hidden;
   }
 
   .leaderboard-dialog {
-    grid-template-rows: auto auto auto auto minmax(150px, 1fr) auto auto auto;
-    gap: 7px;
-    width: min(calc(100vw - 12px), 430px);
-    max-height: calc(100dvh - 12px);
+    grid-template-rows: auto auto auto auto minmax(0, 1fr) auto auto auto;
+    gap: 8px;
+    width: min(100%, 560px);
+    height: calc(100dvh - max(8px, env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom)));
+    max-height: none;
+    margin: 0 auto;
     aspect-ratio: auto;
-    padding: 48px 16px 24px;
+    padding: 18px 12px 12px;
+    border: 1px solid rgba(245, 199, 106, 0.72);
+    border-radius: 8px;
+    background:
+      linear-gradient(180deg, rgba(4, 10, 22, 0.96), rgba(2, 6, 23, 0.98)),
+      url("../public/assets/ui/fantasy/leaderboard_window.webp") center / cover no-repeat;
+    overscroll-behavior: contain;
   }
 
   .leaderboard-dialog h2 {
     width: 100%;
     min-height: 42px;
-    padding: 0 18px;
-    font-size: 20px;
+    padding: 0 14px;
+    font-size: clamp(19px, 5.6vw, 22px);
   }
 
   .leaderboard-meta,
@@ -1416,18 +1670,18 @@ canvas {
   }
 
   .leaderboard-entry {
-    grid-template-columns: 34px 38px minmax(64px, 1fr) 54px 74px;
+    grid-template-columns: 32px 36px minmax(70px, 1fr) 64px 72px;
     gap: 5px;
     min-height: 40px;
-    padding: 0 8px;
+    padding: 0 6px;
     font-size: 12px;
   }
 
   .leaderboard-header {
-    grid-template-columns: 34px 38px minmax(64px, 1fr) 54px 74px;
+    grid-template-columns: 32px 36px minmax(70px, 1fr) 64px 72px;
     gap: 5px;
-    margin: 0 12px 0 3px;
-    padding: 0 8px;
+    margin: 0 10px 0 3px;
+    padding: 0 6px;
     font-size: 10px;
   }
 
@@ -1484,5 +1738,82 @@ canvas {
     width: 100%;
     min-height: 42px;
     font-size: 16px;
+  }
+}
+
+@media (max-width: 380px) {
+  .leaderboard-entry,
+  .leaderboard-header {
+    grid-template-columns: 28px 32px minmax(56px, 1fr) 54px 62px;
+    gap: 4px;
+    font-size: 11px;
+  }
+
+  .leaderboard-new-marker {
+    font-size: 10px;
+  }
+
+  .leaderboard-player-id {
+    font-size: 9px;
+  }
+}
+
+@media (max-height: 560px) and (min-width: 561px) {
+  .leaderboard-dialog,
+  .account-dialog {
+    width: min(720px, calc(100vw - 20px));
+    height: calc(100dvh - 16px);
+    padding: 10px 14px;
+    gap: 6px;
+  }
+
+  .leaderboard-dialog h2,
+  .account-dialog h2,
+  .options-dialog h2 {
+    min-height: 34px;
+    font-size: 18px;
+  }
+
+  .leaderboard-entry,
+  .leaderboard-header {
+    grid-template-columns: 36px 40px minmax(100px, 1fr) 70px 88px;
+    min-height: 34px;
+    font-size: 11px;
+  }
+
+  .leaderboard-account-prompt {
+    grid-template-columns: minmax(0, 1fr) 170px;
+    min-height: 42px;
+    padding: 5px 10px;
+  }
+
+  .leaderboard-google-button,
+  #leaderboard-close,
+  #account-close,
+  #options-close {
+    min-height: 36px;
+  }
+
+  .account-dialog {
+    grid-template-columns: 1fr 1fr;
+    align-content: stretch;
+  }
+
+  .account-dialog h2,
+  .account-status,
+  #account-close {
+    grid-column: 1 / -1;
+  }
+
+  .account-card {
+    min-height: 0;
+    overflow: auto;
+  }
+
+  .options-dialog {
+    width: min(500px, calc(100vw - 20px));
+    height: calc(100dvh - 16px);
+    padding: 10px 14px;
+    gap: 8px;
   }
 }
