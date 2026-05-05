@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.276
+### English
+- Renamed the start-screen advanced panel to "Replay ghost options" so it matches the ghost-only controls inside.
+### Japanese
+- トップ画面の詳細パネル名を「リプレイゴースト設定」に変更し、中にあるゴースト関連の操作内容と合うようにしました。
+
 ## v0.1.275
 ### English
 - Added a one-time 3.5-second story message when stamina first reaches zero during a stage.
