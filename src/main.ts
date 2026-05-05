@@ -61,12 +61,15 @@ import { DanmakuOverlay } from "./danmaku";
 import {
   fetchLeaderboardEntries,
   fetchMyLeaderboardEntries,
+  fetchLeaderboardUserSettings,
   getLeaderboardIdentity,
   isLeaderboardConfigured,
   logInLeaderboardWithGoogle,
+  saveLeaderboardUserSettings,
   signInLeaderboardWithGoogle,
   submitLeaderboardScore,
   type LeaderboardIdentity,
+  type LeaderboardUserSettings,
   unlinkLeaderboardGoogleAccount,
 } from "./leaderboard";
 import { showLeaderboardPanel } from "./leaderboardUi";
@@ -77,7 +80,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.219";
+const DEBUG_VERSION = "v0.1.226";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -93,6 +96,7 @@ const SCORE_DANMAKU_THRESHOLD = 1000;
 const CROUCH_DANMAKU_HOLD_MS = 2000;
 const JUMP_CHAIN_DANMAKU_COUNT = 5;
 const FALL_MISS_RESTART_DELAY_MS = 4800;
+const TIME_UP_HURT_TO_MISS_DELAY_MS = 520;
 const FALL_RESET_WORLD_MARGIN = 640;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
@@ -134,7 +138,7 @@ const BOOST_JUMP_SPEED_THRESHOLD = 285;
 const DASH_SPEED_MULTIPLIER = 2;
 const DASH_MAX_VERTICAL_SPEED = Math.abs(BOOSTED_JUMP_VELOCITY) * DASH_SPEED_MULTIPLIER;
 const MAX_STAMINA = 100;
-const AIR_JUMP_STAMINA_COST = 28;
+const AIR_JUMP_STAMINA_COST = 20;
 const DASH_STAMINA_DRAIN_PER_SECOND = 32;
 const STAMINA_RECOVERY_PER_SECOND = 42;
 const HUD_SCALE_BASE_WIDTH = 1280;
@@ -209,6 +213,9 @@ class PrototypeScene extends Phaser.Scene {
   private leaderboardGoogleLinked = false;
   private leaderboardGoogleEmail: string | null = null;
   private leaderboardGoogleDisplayName: string | null = null;
+  private leaderboardSettingsSyncLoadedForPlayerId = "";
+  private leaderboardSettingsSaveTimer: number | undefined;
+  private applyingLeaderboardUserSettings = false;
   private controlMode: ControlMode = "pc";
   private currentStageId: StageId = DEFAULT_STAGE_ID;
   private locale: Locale = getBrowserLocale();
@@ -534,10 +541,14 @@ class PrototypeScene extends Phaser.Scene {
     if (!this.isRunActive) {
       if (!this.isDefeatSequenceActive) {
         this.applyPlayerBody(false);
+        this.player.setVelocity(0, 0);
       }
       this.updateCollisionDebug();
       this.player.setAcceleration(0, 0);
-      this.player.setVelocity(0, 0);
+      return;
+    }
+    if (this.getRemainingMilliseconds() <= 0) {
+      this.playTimeUpMissSequence();
       return;
     }
 
@@ -899,6 +910,7 @@ class PrototypeScene extends Phaser.Scene {
         this.setCookieValue(STAGE_ID_STORAGE_KEY, this.currentStageId);
         this.setLocale(locale);
         this.setSoundEnabled(soundOn);
+        this.scheduleLeaderboardUserSettingsSave();
         this.setupComplete = true;
         this.startRun();
       },
@@ -1023,6 +1035,92 @@ class PrototypeScene extends Phaser.Scene {
     this.leaderboardGoogleDisplayName = identity.displayName;
     this.updatePlayerNameText();
     this.startModal?.setAccountStatus(this.getStartAccountStatus());
+    void this.syncLeaderboardUserSettings();
+  }
+
+  private async syncLeaderboardUserSettings() {
+    if (!this.leaderboardGoogleLinked || !this.leaderboardPlayerId) {
+      this.leaderboardSettingsSyncLoadedForPlayerId = "";
+      return;
+    }
+    if (this.leaderboardSettingsSyncLoadedForPlayerId === this.leaderboardPlayerId) {
+      return;
+    }
+
+    try {
+      const settings = await fetchLeaderboardUserSettings();
+      this.leaderboardSettingsSyncLoadedForPlayerId = this.leaderboardPlayerId;
+      if (settings && Object.keys(settings).length > 0) {
+        this.applyLeaderboardUserSettings(settings);
+        return;
+      }
+      await saveLeaderboardUserSettings(this.getLeaderboardUserSettings());
+    } catch (error) {
+      console.warn("Could not sync leaderboard user settings.", error);
+    }
+  }
+
+  private getLeaderboardUserSettings(): LeaderboardUserSettings {
+    return {
+      playerName: this.playerName,
+      locale: this.locale,
+      stageId: this.currentStageId,
+      soundVolumePercent: this.soundVolumePercent,
+      soundMuted: this.soundMuted,
+      danmakuEnabled: this.danmakuEnabled,
+    };
+  }
+
+  private applyLeaderboardUserSettings(settings: LeaderboardUserSettings) {
+    this.applyingLeaderboardUserSettings = true;
+    try {
+      if (settings.playerName) {
+        this.playerName = settings.playerName;
+        this.setCookieValue("actiongame_player_name", this.playerName);
+      }
+      if (settings.locale && isLocale(settings.locale)) {
+        this.setLocale(settings.locale);
+      }
+      if (settings.stageId && (!this.setupComplete || this.startModal)) {
+        this.currentStageId = this.resolveStageId(settings.stageId);
+        this.setCookieValue(STAGE_ID_STORAGE_KEY, this.currentStageId);
+      }
+      if (typeof settings.soundVolumePercent === "number") {
+        this.soundVolumePercent = Phaser.Math.Clamp(Math.round(settings.soundVolumePercent), 0, 100);
+      }
+      if (typeof settings.soundMuted === "boolean") {
+        this.soundMuted = settings.soundMuted;
+      }
+      if (typeof settings.danmakuEnabled === "boolean") {
+        this.danmakuEnabled = settings.danmakuEnabled;
+        this.setCookieValue("actiongame_danmaku_disabled", settings.danmakuEnabled ? "0" : "1");
+      }
+      this.applySoundSettings();
+      this.refreshLocalizedUI();
+      if (this.startModal) {
+        this.showStartModal();
+      }
+      if (this.setupComplete) {
+        this.createGlobalUI();
+      }
+    } finally {
+      this.applyingLeaderboardUserSettings = false;
+    }
+  }
+
+  private scheduleLeaderboardUserSettingsSave() {
+    if (this.applyingLeaderboardUserSettings || !this.leaderboardGoogleLinked) {
+      return;
+    }
+    if (this.leaderboardSettingsSaveTimer !== undefined) {
+      window.clearTimeout(this.leaderboardSettingsSaveTimer);
+    }
+    this.leaderboardSettingsSaveTimer = window.setTimeout(() => {
+      this.leaderboardSettingsSaveTimer = undefined;
+      void saveLeaderboardUserSettings(this.getLeaderboardUserSettings()).catch((error) => {
+        console.warn("Could not save leaderboard user settings.", error);
+      });
+    }, 400);
   }
 
   private getSavedLocale() {
@@ -1042,6 +1140,7 @@ class PrototypeScene extends Phaser.Scene {
       // Ignore storage failures; the current session can still use the chosen language.
     }
     this.refreshLocalizedUI();
+    this.scheduleLeaderboardUserSettingsSave();
   }
 
   private refreshLocalizedUI() {
@@ -1135,6 +1234,7 @@ class PrototypeScene extends Phaser.Scene {
     this.sound.mute = this.soundMuted;
     this.saveVolumeSettings(this.soundVolumePercent, this.soundMuted);
     this.refreshGlobalSoundUI();
+    this.scheduleLeaderboardUserSettingsSave();
   }
 
   private setSoundEnabled(soundOn: boolean) {
@@ -1152,6 +1252,7 @@ class PrototypeScene extends Phaser.Scene {
   private setDanmakuEnabled(enabled: boolean) {
     this.danmakuEnabled = enabled;
     this.setCookieValue("actiongame_danmaku_disabled", enabled ? "0" : "1");
+    this.scheduleLeaderboardUserSettingsSave();
     if (!enabled) {
       this.danmaku?.clear();
     }
@@ -1439,6 +1540,8 @@ class PrototypeScene extends Phaser.Scene {
       getStageConstants: () => this.stageConstants,
       rebuildStageObjects: () => this.rebuildEditableStageObjects(),
       moveGoalTo: (x, y) => this.moveGoalTo(x, y),
+      getRemainingTimeSeconds: () => this.getRemainingMilliseconds() / 1000,
+      setRemainingTimeSeconds: (seconds) => this.setRemainingTimeSeconds(seconds),
       onToggle: (enabled) => {
         this.updateEditorTimerPause(enabled);
         this.rebuildEditableStageObjects();
@@ -1792,6 +1895,19 @@ class PrototypeScene extends Phaser.Scene {
     return Math.max(0, GAME_TIME_MS - elapsed);
   }
 
+  private setRemainingTimeSeconds(seconds: number) {
+    if (!this.isRunActive || this.startTime === 0 || !Number.isFinite(seconds)) {
+      return;
+    }
+
+    const remainingMs = Phaser.Math.Clamp(Math.round(seconds * 1000), 0, GAME_TIME_MS);
+    const activeEditorPauseMs =
+      this.editorTimerPauseStartedAt === 0 ? 0 : Math.max(0, this.time.now - this.editorTimerPauseStartedAt);
+    const elapsedMs = GAME_TIME_MS - remainingMs;
+    this.startTime = this.time.now - this.editorTimerPausedMs - activeEditorPauseMs - elapsedMs;
+    this.updateTimerText();
+  }
+
   private formatTimeSeconds(milliseconds: number) {
     return (milliseconds / 1000).toFixed(2);
   }
@@ -2057,6 +2173,49 @@ class PrototypeScene extends Phaser.Scene {
     });
   }
 
+  private playTimeUpMissSequence() {
+    if (this.isDefeatSequenceActive || this.isRestarting || this.hasWon) {
+      return;
+    }
+
+    this.dismissLeaderboard();
+    this.isDefeatSequenceActive = true;
+    this.isRunActive = false;
+    this.hurtUntil = 0;
+    this.invulnerableUntil = 0;
+    this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
+    this.mobileJumpQueued = false;
+    freezeEnemies(this.enemiesGroup);
+    this.timerText?.setText(`${t(this.locale, "hud.time")}:0.00`);
+    this.isLanding = false;
+    this.landingFastForwarded = false;
+    this.resetPlayerIdleState();
+    this.damageTween?.stop();
+    this.damageTween = undefined;
+    this.player.clearTint();
+    this.player.setAlpha(1);
+    this.player.setAngle(0);
+    this.applyPlayerBody(false);
+    this.player.body.setAllowGravity(true);
+    this.player.setAcceleration(0, 0);
+    this.player.setVelocity(this.player.flipX ? DAMAGE_KNOCKBACK_X : -DAMAGE_KNOCKBACK_X, DAMAGE_KNOCKBACK_Y);
+    this.player.setDragX(AIR_DRAG);
+    this.player.anims.timeScale = 1;
+    this.player.anims.play("player-air", true);
+    this.playDamageMotion(this.player.flipX ? -1 : 1);
+    this.cameras.main.flash(180, 253, 224, 71);
+    this.cameras.main.shake(220, 0.008);
+    this.time.delayedCall(TIME_UP_HURT_TO_MISS_DELAY_MS, () => {
+      this.damageTween?.stop();
+      this.damageTween = undefined;
+      this.player.clearTint();
+      this.player.setVelocity(0, 0);
+      this.player.anims.stop();
+      this.player.setAlpha(0.55);
+      this.showMissPresentation("timeUp");
+    });
+  }
+
   private playFallMissSequence() {
     if (this.isDefeatSequenceActive || this.isRestarting) {
       return;
@@ -2077,8 +2236,16 @@ class PrototypeScene extends Phaser.Scene {
     this.player.setAlpha(0.55);
     this.cameras.main.flash(220, 255, 34, 68);
     this.cameras.main.shake(320, 0.012);
+    this.showMissPresentation("miss");
+  }
+
+  private showMissPresentation(danmakuKind: "miss" | "timeUp") {
     if (this.danmakuEnabled) {
-      this.danmaku?.emitMiss();
+      if (danmakuKind === "timeUp") {
+        this.danmaku?.emitTimeUp();
+      } else {
+        this.danmaku?.emitMiss();
+      }
     }
     this.missText?.destroy();
     const missBurst = this.add

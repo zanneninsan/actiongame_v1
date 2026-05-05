@@ -65,6 +65,21 @@ const MISS_COMMENTS = [
   "見なかったことにしよう",
 ];
 
+const TIME_UP_COMMENTS = [
+  "TIME UP",
+  "時間切れ",
+  "0秒です",
+  "タイマー見て",
+  "延長戦なし",
+  "ここで終了",
+  "あと少しだった",
+  "急いでー",
+  "無情なカウント",
+  "MISS扱いです",
+  "リトライだ",
+  "次は間に合う",
+];
+
 type ActiveComment = Phaser.GameObjects.Text & {
   destroyTimer?: Phaser.Time.TimerEvent;
 };
@@ -116,6 +131,15 @@ export class DanmakuOverlay {
       stroke: "#881337",
       fontSize: 27,
       duration: 3800,
+    });
+  }
+
+  emitTimeUp() {
+    this.emitCenterBurst(TIME_UP_COMMENTS, 28, 58, {
+      color: "#fef08a",
+      stroke: "#7f1d1d",
+      fontSize: 29,
+      duration: 2400,
     });
   }
 
@@ -179,6 +203,69 @@ export class DanmakuOverlay {
       onComplete: () => this.removeComment(comment),
     });
     comment.destroyTimer = this.scene.time.delayedCall(style.duration + 1200, () => this.removeComment(comment));
+  }
+
+  private emitCenterBurst(
+    comments: readonly string[],
+    count: number,
+    staggerMs: number,
+    options: Partial<DanmakuStyle> = {},
+  ) {
+    for (let index = 0; index < count; index += 1) {
+      const timer = this.scene.time.delayedCall(index * staggerMs, () => {
+        this.pendingTimers.delete(timer);
+        this.emitCenter(comments[index % comments.length], index, options);
+      });
+      this.pendingTimers.add(timer);
+    }
+  }
+
+  private emitCenter(message: string, index: number, options: Partial<DanmakuStyle> = {}) {
+    const style = {
+      color: options.color ?? "#f8fafc",
+      stroke: options.stroke ?? "#020617",
+      fontSize: options.fontSize ?? 24,
+      duration: options.duration ?? 2600,
+    };
+    const ring = Math.floor(index / 7);
+    const angle = Phaser.Math.DegToRad(index * 137 + Phaser.Math.Between(-12, 12));
+    const radius = Phaser.Math.Between(10 + ring * 20, 54 + ring * 34);
+    const x = this.width / 2 + Math.cos(angle) * radius;
+    const y = this.height / 2 + Math.sin(angle) * radius * 0.62;
+    const comment = this.scene.add
+      .text(x, y, message, {
+        fontFamily: "monospace",
+        fontSize: `${style.fontSize + Phaser.Math.Between(-3, 4)}px`,
+        color: style.color,
+        stroke: style.stroke,
+        strokeThickness: 5,
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(181 + (index % 6))
+      .setAlpha(0)
+      .setScale(0.35)
+      .setAngle(Phaser.Math.Between(-8, 8))
+      .setShadow(2, 2, "#000000", 2, true, true) as ActiveComment;
+
+    this.activeComments.add(comment);
+    this.scene.tweens.add({
+      targets: comment,
+      alpha: { from: 0, to: 0.94 },
+      scale: { from: 0.35, to: Phaser.Math.FloatBetween(0.96, 1.22) },
+      duration: 180,
+      ease: "Back.easeOut",
+    });
+    this.scene.tweens.add({
+      targets: comment,
+      alpha: 0,
+      scale: "+=0.28",
+      duration: 520,
+      delay: style.duration + Phaser.Math.Between(-260, 260),
+      ease: "Sine.easeIn",
+      onComplete: () => this.removeComment(comment),
+    });
+    comment.destroyTimer = this.scene.time.delayedCall(style.duration + 1100, () => this.removeComment(comment));
   }
 
   private getLaneY() {

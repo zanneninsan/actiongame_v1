@@ -2,6 +2,48 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.226
+### English
+- Added stationary and no-gravity stationary enemy behavior overrides to enemy placements and the stage editor.
+### Japanese
+- 敵配置の挙動に「その場で静止」と「その場で静止(重力無効)」を追加し、ステージ編集パネルから選べるようにしました。
+
+## v0.1.225
+### English
+- Added a debug control in the stage editor panel for setting the remaining time during a run.
+### Japanese
+- デバッグ用に、ステージ編集パネルからプレイ中の残り時間を変更できる入力欄を追加しました。
+
+## v0.1.224
+### English
+- Made the stage editor panel show only the option rows related to the currently selected tool.
+### Japanese
+- ステージ編集パネルで、現在選択中のツールに関係する設定項目だけを表示するようにしました。
+
+## v0.1.223
+### English
+- Added a time-up miss sequence that knocks the player back before showing MISS, with center-burst danmaku comments for timeouts.
+### Japanese
+- 残り時間が0になったとき、のけぞり後にMISS扱いへ移行し、中央から文字が増える時間切れ用の弾幕を表示するようにしました。
+
+## v0.1.222
+### English
+- Reduced the stamina cost for air jumps from 28 to 20.
+### Japanese
+- 空中ジャンプのスタミナ消費を28から20に下げました。
+
+## v0.1.221
+### English
+- Removed the old moving-platform debug logging preference from the game and Google account settings sync.
+### Japanese
+- 使わなくなった動く足場のデバッグログ設定を、ゲーム本体とGoogleアカウント同期対象から削除しました。
+
+## v0.1.220
+### English
+- Sync player preferences to the linked Google account, including name, language, stage, sound, and danmaku settings.
+### Japanese
+- プレイヤー名、言語、ステージ、サウンド、弾幕設定を、連携済みGoogleアカウントに同期するようにしました。
+
 ## v0.1.219
 ### English
 - Added Google login and account status controls to the start screen while keeping anonymous play available.

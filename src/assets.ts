@@ -33,6 +33,8 @@ export type EnemyAiType =
   | "chase"
   | "shooter"
   | "turret"
+  | "stationary"
+  | "stationaryNoGravity"
   | "projectile"
   | "cannonProjectile";
 export const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
@@ -65,7 +67,15 @@ export type PlatformRunPlacement = {
 export type StreetLampPlacement = { x: number; key: StreetLampKey; scale?: number };
 export type StageDecorationPlacement = { x: number; y?: number; key: string; scale?: number };
 export type ItemPlacement = { type: ItemType; x: number; y: number };
-export type EnemyPlacement = { type?: EnemyType; x: number; y: number; patrolLeft: number; patrolRight: number; speed?: number };
+export type EnemyPlacement = {
+  type?: EnemyType;
+  aiType?: EnemyAiType;
+  x: number;
+  y: number;
+  patrolLeft: number;
+  patrolRight: number;
+  speed?: number;
+};
 export type BonusBlockPlacement = { type: "hidden" | "question" | "breakable"; x: number; y: number; reward?: ItemType };
 export type CheckpointPlacement = { x: number; y: number };
 export type OneWayGatePlacement = { x: number; y: number; height?: number };

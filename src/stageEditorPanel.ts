@@ -3,6 +3,7 @@ import {
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
   type EnemyType,
+  type EnemyAiType,
   type ItemType,
   type MovingPlatformAxis,
   type StreetLampKey,
@@ -32,6 +33,8 @@ type StageEditorPanelOptions = {
   onRedo: () => void;
   onExport: () => void;
   onImport: (json: string) => void;
+  getRemainingTimeSeconds: () => number;
+  onRemainingTimeChange: (seconds: number) => void;
 };
 
 export class StageEditorPanel {
@@ -45,8 +48,10 @@ export class StageEditorPanel {
   private movingSpeedInput?: HTMLInputElement;
   private itemTypeSelect?: HTMLSelectElement;
   private enemyTypeSelect?: HTMLSelectElement;
+  private enemyAiTypeSelect?: HTMLSelectElement;
   private lampTypeSelect?: HTMLSelectElement;
   private decorationSelect?: HTMLSelectElement;
+  private remainingTimeInput?: HTMLInputElement;
   private undoButton?: HTMLButtonElement;
   private redoButton?: HTMLButtonElement;
   private importFileInput?: HTMLInputElement;
@@ -86,6 +91,11 @@ export class StageEditorPanel {
     return (this.enemyTypeSelect?.value ?? "aquaMascot") as EnemyType;
   }
 
+  get enemyAiType() {
+    const value = this.enemyAiTypeSelect?.value ?? "";
+    return value ? (value as EnemyAiType) : undefined;
+  }
+
   get lampType() {
     return (this.lampTypeSelect?.value ?? PROP_ASSETS.lampSingle) as StreetLampKey;
   }
@@ -122,11 +132,11 @@ export class StageEditorPanel {
             <option value="goal">${t(this.options.locale, "editor.tool.goal")}</option>
           </select>
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="platform movingPlatform">
           <label>${t(this.options.locale, "editor.units")}</label>
           <input data-platform-units type="number" min="1" max="16" value="3" />
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="movingPlatform">
           <label>${t(this.options.locale, "editor.movingAxis")}</label>
           <select data-moving-axis>
             <option value="x">${t(this.options.locale, "editor.movingAxis.x")}</option>
@@ -134,19 +144,19 @@ export class StageEditorPanel {
             <option value="xy">${t(this.options.locale, "editor.movingAxis.xy")}</option>
           </select>
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="movingPlatform">
           <label>${t(this.options.locale, "editor.movingDistance")}</label>
           <input data-moving-distance type="number" min="-960" max="960" step="32" value="256" />
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="movingPlatform">
           <label>${t(this.options.locale, "editor.movingDistanceY")}</label>
           <input data-moving-distance-y type="number" min="-960" max="960" step="32" value="160" />
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="movingPlatform">
           <label>${t(this.options.locale, "editor.movingSpeed")}</label>
           <input data-moving-speed type="number" min="16" max="360" step="8" value="90" />
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="item">
           <label>${t(this.options.locale, "editor.item")}</label>
           <select data-item-type>
             <option value="energyDrink">${t(this.options.locale, "editor.item.energy")}</option>
@@ -159,20 +169,28 @@ export class StageEditorPanel {
             <option value="dashRing">${t(this.options.locale, "editor.item.dashRing")}</option>
           </select>
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="enemy">
           <label>${t(this.options.locale, "editor.enemy")}</label>
           <select data-enemy-type>
             ${Object.entries(ENEMY_DEFINITIONS).map(([type, definition]) => `<option value="${type}">${definition.label}</option>`).join("")}
           </select>
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="enemy">
+          <label>${t(this.options.locale, "editor.enemyBehavior")}</label>
+          <select data-enemy-ai-type>
+            <option value="">${t(this.options.locale, "editor.enemyBehavior.default")}</option>
+            <option value="stationary">${t(this.options.locale, "editor.enemyBehavior.stationary")}</option>
+            <option value="stationaryNoGravity">${t(this.options.locale, "editor.enemyBehavior.stationaryNoGravity")}</option>
+          </select>
+        </div>
+        <div class="editor-row" data-editor-fields="streetLamp">
           <label>${t(this.options.locale, "editor.lamp")}</label>
           <select data-lamp-type>
             <option value="${PROP_ASSETS.lampSingle}">${t(this.options.locale, "editor.lamp.single")}</option>
             <option value="${PROP_ASSETS.lampDouble}">${t(this.options.locale, "editor.lamp.double")}</option>
           </select>
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="decoration">
           <label>${t(this.options.locale, "editor.object")}</label>
           <select data-decoration-key>
             ${STAGE_OBJECT_ASSETS.map((asset) => `<option value="${asset.key}">${asset.key.replace("stage-", "")}</option>`).join("")}
@@ -181,6 +199,15 @@ export class StageEditorPanel {
         <div class="editor-history-row">
           <button data-editor-undo type="button" disabled>${t(this.options.locale, "editor.undo")}</button>
           <button data-editor-redo type="button" disabled>${t(this.options.locale, "editor.redo")}</button>
+        </div>
+        <div class="editor-row editor-time-row">
+          <label>${t(this.options.locale, "editor.remainingTime")}</label>
+          <div class="editor-inline-control">
+            <input data-editor-remaining-time type="number" min="0" max="360" step="1" value="${Math.round(
+              this.options.getRemainingTimeSeconds(),
+            )}" />
+            <button data-editor-apply-time type="button">${t(this.options.locale, "editor.applyTime")}</button>
+          </div>
         </div>
         <p class="editor-help">${t(this.options.locale, "editor.help.select")}</p>
         <p class="editor-help">${t(this.options.locale, "editor.help.keys")}</p>
@@ -205,8 +232,10 @@ export class StageEditorPanel {
     this.movingSpeedInput = panel.querySelector<HTMLInputElement>("[data-moving-speed]")!;
     this.itemTypeSelect = panel.querySelector<HTMLSelectElement>("[data-item-type]")!;
     this.enemyTypeSelect = panel.querySelector<HTMLSelectElement>("[data-enemy-type]")!;
+    this.enemyAiTypeSelect = panel.querySelector<HTMLSelectElement>("[data-enemy-ai-type]")!;
     this.lampTypeSelect = panel.querySelector<HTMLSelectElement>("[data-lamp-type]")!;
     this.decorationSelect = panel.querySelector<HTMLSelectElement>("[data-decoration-key]")!;
+    this.remainingTimeInput = panel.querySelector<HTMLInputElement>("[data-editor-remaining-time]")!;
     this.undoButton = panel.querySelector<HTMLButtonElement>("[data-editor-undo]")!;
     this.redoButton = panel.querySelector<HTMLButtonElement>("[data-editor-redo]")!;
     this.importFileInput = panel.querySelector<HTMLInputElement>("[data-editor-import-file]")!;
@@ -217,24 +246,48 @@ export class StageEditorPanel {
     const exportButton = panel.querySelector<HTMLButtonElement>(".editor-export-button")!;
     const importButton = panel.querySelector<HTMLButtonElement>("[data-editor-import]")!;
     const loadFileButton = panel.querySelector<HTMLButtonElement>("[data-editor-load-file]")!;
+    const applyTimeButton = panel.querySelector<HTMLButtonElement>("[data-editor-apply-time]")!;
+    const toolFieldRows = Array.from(panel.querySelectorAll<HTMLElement>("[data-editor-fields]"));
     toolSelect.value = this.options.initialTool;
     panel.classList.toggle("is-open", this.enabled);
     toggleButton.textContent = this.enabled ? t(this.options.locale, "editor.toggleOn") : t(this.options.locale, "editor.toggle");
+    const refreshToolFields = () => {
+      const selectedTool = toolSelect.value;
+      toolFieldRows.forEach((row) => {
+        const tools = row.dataset.editorFields?.split(/\s+/) ?? [];
+        row.hidden = !tools.includes(selectedTool);
+      });
+    };
 
     const toggleEditor = () => {
       this.enabled = !this.enabled;
       panel.classList.toggle("is-open", this.enabled);
       toggleButton.textContent = this.enabled ? t(this.options.locale, "editor.toggleOn") : t(this.options.locale, "editor.toggle");
+      if (this.enabled && this.remainingTimeInput) {
+        this.remainingTimeInput.value = String(Math.round(this.options.getRemainingTimeSeconds()));
+      }
       this.options.onToggle(this.enabled);
     };
     const setTool = () => {
       this.options.onToolChange(toolSelect.value as EditorTool);
+      refreshToolFields();
     };
     const importFromTextarea = () => {
       this.options.onImport(this.exportTextarea?.value ?? "");
     };
     const openImportFile = () => {
       this.importFileInput?.click();
+    };
+    const applyRemainingTime = () => {
+      const seconds = Number(this.remainingTimeInput?.value);
+      if (!Number.isFinite(seconds)) {
+        return;
+      }
+      this.options.onRemainingTimeChange(seconds);
+      if (this.remainingTimeInput) {
+        this.remainingTimeInput.value = String(Math.round(this.options.getRemainingTimeSeconds()));
+      }
+      this.setImportStatus(t(this.options.locale, "editor.status.timeUpdated"));
     };
     const importSelectedFile = () => {
       const file = this.importFileInput?.files?.[0];
@@ -260,6 +313,7 @@ export class StageEditorPanel {
     exportButton.addEventListener("click", this.options.onExport);
     importButton.addEventListener("click", importFromTextarea);
     loadFileButton.addEventListener("click", openImportFile);
+    applyTimeButton.addEventListener("click", applyRemainingTime);
     this.importFileInput.addEventListener("change", importSelectedFile);
     this.cleanup.push(() => {
       toggleButton.removeEventListener("click", toggleEditor);
@@ -269,8 +323,10 @@ export class StageEditorPanel {
       exportButton.removeEventListener("click", this.options.onExport);
       importButton.removeEventListener("click", importFromTextarea);
       loadFileButton.removeEventListener("click", openImportFile);
+      applyTimeButton.removeEventListener("click", applyRemainingTime);
       this.importFileInput?.removeEventListener("change", importSelectedFile);
     });
+    refreshToolFields();
     this.bindDrag(panel);
   }
 
@@ -329,8 +385,10 @@ export class StageEditorPanel {
     this.movingSpeedInput = undefined;
     this.itemTypeSelect = undefined;
     this.enemyTypeSelect = undefined;
+    this.enemyAiTypeSelect = undefined;
     this.lampTypeSelect = undefined;
     this.decorationSelect = undefined;
+    this.remainingTimeInput = undefined;
     this.undoButton = undefined;
     this.redoButton = undefined;
     this.importFileInput = undefined;
