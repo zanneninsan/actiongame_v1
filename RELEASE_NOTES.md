@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.222
+### English
+- Reduced the stamina cost for air jumps from 28 to 20.
+### Japanese
+- 空中ジャンプのスタミナ消費を28から20に下げました。
+
 ## v0.1.221
 ### English
 - Removed the old moving-platform debug logging preference from the game and Google account settings sync.
