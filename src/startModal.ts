@@ -11,6 +11,10 @@ export type StartAccountStatus = {
   email: string | null;
   displayName: string | null;
 };
+export type StartGhostLoadResult = {
+  label: string;
+  stageId?: string;
+};
 
 type StartModalOptions = {
   playerName: string;
@@ -23,6 +27,7 @@ type StartModalOptions = {
   onLocaleChange: (locale: Locale) => void;
   onSoundOnChange: (soundOn: boolean) => void;
   onGoogleLogin: () => Promise<StartAccountStatus | undefined>;
+  onGhostReplayLoad: (jsonText: string) => StartGhostLoadResult;
   onSubmit: (settings: { playerName: string; controlMode: ControlMode; stageId: string; soundOn: boolean; locale: Locale }) => void;
 };
 
@@ -80,6 +85,11 @@ export class StartModal {
           this.options.locale,
           "start.playerSpec",
         )}</a>
+        <div class="start-ghost-panel">
+          <input id="start-ghost-file" class="start-ghost-file" type="file" accept="application/json,.json" />
+          <label for="start-ghost-file" class="start-ghost-load">${t(this.options.locale, "start.ghostLoad")}</label>
+          <span class="start-ghost-status">${t(this.options.locale, "start.ghostEmpty")}</span>
+        </div>
         <div class="start-account-panel">
           <span class="start-account-status"></span>
           <div class="start-account-actions">
@@ -99,6 +109,8 @@ export class StartModal {
     const stageSelect = overlay.querySelector<HTMLSelectElement>("select[name='stage']")!;
     const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
     const soundButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-sound]"));
+    const ghostFileInput = overlay.querySelector<HTMLInputElement>("#start-ghost-file")!;
+    const ghostStatus = overlay.querySelector<HTMLSpanElement>(".start-ghost-status")!;
     const accountStatus = overlay.querySelector<HTMLSpanElement>(".start-account-status")!;
     const startButton = overlay.querySelector<HTMLButtonElement>(".start-button")!;
     const googleLoginButton = overlay.querySelector<HTMLButtonElement>(".start-google-login")!;
@@ -116,6 +128,9 @@ export class StartModal {
     stageSelect.addEventListener("keydown", (event) => event.stopPropagation());
     stageSelect.addEventListener("keyup", (event) => event.stopPropagation());
     stageSelect.addEventListener("keypress", (event) => event.stopPropagation());
+    ghostFileInput.addEventListener("keydown", (event) => event.stopPropagation());
+    ghostFileInput.addEventListener("keyup", (event) => event.stopPropagation());
+    ghostFileInput.addEventListener("keypress", (event) => event.stopPropagation());
     stageSelect.addEventListener("change", () => {
       selectedStageId = stageSelect.value;
       this.options.stageId = selectedStageId;
@@ -195,6 +210,27 @@ export class StartModal {
             ? t(this.options.locale, "start.googleLoggedIn")
             : t(this.options.locale, "start.googleLogin");
         }
+      }
+    });
+
+    ghostFileInput.addEventListener("change", async () => {
+      const file = ghostFileInput.files?.[0];
+      if (!file) {
+        return;
+      }
+
+      try {
+        const result = this.options.onGhostReplayLoad(await file.text());
+        ghostStatus.textContent = result.label;
+        if (result.stageId && Array.from(stageSelect.options).some((option) => option.value === result.stageId)) {
+          selectedStageId = result.stageId;
+          stageSelect.value = result.stageId;
+          this.options.stageId = result.stageId;
+        }
+      } catch (error) {
+        console.warn("Could not load ghost replay.", error);
+        ghostStatus.textContent = t(this.options.locale, "start.ghostLoadFailed");
+        ghostFileInput.value = "";
       }
     });
 
