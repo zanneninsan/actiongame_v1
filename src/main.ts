@@ -84,7 +84,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.258";
+const DEBUG_VERSION = "v0.1.263";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -93,6 +93,7 @@ const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
 };
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
+const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
@@ -168,11 +169,12 @@ const HUD_PLAYER_NAME_Y = 28;
 const HUD_SCORE_Y = 56;
 const HUD_TIMER_X = 230;
 const HUD_STAMINA_Y = 80;
+const HUD_STAMINA_BAR_X = 150;
 const HUD_STAMINA_BAR_Y = 89;
 const HUD_STAMINA_BAR_WIDTH = 132;
 const HUD_STAMINA_BAR_HEIGHT = 9;
-const HUD_STAMINA_FILL_WIDTH = 128;
-const HUD_STAMINA_FILL_HEIGHT = 5;
+const HUD_STAMINA_FILL_WIDTH = HUD_STAMINA_BAR_WIDTH;
+const HUD_STAMINA_FILL_HEIGHT = HUD_STAMINA_BAR_HEIGHT;
 const OVERHEAD_STAMINA_BAR_WIDTH = 76;
 const OVERHEAD_STAMINA_BAR_HEIGHT = 8;
 const OVERHEAD_STAMINA_FILL_WIDTH = 70;
@@ -183,6 +185,7 @@ const GHOST_RECORD_INTERVAL_MS = 50;
 const GHOST_EXPORT_BUTTON_X = GAME_WIDTH - 168;
 const GHOST_EXPORT_BUTTON_Y = 118;
 const CLEAR_MENU_BUTTON_Y = GHOST_EXPORT_BUTTON_Y + 46;
+const SHOW_CLEAR_RANK_AND_MISSIONS = false;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
@@ -253,6 +256,7 @@ class PrototypeScene extends Phaser.Scene {
   private staminaText!: Phaser.GameObjects.Text;
   private staminaBarBack!: Phaser.GameObjects.Rectangle;
   private staminaBarFill!: Phaser.GameObjects.Rectangle;
+  private staminaBarFrame!: Phaser.GameObjects.Rectangle;
   private overheadStaminaBarBack!: Phaser.GameObjects.Rectangle;
   private overheadStaminaBarFill!: Phaser.GameObjects.Rectangle;
   private controlHintText!: Phaser.GameObjects.Text;
@@ -305,6 +309,10 @@ class PrototypeScene extends Phaser.Scene {
   private stageEditor?: StageEditor;
   private restartStageEditorEnabled = false;
   private restartEditorStage?: StageDefinition;
+  private readonly handleGameLayoutRefresh = () => {
+    this.scale.refresh();
+    this.applyHudScale();
+  };
   private storyDialogue?: StoryDialogueController;
   private storyDialogueQueue: QueuedStoryDialogue[] = [];
   private hasAdvancedStoryDialogueAtX = false;
@@ -574,16 +582,21 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(100)
       .setShadow(1, 1, "#020617", 2, true, true);
     this.staminaBarBack = this.add
-      .rectangle(150, HUD_STAMINA_BAR_Y, 132, 9, 0x0f172a, 0.78)
+      .rectangle(HUD_STAMINA_BAR_X, HUD_STAMINA_BAR_Y, HUD_STAMINA_BAR_WIDTH, HUD_STAMINA_BAR_HEIGHT, 0x0f172a, 0.78)
       .setOrigin(0, 0.5)
       .setScrollFactor(0)
       .setDepth(99);
-    this.staminaBarBack.setStrokeStyle(1, 0x86efac, 0.8);
     this.staminaBarFill = this.add
-      .rectangle(152, HUD_STAMINA_BAR_Y, 128, 5, 0x86efac, 0.95)
+      .rectangle(HUD_STAMINA_BAR_X, HUD_STAMINA_BAR_Y, HUD_STAMINA_FILL_WIDTH, HUD_STAMINA_FILL_HEIGHT, 0x86efac, 0.95)
       .setOrigin(0, 0.5)
       .setScrollFactor(0)
       .setDepth(100);
+    this.staminaBarFrame = this.add
+      .rectangle(HUD_STAMINA_BAR_X, HUD_STAMINA_BAR_Y, HUD_STAMINA_BAR_WIDTH, HUD_STAMINA_BAR_HEIGHT, 0x0f172a, 0)
+      .setOrigin(0, 0.5)
+      .setScrollFactor(0)
+      .setDepth(101);
+    this.staminaBarFrame.setStrokeStyle(1, 0x86efac, 0.8);
     this.overheadStaminaBarBack = this.add
       .rectangle(this.player.x, this.player.y, OVERHEAD_STAMINA_BAR_WIDTH, OVERHEAD_STAMINA_BAR_HEIGHT, 0x020617, 0.78)
       .setOrigin(0.5, 0.5)
@@ -611,6 +624,8 @@ class PrototypeScene extends Phaser.Scene {
     this.applyHudScale();
     this.scale.off("resize", this.handleScaleResize, this);
     this.scale.on("resize", this.handleScaleResize, this);
+    window.removeEventListener(GAME_LAYOUT_REFRESH_EVENT, this.handleGameLayoutRefresh);
+    window.addEventListener(GAME_LAYOUT_REFRESH_EVENT, this.handleGameLayoutRefresh);
     this.updateControlHintText();
     this.danmaku = new DanmakuOverlay(this, GAME_WIDTH, GAME_HEIGHT);
     this.danmaku.setMode(this.danmakuMode);
@@ -871,6 +886,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private resetRunState() {
     this.scale.off("resize", this.handleScaleResize, this);
+    window.removeEventListener(GAME_LAYOUT_REFRESH_EVENT, this.handleGameLayoutRefresh);
     this.removeStartModal();
     this.removeMobileControls();
     this.removeStageEditor();
@@ -1428,16 +1444,22 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     if (this.staminaBarBack) {
-      this.staminaBarBack.setPosition(150 * scale, HUD_STAMINA_BAR_Y * scale);
+      this.staminaBarBack.setPosition(HUD_STAMINA_BAR_X * scale, HUD_STAMINA_BAR_Y * scale);
       this.staminaBarBack.width = HUD_STAMINA_BAR_WIDTH * scale;
       this.staminaBarBack.height = HUD_STAMINA_BAR_HEIGHT * scale;
-      this.staminaBarBack.setStrokeStyle(Math.max(1, Math.round(scale)), 0x86efac, 0.8);
     }
 
     if (this.staminaBarFill) {
-      this.staminaBarFill.setPosition(152 * scale, HUD_STAMINA_BAR_Y * scale);
+      this.staminaBarFill.setPosition(HUD_STAMINA_BAR_X * scale, HUD_STAMINA_BAR_Y * scale);
       this.staminaBarFill.height = HUD_STAMINA_FILL_HEIGHT * scale;
       this.updateStaminaHud();
+    }
+
+    if (this.staminaBarFrame) {
+      this.staminaBarFrame.setPosition(HUD_STAMINA_BAR_X * scale, HUD_STAMINA_BAR_Y * scale);
+      this.staminaBarFrame.width = HUD_STAMINA_BAR_WIDTH * scale;
+      this.staminaBarFrame.height = HUD_STAMINA_BAR_HEIGHT * scale;
+      this.staminaBarFrame.setStrokeStyle(Math.max(1, Math.round(scale)), 0x86efac, 0.8);
     }
 
     if (this.controlHintText) {
@@ -1772,6 +1794,16 @@ class PrototypeScene extends Phaser.Scene {
     const requestFullscreen =
       target.requestFullscreen ?? target.webkitRequestFullscreen ?? target.msRequestFullscreen;
     await Promise.resolve(requestFullscreen?.call(target)).catch(() => undefined);
+    await Promise.resolve(screen.orientation?.lock?.("landscape")).catch((error) =>
+      console.warn("Landscape orientation lock failed.", error),
+    );
+    this.scheduleGameLayoutRefresh();
+  }
+
+  private scheduleGameLayoutRefresh() {
+    for (const delayMs of [0, 80, 180, 360, 720]) {
+      window.setTimeout(this.handleGameLayoutRefresh, delayMs);
+    }
   }
 
   private createStageEditor(initialEnabled = this.stageEditor?.isEnabled ?? this.restartStageEditorEnabled) {
@@ -2907,6 +2939,8 @@ class PrototypeScene extends Phaser.Scene {
     const finalScore = this.roundScoreValue(itemScore + timeBonus);
     const clearRank = this.rewards?.getClearRank(finalScore, remaining, GAME_TIME_MS) ?? "C";
     const missionLine = this.rewards?.getMissionSummary(remaining, GAME_TIME_MS) ?? "";
+    const clearTitle = SHOW_CLEAR_RANK_AND_MISSIONS ? `${t(this.locale, "hud.clear")}  ${clearRank}` : t(this.locale, "hud.clear");
+    const missionResultLine = SHOW_CLEAR_RANK_AND_MISSIONS && missionLine ? `${missionLine}\n` : "";
     this.stopGhostRecording();
     this.timerText.setText(
       `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,
@@ -2917,7 +2951,7 @@ class PrototypeScene extends Phaser.Scene {
       .text(
         GAME_WIDTH / 2,
         GAME_HEIGHT / 2,
-        `${t(this.locale, "hud.clear")}  ${clearRank}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}\n${missionLine}\n${t(
+        `${clearTitle}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}\n${missionResultLine}${t(
           this.locale,
           "hud.timeBonus",
         )} ${this.formatScoreValue(timeBonus)}`,

@@ -1,5 +1,7 @@
 import { LOCALE_OPTIONS, t, type Locale } from "./i18n";
 
+const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
+
 export type ControlMode = "pc" | "mobile";
 export type StageOption = { id: string; label: Record<Locale, string> };
 export type StartAccountStatus = {
@@ -111,6 +113,7 @@ export class StartModal {
               <option value="">${t(this.options.locale, "start.ghostRankingEmpty")}</option>
             </select>
             <span class="start-ghost-status">${t(this.options.locale, "start.ghostEmpty")}</span>
+            <button type="button" class="start-ghost-fullscreen" hidden>${t(this.options.locale, "start.ghostRestoreFullscreen")}</button>
           </div>
         </details>
         <div class="start-account-panel">
@@ -136,6 +139,7 @@ export class StartModal {
     const soundButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-sound]"));
     const ghostFileInput = overlay.querySelector<HTMLInputElement>("#start-ghost-file")!;
     const ghostStatus = overlay.querySelector<HTMLSpanElement>(".start-ghost-status")!;
+    const ghostFullscreenButton = overlay.querySelector<HTMLButtonElement>(".start-ghost-fullscreen")!;
     const accountStatus = overlay.querySelector<HTMLSpanElement>(".start-account-status")!;
     const startButton = overlay.querySelector<HTMLButtonElement>(".start-button")!;
     const googleLoginButton = overlay.querySelector<HTMLButtonElement>(".start-google-login")!;
@@ -148,6 +152,7 @@ export class StartModal {
     let selectedStageId = this.options.stageId;
     let soundOn = this.options.soundOn;
     let selectedLocale = this.options.locale;
+    let localGhostFileLoaded = false;
 
     input.addEventListener("keydown", (event) => event.stopPropagation());
     input.addEventListener("keyup", (event) => event.stopPropagation());
@@ -185,6 +190,10 @@ export class StartModal {
       showOrientationPrompt(!orientationNote.hidden);
     };
 
+    const refreshGhostFullscreenButton = () => {
+      ghostFullscreenButton.hidden = !localGhostFileLoaded || !shouldSuggestMobileFullscreen();
+    };
+
     orientationYes.addEventListener("click", async () => {
       selectedMode = "mobile";
       this.options.controlMode = selectedMode;
@@ -194,6 +203,7 @@ export class StartModal {
       orientationYes.textContent = t(this.options.locale, "start.orientationTrying");
       try {
         const succeeded = await requestFullscreenAndLandscape();
+        scheduleGameLayoutRefresh();
         this.orientationPromptSatisfied = succeeded || isLandscapeViewport();
         if (this.orientationPromptSatisfied) {
           orientationPrompt.hidden = true;
@@ -215,9 +225,15 @@ export class StartModal {
     orientationPrompt.addEventListener("keydown", (event) => event.stopPropagation());
     window.addEventListener("resize", refreshOrientationPrompt, { passive: true });
     screen.orientation?.addEventListener?.("change", refreshOrientationPrompt);
+    document.addEventListener("fullscreenchange", refreshGhostFullscreenButton);
+    window.addEventListener("resize", refreshGhostFullscreenButton, { passive: true });
+    screen.orientation?.addEventListener?.("change", refreshGhostFullscreenButton);
     this.removeOrientationPromptListeners = () => {
       window.removeEventListener("resize", refreshOrientationPrompt);
       screen.orientation?.removeEventListener?.("change", refreshOrientationPrompt);
+      document.removeEventListener("fullscreenchange", refreshGhostFullscreenButton);
+      window.removeEventListener("resize", refreshGhostFullscreenButton);
+      screen.orientation?.removeEventListener?.("change", refreshGhostFullscreenButton);
     };
     const loadGhostOptions = async () => {
       ghostSelect.innerHTML = `<option value="">${t(this.options.locale, "start.ghostRankingLoading")}</option>`;
@@ -334,10 +350,31 @@ export class StartModal {
           stageSelect.value = result.stageId;
           this.options.stageId = result.stageId;
         }
+        localGhostFileLoaded = true;
+        window.setTimeout(refreshGhostFullscreenButton, 250);
       } catch (error) {
         console.warn("Could not load ghost replay.", error);
         ghostStatus.textContent = t(this.options.locale, "start.ghostLoadFailed");
         ghostFileInput.value = "";
+        localGhostFileLoaded = false;
+        refreshGhostFullscreenButton();
+      }
+    });
+
+    ghostFullscreenButton.addEventListener("click", async () => {
+      selectedMode = "mobile";
+      this.options.controlMode = selectedMode;
+      refreshMode();
+      ghostFullscreenButton.disabled = true;
+      ghostFullscreenButton.textContent = t(this.options.locale, "start.orientationTrying");
+      try {
+        const succeeded = await requestFullscreenAndLandscape();
+        scheduleGameLayoutRefresh();
+        this.orientationPromptSatisfied = succeeded || isLandscapeViewport();
+        refreshGhostFullscreenButton();
+      } finally {
+        ghostFullscreenButton.disabled = false;
+        ghostFullscreenButton.textContent = t(this.options.locale, "start.ghostRestoreFullscreen");
       }
     });
 
@@ -461,6 +498,15 @@ async function requestFullscreenAndLandscape() {
   }
 
   return fullscreenSucceeded && orientationSucceeded;
+}
+
+function scheduleGameLayoutRefresh() {
+  for (const delayMs of [0, 80, 180, 360, 720]) {
+    window.setTimeout(() => {
+      window.dispatchEvent(new Event("resize"));
+      window.dispatchEvent(new Event(GAME_LAYOUT_REFRESH_EVENT));
+    }, delayMs);
+  }
 }
 
 function escapeHtml(value: string) {

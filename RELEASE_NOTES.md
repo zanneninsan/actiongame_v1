@@ -2,6 +2,38 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.263
+### English
+- Aligned the top-left stamina gauge fill with its outer frame at 100 stamina.
+### Japanese
+- 左上のスタミナゲージが100の時、外枠とゲージ本体のサイズが揃うようにしました。
+
+## v0.1.262
+### English
+- Temporarily hid clear rank and mission summary lines from the result display while keeping the calculations available for later restoration.
+### Japanese
+- クリア時のランク表示とミッション達成表示をリザルトから一時的に非表示にし、後で戻せるように計算処理は残しました。
+
+## v0.1.261
+### English
+- Renamed the top-right spec shortcut to Guide.
+- Updated the mobile Full button to request landscape orientation when entering fullscreen and refresh the Phaser layout afterward.
+### Japanese
+- 右上の「仕様」ボタン表記を「取説」に変更しました。
+- スマホモードの「Full」ボタンでフルスクリーンに入る時に横画面もリクエストし、その後Phaserの表示領域を再計算するようにしました。
+
+## v0.1.260
+### English
+- Forced Phaser to refresh its scale layout after landscape fullscreen restoration so the canvas no longer keeps a portrait-sized drawing area.
+### Japanese
+- 横フルスクリーンへ戻した後にPhaserのスケール計算を明示的に更新し、描画領域が縦画面サイズのまま残らないようにしました。
+
+## v0.1.259
+### English
+- Added a mobile restore button after loading a local ghost JSON file so players can re-enter landscape fullscreen when the file picker exits fullscreen or rotates the screen.
+### Japanese
+- スマホでローカルのゴーストJSONファイルを読み込んだ後、ファイル選択でフルスクリーン解除や縦画面戻りが起きた場合に、横フルスクリーンへ戻れるボタンを表示するようにしました。
+
 ## v0.1.258
 ### English
 - Changed the clear result text to use a thin outline.
