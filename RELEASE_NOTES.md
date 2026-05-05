@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.242
+### English
+- Halved dash stamina drain and added a short dash linger after releasing Shift so tapping dash can conserve stamina while keeping momentum.
+### Japanese
+- ダッシュのスタミナ消費を半分にし、Shiftを離した後も短くダッシュが持続するようにして、細かく押すことでスタミナを温存できるようにしました。
+
 ## v0.1.241
 ### English
 - Added start-screen controls for selecting and loading saved top-ranking ghosts from Firebase.

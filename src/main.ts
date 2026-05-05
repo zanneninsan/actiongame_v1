@@ -82,7 +82,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.241";
+const DEBUG_VERSION = "v0.1.242";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -142,7 +142,8 @@ const DASH_MAX_VERTICAL_SPEED = Math.abs(BOOSTED_JUMP_VELOCITY) * DASH_SPEED_MUL
 const EDITOR_FLY_SPEED = 360;
 const MAX_STAMINA = 100;
 const AIR_JUMP_STAMINA_COST = 20;
-const DASH_STAMINA_DRAIN_PER_SECOND = 32;
+const DASH_STAMINA_DRAIN_PER_SECOND = 16;
+const DASH_LINGER_MS = 260;
 const STAMINA_RECOVERY_PER_SECOND = 42;
 const HUD_SCALE_BASE_WIDTH = 1280;
 const HUD_SCALE_BASE_HEIGHT = 720;
@@ -245,6 +246,7 @@ class PrototypeScene extends Phaser.Scene {
   private ghostRecordingDisabled = false;
   private lastGhostRecordAt = -Infinity;
   private ghostExportButton?: Phaser.GameObjects.Text;
+  private dashLingerUntil = -Infinity;
   private countdownOverlay?: StartCountdownOverlay;
   private finalScoreText?: Phaser.GameObjects.Text;
   private missText?: Phaser.GameObjects.Text;
@@ -861,6 +863,7 @@ class PrototypeScene extends Phaser.Scene {
     this.ghostRecordingActive = false;
     this.ghostRecordingDisabled = false;
     this.lastGhostRecordAt = -Infinity;
+    this.dashLingerUntil = -Infinity;
     this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
     this.rewards?.reset();
@@ -868,6 +871,7 @@ class PrototypeScene extends Phaser.Scene {
     this.editorTimerPausedMs = 0;
     this.editorTimerPauseStartedAt = 0;
     this.stamina = MAX_STAMINA;
+    this.dashLingerUntil = -Infinity;
     this.hasUsedStageEditorThisRun = false;
     this.isRunActive = false;
     this.hasWon = false;
@@ -1849,17 +1853,16 @@ class PrototypeScene extends Phaser.Scene {
 
   private updateStamina(onFloor: boolean, wantsDash: boolean, deltaMs: number) {
     const deltaSeconds = deltaMs / 1000;
-    let dashActive = false;
 
     if (wantsDash && this.stamina > 0) {
-      dashActive = true;
       this.stamina = Math.max(0, this.stamina - DASH_STAMINA_DRAIN_PER_SECOND * deltaSeconds);
+      this.dashLingerUntil = this.time.now + DASH_LINGER_MS;
     } else if (onFloor && !wantsDash) {
       this.stamina = Math.min(MAX_STAMINA, this.stamina + STAMINA_RECOVERY_PER_SECOND * deltaSeconds);
     }
 
     this.updateStaminaHud();
-    return dashActive;
+    return this.time.now <= this.dashLingerUntil;
   }
 
   private consumeStamina(cost: number) {
