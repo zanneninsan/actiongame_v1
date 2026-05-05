@@ -60,6 +60,8 @@ import {
 import { DanmakuOverlay, type DanmakuMode } from "./danmaku";
 import {
   fetchLeaderboardEntries,
+  fetchLeaderboardGhostOptions,
+  fetchLeaderboardGhostReplay,
   fetchMyLeaderboardEntries,
   fetchLeaderboardUserSettings,
   getLeaderboardIdentity,
@@ -80,7 +82,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.240";
+const DEBUG_VERSION = "v0.1.241";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1041,6 +1043,8 @@ class PrototypeScene extends Phaser.Scene {
       onSoundOnChange: (soundOn) => this.setSoundEnabled(soundOn),
       onGoogleLogin: () => this.logInLeaderboardGoogleAccount(),
       onGhostReplayLoad: (jsonText) => this.loadGhostReplayFromJson(jsonText),
+      onFetchGhostOptions: (stageId) => fetchLeaderboardGhostOptions(this.resolveStageId(stageId), 10),
+      onGhostReplaySelect: (ghostId) => this.loadLeaderboardGhostReplay(ghostId),
       onSubmit: ({ playerName, controlMode, stageId, soundOn, locale }) => {
         this.playerName = playerName;
         this.setCookieValue("actiongame_player_name", this.playerName);
@@ -1908,6 +1912,14 @@ class PrototypeScene extends Phaser.Scene {
 
   private loadGhostReplayFromJson(jsonText: string): GhostReplayLoadResult {
     const parsed = JSON.parse(jsonText) as Partial<GhostReplayData>;
+    return this.loadGhostReplayData(parsed);
+  }
+
+  private async loadLeaderboardGhostReplay(ghostId: string): Promise<GhostReplayLoadResult> {
+    return this.loadGhostReplayData(await fetchLeaderboardGhostReplay(ghostId));
+  }
+
+  private loadGhostReplayData(parsed: Partial<GhostReplayData>): GhostReplayLoadResult {
     if (
       parsed.schema !== GHOST_REPLAY_SCHEMA ||
       typeof parsed.stageId !== "string" ||

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.241
+### English
+- Added start-screen controls for selecting and loading saved top-ranking ghosts from Firebase.
+### Japanese
+- スタート画面からFirebaseに保存されたランキング上位ゴーストを選んで読み込めるようにしました。
+
 ## v0.1.240
 ### English
 - Save ghost replay data to Firebase when an accepted leaderboard submission reaches the stage top 10.
