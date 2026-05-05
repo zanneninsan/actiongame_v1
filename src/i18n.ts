@@ -9,6 +9,7 @@ export const LOCALE_OPTIONS: Array<{ locale: Locale; label: string }> = [
 
 const translations = {
   en: {
+    "start.title": "SUPER ZANNENIN=SAN LAND",
     "start.playerName": "Player Name",
     "start.controlMode": "Control mode",
     "start.soundSetting": "Sound setting",
@@ -192,6 +193,7 @@ const translations = {
     "account.close": "Close",
   },
   ja: {
+    "start.title": "スーパー残念院さんランド",
     "start.playerName": "プレイヤー名",
     "start.controlMode": "操作方法",
     "start.soundSetting": "サウンド設定",
