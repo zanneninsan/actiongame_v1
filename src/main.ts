@@ -17,7 +17,7 @@ import { StageEditor } from "./stageEditor";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
 import {
   createStoryDialogue,
-  getDefaultStoryDialogueLines,
+  resolveStoryDialogueLines,
   type StoryDialogueController,
 } from "./storyDialogue";
 import { getBrowserLocale, isLocale, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
@@ -70,7 +70,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.202";
+const DEBUG_VERSION = "v0.1.203";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -696,20 +696,27 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private updateStoryDialogueProgress() {
-    if (this.hasAdvancedStoryDialogueAtX || this.player.x <= STORY_DIALOGUE_ADVANCE_X) {
+    const storyDialogue = this.editorStage.storyDialogue;
+    if (!storyDialogue?.lines.length) {
+      return;
+    }
+
+    const triggerX = storyDialogue.triggerX ?? STORY_DIALOGUE_ADVANCE_X;
+    if (this.hasAdvancedStoryDialogueAtX || this.player.x <= triggerX) {
       return;
     }
 
     this.hasAdvancedStoryDialogueAtX = true;
     this.storyDialogue = createStoryDialogue({
-      lines: getDefaultStoryDialogueLines(this.locale),
+      lines: resolveStoryDialogueLines(storyDialogue, this.locale),
       locale: this.locale,
     });
-    this.storyDialogueNextEvent = this.time.delayedCall(STORY_DIALOGUE_STEP_DELAY_MS, () => {
+    const stepDelayMs = storyDialogue.stepDelayMs ?? STORY_DIALOGUE_STEP_DELAY_MS;
+    this.storyDialogueNextEvent = this.time.delayedCall(stepDelayMs, () => {
       this.storyDialogue?.next();
       this.storyDialogueNextEvent = undefined;
     });
-    this.storyDialogueRemoveEvent = this.time.delayedCall(STORY_DIALOGUE_STEP_DELAY_MS * 2, () => {
+    this.storyDialogueRemoveEvent = this.time.delayedCall(stepDelayMs * 2, () => {
       this.storyDialogue?.remove({ animate: true });
       this.storyDialogue = undefined;
       this.storyDialogueRemoveEvent = undefined;

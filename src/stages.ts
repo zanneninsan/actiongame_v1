@@ -9,6 +9,33 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
     "rearKey": "rear-starry-sky",
     "midgroundKey": "midground-city-loop-strip"
   },
+  "storyDialogue": {
+    "triggerX": 600,
+    "lines": [
+      {
+        "characterName": {
+          "ja": "残念院さん",
+          "en": "Zannenin"
+        },
+        "message": {
+          "ja": "人が多いですね……ここが渋谷。",
+          "en": "So many people... this must be Shibuya."
+        },
+        "portraitPath": "assets/ui/message_faces/message_face_head_icon_05_shy.webp"
+      },
+      {
+        "characterName": {
+          "ja": "残念院さん",
+          "en": "Zannenin"
+        },
+        "message": {
+          "ja": "先へ進みましょう。何か手がかりが見つかるはずです。",
+          "en": "Let's keep moving. We should be able to find a clue ahead."
+        },
+        "portraitPath": "assets/ui/message_faces/message_face_head_icon_02_smile.webp"
+      }
+    ]
+  },
   "worldWidth": 12800,
   "worldTop": -720,
   "worldBottom": 720,
@@ -569,6 +596,33 @@ export const NEO_SHIBUYA_STAGE: StageDefinition = {
   "backgrounds": {
     "rearKey": "rear-starry-sky",
     "midgroundKey": "midground-city-loop-strip"
+  },
+  "storyDialogue": {
+    "triggerX": 600,
+    "lines": [
+      {
+        "characterName": {
+          "ja": "残念院さん",
+          "en": "Zannenin"
+        },
+        "message": {
+          "ja": "見覚えのある街なのに、少し様子が違いますね。",
+          "en": "This city feels familiar, but something is different."
+        },
+        "portraitPath": "assets/ui/message_faces/message_face_head_icon_05_shy.webp"
+      },
+      {
+        "characterName": {
+          "ja": "残念院さん",
+          "en": "Zannenin"
+        },
+        "message": {
+          "ja": "新しい仕掛けに注意しながら、奥まで進みましょう。",
+          "en": "Watch the new tricks and keep pressing deeper in."
+        },
+        "portraitPath": "assets/ui/message_faces/message_face_head_icon_02_smile.webp"
+      }
+    ]
   },
   "worldWidth": 12800,
   "worldTop": -720,
@@ -1257,6 +1311,33 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     rearKey: "rear-620c2900-ce9f-46e9-974e-b40916d5aa0c",
     midgroundKey: "midground-photoroom-20260504-035157",
   },
+  storyDialogue: {
+    triggerX: 520,
+    lines: [
+      {
+        characterName: {
+          ja: "残念院さん",
+          en: "Zannenin",
+        },
+        message: {
+          ja: "足場の間が広いですね。勢いを落とさずに渡りましょう。",
+          en: "These gaps are wide. Keep your speed and cross cleanly.",
+        },
+        portraitPath: "assets/ui/message_faces/message_face_head_icon_02_smile.webp",
+      },
+      {
+        characterName: {
+          ja: "残念院さん",
+          en: "Zannenin",
+        },
+        message: {
+          ja: "高い場所ほど焦りは禁物です。着地点を見て進みます。",
+          en: "The higher we go, the calmer we move. Watch the landing first.",
+        },
+        portraitPath: "assets/ui/message_faces/message_face_head_icon_05_shy.webp",
+      },
+    ],
+  },
   worldWidth: 9200,
   worldTop: -760,
   worldBottom: 720,
@@ -1383,6 +1464,34 @@ export const SKY_SHAFT_CLIMB_STAGE: StageDefinition = {
     rearKey: "rear-620c2900-ce9f-46e9-974e-b40916d5aa0c",
     midgroundKey: "midground-city-loop-strip",
   },
+  storyDialogue: {
+    triggerX: 360,
+    stepDelayMs: 7000,
+    lines: [
+      {
+        characterName: {
+          ja: "残念院さん",
+          en: "Zannenin",
+        },
+        message: {
+          ja: "上へ続く道です。落ち着いて、一段ずつ登りましょう。",
+          en: "The route climbs upward. One platform at a time.",
+        },
+        portraitPath: "assets/ui/message_faces/message_face_head_icon_02_smile.webp",
+      },
+      {
+        characterName: {
+          ja: "残念院さん",
+          en: "Zannenin",
+        },
+        message: {
+          ja: "動く足場は待つ勇気も大事です。無理に飛び込まないで。",
+          en: "Moving platforms reward patience. Don't jump before the timing is yours.",
+        },
+        portraitPath: "assets/ui/message_faces/message_face_head_icon_05_shy.webp",
+      },
+    ],
+  },
   worldWidth: 1920,
   worldTop: -3720,
   worldBottom: 720,
@@ -1486,6 +1595,17 @@ export const ACTIVE_STAGE = STAGES[DEFAULT_STAGE_ID];
 export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   name: typeof stage.name === "string" ? stage.name : { ...stage.name },
   backgrounds: stage.backgrounds ? { ...stage.backgrounds } : undefined,
+  storyDialogue: stage.storyDialogue
+    ? {
+        triggerX: stage.storyDialogue.triggerX,
+        stepDelayMs: stage.storyDialogue.stepDelayMs,
+        lines: stage.storyDialogue.lines.map((line) => ({
+          characterName: { ...line.characterName },
+          message: { ...line.message },
+          portraitPath: line.portraitPath,
+        })),
+      }
+    : undefined,
   worldWidth: stage.worldWidth,
   worldTop: stage.worldTop,
   worldBottom: stage.worldBottom,

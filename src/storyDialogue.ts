@@ -1,4 +1,5 @@
 import type { Locale } from "./i18n";
+import { resolveStageText, type StageStoryDialogue } from "./assets";
 
 export type StoryDialogueLine = {
   characterName: string;
@@ -35,24 +36,12 @@ const MIN_DIALOGUE_FONT_SIZE = 10;
 const TV_SWITCH_IN_MS = 520;
 const TV_SWITCH_OUT_MS = 420;
 
-export const getDefaultStoryDialogueLines = (locale: Locale): StoryDialogueLine[] => {
-  const characterName = locale === "ja" ? "残念院さん" : "Zannenin";
-  return [
-    {
-      characterName,
-      message: locale === "ja" ? "人が多いですね……ここが渋谷。" : "So many people... this must be Shibuya.",
-      portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_05_shy.webp`,
-    },
-    {
-      characterName,
-      message:
-        locale === "ja"
-          ? "先へ進みましょう。何か手がかりが見つかるはずです。"
-          : "Let's keep moving. We should be able to find a clue ahead.",
-      portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_02_smile.webp`,
-    },
-  ];
-};
+export const resolveStoryDialogueLines = (storyDialogue: StageStoryDialogue, locale: Locale): StoryDialogueLine[] =>
+  storyDialogue.lines.map((line) => ({
+    characterName: resolveStageText(line.characterName, locale),
+    message: resolveStageText(line.message, locale),
+    portraitUrl: resolvePortraitUrl(line.portraitPath),
+  }));
 
 export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogueController {
   const root = options.root ?? document.body;
@@ -258,6 +247,10 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
 
 function applyStyle(element: HTMLElement, style: Partial<CSSStyleDeclaration>) {
   Object.assign(element.style, style);
+}
+
+function resolvePortraitUrl(path: string) {
+  return /^https?:\/\//.test(path) || path.startsWith("/") ? path : `${ASSET_BASE}${path}`;
 }
 
 function playTvSwitchIn(element: HTMLElement) {

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.203
+### English
+- Moved story message content into stage definitions so each stage can define its own dialogue lines, trigger position, and timing while keeping the message UI renderer reusable.
+### Japanese
+- ストーリーメッセージの内容をステージ定義へ移し、ステージごとに会話文、表示位置、進行タイミングを変えられるようにしました。
+
 ## v0.1.202
 ### English
 - Hardened leaderboard submission error handling, added server-side stage score limits, skipped edited-stage runs from submission, and added leaderboard fetch retry/logging plus Functions validation tests.

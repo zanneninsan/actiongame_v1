@@ -72,9 +72,21 @@ export type OneWayGatePlacement = { x: number; y: number; height?: number };
 export type StageLocalizedName = { jp: string; en: string };
 export type StageName = string | StageLocalizedName;
 export type StageBackgroundSelection = { rearKey?: string; midgroundKey?: string };
+export type StageLocalizedText = { ja: string; en: string };
+export type StageStoryDialogueLine = {
+  characterName: StageLocalizedText;
+  message: StageLocalizedText;
+  portraitPath: string;
+};
+export type StageStoryDialogue = {
+  triggerX?: number;
+  stepDelayMs?: number;
+  lines: StageStoryDialogueLine[];
+};
 export type StageDefinition = {
   name: StageName;
   backgrounds?: StageBackgroundSelection;
+  storyDialogue?: StageStoryDialogue;
   worldWidth: number;
   worldTop?: number;
   worldBottom?: number;
@@ -99,6 +111,10 @@ export function resolveStageName(name: StageName, locale: "ja" | "en") {
   }
 
   return locale === "ja" ? name.jp : name.en;
+}
+
+export function resolveStageText(text: StageLocalizedText, locale: "ja" | "en") {
+  return locale === "ja" ? text.ja : text.en;
 }
 
 export const STAGE_OBJECT_ASSETS = [
