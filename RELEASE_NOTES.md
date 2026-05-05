@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.209
+### English
+- Renamed the Player Spec display label to Game Spec across the game UI and spec page titles.
+### Japanese
+- ゲーム内UIと仕様ページの表示名を「プレイヤー仕様」から「ゲーム仕様」に変更しました。
+
 ## v0.1.208
 ### English
 - Localized the in-game Player Spec link and SPEC button, and passed the current game language to the Player Spec page.
