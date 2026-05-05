@@ -145,6 +145,11 @@ export const handleSpecialPlatformCollision = (options: {
   platformObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile;
   canInteract: () => boolean;
   shouldSpringBigJump?: () => boolean;
+  onSpringLaunch?: (details: {
+    isBigJump: boolean;
+    bigJumpVelocity: number;
+    showBigJumpEffect: () => void;
+  }) => void;
   onLaunch: () => void;
 }) => {
   if (!options.canInteract()) {
@@ -161,12 +166,15 @@ export const handleSpecialPlatformCollision = (options: {
     const baseVelocity = platform.getData("springVelocity") as number | undefined;
     const velocity = baseVelocity ?? SPRING_PLATFORM_DEFAULT_VELOCITY;
     const isBigJump = options.shouldSpringBigJump?.() ?? false;
-    options.player.setVelocityY(isBigJump ? velocity * SPRING_PLATFORM_BIG_JUMP_MULTIPLIER : velocity);
+    const bigJumpVelocity = velocity * SPRING_PLATFORM_BIG_JUMP_MULTIPLIER;
+    options.player.setVelocityY(isBigJump ? bigJumpVelocity : velocity);
     options.player.anims.play("player-air", true);
     options.scene.cameras.main.shake(isBigJump ? 120 : 80, isBigJump ? 0.003 : 0.002);
+    const showEffect = () => showBigSpringJumpEffect(options.scene, platform);
     if (isBigJump) {
-      showBigSpringJumpEffect(options.scene, platform);
+      showEffect();
     }
+    options.onSpringLaunch?.({ isBigJump, bigJumpVelocity, showBigJumpEffect: showEffect });
     options.onLaunch();
   } else if (behavior === "fragile") {
     queueFragilePlatformCollapse(options.scene, platform);

@@ -72,13 +72,14 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.214";
+const DEBUG_VERSION = "v0.1.215";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
-const SPRING_BIG_JUMP_INPUT_BUFFER_MS = 360;
+const SPRING_BIG_JUMP_INPUT_BUFFER_MS = 180;
+const SPRING_BIG_JUMP_POST_LAUNCH_BUFFER_MS = 260;
 const SPRING_LAUNCH_NORMAL_JUMP_SUPPRESS_MS = 140;
 const STORY_DIALOGUE_ADVANCE_X = 600;
 const STORY_DIALOGUE_STEP_DELAY_MS = 8000;
@@ -207,6 +208,9 @@ class PrototypeScene extends Phaser.Scene {
   private hasJumpChainDanmakuPlayed = false;
   private lastJumpInputAt = -Infinity;
   private lastSpringLaunchAt = -Infinity;
+  private pendingSpringBigJumpUntil = -Infinity;
+  private pendingSpringBigJumpVelocity = 0;
+  private pendingSpringBigJumpEffect?: () => void;
   private wasOnFloor = false;
   private isLanding = false;
   private landingFastForwarded = false;
@@ -693,6 +697,9 @@ class PrototypeScene extends Phaser.Scene {
     this.hasJumpChainDanmakuPlayed = false;
     this.lastJumpInputAt = -Infinity;
     this.lastSpringLaunchAt = -Infinity;
+    this.pendingSpringBigJumpUntil = -Infinity;
+    this.pendingSpringBigJumpVelocity = 0;
+    this.pendingSpringBigJumpEffect = undefined;
     this.wasOnFloor = false;
     this.isLanding = false;
     this.landingFastForwarded = false;
@@ -1121,8 +1128,18 @@ class PrototypeScene extends Phaser.Scene {
       platformObject,
       canInteract: () => this.isRunActive && !this.stageEditor?.isEnabled,
       shouldSpringBigJump: () => this.isSpringBigJumpInputActive(),
-      onLaunch: () => {
+      onSpringLaunch: ({ isBigJump, bigJumpVelocity, showBigJumpEffect }) => {
         this.lastSpringLaunchAt = this.time.now;
+        if (isBigJump) {
+          this.clearPendingSpringBigJump();
+          return;
+        }
+
+        this.pendingSpringBigJumpUntil = this.time.now + SPRING_BIG_JUMP_POST_LAUNCH_BUFFER_MS;
+        this.pendingSpringBigJumpVelocity = bigJumpVelocity;
+        this.pendingSpringBigJumpEffect = showBigJumpEffect;
+      },
+      onLaunch: () => {
         this.isLanding = false;
         this.landingFastForwarded = false;
       },
@@ -1131,6 +1148,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private noteJumpInput() {
     this.lastJumpInputAt = this.time.now;
+    this.tryUpgradePendingSpringBigJump();
   }
 
   private isSpringBigJumpInputActive() {
@@ -1140,6 +1158,27 @@ class PrototypeScene extends Phaser.Scene {
       this.mobileInput.w ||
       this.time.now - this.lastJumpInputAt <= SPRING_BIG_JUMP_INPUT_BUFFER_MS
     );
+  }
+
+  private tryUpgradePendingSpringBigJump() {
+    if (
+      this.time.now > this.pendingSpringBigJumpUntil ||
+      this.pendingSpringBigJumpVelocity >= 0 ||
+      this.player.body.velocity.y >= 0
+    ) {
+      return;
+    }
+
+    this.player.setVelocityY(Math.min(this.player.body.velocity.y, this.pendingSpringBigJumpVelocity));
+    this.lastSpringLaunchAt = this.time.now;
+    this.pendingSpringBigJumpEffect?.();
+    this.clearPendingSpringBigJump();
+  }
+
+  private clearPendingSpringBigJump() {
+    this.pendingSpringBigJumpUntil = -Infinity;
+    this.pendingSpringBigJumpVelocity = 0;
+    this.pendingSpringBigJumpEffect = undefined;
   }
 
   private canLandOnDecorationPlatform(

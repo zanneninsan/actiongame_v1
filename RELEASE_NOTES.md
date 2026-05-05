@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.215
+### English
+- Shifted spring platform big-jump timing later by reducing the pre-contact buffer and adding a short post-launch upgrade window.
+### Japanese
+- ジャンプ台大ジャンプの判定タイミングを後ろ寄りに調整し、接触後の短い猶予でも大ジャンプへ昇格できるようにしました。
+
 ## v0.1.214
 ### English
 - Fixed spring platform big jumps so the stronger upward velocity is no longer clamped to the normal vertical speed limit.
