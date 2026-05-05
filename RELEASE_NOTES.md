@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.265
+### English
+- Reflected the imported Shibu-ya city stage JSON into the playable Shibu-ya city stage layout.
+### Japanese
+- 読み込んだシブヤシティのステージJSONを、プレイ対象のシブヤシティのステージ配置に反映しました。
+
 ## v0.1.264
 ### English
 - Changed the top-right Title shortcut from text to a home-style icon.
