@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.235
+### English
+- Changed the classic danmaku miss effect to fixed red, bold, center-aligned comments that stack downward one by one and fade out when the stack is full.
+### Japanese
+- ニコ動風モードのMISS時弾幕を、赤文字・太字・中央揃えの固定コメントが上から下へ1件ずつ積み重なり、上限を超えると古いコメントからフェードアウトする演出に変更しました。
+
 ## v0.1.234
 ### English
 - Added YouTube Live-style emoji-heavy comments to the live chat danmaku mode.

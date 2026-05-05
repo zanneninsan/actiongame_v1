@@ -113,6 +113,7 @@ export class DanmakuOverlay {
   private readonly width: number;
   private readonly height: number;
   private readonly activeComments = new Set<ActiveComment>();
+  private readonly deathStackComments: ActiveComment[] = [];
   private readonly liveChatComments: ActiveComment[] = [];
   private readonly pendingTimers = new Set<Phaser.Time.TimerEvent>();
   private nextLane = 0;
@@ -157,12 +158,18 @@ export class DanmakuOverlay {
   }
 
   emitMiss() {
-    this.emitBurst(MISS_COMMENTS, 16, 85, {
+    const style = {
       color: "#fecdd3",
       stroke: "#881337",
       fontSize: 27,
       duration: 3800,
-    });
+    };
+    if (this.mode === "liveChat") {
+      this.emitBurst(MISS_COMMENTS, 16, 85, style);
+      return;
+    }
+
+    this.emitDeathStack(MISS_COMMENTS, 12, 500);
   }
 
   emitTimeUp() {
@@ -182,6 +189,7 @@ export class DanmakuOverlay {
       comment.destroy();
     });
     this.activeComments.clear();
+    this.deathStackComments.length = 0;
     this.liveChatComments.length = 0;
   }
 
@@ -239,6 +247,83 @@ export class DanmakuOverlay {
       onComplete: () => this.removeComment(comment),
     });
     comment.destroyTimer = this.scene.time.delayedCall(style.duration + 1200, () => this.removeComment(comment));
+  }
+
+  private emitDeathStack(comments: readonly string[], count: number, staggerMs: number) {
+    for (let index = 0; index < count; index += 1) {
+      const timer = this.scene.time.delayedCall(index * staggerMs, () => {
+        this.pendingTimers.delete(timer);
+        this.emitDeathStackComment(comments[Phaser.Math.Between(0, comments.length - 1)]);
+      });
+      this.pendingTimers.add(timer);
+    }
+  }
+
+  private emitDeathStackComment(message: string) {
+    const maxVisible = 7;
+    const comment = this.scene.add
+      .text(this.width / 2, this.getDeathStackY(this.deathStackComments.length), message, {
+        fontFamily: "monospace",
+        fontSize: "32px",
+        fontStyle: "bold",
+        color: "#ff1744",
+        stroke: "#000000",
+        strokeThickness: 8,
+      })
+      .setOrigin(0.5, 0)
+      .setScrollFactor(0)
+      .setDepth(184)
+      .setAlpha(0)
+      .setShadow(2, 2, "#000000", 2, true, true) as ActiveComment;
+
+    this.activeComments.add(comment);
+    this.deathStackComments.push(comment);
+    this.scene.tweens.add({
+      targets: comment,
+      alpha: 0.96,
+      duration: Phaser.Math.Between(200, 300),
+      ease: "Sine.easeOut",
+    });
+    while (this.deathStackComments.length > maxVisible) {
+      this.fadeDeathStackComment(this.deathStackComments[0]);
+    }
+    comment.destroyTimer = this.scene.time.delayedCall(5600, () => this.fadeDeathStackComment(comment));
+  }
+
+  private getDeathStackY(index: number) {
+    return 86 + index * 46;
+  }
+
+  private layoutDeathStackComments() {
+    this.deathStackComments.forEach((comment, index) => {
+      this.scene.tweens.add({
+        targets: comment,
+        y: this.getDeathStackY(index),
+        duration: 180,
+        ease: "Sine.easeOut",
+      });
+    });
+  }
+
+  private fadeDeathStackComment(comment: ActiveComment) {
+    if (!this.activeComments.has(comment)) {
+      return;
+    }
+
+    const stackIndex = this.deathStackComments.indexOf(comment);
+    if (stackIndex >= 0) {
+      this.deathStackComments.splice(stackIndex, 1);
+      this.layoutDeathStackComments();
+    }
+    comment.destroyTimer?.remove(false);
+    comment.destroyTimer = undefined;
+    this.scene.tweens.add({
+      targets: comment,
+      alpha: 0,
+      duration: 260,
+      ease: "Sine.easeIn",
+      onComplete: () => this.removeComment(comment),
+    });
   }
 
   private emitCenterBurst(
@@ -430,9 +515,15 @@ export class DanmakuOverlay {
     if (liveIndex >= 0) {
       this.liveChatComments.splice(liveIndex, 1);
     }
+    const deathStackIndex = this.deathStackComments.indexOf(comment);
+    if (deathStackIndex >= 0) {
+      this.deathStackComments.splice(deathStackIndex, 1);
+    }
     comment.destroy();
     if (liveIndex >= 0) {
       this.layoutLiveChatComments();
+    } else if (deathStackIndex >= 0) {
+      this.layoutDeathStackComments();
     }
   }
 }
