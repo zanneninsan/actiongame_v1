@@ -1,5 +1,6 @@
 import { LOCALE_OPTIONS, t, type Locale } from "./i18n";
 import { canPromptPwaInstall, isPwaInstalled, promptPwaInstall } from "./pwaInstall";
+import { hasFullscreenElement, isLandscapeViewport, isLikelySmartphone } from "./mobileViewport";
 
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
 const PWA_INSTALL_DISMISSED_KEY = "actiongame_pwa_install_dismissed";
@@ -190,7 +191,7 @@ export class StartModal {
     ghostSelect.addEventListener("keyup", (event) => event.stopPropagation());
     ghostSelect.addEventListener("keypress", (event) => event.stopPropagation());
     const refreshInstallPanel = () => {
-      const shouldShow = isProbablySmartphone() && !isPwaInstalled() && getStorageValue(PWA_INSTALL_DISMISSED_KEY) !== "1";
+      const shouldShow = isLikelySmartphone() && !isPwaInstalled() && getStorageValue(PWA_INSTALL_DISMISSED_KEY) !== "1";
       installPanel.hidden = !shouldShow;
       installNote.hidden = true;
       installButton.textContent = canPromptPwaInstall()
@@ -554,19 +555,10 @@ export class StartModal {
 }
 
 function shouldSuggestMobileFullscreen() {
-  if (!isProbablySmartphone()) {
+  if (!isLikelySmartphone()) {
     return false;
   }
-  return !isLandscapeViewport() || !document.fullscreenElement;
-}
-
-function isProbablySmartphone() {
-  const userAgent = navigator.userAgent || "";
-  const uaLooksMobile = /Android|iPhone|iPod|Windows Phone|Mobile/i.test(userAgent);
-  const hasTouch = navigator.maxTouchPoints > 0 || matchMedia("(pointer: coarse)").matches;
-  const shortSide = Math.min(window.innerWidth, window.innerHeight);
-  const longSide = Math.max(window.innerWidth, window.innerHeight);
-  return uaLooksMobile || (hasTouch && shortSide <= 560 && longSide <= 980);
+  return !isLandscapeViewport() || !hasFullscreenElement();
 }
 
 function getManualInstallMessage(locale: Locale) {
@@ -592,12 +584,8 @@ function setStorageValue(key: string, value: string) {
   }
 }
 
-function isLandscapeViewport() {
-  return window.innerWidth > window.innerHeight;
-}
-
 async function requestFullscreenAndLandscape() {
-  let fullscreenSucceeded = Boolean(document.fullscreenElement);
+  let fullscreenSucceeded = hasFullscreenElement();
   try {
     if (!fullscreenSucceeded && document.documentElement.requestFullscreen) {
       await document.documentElement.requestFullscreen();

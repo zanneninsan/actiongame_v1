@@ -908,6 +908,56 @@ body.is-account-modal-open #mobile-controls {
   background: rgba(127, 29, 29, 0.72);
 }
 
+.mobile-fullscreen-recovery {
+  position: fixed;
+  right: calc(14px + env(safe-area-inset-right));
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  z-index: 24;
+  width: min(320px, calc(100vw - 28px));
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(253, 230, 138, 0.76);
+  border-radius: 8px;
+  background: rgba(3, 7, 18, 0.9);
+  color: #f8fafc;
+  font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+  font-weight: 800;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+  pointer-events: auto;
+}
+
+.mobile-fullscreen-recovery strong {
+  color: #f5c76a;
+  font-size: 14px;
+}
+
+.mobile-fullscreen-recovery span {
+  color: #dbeafe;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.mobile-fullscreen-recovery-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+
+.mobile-fullscreen-recovery button {
+  min-height: 36px;
+  border: 0;
+  padding: 0 12px;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #f8fafc;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
 #stage-editor {
   position: fixed;
   top: 12px;
@@ -1262,6 +1312,22 @@ body.is-account-modal-open #mobile-controls {
 
   .fullscreen-button {
     font-size: calc(var(--mobile-button-size) * 0.18);
+  }
+
+  .mobile-fullscreen-recovery {
+    right: calc(8px + env(safe-area-inset-right));
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    width: min(300px, calc(100vw - 16px));
+    padding: 9px;
+  }
+
+  .mobile-fullscreen-recovery-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .mobile-fullscreen-recovery button {
+    min-height: 32px;
+    font-size: 11px;
   }
 }
 

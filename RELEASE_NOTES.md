@@ -2,6 +2,16 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.268
+### English
+- Added a short touch-control tutorial stage that introduces movement, jumping, dash, a checkpoint, and a simple stationary enemy.
+- Refined smartphone detection to use mobile user agents, coarse touch pointers, and viewport shape consistently across start-screen guidance and PWA prompts.
+- Added a mobile fullscreen recovery prompt when fullscreen is dropped after touch play has entered fullscreen once.
+### Japanese
+- タッチ操作向けの短いチュートリアルステージを追加し、移動、ジャンプ、ダッシュ、チェックポイント、静止敵を軽く試せるようにしました。
+- スマートフォン判定を見直し、ユーザーエージェント、タッチポインタ、画面サイズの条件を開始画面の案内とPWA導線で共通化しました。
+- モバイルプレイ中にフルスクリーンが解除された場合、フルスクリーンへ戻す案内を表示するようにしました。
+
 ## v0.1.267
 ### English
 - Split option-screen audio controls into separate BGM and SE volume sliders while keeping the top sound button as a global mute toggle.

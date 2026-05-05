@@ -1581,6 +1581,99 @@ export const SKY_SHAFT_CLIMB_STAGE: StageDefinition = {
   ],
 };
 
+export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
+  name: {
+    jp: "タッチ操作チュートリアル",
+    en: "Touch Controls Tutorial",
+  },
+  backgrounds: {
+    rearKey: "rear-starry-sky",
+    midgroundKey: "midground-city-loop-strip",
+  },
+  storyDialogue: {
+    triggerX: 260,
+    stepDelayMs: 1800,
+    lines: [
+      {
+        characterName: {
+          ja: "残念院さん",
+          en: "Zannenin",
+        },
+        message: {
+          ja: "左下で移動、右下でジャンプです。まずは少し進んでみましょう。",
+          en: "Use the left buttons to move and the right buttons to jump. Try moving forward first.",
+        },
+        portraitPath: "assets/ui/message_faces/message_face_head_icon_02_smile.webp",
+      },
+      {
+        characterName: {
+          ja: "残念院さん",
+          en: "Zannenin",
+        },
+        message: {
+          ja: "DASHを押しながら進むと速く走れます。短いステージなので気軽にどうぞ。",
+          en: "Hold DASH while moving to run faster. This is a short practice stage, so take it easy.",
+        },
+        portraitPath: "assets/ui/message_faces/message_face_head_icon_03_happy_open.png",
+      },
+    ],
+  },
+  worldWidth: 2600,
+  worldTop: -360,
+  worldBottom: 720,
+  groundTopY: 672,
+  playerStart: {
+    x: 120,
+    y: 552,
+  },
+  goal: {
+    x: 2380,
+    y: 568,
+  },
+  platforms: [
+    { x: 0, y: 672, units: 11 },
+    { x: 480, y: 672, units: 7 },
+    { x: 864, y: 672, units: 8 },
+    { x: 1376, y: 672, units: 10 },
+    { x: 1920, y: 672, units: 12 },
+    { x: 520, y: 552, units: 4 },
+    { x: 900, y: 480, units: 3 },
+    { x: 1216, y: 420, units: 3 },
+    { x: 1600, y: 548, units: 4 },
+    { x: 1920, y: 500, units: 4 },
+  ],
+  streetLamps: [
+    { x: 280, key: "street-lamp-single", scale: 0.62 },
+    { x: 1840, key: "street-lamp-double", scale: 0.58 },
+  ],
+  decorations: [
+    { x: 420, y: 672, key: "stage-props-traffic-cone", scale: 0.48 },
+    { x: 760, y: 672, key: "stage-props-roadwork-sign", scale: 0.42 },
+    { x: 1360, y: 672, key: "stage-props-planter-box", scale: 0.48 },
+    { x: 2100, y: 672, key: "stage-structures-chainlink-fence", scale: 0.54 },
+  ],
+  items: [
+    { type: "coin", x: 260, y: 610 },
+    { type: "coin", x: 330, y: 610 },
+    { type: "energyDrink", x: 620, y: 496 },
+    { type: "bubbleTea", x: 980, y: 424 },
+    { type: "dashRing", x: 1280, y: 364 },
+    { type: "coin", x: 1540, y: 610 },
+    { type: "coin", x: 1640, y: 610 },
+    { type: "shoppingBag", x: 2000, y: 444 },
+  ],
+  bonusBlocks: [
+    { type: "question", x: 710, y: 404, reward: "coin" },
+  ],
+  checkpoints: [
+    { x: 1500, y: 568 },
+  ],
+  oneWayGates: [],
+  enemies: [
+    { type: "coneGolem", aiType: "stationary", x: 1760, y: 590, patrolLeft: 1760, patrolRight: 1760, speed: 0 },
+  ],
+};
+
 export const RANKING_CHECK_STAGE: StageDefinition = {
   name: {
     jp: "ランキング確認",
@@ -1646,6 +1739,7 @@ export const STAGES = {
   neoShibuyaCity: NEO_SHIBUYA_STAGE,
   skybridgeSprint: SKYBRIDGE_SPRINT_STAGE,
   skyShaftClimb: SKY_SHAFT_CLIMB_STAGE,
+  mobileTouchTutorial: MOBILE_TOUCH_TUTORIAL_STAGE,
   rankingCheck: RANKING_CHECK_STAGE,
 };
 export type StageId = keyof typeof STAGES;
@@ -1653,6 +1747,7 @@ export const DEFAULT_STAGE_ID = "neonCanal" satisfies StageId;
 export const PLAYABLE_STAGE_IDS = [
   "neonCanal",
   "neoShibuyaCity",
+  "mobileTouchTutorial",
   "skybridgeSprint",
   "skyShaftClimb",
   "rankingCheck",

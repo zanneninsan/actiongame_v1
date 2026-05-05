@@ -80,13 +80,14 @@ import { showLeaderboardPanel, type LeaderboardGhostSaveStatus } from "./leaderb
 import { showAccountPanel } from "./accountUi";
 import { initializePwaInstall } from "./pwaInstall";
 import { getScaledSeVolume, SE_VOLUME_REGISTRY_KEY } from "./audioSettings";
+import { hasFullscreenElement, isLikelySmartphone } from "./mobileViewport";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.267";
+const DEBUG_VERSION = "v0.1.268";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -280,6 +281,9 @@ class PrototypeScene extends Phaser.Scene {
   private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false, shift: false };
   private mobileJumpQueued = false;
   private mobileControlCleanup: Array<() => void> = [];
+  private mobileFullscreenRecoveryOverlay?: HTMLDivElement;
+  private mobileFullscreenWasActive = false;
+  private mobileFullscreenRecoveryDismissed = false;
   private rewards?: RewardSystem;
   private startTime = 0;
   private editorTimerPausedMs = 0;
@@ -315,6 +319,16 @@ class PrototypeScene extends Phaser.Scene {
   private readonly handleGameLayoutRefresh = () => {
     this.scale.refresh();
     this.applyHudScale();
+  };
+  private readonly handleFullscreenChange = () => {
+    const fullscreenActive = hasFullscreenElement();
+    if (fullscreenActive) {
+      this.mobileFullscreenWasActive = true;
+      this.mobileFullscreenRecoveryDismissed = false;
+      this.removeMobileFullscreenRecovery();
+    }
+    this.scheduleGameLayoutRefresh();
+    this.refreshMobileFullscreenRecovery();
   };
   private storyDialogue?: StoryDialogueController;
   private storyDialogueQueue: QueuedStoryDialogue[] = [];
@@ -432,6 +446,12 @@ class PrototypeScene extends Phaser.Scene {
     this.danmakuEnabled = this.getCookieValue("actiongame_danmaku_disabled") !== "1";
     this.danmakuMode = this.getSavedDanmakuMode();
     this.applySoundSettings();
+    document.removeEventListener("fullscreenchange", this.handleFullscreenChange);
+    document.addEventListener("fullscreenchange", this.handleFullscreenChange);
+    document.removeEventListener("webkitfullscreenchange", this.handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", this.handleFullscreenChange);
+    document.removeEventListener("MSFullscreenChange", this.handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", this.handleFullscreenChange);
     this.resetRunState();
     this.isRestarting = false;
     this.stageConstants = resolveStageConstants(this.editorStage);
@@ -1098,6 +1118,8 @@ class PrototypeScene extends Phaser.Scene {
     this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
     this.updateControlHintText();
     if (this.controlMode === "mobile") {
+      this.mobileFullscreenWasActive = hasFullscreenElement();
+      this.mobileFullscreenRecoveryDismissed = false;
       this.createMobileControls();
     }
     this.startCountdown();
@@ -1805,26 +1827,33 @@ class PrototypeScene extends Phaser.Scene {
         void this.toggleMobileFullscreen();
       },
     });
+    this.refreshMobileFullscreenRecovery();
   }
 
   private removeMobileControls() {
     this.mobileControlCleanup.forEach((cleanup) => cleanup());
     this.mobileControlCleanup = [];
     document.getElementById("mobile-controls")?.remove();
+    this.removeMobileFullscreenRecovery();
   }
 
   private async toggleMobileFullscreen() {
-    const fullscreenDocument = document as FullscreenDocument;
-    const fullscreenElement =
-      document.fullscreenElement ?? fullscreenDocument.webkitFullscreenElement ?? fullscreenDocument.msFullscreenElement;
-    const exitFullscreen =
-      fullscreenDocument.exitFullscreen ?? fullscreenDocument.webkitExitFullscreen ?? fullscreenDocument.msExitFullscreen;
-
-    if (fullscreenElement) {
-      await Promise.resolve(exitFullscreen?.call(document)).catch(() => undefined);
+    if (hasFullscreenElement()) {
+      await this.exitMobileFullscreen();
       return;
     }
 
+    await this.enterMobileFullscreen();
+  }
+
+  private async exitMobileFullscreen() {
+    const fullscreenDocument = document as FullscreenDocument;
+    const exitFullscreen =
+      fullscreenDocument.exitFullscreen ?? fullscreenDocument.webkitExitFullscreen ?? fullscreenDocument.msExitFullscreen;
+    await Promise.resolve(exitFullscreen?.call(document)).catch(() => undefined);
+  }
+
+  private async enterMobileFullscreen() {
     const target = document.documentElement as FullscreenTarget;
     const requestFullscreen =
       target.requestFullscreen ?? target.webkitRequestFullscreen ?? target.msRequestFullscreen;
@@ -1832,7 +1861,59 @@ class PrototypeScene extends Phaser.Scene {
     await Promise.resolve(screen.orientation?.lock?.("landscape")).catch((error) =>
       console.warn("Landscape orientation lock failed.", error),
     );
+    if (hasFullscreenElement()) {
+      this.mobileFullscreenWasActive = true;
+      this.mobileFullscreenRecoveryDismissed = false;
+      this.removeMobileFullscreenRecovery();
+    }
     this.scheduleGameLayoutRefresh();
+  }
+
+  private refreshMobileFullscreenRecovery() {
+    if (
+      this.controlMode !== "mobile" ||
+      !this.setupComplete ||
+      this.startModal ||
+      !isLikelySmartphone() ||
+      hasFullscreenElement() ||
+      !this.mobileFullscreenWasActive ||
+      this.mobileFullscreenRecoveryDismissed
+    ) {
+      this.removeMobileFullscreenRecovery();
+      return;
+    }
+
+    if (this.mobileFullscreenRecoveryOverlay) {
+      return;
+    }
+
+    const overlay = document.createElement("div");
+    overlay.className = "mobile-fullscreen-recovery";
+    overlay.innerHTML = `
+      <strong>${t(this.locale, "mobile.fullscreenRestoreTitle")}</strong>
+      <span>${t(this.locale, "mobile.fullscreenRestoreBody")}</span>
+      <div class="mobile-fullscreen-recovery-actions">
+        <button type="button" data-action="restore">${t(this.locale, "mobile.fullscreenRestoreButton")}</button>
+        <button type="button" data-action="dismiss">${t(this.locale, "mobile.fullscreenRestoreLater")}</button>
+      </div>
+    `;
+    const restoreButton = overlay.querySelector<HTMLButtonElement>("[data-action='restore']")!;
+    const dismissButton = overlay.querySelector<HTMLButtonElement>("[data-action='dismiss']")!;
+    restoreButton.addEventListener("click", () => {
+      void this.enterMobileFullscreen();
+    });
+    dismissButton.addEventListener("click", () => {
+      this.mobileFullscreenRecoveryDismissed = true;
+      this.removeMobileFullscreenRecovery();
+    });
+    overlay.addEventListener("pointerdown", (event) => event.stopPropagation());
+    document.body.appendChild(overlay);
+    this.mobileFullscreenRecoveryOverlay = overlay;
+  }
+
+  private removeMobileFullscreenRecovery() {
+    this.mobileFullscreenRecoveryOverlay?.remove();
+    this.mobileFullscreenRecoveryOverlay = undefined;
   }
 
   private scheduleGameLayoutRefresh() {
