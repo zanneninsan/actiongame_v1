@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.214
+### English
+- Moved the stage editor panel launcher to the upper-left corner to avoid overlapping the upper-right controls.
+### Japanese
+- 右上の操作UIと重なりにくくするため、ステージ編集パネルの起点を左上へ移動しました。
+
 ## v0.1.213
 ### English
 - Added Google login and account status controls to the start screen while keeping anonymous play available.
