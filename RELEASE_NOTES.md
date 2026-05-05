@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.185
+### English
+- Updated the options screen language label to match the start screen bilingual label format.
+### Japanese
+- オプション画面の言語ラベルも、開始画面と同じく現在の表示言語名と `Language` を併記する表示にしました。
+
 ## v0.1.184
 ### English
 - Updated the start screen language label to show both the current UI language label and `Language`.
