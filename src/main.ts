@@ -72,7 +72,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.213";
+const DEBUG_VERSION = "v0.1.214";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -121,6 +121,7 @@ const AIR_DRAG = 120;
 const MAX_RUN_SPEED = 380;
 const CROUCH_MAX_RUN_SPEED = 300;
 const MAX_FALL_SPEED = 680;
+const MAX_UPWARD_LAUNCH_SPEED = 1280;
 const JUMP_VELOCITY = -575;
 const BOOSTED_JUMP_VELOCITY = -655;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
@@ -528,7 +529,7 @@ class PrototypeScene extends Phaser.Scene {
     this.applyPlayerBody(isCrouchInputActive);
     this.player.setMaxVelocity(
       (isCrouchInputActive ? CROUCH_MAX_RUN_SPEED : MAX_RUN_SPEED) * speedMultiplier,
-      isShiftSpeedActive ? DASH_MAX_VERTICAL_SPEED : MAX_FALL_SPEED,
+      this.player.body.velocity.y < 0 ? MAX_UPWARD_LAUNCH_SPEED : isShiftSpeedActive ? DASH_MAX_VERTICAL_SPEED : MAX_FALL_SPEED,
     );
     this.updateCollisionDebug();
     const debugJump = Phaser.Input.Keyboard.JustDown(this.keys.w) || this.mobileJumpQueued;

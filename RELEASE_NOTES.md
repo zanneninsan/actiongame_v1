@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.214
+### English
+- Fixed spring platform big jumps so the stronger upward velocity is no longer clamped to the normal vertical speed limit.
+### Japanese
+- ジャンプ台大ジャンプの上向き速度が通常の縦速度上限で丸められ、通常ジャンプ台と同じ高さになる問題を修正しました。
+
 ## v0.1.213
 ### English
 - Added a bright burst, upward sparks, and a BIG JUMP popup when the spring platform big jump succeeds.
