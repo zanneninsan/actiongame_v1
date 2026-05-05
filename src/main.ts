@@ -19,6 +19,7 @@ import {
   createStoryDialogue,
   resolveStoryDialogueLines,
   type StoryDialogueController,
+  type StoryDialogueLine,
 } from "./storyDialogue";
 import { getBrowserLocale, isLocale, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
 import { MIDGROUND_BACKGROUNDS, REAR_BACKGROUNDS } from "virtual:background-assets";
@@ -80,7 +81,13 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.239";
+const DEBUG_VERSION = "v0.1.240";
+const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
+const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
+  characterName: "残念院さん",
+  message: "ひゃっ...ぷいりちゃん、ごめんなさいっ",
+  portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_07_sad.png`,
+};
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -172,6 +179,11 @@ type FullscreenDocument = Document & {
   msExitFullscreen?: () => Promise<void> | void;
   webkitExitFullscreen?: () => Promise<void> | void;
 };
+type QueuedStoryDialogue = {
+  lines: StoryDialogueLine[];
+  stepDelayMs?: number;
+  durationMs?: number;
+};
 
 let extraTouchPointersAdded = false;
 let stageBackgroundDefaultsAppliedFor: StageId | undefined;
@@ -238,12 +250,14 @@ class PrototypeScene extends Phaser.Scene {
   private restartStageEditorEnabled = false;
   private restartEditorStage?: StageDefinition;
   private storyDialogue?: StoryDialogueController;
+  private storyDialogueQueue: QueuedStoryDialogue[] = [];
   private hasAdvancedStoryDialogueAtX = false;
-  private storyDialogueNextEvent?: Phaser.Time.TimerEvent;
+  private storyDialogueAdvanceEvents: Phaser.Time.TimerEvent[] = [];
   private storyDialogueRemoveEvent?: Phaser.Time.TimerEvent;
   private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
   private hasWon = false;
   private hasScoreMilestoneDanmakuPlayed = false;
+  private hasShownAquaMascotStompDialogue = false;
   private crouchDanmakuStartedAt = 0;
   private hasCrouchDanmakuPlayed = false;
   private jumpChainCount = 0;
@@ -785,6 +799,7 @@ class PrototypeScene extends Phaser.Scene {
     this.storyDialogue?.remove();
     this.storyDialogue = undefined;
     this.hasAdvancedStoryDialogueAtX = false;
+    this.hasShownAquaMascotStompDialogue = false;
     this.countdownOverlay?.clear();
     this.countdownOverlay = undefined;
     this.missText?.destroy();
@@ -847,27 +862,74 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.hasAdvancedStoryDialogueAtX = true;
-    this.storyDialogue = createStoryDialogue({
+    this.enqueueStoryDialogue({
       lines: resolveStoryDialogueLines(storyDialogue, this.locale),
-      locale: this.locale,
-    });
-    const stepDelayMs = storyDialogue.stepDelayMs ?? STORY_DIALOGUE_STEP_DELAY_MS;
-    this.storyDialogueNextEvent = this.time.delayedCall(stepDelayMs, () => {
-      this.storyDialogue?.next();
-      this.storyDialogueNextEvent = undefined;
-    });
-    this.storyDialogueRemoveEvent = this.time.delayedCall(stepDelayMs * 2, () => {
-      this.storyDialogue?.remove({ animate: true });
-      this.storyDialogue = undefined;
-      this.storyDialogueRemoveEvent = undefined;
+      stepDelayMs: storyDialogue.stepDelayMs ?? STORY_DIALOGUE_STEP_DELAY_MS,
     });
   }
 
   private clearStoryDialogueTimers() {
-    this.storyDialogueNextEvent?.remove(false);
+    this.storyDialogueAdvanceEvents.forEach((event) => event.remove(false));
     this.storyDialogueRemoveEvent?.remove(false);
-    this.storyDialogueNextEvent = undefined;
+    this.storyDialogueAdvanceEvents.length = 0;
     this.storyDialogueRemoveEvent = undefined;
+    this.storyDialogueQueue.length = 0;
+  }
+
+  private showAquaMascotStompDialogueOnce(enemy: Phaser.Physics.Arcade.Sprite) {
+    if (this.hasShownAquaMascotStompDialogue || enemy.getData("enemyType") !== "aquaMascot") {
+      return;
+    }
+
+    this.hasShownAquaMascotStompDialogue = true;
+    this.enqueueStoryDialogue({
+      lines: [AQUA_MASCOT_STOMP_DIALOGUE],
+      durationMs: AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS,
+    });
+  }
+
+  private enqueueStoryDialogue(dialogue: QueuedStoryDialogue) {
+    if (!dialogue.lines.length) {
+      return;
+    }
+
+    this.storyDialogueQueue.push({
+      ...dialogue,
+      lines: [...dialogue.lines],
+    });
+    this.showNextQueuedStoryDialogue();
+  }
+
+  private showNextQueuedStoryDialogue() {
+    if (this.storyDialogue || this.storyDialogueAdvanceEvents.length > 0 || this.storyDialogueRemoveEvent) {
+      return;
+    }
+
+    const nextDialogue = this.storyDialogueQueue.shift();
+    if (!nextDialogue) {
+      return;
+    }
+
+    this.storyDialogue = createStoryDialogue({
+      lines: nextDialogue.lines,
+      locale: this.locale,
+    });
+    const stepDelayMs = nextDialogue.stepDelayMs ?? STORY_DIALOGUE_STEP_DELAY_MS;
+    for (let lineIndex = 1; lineIndex < nextDialogue.lines.length; lineIndex += 1) {
+      const advanceEvent = this.time.delayedCall(stepDelayMs * lineIndex, () => {
+        this.storyDialogue?.next();
+        this.storyDialogueAdvanceEvents = this.storyDialogueAdvanceEvents.filter((event) => event !== advanceEvent);
+      });
+      this.storyDialogueAdvanceEvents.push(advanceEvent);
+    }
+    const durationMs = nextDialogue.durationMs ?? stepDelayMs * Math.max(nextDialogue.lines.length, 1);
+    this.storyDialogueRemoveEvent = this.time.delayedCall(durationMs, () => {
+      this.storyDialogue?.remove({ animate: true });
+      this.storyDialogue = undefined;
+      this.storyDialogueRemoveEvent = undefined;
+      this.storyDialogueAdvanceEvents.length = 0;
+      this.showNextQueuedStoryDialogue();
+    });
   }
 
   private restartStage() {
@@ -1713,6 +1775,7 @@ class PrototypeScene extends Phaser.Scene {
       this.isLanding = false;
       this.landingFastForwarded = false;
       this.rewards?.addEnemyDefeatScore(stompTarget);
+      this.showAquaMascotStompDialogueOnce(stompTarget);
     });
     if (stomped || this.time.now < this.invulnerableUntil) {
       return;

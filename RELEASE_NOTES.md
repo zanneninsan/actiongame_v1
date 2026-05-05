@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.240
+### English
+- Added a queued story-message popup for the first Aqua Mascot stomp, using the sad portrait and a five-second apology line.
+### Japanese
+- 初めてAqua Mascotを踏んだ時に、sad表情のメッセージUIで謝罪セリフを5秒表示するようにしました。既に会話UIが出ている場合は順番待ちで表示されます。
+
 ## v0.1.239
 ### English
 - Changed the time-up danmaku presentation to use the same centered fixed reaction-wave style as MISS while keeping dedicated timeout comments.
