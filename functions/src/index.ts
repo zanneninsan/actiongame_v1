@@ -105,30 +105,30 @@ async function saveTopRankGhost(
   const shouldSaveGhost = typeof rank === "number" && rank <= TOP_GHOST_RANK_LIMIT && Boolean(ghostReplay);
 
   if (!shouldSaveGhost || !ghostReplay) {
-    await Promise.all([
-      ghostRef.delete().catch(() => undefined),
-      scoreRef.set({hasGhost: false, ghostUpdatedAt: FieldValue.serverTimestamp()}, {merge: true}),
-    ]);
+    const batch = firestore.batch();
+    batch.delete(ghostRef);
+    batch.set(scoreRef, {hasGhost: false, ghostUpdatedAt: FieldValue.serverTimestamp()}, {merge: true});
+    await batch.commit();
     return false;
   }
 
-  await Promise.all([
-    ghostRef.set({
-      uid,
-      playerId: payload.playerId,
-      stageId: payload.stageId,
-      stageName: payload.stageName,
-      submissionId: payload.submissionId,
-      gameVersion: payload.gameVersion,
-      playerName: payload.playerName,
-      score: payload.expectedScore,
-      rank,
-      ghostReplay: compactGhostReplay(ghostReplay),
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    }),
-    scoreRef.set({hasGhost: true, ghostUpdatedAt: FieldValue.serverTimestamp()}, {merge: true}),
-  ]);
+  const batch = firestore.batch();
+  batch.set(ghostRef, {
+    uid,
+    playerId: payload.playerId,
+    stageId: payload.stageId,
+    stageName: payload.stageName,
+    submissionId: payload.submissionId,
+    gameVersion: payload.gameVersion,
+    playerName: payload.playerName,
+    score: payload.expectedScore,
+    rank,
+    ghostReplay: compactGhostReplay(ghostReplay),
+    createdAt: FieldValue.serverTimestamp(),
+    updatedAt: FieldValue.serverTimestamp(),
+  });
+  batch.set(scoreRef, {hasGhost: true, ghostUpdatedAt: FieldValue.serverTimestamp()}, {merge: true});
+  await batch.commit();
   return true;
 }
 

@@ -5,8 +5,10 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 ## v0.1.245
 ### English
 - Restored the three jump-height tiers: normal jumps, speed-boosted jumps from horizontal momentum, and higher Shift dash jumps only while dash input is held.
+- Made leaderboard ghost registration atomic so the score entry cannot advertise a ghost unless the ghost replay document is saved with it.
 ### Japanese
 - ジャンプ高さを、通常ジャンプ、横速度による加速中ジャンプ、Shiftダッシュ入力中だけの高いジャンプの3段階に戻しました。
+- ランキングゴーストの登録を一括書き込みにし、ゴースト本体が保存されていないのにスコア側だけがゴーストありになる状態を防ぐようにしました。
 
 ## v0.1.244
 ### English
