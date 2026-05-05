@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.253
+### English
+- Reworked leaderboard, account, and options modals for mobile with full-height sheets, tighter columns, fixed modal isolation, and compact landscape layouts.
+### Japanese
+- ランキング、アカウント、設定モーダルをスマホ向けの全高シートに作り直し、列幅と横画面レイアウトを調整し、モーダル表示中は背後のUIが干渉しないようにしました。
+
 ## v0.1.252
 ### English
 - Reworked the mobile start screen into a dedicated vertical layout with a sticky start area, collapsed ghost options, and hidden background controls while the modal is open.

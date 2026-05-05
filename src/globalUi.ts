@@ -135,10 +135,12 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
 
   optionsToggle.addEventListener("click", () => {
     optionsModal.style.display = "grid";
+    document.body.classList.add("is-options-modal-open");
   });
 
   optionsClose.addEventListener("click", () => {
     optionsModal.style.display = "none";
+    document.body.classList.remove("is-options-modal-open");
   });
 
   volumeSlider.addEventListener("input", (event) => {
@@ -157,6 +159,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
     const nextOptionsModal = document.getElementById("options-modal");
     if (nextOptionsModal) {
       nextOptionsModal.style.display = "grid";
+      document.body.classList.add("is-options-modal-open");
     }
   });
 
@@ -182,6 +185,7 @@ export const removeGlobalUI = () => {
   document.getElementById("global-ui")?.remove();
   document.getElementById("options-modal")?.remove();
   document.getElementById("account-modal")?.remove();
+  document.body.classList.remove("is-options-modal-open", "is-account-modal-open", "is-leaderboard-modal-open");
 };
 
 export const setPlayerPositionDebugUI = (enabled: boolean, x: number, y: number) => {
