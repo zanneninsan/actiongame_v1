@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.252
+### English
+- Reworked the mobile start screen into a dedicated vertical layout with a sticky start area, collapsed ghost options, and hidden background controls while the modal is open.
+### Japanese
+- スマホ向けスタート画面を専用の縦レイアウトに作り直し、スタート操作を下部に固定し、ゴースト設定を折りたたみ、モーダル表示中は背後の操作UIを隠すようにしました。
+
 ## v0.1.251
 ### English
 - Tightened the start screen by removing the player spec link, renaming ghost loading to ghost file loading, and placing player name, language, and stage inputs beside their labels.
