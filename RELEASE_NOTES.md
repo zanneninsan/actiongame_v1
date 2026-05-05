@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.183
+### English
+- Localized the story message UI lines and next-message accessibility label for English and Japanese.
+### Japanese
+- ストーリーメッセージUIの会話文と次メッセージボタンの読み上げラベルを、日本語と英語の表示に対応しました。
+
 ## v0.1.182
 ### English
 - Stopped forcing or waiting for landscape orientation in mobile mode and added a mobile fullscreen toggle button.

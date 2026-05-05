@@ -18,7 +18,7 @@ import { StageEditor } from "./stageEditor";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
 import {
   createStoryDialogue,
-  DEFAULT_STORY_DIALOGUE_LINES,
+  getDefaultStoryDialogueLines,
   type StoryDialogueController,
 } from "./storyDialogue";
 import { getBrowserLocale, isLocale, LOCALE_STORAGE_KEY, t, type Locale } from "./i18n";
@@ -61,7 +61,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.182";
+const DEBUG_VERSION = "v0.1.183";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -647,7 +647,10 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.hasAdvancedStoryDialogueAtX = true;
-    this.storyDialogue = createStoryDialogue({ lines: DEFAULT_STORY_DIALOGUE_LINES });
+    this.storyDialogue = createStoryDialogue({
+      lines: getDefaultStoryDialogueLines(this.locale),
+      locale: this.locale,
+    });
     this.storyDialogueNextEvent = this.time.delayedCall(STORY_DIALOGUE_STEP_DELAY_MS, () => {
       this.storyDialogue?.next();
       this.storyDialogueNextEvent = undefined;
