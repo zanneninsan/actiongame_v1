@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.186
+### English
+- Resolved build-time UI asset URL warnings by making CSS image references resolve through the project asset graph.
+- Raised the Vite chunk warning limit to match the current Phaser/Firebase game bundle size and avoid noisy chunk-size warnings.
+### Japanese
+- CSS内のUI画像参照をビルド時に解決できる形へ直し、UI画像URL警告が出ないようにしました。
+- PhaserとFirebaseを含む現在のゲームバンドルサイズに合わせてViteのチャンク警告閾値を調整し、不要なチャンクサイズ警告を抑えました。
+
 ## v0.1.185
 ### English
 - Restored Shibuya City stage data to match `04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`, removing the moving, fragile, and secret-route additions from the base Shibuya City stage.
