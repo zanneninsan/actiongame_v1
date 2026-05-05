@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Player Spec - SUPER ZANNENIN SISTERS</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #10131a;
+        --panel: #171d26;
+        --panel-alt: #202631;
+        --line: #3e4a5c;
+        --text: #f8fafc;
+        --muted: #aeb9c8;
+        --gold: #f5c76a;
+        --mint: #8cffd2;
+        --rose: #f4a6b8;
+        --blue: #8fb7ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(180deg, rgba(20, 24, 32, 0.96), rgba(12, 15, 22, 0.98)),
+          var(--bg);
+        color: var(--text);
+        font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+        line-height: 1.72;
+      }
+
+      a {
+        color: var(--mint);
+      }
+
+      .page-shell {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 40px 0 64px;
+      }
+
+      header {
+        padding: 24px 0 30px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .kicker {
+        margin: 0 0 8px;
+        color: var(--gold);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 36px;
+        line-height: 1.18;
+      }
+
+      .lead {
+        max-width: 780px;
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 24px 0 0;
+      }
+
+      nav a,
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #1b2230;
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      main {
+        display: grid;
+        gap: 34px;
+        margin-top: 34px;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        color: var(--gold);
+        font-size: 24px;
+        line-height: 1.3;
+      }
+
+      h3 {
+        margin: 22px 0 8px;
+        color: var(--mint);
+        font-size: 18px;
+      }
+
+      p {
+        margin: 0 0 12px;
+      }
+
+      .spec-note {
+        color: var(--muted);
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--panel);
+      }
+
+      table {
+        width: 100%;
+        min-width: 680px;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--panel-alt);
+        color: var(--gold);
+        font-size: 13px;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      td.num,
+      th.num {
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      code,
+      pre {
+        font-family: "Cascadia Mono", Consolas, monospace;
+      }
+
+      code {
+        color: var(--rose);
+      }
+
+      pre {
+        overflow-x: auto;
+        margin: 12px 0;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #0b0f16;
+      }
+
+      .rule-list {
+        margin: 0;
+        padding-left: 22px;
+      }
+
+      .rule-list li + li {
+        margin-top: 6px;
+      }
+
+      .callout {
+        border-left: 4px solid var(--blue);
+        padding: 12px 16px;
+        background: rgba(143, 183, 255, 0.11);
+      }
+
+      footer {
+        margin-top: 46px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 640px) {
+        .page-shell {
+          width: min(100% - 22px, 1120px);
+          padding-top: 24px;
+        }
+
+        h1 {
+          font-size: 28px;
+        }
+
+        nav a,
+        .back-link {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header>
+        <p class="kicker">Core Player Reference</p>
+        <h1>SUPER ZANNENIN SISTERS Player Spec</h1>
+        <p class="lead">
+          スコア、踏みつけコンボ、パワーアップ、クリア評価を詰めたいプレイヤー向けの仕様説明書です。
+          ゲーム内ヘルプではなく、プレイ外で読み返せるリファレンスとして整理しています。
+        </p>
+        <nav aria-label="Page sections">
+          <a href="#score">Score</a>
+          <a href="#stomp-combo">Stomp Combo</a>
+          <a href="#powerups">Power-Ups</a>
+          <a href="#clear-rank">Clear Rank</a>
+          <a href="#missions">Mission Summary</a>
+          <a class="back-link" href="../">Back to Game</a>
+        </nav>
+      </header>
+
+      <main>
+        <section id="status">
+          <h2>Status</h2>
+          <p class="spec-note">Last updated from code state: <code>v0.1.198</code></p>
+          <div class="callout">
+            <p><strong>踏みつけ撃破:</strong> 完全クローズ。</p>
+            <p><strong>連続踏みボーナス:</strong> 現仕様を下のセクションに記載。</p>
+          </div>
+        </section>
+
+        <section id="score">
+          <h2>Score Sources</h2>
+          <h3>Items</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th class="num">Points</th>
+                  <th>Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Energy drink</td><td class="num">100</td><td>Score item.</td></tr>
+                <tr><td>Shopping bag</td><td class="num">250</td><td>Score item.</td></tr>
+                <tr><td>Bubble tea</td><td class="num">150</td><td>Score item.</td></tr>
+                <tr><td>Coin</td><td class="num">25</td><td>Also increments the coin count shown in the mission summary.</td></tr>
+                <tr><td>Speed power-up</td><td class="num">0</td><td>Grants a temporary speed multiplier.</td></tr>
+                <tr><td>Jump power-up</td><td class="num">0</td><td>Grants a temporary jump multiplier.</td></tr>
+                <tr><td>Star</td><td class="num">0</td><td>Grants temporary star invulnerability.</td></tr>
+                <tr><td>Dash ring</td><td class="num">0</td><td>Grants a short forward dash boost.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Enemy Stomp Score</h3>
+          <p>Enemy stomp score is added as bonus score. If an enemy does not define a custom stomp score, its base stomp score is 10.</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Enemy</th>
+                  <th class="num">Base Stomp Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Knife Punk</td><td class="num">10</td></tr>
+                <tr><td>Aqua Mascot</td><td class="num">10</td></tr>
+                <tr><td>Horned Cyborg</td><td class="num">20</td></tr>
+                <tr><td>Cone Golem</td><td class="num">15</td></tr>
+                <tr><td>Rabbit Traveler</td><td class="num">20</td></tr>
+                <tr><td>Neon Idol</td><td class="num">30</td></tr>
+                <tr><td>Heart Cannon</td><td class="num">25</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="stomp-combo">
+          <h2>Stomp Combo</h2>
+          <p>The stomp combo increases the score multiplier when enemies are stomped in quick succession.</p>
+          <h3>Combo Condition</h3>
+          <ul class="rule-list">
+            <li>A stomp starts or continues the combo when the next enemy stomp happens within <strong>1400 ms</strong> of the previous enemy stomp.</li>
+            <li>If more than 1400 ms passes between enemy stomps, the next stomp starts over at combo 1.</li>
+            <li>Landing on the floor resets the current combo count to 0.</li>
+            <li>Stomping an enemy bounces the player upward, so another stomp can continue the combo before landing.</li>
+          </ul>
+          <h3>Score Formula</h3>
+          <pre><code>stomp points = enemy base stomp score * current stomp combo count</code></pre>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Sequence</th>
+                  <th class="num">Enemy Base Score</th>
+                  <th class="num">Combo Count</th>
+                  <th class="num">Awarded Points</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>First stomp</td><td class="num">10</td><td class="num">1</td><td class="num">10</td></tr>
+                <tr><td>Second quick stomp</td><td class="num">10</td><td class="num">2</td><td class="num">20</td></tr>
+                <tr><td>Third quick stomp</td><td class="num">20</td><td class="num">3</td><td class="num">60</td></tr>
+                <tr><td>Stomp after landing</td><td class="num">10</td><td class="num">1</td><td class="num">10</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h3>On-Screen Popup</h3>
+          <ul class="rule-list">
+            <li>Combo 1 shows only the gained score, such as <code>+10</code>.</li>
+            <li>Combo 2 or higher shows the gained score and combo count, such as <code>+20 x2</code>.</li>
+          </ul>
+        </section>
+
+        <section id="powerups">
+          <h2>Power-Ups</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Power-Up</th>
+                  <th class="num">Duration</th>
+                  <th>Effect</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Speed</td><td class="num">9000 ms</td><td>Multiplies player speed by 1.28.</td></tr>
+                <tr><td>Jump</td><td class="num">9000 ms</td><td>Multiplies jump velocity by 1.18.</td></tr>
+                <tr><td>Star</td><td class="num">9000 ms</td><td>Sets the star invulnerability timer.</td></tr>
+                <tr><td>Dash ring</td><td class="num">900 ms</td><td>Sets horizontal velocity to 720 in the facing direction and applies the speed multiplier during the boost.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="clear-rank">
+          <h2>Clear Rank</h2>
+          <p>Clear rank is calculated from three bonuses.</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Bonus</th>
+                  <th>Condition</th>
+                  <th class="num">Rank Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>No damage</td><td>Damage taken is 0.</td><td class="num">1</td></tr>
+                <tr><td>Fast clear</td><td>Remaining time is at least 55% of total stage time.</td><td class="num">1</td></tr>
+                <tr><td>Score bonus</td><td>Final score is at least 4200.</td><td class="num">1</td></tr>
+                <tr><td>Partial score bonus</td><td>Final score is at least 2600 and below 4200.</td><td class="num">0.5</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Rank Thresholds</h3>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th class="num">Required Rank Score</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>S</td><td class="num">2.5 or higher</td></tr>
+                <tr><td>A</td><td class="num">1.5 or higher</td></tr>
+                <tr><td>B</td><td class="num">0.5 or higher</td></tr>
+                <tr><td>C</td><td class="num">Below 0.5</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="missions">
+          <h2>Mission Summary</h2>
+          <p>The clear mission summary currently reports:</p>
+          <ul class="rule-list">
+            <li>Damage state: <code>NO DMG OK</code> or <code>DMG n</code></li>
+            <li>Collected coin count: <code>COIN n</code></li>
+            <li>Fast clear state: <code>FAST OK</code> or <code>FAST --</code></li>
+          </ul>
+        </section>
+      </main>
+
+      <footer>
+        <p>This page is part of the SUPER ZANNENIN SISTERS site and is intended as a precise gameplay reference, not an in-game tutorial.</p>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.199
+### English
+- Added a site-level Player Spec page for core players, with readable tables for scoring, stomp combos, power-ups, clear rank, and mission summary rules.
+- Added Player Spec links from the start modal and in-game global UI.
+### Japanese
+- コアプレイヤー向けの仕様説明ページをサイト内に追加し、スコア、踏みつけコンボ、パワーアップ、クリアランク、ミッション表示のルールを表で読みやすく確認できるようにしました。
+- スタート画面とゲーム中のグローバルUIから、Player Specページを開ける導線を追加しました。
+
 ## v0.1.198
 ### English
 - Restored the leaderboard `NEW` marker after a best score update by matching the current score row by player, score, and rank when the submission id is not yet visible in the fetched entry.
