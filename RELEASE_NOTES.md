@@ -6,9 +6,11 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 ### English
 - Updated the start screen and browser title to 作成中ネオシブヤシティ.
 - Reduced the Skybridge Sprint midground opacity to improve stage readability.
+- Added a smartphone startup prompt that asks to switch to landscape fullscreen, attempts fullscreen and orientation lock when accepted, and falls back to a rotate-device retry prompt when the browser blocks it.
 ### Japanese
 - スタート画面とブラウザタイトルを「作成中ネオシブヤシティ」に変更しました。
 - 動物園ステージの視認性を上げるため、中景を少し薄く表示するようにしました。
+- スマートフォンと思われる環境で、スタート画面の前に横画面・フルスクリーン推奨の確認を表示し、許可された場合は自動切り替えを試み、失敗時は端末を横向きにして再試行できる案内を出すようにしました。
 
 ## v0.1.254
 ### English

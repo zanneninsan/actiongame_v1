@@ -40,6 +40,86 @@ canvas {
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
 }
 
+.start-orientation-prompt {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(2, 6, 23, 0.62);
+}
+
+.start-orientation-prompt[hidden] {
+  display: none;
+}
+
+.start-orientation-dialog {
+  box-sizing: border-box;
+  width: min(460px, calc(100vw - 32px));
+  display: grid;
+  gap: 14px;
+  padding: 22px 24px 20px;
+  border: 1px solid rgba(245, 199, 106, 0.78);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(6, 15, 32, 0.98), rgba(2, 6, 23, 0.98)),
+    url("../public/assets/ui/fantasy/options_modal_window.webp") center / cover no-repeat;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.62), inset 0 0 18px rgba(184, 233, 255, 0.08);
+  color: #f8fafc;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.start-orientation-message,
+.start-orientation-note {
+  margin: 0;
+  font-weight: 900;
+  line-height: 1.55;
+}
+
+.start-orientation-message {
+  color: #fef3c7;
+  font-size: 16px;
+}
+
+.start-orientation-note {
+  color: #b8e9ff;
+  font-size: 13px;
+}
+
+.start-orientation-note[hidden] {
+  display: none;
+}
+
+.start-orientation-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.start-orientation-actions button {
+  min-height: 44px;
+  border: 0;
+  padding: 0 14px;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #f8fafc;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.start-orientation-actions button:first-child {
+  background-image: url("../public/assets/ui/fantasy/button_primary_selected_safe.webp");
+  color: #fff7d6;
+}
+
+.start-orientation-actions button:disabled {
+  cursor: wait;
+  opacity: 0.76;
+}
+
 .start-dialog {
   box-sizing: border-box;
   position: relative;
@@ -363,6 +443,34 @@ canvas {
     background:
       linear-gradient(180deg, rgba(4, 10, 22, 0.96), rgba(2, 6, 23, 0.98)),
       url("../public/assets/ui/fantasy/start_modal_window.webp") center / cover no-repeat;
+  }
+
+  .start-orientation-prompt {
+    padding: max(10px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
+
+  .start-orientation-dialog {
+    width: min(100%, 420px);
+    gap: 12px;
+    padding: 18px 16px 16px;
+  }
+
+  .start-orientation-message {
+    font-size: 15px;
+  }
+
+  .start-orientation-note {
+    font-size: 12px;
+  }
+
+  .start-orientation-actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .start-orientation-actions button {
+    min-height: 46px;
   }
 
   .start-dialog h1 {
