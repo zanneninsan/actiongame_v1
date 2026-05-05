@@ -72,14 +72,14 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.211";
+const DEBUG_VERSION = "v0.1.212";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
 const GAME_TIME_MS = GAME_TIME_SECONDS * 1000;
-const SPRING_BIG_JUMP_INPUT_BUFFER_MS = 160;
-const SPRING_LAUNCH_NORMAL_JUMP_SUPPRESS_MS = 80;
+const SPRING_BIG_JUMP_INPUT_BUFFER_MS = 360;
+const SPRING_LAUNCH_NORMAL_JUMP_SUPPRESS_MS = 140;
 const STORY_DIALOGUE_ADVANCE_X = 600;
 const STORY_DIALOGUE_STEP_DELAY_MS = 8000;
 const TIME_BONUS_PER_SECOND = 10;
@@ -1119,7 +1119,7 @@ class PrototypeScene extends Phaser.Scene {
       player: this.player,
       platformObject,
       canInteract: () => this.isRunActive && !this.stageEditor?.isEnabled,
-      shouldSpringBigJump: () => this.isSpringBigJumpInputBuffered(),
+      shouldSpringBigJump: () => this.isSpringBigJumpInputActive(),
       onLaunch: () => {
         this.lastSpringLaunchAt = this.time.now;
         this.isLanding = false;
@@ -1132,8 +1132,13 @@ class PrototypeScene extends Phaser.Scene {
     this.lastJumpInputAt = this.time.now;
   }
 
-  private isSpringBigJumpInputBuffered() {
-    return this.time.now - this.lastJumpInputAt <= SPRING_BIG_JUMP_INPUT_BUFFER_MS;
+  private isSpringBigJumpInputActive() {
+    return (
+      this.keys.w.isDown ||
+      this.cursors.space.isDown ||
+      this.mobileInput.w ||
+      this.time.now - this.lastJumpInputAt <= SPRING_BIG_JUMP_INPUT_BUFFER_MS
+    );
   }
 
   private canLandOnDecorationPlatform(

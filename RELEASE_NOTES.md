@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.212
+### English
+- Relaxed big spring jump timing so holding jump or pressing jump within a wider input buffer triggers the big launch.
+### Japanese
+- ジャンプ台大ジャンプの判定を緩和し、ジャンプ入力の押しっぱなしや広めの入力猶予でも大ジャンプが出るようにしました。
+
 ## v0.1.211
 ### English
 - Added a big spring jump when jump input is timed just before or as the player lands on a spring platform.
