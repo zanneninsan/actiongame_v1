@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.186
+### English
+- Localized leaderboard titles, status messages, current score labels, and score submission result messages for English and Japanese while keeping the table column headers unchanged.
+### Japanese
+- ランキング画面のタイトル、状態メッセージ、今回のスコア表示、スコア登録結果メッセージを日本語と英語の表示に対応しました。表の列見出しはこれまで通り英字表記のままにしています。
+
 ## v0.1.185
 ### English
 - Updated the options screen language label to match the start screen bilingual label format.

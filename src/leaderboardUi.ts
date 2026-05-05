@@ -1,8 +1,11 @@
 import type { LeaderboardEntry } from "./leaderboard";
+import type { Locale } from "./i18n";
+import { DEFAULT_LOCALE, t } from "./i18n";
 
 type LeaderboardPanelOptions = {
   stageName: string;
   gameVersion: string;
+  locale?: Locale;
   fetchEntries: () => Promise<LeaderboardEntry[]>;
   statusMessage?: string;
   currentSubmissionId?: string;
@@ -19,13 +22,14 @@ type LeaderboardCurrentScore = {
 export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
   document.getElementById("leaderboard-modal")?.remove();
 
+  const locale = options.locale ?? DEFAULT_LOCALE;
   const modal = document.createElement("div");
   modal.id = "leaderboard-modal";
   modal.innerHTML = `
-    <div class="leaderboard-dialog" role="dialog" aria-modal="true" aria-label="Leaderboard">
-      <h2>LEADERBOARD</h2>
+    <div class="leaderboard-dialog" role="dialog" aria-modal="true" aria-label="${escapeHtml(t(locale, "leaderboard.title"))}">
+      <h2>${escapeHtml(t(locale, "leaderboard.title"))}</h2>
       <p class="leaderboard-meta">${escapeHtml(options.stageName)} / ${escapeHtml(options.gameVersion)}</p>
-      <p class="leaderboard-status">${escapeHtml(options.statusMessage ?? "Loading...")}</p>
+      <p class="leaderboard-status">${escapeHtml(options.statusMessage ?? t(locale, "leaderboard.loading"))}</p>
       <div class="leaderboard-header">
         <span aria-hidden="true"></span>
         <span>RANK</span>
@@ -36,7 +40,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
       </div>
       <ol class="leaderboard-list"></ol>
       <div class="leaderboard-current-score" hidden></div>
-      <button id="leaderboard-close" class="ui-button" type="button">Close</button>
+      <button id="leaderboard-close" class="ui-button" type="button">${escapeHtml(t(locale, "leaderboard.close"))}</button>
     </div>
   `;
   document.body.appendChild(modal);
@@ -46,7 +50,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
   const currentScore = modal.querySelector<HTMLElement>(".leaderboard-current-score")!;
   const closeButton = modal.querySelector<HTMLButtonElement>("#leaderboard-close")!;
   const close = () => modal.remove();
-  renderCurrentScore(currentScore, options.currentScore);
+  renderCurrentScore(currentScore, options.currentScore, locale);
 
   closeButton.addEventListener("click", close);
   modal.addEventListener("pointerdown", (event) => {
@@ -66,18 +70,18 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
     .fetchEntries()
     .then((entries) => {
       if (entries.length === 0) {
-        status.textContent = options.statusMessage ?? "No scores yet.";
+        status.textContent = options.statusMessage ?? t(locale, "leaderboard.empty");
         return;
       }
 
-      status.textContent = options.statusMessage ?? "Top 100 scores";
+      status.textContent = options.statusMessage ?? t(locale, "leaderboard.topScores");
       list.replaceChildren(
         ...entries.map((entry, index) => createEntryRow(entry, index + 1, options.currentSubmissionId, options.currentPlayerId)),
       );
       list.querySelector(".leaderboard-entry.is-current-score")?.scrollIntoView({ block: "center" });
     })
     .catch(() => {
-      status.textContent = "Leaderboard is unavailable.";
+      status.textContent = t(locale, "leaderboard.unavailable");
     });
 }
 
@@ -100,7 +104,7 @@ function createEntryRow(entry: LeaderboardEntry, rank: number, currentSubmission
   return row;
 }
 
-function renderCurrentScore(container: HTMLElement, currentScore?: LeaderboardCurrentScore) {
+function renderCurrentScore(container: HTMLElement, currentScore: LeaderboardCurrentScore | undefined, locale: Locale) {
   if (!currentScore) {
     container.hidden = true;
     container.replaceChildren();
@@ -109,10 +113,12 @@ function renderCurrentScore(container: HTMLElement, currentScore?: LeaderboardCu
 
   container.hidden = false;
   container.innerHTML = `
-    <span class="leaderboard-current-label">CURRENT SCORE</span>
+    <span class="leaderboard-current-label">${escapeHtml(t(locale, "leaderboard.currentScore"))}</span>
     <span class="leaderboard-current-rank">RANK ${currentScore.scoreUpdated && currentScore.rank ? currentScore.rank : "-"}</span>
     <span class="leaderboard-current-value">${currentScore.score.toFixed(2)}</span>
-    <span class="leaderboard-current-status">${currentScore.scoreUpdated ? "BEST UPDATED" : "BEST NOT UPDATED"}</span>
+    <span class="leaderboard-current-status">${escapeHtml(
+      currentScore.scoreUpdated ? t(locale, "leaderboard.bestUpdated") : t(locale, "leaderboard.bestNotUpdated"),
+    )}</span>
   `;
 }
 

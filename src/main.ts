@@ -61,7 +61,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.185";
+const DEBUG_VERSION = "v0.1.186";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1415,7 +1415,8 @@ class PrototypeScene extends Phaser.Scene {
     showLeaderboardPanel({
       stageName: resolveStageName(this.editorStage.name, this.locale),
       gameVersion: DEBUG_VERSION,
-      statusMessage: isLeaderboardConfigured() ? statusMessage : "Leaderboard is not configured.",
+      locale: this.locale,
+      statusMessage: isLeaderboardConfigured() ? statusMessage : t(this.locale, "leaderboard.notConfigured"),
       currentSubmissionId,
       currentPlayerId: this.leaderboardPlayerId,
       currentScore,
@@ -1451,14 +1452,14 @@ class PrototypeScene extends Phaser.Scene {
         }
         const currentScore = { score: finalScore, rank: result.rank, scoreUpdated: result.scoreUpdated };
         this.showLeaderboard(
-          result.scoreUpdated ? "Score submitted." : "Score submitted. Best score was not updated.",
+          result.scoreUpdated ? t(this.locale, "leaderboard.scoreSubmitted") : t(this.locale, "leaderboard.scoreSubmittedBestNotUpdated"),
           result.scoreUpdated && "submissionId" in result ? result.submissionId ?? submissionId : undefined,
           currentScore,
         );
       })
       .catch((error) => {
         console.warn("Score submission failed.", error);
-        this.showLeaderboard("Score could not be submitted.");
+        this.showLeaderboard(t(this.locale, "leaderboard.scoreSubmitFailed"));
       });
   }
 
