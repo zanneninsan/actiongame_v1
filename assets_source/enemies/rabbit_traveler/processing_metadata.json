@@ -1,0 +1,129 @@
+{
+  "source": "C:\\Users\\JSL_SERVER1\\Downloads\\E893B9ED-F765-4808-AD3C-2A512976C905.png",
+  "runtime_output": "public/assets/enemies/rabbit_traveler_walk.webp",
+  "frame_width": 160,
+  "frame_height": 190,
+  "transparency_policy": "safe-side conservative border-connected background removal; retained pixels forced opaque; lossless PNG intermediates preserved",
+  "frames": [
+    {
+      "frame": 1,
+      "source_component_box": [
+        318,
+        63,
+        397,
+        230
+      ],
+      "source_crop_box": [
+        306,
+        53,
+        409,
+        238
+      ],
+      "canvas_paste": [
+        28,
+        5
+      ],
+      "median_border_background": [
+        246,
+        244,
+        236
+      ]
+    },
+    {
+      "frame": 2,
+      "source_component_box": [
+        415,
+        61,
+        493,
+        230
+      ],
+      "source_crop_box": [
+        403,
+        51,
+        505,
+        238
+      ],
+      "canvas_paste": [
+        29,
+        3
+      ],
+      "median_border_background": [
+        246,
+        244,
+        236
+      ]
+    },
+    {
+      "frame": 3,
+      "source_component_box": [
+        511,
+        61,
+        588,
+        230
+      ],
+      "source_crop_box": [
+        499,
+        51,
+        600,
+        238
+      ],
+      "canvas_paste": [
+        29,
+        3
+      ],
+      "median_border_background": [
+        246,
+        244,
+        236
+      ]
+    },
+    {
+      "frame": 4,
+      "source_component_box": [
+        611,
+        60,
+        690,
+        230
+      ],
+      "source_crop_box": [
+        599,
+        50,
+        702,
+        238
+      ],
+      "canvas_paste": [
+        28,
+        2
+      ],
+      "median_border_background": [
+        246,
+        244,
+        236
+      ]
+    },
+    {
+      "frame": 5,
+      "source_component_box": [
+        700,
+        60,
+        786,
+        230
+      ],
+      "source_crop_box": [
+        688,
+        50,
+        798,
+        238
+      ],
+      "canvas_paste": [
+        25,
+        2
+      ],
+      "median_border_background": [
+        246,
+        244,
+        236
+      ]
+    }
+  ]
+}

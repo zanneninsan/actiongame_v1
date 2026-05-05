@@ -8,6 +8,12 @@ const FLYING_BOB_HEIGHT = 34;
 const FLYING_BOB_SPEED = 0.0032;
 const HOP_INTERVAL_MS = 1050;
 const HOP_VELOCITY_Y = -410;
+const SHOOT_INTERVAL_MS = 1700;
+const PROJECTILE_SPEED = 235;
+const PROJECTILE_TEXTURE_KEY = "enemy-projectile-heart";
+const TURRET_SHOOT_INTERVAL_MS = 2250;
+const TURRET_PROJECTILE_SPEED = 310;
+const TURRET_PROJECTILE_TEXTURE_KEY = "enemy-cannon-heart";
 
 export const createEnemyAnimations = (scene: Phaser.Scene) => {
   Object.values(ENEMY_DEFINITIONS).forEach((definition) => {
@@ -16,16 +22,27 @@ export const createEnemyAnimations = (scene: Phaser.Scene) => {
       return;
     }
 
-    scene.anims.create({
-      key: animation.key,
-      frames: scene.anims.generateFrameNumbers(animation.key, {
-        start: 0,
-        end: animation.frameCount - 1,
-      }),
-      frameRate: animation.frameRate,
-      repeat: -1,
-    });
+    if (!scene.textures.exists(animation.key)) {
+      console.warn(`Skipping enemy animation "${animation.key}" because its texture was not loaded.`);
+      return;
+    }
+
+    try {
+      scene.anims.create({
+        key: animation.key,
+        frames: scene.anims.generateFrameNumbers(animation.key, {
+          start: 0,
+          end: animation.frameCount - 1,
+        }),
+        frameRate: animation.frameRate,
+        repeat: -1,
+      });
+    } catch (error) {
+      console.warn(`Skipping enemy animation "${animation.key}" because its frames could not be created.`, error);
+    }
   });
+  createProjectileTexture(scene);
+  createTurretProjectileTexture(scene);
 };
 
 export const createEnemies = (
@@ -89,9 +106,59 @@ export const updateEnemies = (
       updateChaseEnemy(enemy, player);
       return;
     }
+    if (aiType === "shooter") {
+      updateShooterEnemy(enemiesGroup, enemy, player);
+      return;
+    }
+    if (aiType === "turret") {
+      updateTurretEnemy(enemiesGroup, enemy, player);
+      return;
+    }
+    if (aiType === "projectile") {
+      updateProjectileEnemy(enemy, destroyBelowY);
+      return;
+    }
+    if (aiType === "cannonProjectile") {
+      updateCannonProjectileEnemy(enemy, destroyBelowY);
+      return;
+    }
 
     updatePatrolEnemy(enemy);
   });
+};
+
+const createProjectileTexture = (scene: Phaser.Scene) => {
+  if (scene.textures.exists(PROJECTILE_TEXTURE_KEY)) {
+    return;
+  }
+  const graphics = scene.make.graphics({ x: 0, y: 0 }, false);
+  graphics.fillStyle(0xff4fb3, 1);
+  graphics.fillCircle(10, 9, 7);
+  graphics.fillCircle(20, 9, 7);
+  graphics.fillTriangle(4, 12, 26, 12, 15, 28);
+  graphics.lineStyle(3, 0x3b0a2a, 1);
+  graphics.strokeCircle(10, 9, 7);
+  graphics.strokeCircle(20, 9, 7);
+  graphics.generateTexture(PROJECTILE_TEXTURE_KEY, 30, 30);
+  graphics.destroy();
+};
+
+const createTurretProjectileTexture = (scene: Phaser.Scene) => {
+  if (scene.textures.exists(TURRET_PROJECTILE_TEXTURE_KEY)) {
+    return;
+  }
+  const graphics = scene.make.graphics({ x: 0, y: 0 }, false);
+  graphics.fillStyle(0xff77c8, 1);
+  graphics.fillCircle(14, 13, 10);
+  graphics.fillCircle(30, 13, 10);
+  graphics.fillTriangle(5, 18, 39, 18, 22, 40);
+  graphics.lineStyle(4, 0x111827, 1);
+  graphics.strokeCircle(14, 13, 10);
+  graphics.strokeCircle(30, 13, 10);
+  graphics.lineStyle(2, 0x67e8f9, 1);
+  graphics.strokeCircle(22, 20, 18);
+  graphics.generateTexture(TURRET_PROJECTILE_TEXTURE_KEY, 44, 44);
+  graphics.destroy();
 };
 
 const updatePatrolEnemy = (enemy: Phaser.Physics.Arcade.Sprite) => {
@@ -159,6 +226,93 @@ const updateChaseEnemy = (
   enemy.setFlipX(direction < 0);
 };
 
+const updateShooterEnemy = (
+  enemiesGroup: Phaser.Physics.Arcade.Group,
+  enemy: Phaser.Physics.Arcade.Sprite,
+  player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+) => {
+  const body = enemy.body as Phaser.Physics.Arcade.Body;
+  body.setAllowGravity(true);
+  enemy.setVelocityX(0);
+  if (!player?.active) {
+    return;
+  }
+
+  const direction = player.x < enemy.x ? -1 : 1;
+  enemy.setFlipX(direction < 0);
+  const nextShotAt = (enemy.getData("nextShotAt") as number | undefined) ?? 0;
+  if (enemy.scene.time.now < nextShotAt || Math.abs(player.x - enemy.x) > 620) {
+    return;
+  }
+
+  enemy.setData("nextShotAt", enemy.scene.time.now + SHOOT_INTERVAL_MS + Phaser.Math.Between(-180, 240));
+  const projectile = enemiesGroup.create(enemy.x + direction * 34, enemy.y - 12, PROJECTILE_TEXTURE_KEY) as Phaser.Physics.Arcade.Sprite;
+  projectile.setDisplaySize(28, 28);
+  projectile.setDepth(0.22);
+  projectile.setData("enemyType", "projectile");
+  projectile.setData("aiType", "projectile");
+  projectile.setData("defeated", false);
+  projectile.setVelocity(direction * PROJECTILE_SPEED, -24);
+  projectile.setSize(24, 24);
+  const projectileBody = projectile.body as Phaser.Physics.Arcade.Body;
+  projectileBody.setAllowGravity(false);
+};
+
+const updateTurretEnemy = (
+  enemiesGroup: Phaser.Physics.Arcade.Group,
+  enemy: Phaser.Physics.Arcade.Sprite,
+  player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+) => {
+  const body = enemy.body as Phaser.Physics.Arcade.Body;
+  body.setAllowGravity(true);
+  enemy.setVelocityX(0);
+  if (!player?.active) {
+    return;
+  }
+
+  const distanceX = player.x - enemy.x;
+  const distanceY = player.y - enemy.y;
+  const direction = distanceX < 0 ? -1 : 1;
+  enemy.setFlipX(direction < 0);
+  const nextShotAt = (enemy.getData("nextShotAt") as number | undefined) ?? 0;
+  if (enemy.scene.time.now < nextShotAt || Math.abs(distanceX) > 760 || Math.abs(distanceY) > 260) {
+    return;
+  }
+
+  enemy.setData("nextShotAt", enemy.scene.time.now + TURRET_SHOOT_INTERVAL_MS + Phaser.Math.Between(-220, 320));
+  const projectile = enemiesGroup.create(
+    enemy.x + direction * 46,
+    enemy.y - 8,
+    TURRET_PROJECTILE_TEXTURE_KEY,
+  ) as Phaser.Physics.Arcade.Sprite;
+  projectile.setDisplaySize(36, 36);
+  projectile.setDepth(0.24);
+  projectile.setData("enemyType", "cannonProjectile");
+  projectile.setData("aiType", "cannonProjectile");
+  projectile.setData("defeated", false);
+  projectile.setVelocity(direction * TURRET_PROJECTILE_SPEED, Phaser.Math.Clamp(distanceY * 0.18, -70, 70));
+  projectile.setAngularVelocity(direction * 260);
+  projectile.setSize(26, 26);
+  const projectileBody = projectile.body as Phaser.Physics.Arcade.Body;
+  projectileBody.setAllowGravity(false);
+};
+
+const updateProjectileEnemy = (enemy: Phaser.Physics.Arcade.Sprite, destroyBelowY?: number) => {
+  const body = enemy.body as Phaser.Physics.Arcade.Body;
+  body.setAllowGravity(false);
+  if (destroyBelowY !== undefined && (enemy.y > destroyBelowY || enemy.x < -160 || enemy.x > body.world.bounds.width + 160)) {
+    enemy.destroy();
+  }
+};
+
+const updateCannonProjectileEnemy = (enemy: Phaser.Physics.Arcade.Sprite, destroyBelowY?: number) => {
+  const body = enemy.body as Phaser.Physics.Arcade.Body;
+  body.setAllowGravity(false);
+  if (destroyBelowY !== undefined && (enemy.y > destroyBelowY || enemy.x < -160 || enemy.x > body.world.bounds.width + 160)) {
+    enemy.destroy();
+  }
+};
+
 const updatePatrolDirection = (enemy: Phaser.Physics.Arcade.Sprite) => {
   const body = enemy.body as Phaser.Physics.Arcade.Body;
   const patrolLeft = enemy.getData("patrolLeft") as number;
@@ -192,7 +346,17 @@ export const freezeEnemies = (enemiesGroup?: Phaser.Physics.Arcade.Group) => {
 const createEnemySprite = (enemiesGroup: Phaser.Physics.Arcade.Group, placement: EnemyPlacement) => {
   const definition = ENEMY_DEFINITIONS[placement.type ?? "aquaMascot"];
   const animation = definition.animation;
-  const enemy = enemiesGroup.create(placement.x, placement.y, animation?.key ?? definition.key) as Phaser.Physics.Arcade.Sprite;
+  const animationReady =
+    animation !== undefined &&
+    enemiesGroup.scene.textures.exists(animation.key) &&
+    enemiesGroup.scene.anims.exists(animation.key);
+  const textureKey =
+    animationReady || definition.assetPath
+      ? animationReady
+        ? animation.key
+        : definition.key
+      : getFallbackEnemyTextureKey(enemiesGroup.scene);
+  const enemy = enemiesGroup.create(placement.x, placement.y, textureKey) as Phaser.Physics.Arcade.Sprite;
   const speed = placement.speed ?? ENEMY_DEFAULT_SPEED;
   const direction = speed >= 0 ? 1 : -1;
   enemy.setDisplaySize(definition.displayWidth, definition.displayHeight);
@@ -202,17 +366,26 @@ const createEnemySprite = (enemiesGroup: Phaser.Physics.Arcade.Group, placement:
   enemy.setData("homeY", placement.y);
   enemy.setData("phase", Phaser.Math.FloatBetween(0, Math.PI * 2));
   enemy.setData("nextHopAt", enemy.scene.time.now + Phaser.Math.Between(260, 900));
+  enemy.setData("nextShotAt", enemy.scene.time.now + Phaser.Math.Between(500, 1400));
   enemy.setData("patrolLeft", Math.min(placement.patrolLeft, placement.patrolRight));
   enemy.setData("patrolRight", Math.max(placement.patrolLeft, placement.patrolRight));
   enemy.setData("speed", Math.abs(speed));
   enemy.setSize(definition.bodyWidth / Math.abs(enemy.scaleX), definition.bodyHeight / Math.abs(enemy.scaleY));
   enemy.setOffset(definition.bodyOffsetX / Math.abs(enemy.scaleX), definition.bodyOffsetY / Math.abs(enemy.scaleY));
-  enemy.setVelocityX(Math.abs(speed) * direction);
+  enemy.setVelocityX(definition.aiType === "turret" ? 0 : Math.abs(speed) * direction);
   enemy.setFlipX(direction < 0);
-  if (animation) {
+  if (animationReady) {
     enemy.play(animation.key);
   }
   const body = enemy.body as Phaser.Physics.Arcade.Body;
   body.setAllowGravity(definition.aiType !== "flyingPatrol");
-  body.setImmovable(false);
+  body.setImmovable(definition.aiType === "turret");
+};
+
+const getFallbackEnemyTextureKey = (scene: Phaser.Scene) => {
+  const fallbackAnimation = ENEMY_DEFINITIONS.aquaMascot.animation?.key;
+  if (fallbackAnimation && scene.textures.exists(fallbackAnimation)) {
+    return fallbackAnimation;
+  }
+  return "__DEFAULT";
 };

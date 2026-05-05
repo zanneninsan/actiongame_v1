@@ -114,4 +114,7 @@ function backgroundAssetsPlugin(): Plugin {
 export default defineConfig({
   base: process.env.GITHUB_PAGES === "true" ? "/actiongame_v1/" : "/",
   plugins: [backgroundAssetsPlugin()],
+  build: {
+    chunkSizeWarningLimit: 1800,
+  },
 });

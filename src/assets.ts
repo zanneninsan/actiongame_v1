@@ -9,31 +9,66 @@ export const PROP_ASSETS = {
   lampDouble: "street-lamp-double",
 } as const;
 export type StreetLampKey = (typeof PROP_ASSETS)[keyof typeof PROP_ASSETS];
-export type ItemType = "energyDrink" | "shoppingBag" | "bubbleTea";
-export type EnemyType = "knifePunk" | "aquaMascot" | "hornedCyborg" | "coneGolem" | "rabbitTraveler";
-export type EnemyAiType = "patrol" | "flyingPatrol" | "hoppingPatrol" | "chase";
+export type ItemType =
+  | "energyDrink"
+  | "shoppingBag"
+  | "bubbleTea"
+  | "coin"
+  | "powerSpeed"
+  | "powerJump"
+  | "star"
+  | "dashRing";
+export type EnemyType =
+  | "knifePunk"
+  | "aquaMascot"
+  | "hornedCyborg"
+  | "coneGolem"
+  | "rabbitTraveler"
+  | "neonIdolShooter"
+  | "heartCannonTurret";
+export type EnemyAiType =
+  | "patrol"
+  | "flyingPatrol"
+  | "hoppingPatrol"
+  | "chase"
+  | "shooter"
+  | "turret"
+  | "projectile"
+  | "cannonProjectile";
 export const ITEM_GLOW_TEXTURE_KEY = "item-soft-glow";
 export const ITEM_GLOW_COLORS: Record<ItemType, number> = {
   energyDrink: 0x8cffd2,
   shoppingBag: 0xffd166,
   bubbleTea: 0xf9a8ff,
+  coin: 0xffd166,
+  powerSpeed: 0x60a5fa,
+  powerJump: 0x86efac,
+  star: 0xfbbf24,
+  dashRing: 0xc084fc,
 };
-export type ScoreState = Record<ItemType, number>;
+export type ScoreState = Partial<Record<ItemType, number>>;
 export type PlatformAsset = (typeof PLATFORM_ASSETS)[keyof typeof PLATFORM_ASSETS];
 export type StageObjectAsset = { key: string; path: string };
 export type MovingPlatformAxis = "x" | "y" | "xy";
 export type MovingPlatformConfig = { axis: MovingPlatformAxis; distance: number; speed: number; distanceY?: number };
+export type SpringPlatformConfig = { velocity?: number };
+export type FragilePlatformConfig = { delayMs?: number; respawnMs?: number };
 export type PlatformRunPlacement = {
   x: number;
   y: number;
   units: number;
   collides?: boolean;
   moving?: MovingPlatformConfig;
+  spring?: SpringPlatformConfig;
+  fragile?: FragilePlatformConfig;
 };
 export type StreetLampPlacement = { x: number; key: StreetLampKey; scale?: number };
 export type StageDecorationPlacement = { x: number; y?: number; key: string; scale?: number };
 export type ItemPlacement = { type: ItemType; x: number; y: number };
 export type EnemyPlacement = { type?: EnemyType; x: number; y: number; patrolLeft: number; patrolRight: number; speed?: number };
+export type BonusBlockPlacement = { type: "hidden" | "question" | "breakable"; x: number; y: number; reward?: ItemType };
+export type CheckpointPlacement = { x: number; y: number };
+export type OneWayGatePlacement = { x: number; y: number; height?: number };
 export type StageLocalizedName = { jp: string; en: string };
 export type StageName = string | StageLocalizedName;
 export type StageBackgroundSelection = { rearKey?: string; midgroundKey?: string };
@@ -52,6 +87,9 @@ export type StageDefinition = {
   streetLamps: StreetLampPlacement[];
   decorations: StageDecorationPlacement[];
   items: ItemPlacement[];
+  bonusBlocks?: BonusBlockPlacement[];
+  checkpoints?: CheckpointPlacement[];
+  oneWayGates?: OneWayGatePlacement[];
   enemies?: EnemyPlacement[];
 };
 
@@ -87,6 +125,11 @@ export const STAGE_OBJECT_ASSETS = [
   { key: "stage-structures-vending-kiosk", path: "assets/stage_objects/structures_vending_kiosk.webp" },
   { key: "stage-structures-station-wall-railing", path: "assets/stage_objects/structures_station_wall_railing.webp" },
   { key: "stage-structures-station-entrance", path: "assets/stage_objects/structures_station_entrance.webp" },
+  { key: "stage-question-block", path: "assets/stage_objects/question_block.png" },
+  { key: "stage-hidden-block", path: "assets/stage_objects/hidden_block.png" },
+  { key: "stage-breakable-block", path: "assets/stage_objects/breakable_block.png" },
+  { key: "stage-checkpoint-flag", path: "assets/stage_objects/checkpoint_flag.png" },
+  { key: "stage-one-way-gate", path: "assets/stage_objects/one_way_gate.png" },
 ] as const satisfies readonly StageObjectAsset[];
 
 export const ITEM_DEFINITIONS: Record<ItemType, { key: string; label: string; points: number; assetPath: string }> = {
@@ -108,6 +151,36 @@ export const ITEM_DEFINITIONS: Record<ItemType, { key: string; label: string; po
     points: 150,
     assetPath: "assets/items/bubble_tea.webp",
   },
+  coin: {
+    key: "item-coin",
+    label: "COIN",
+    points: 25,
+    assetPath: "assets/items/coin.png",
+  },
+  powerSpeed: {
+    key: "item-power-speed",
+    label: "SPEED",
+    points: 0,
+    assetPath: "assets/items/power_speed_blue.png",
+  },
+  powerJump: {
+    key: "item-power-jump",
+    label: "JUMP",
+    points: 0,
+    assetPath: "assets/items/power_jump_green.png",
+  },
+  star: {
+    key: "item-star",
+    label: "STAR",
+    points: 0,
+    assetPath: "assets/items/power_star_orange.png",
+  },
+  dashRing: {
+    key: "item-dash-ring",
+    label: "DASH",
+    points: 0,
+    assetPath: "assets/items/power_dash_purple.png",
+  },
 };
 
 export const ENEMY_DEFINITIONS: Record<
@@ -123,6 +196,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetX: number;
     bodyOffsetY: number;
     aiType: EnemyAiType;
+    stompScore?: number;
     animation?: {
       key: string;
       assetPath: string;
@@ -182,6 +256,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetX: 28,
     bodyOffsetY: 32,
     aiType: "flyingPatrol",
+    stompScore: 20,
     animation: {
       key: "enemy-horned-cyborg-walk",
       assetPath: "assets/enemies/horned_cyborg_walk.png",
@@ -201,6 +276,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetX: 14,
     bodyOffsetY: 30,
     aiType: "hoppingPatrol",
+    stompScore: 15,
     animation: {
       key: "enemy-cone-golem-walk",
       assetPath: "assets/enemies/cone_golem_walk.png",
@@ -220,13 +296,40 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetX: 18,
     bodyOffsetY: 30,
     aiType: "chase",
+    stompScore: 20,
     animation: {
       key: "enemy-rabbit-traveler-walk",
-      assetPath: "assets/enemies/rabbit_traveler_walk.png",
+      assetPath: "assets/enemies/rabbit_traveler_walk.webp",
       frameWidth: 160,
       frameHeight: 190,
       frameCount: 5,
       frameRate: 8,
     },
+  },
+  neonIdolShooter: {
+    key: "enemy-neon-idol-shooter",
+    label: "Neon Idol",
+    assetPath: "assets/enemies/neon_idol_shooter.png",
+    displayWidth: 78,
+    displayHeight: 104,
+    bodyWidth: 40,
+    bodyHeight: 72,
+    bodyOffsetX: 20,
+    bodyOffsetY: 28,
+    aiType: "shooter",
+    stompScore: 30,
+  },
+  heartCannonTurret: {
+    key: "enemy-heart-cannon-turret",
+    label: "Heart Cannon",
+    assetPath: "assets/enemies/heart_cannon_turret.png",
+    displayWidth: 104,
+    displayHeight: 82,
+    bodyWidth: 70,
+    bodyHeight: 48,
+    bodyOffsetX: 18,
+    bodyOffsetY: 26,
+    aiType: "turret",
+    stompScore: 25,
   },
 };

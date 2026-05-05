@@ -7,8 +7,6 @@ import {
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
   resolveStageName,
-  type ItemType,
-  type ScoreState,
 } from "./assets";
 import { DEFAULT_STAGE_ID, PLAYABLE_STAGE_IDS, STAGES, cloneStage, type StageId } from "./stages";
 import { RainbowWinPipeline } from "./rainbowPipeline";
@@ -31,6 +29,15 @@ import {
   updateEnemies,
 } from "./enemies";
 import { createItems, populateItems } from "./items";
+import { createBonusBlocks, populateBonusBlocks } from "./bonusBlocks";
+import { defeatEnemy, tryStompEnemy } from "./enemyCombat";
+import { RewardSystem } from "./rewardSystem";
+import {
+  CheckpointController,
+  OneWayGateController,
+  handleSpecialPlatformCollision,
+  movePlayerToCheckpointStart,
+} from "./stageInteractives";
 import {
   carryPlayerOnDescendingMovingPlatforms,
   isPlayerSupportedByDescendingMovingPlatform,
@@ -43,6 +50,7 @@ import {
   createGlobalUI as createGlobalUIElements,
   removeGlobalUI as removeGlobalUIElements,
   setGlobalSoundUI,
+  setPlayerPositionDebugUI,
 } from "./globalUi";
 import {
   createMobileControls as createMobileControlElements,
@@ -61,7 +69,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.188";
+const DEBUG_VERSION = "v0.1.198";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -138,6 +146,9 @@ class PrototypeScene extends Phaser.Scene {
   private movingPlatformInstances: MovingPlatformInstance[] = [];
   private decorationPlatforms!: Phaser.Physics.Arcade.StaticGroup;
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
+  private bonusBlocksGroup?: Phaser.Physics.Arcade.StaticGroup;
+  private checkpointController?: CheckpointController;
+  private oneWayGateController?: OneWayGateController;
   private enemiesGroup?: Phaser.Physics.Arcade.Group;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d" | "shift", Phaser.Input.Keyboard.Key>;
@@ -153,7 +164,7 @@ class PrototypeScene extends Phaser.Scene {
   private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false, shift: false };
   private mobileJumpQueued = false;
   private mobileControlCleanup: Array<() => void> = [];
-  private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
+  private rewards?: RewardSystem;
   private startTime = 0;
   private isRunActive = false;
   private isRestarting = false;
@@ -304,6 +315,13 @@ class PrototypeScene extends Phaser.Scene {
     createEnemyAnimations(this);
 
     this.player = this.physics.add.sprite(this.editorStage.playerStart.x, this.editorStage.playerStart.y, "player-idle");
+    movePlayerToCheckpointStart(this.currentStageId, this.editorStage, this.player);
+    this.rewards = new RewardSystem(
+      this,
+      () => this.player,
+      () => this.updateScoreText(),
+      () => this.tryEmitScoreDanmaku(),
+    );
     this.player.setDisplaySize(PLAYER_DISPLAY_WIDTH, PLAYER_DISPLAY_HEIGHT);
     this.player.setCollideWorldBounds(true);
     this.applyPlayerBody();
@@ -323,7 +341,7 @@ class PrototypeScene extends Phaser.Scene {
       }
     });
 
-    this.physics.add.collider(this.player, this.platforms);
+    this.physics.add.collider(this.player, this.platforms, this.handlePlatformCollision, undefined, this);
     this.physics.add.collider(this.player, this.movingPlatforms);
     this.physics.add.collider(this.player, this.decorationPlatforms, undefined, this.canLandOnDecorationPlatform, this);
     this.physics.add.overlap(this.player, goal, () => this.win());
@@ -332,13 +350,32 @@ class PrototypeScene extends Phaser.Scene {
       player: this.player,
       placements: this.editorStage.items,
       canCollect: () => !this.stageEditor?.isEnabled,
-      onCollect: (itemType, points) => {
-        this.score[itemType] += points;
-        this.updateScoreText();
-        this.tryEmitScoreDanmaku();
-      },
+      onCollect: (itemType, points, x, y) => this.rewards?.collectItem(itemType, points, x, y),
       trackStageObject: (object) => this.trackStageObject(object),
     });
+    this.bonusBlocksGroup = createBonusBlocks({
+      scene: this,
+      player: this.player,
+      placements: this.editorStage.bonusBlocks ?? [],
+      onReward: (itemType, x, y) => this.rewards?.applyBonusBlockReward(itemType, x, y),
+    });
+    this.checkpointController = new CheckpointController(
+      this,
+      this.player,
+      () => this.currentStageId,
+      () => this.editorStage,
+      () => this.isRunActive && !this.stageEditor?.isEnabled,
+      (x, y, text) => this.rewards?.showFloatingText(x, y, text),
+    );
+    this.checkpointController.create();
+    this.oneWayGateController = new OneWayGateController(
+      this,
+      this.player,
+      () => this.editorStage,
+      () => this.isRunActive && !this.stageEditor?.isEnabled,
+      (x, y, text) => this.rewards?.showFloatingText(x, y, text),
+    );
+    this.oneWayGateController.create();
     this.enemiesGroup = createEnemies(this, this.player, this.editorStage.enemies ?? [], (enemy) =>
       this.damagePlayer(enemy),
     );
@@ -439,6 +476,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.updateStoryDialogueProgress();
     this.refreshDropThroughDecorationPlatform();
+    this.oneWayGateController?.update();
     if (this.stageEditor?.isEnabled) {
       freezeEnemies(this.enemiesGroup);
     } else {
@@ -465,7 +503,8 @@ class PrototypeScene extends Phaser.Scene {
     const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
     const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
     const isShiftSpeedActive = this.keys.shift.isDown || this.mobileInput.shift;
-    const speedMultiplier = isShiftSpeedActive ? DASH_SPEED_MULTIPLIER : 1;
+    const speedMultiplier = (isShiftSpeedActive ? DASH_SPEED_MULTIPLIER : 1) * (this.rewards?.getSpeedMultiplier() ?? 1);
+    const jumpMultiplier = this.rewards?.getJumpMultiplier() ?? 1;
     const isCrouchInputActive = down && onFloor;
     this.updateDecorationPlatformDrop(down, onFloor);
     this.applyPlayerBody(isCrouchInputActive);
@@ -502,7 +541,7 @@ class PrototypeScene extends Phaser.Scene {
     if (jump && canJump) {
       const baseJumpVelocity =
         Math.abs(this.player.body.velocity.x) >= BOOST_JUMP_SPEED_THRESHOLD ? BOOSTED_JUMP_VELOCITY : JUMP_VELOCITY;
-      this.player.setVelocityY(baseJumpVelocity * speedMultiplier);
+      this.player.setVelocityY(baseJumpVelocity * speedMultiplier * jumpMultiplier);
       this.isLanding = false;
       this.landingFastForwarded = false;
       this.player.anims.timeScale = 1;
@@ -516,6 +555,9 @@ class PrototypeScene extends Phaser.Scene {
     const isCrouching = down && onFloor && !startedJump;
     this.updateJumpChainDanmaku(startedJump, landedThisFrame);
     this.updateCrouchDanmaku(isCrouching);
+    if (landedThisFrame) {
+      this.rewards?.resetStompComboOnLanding();
+    }
 
     if (landedThisFrame) {
       this.isLanding = true;
@@ -611,7 +653,7 @@ class PrototypeScene extends Phaser.Scene {
     this.danmaku = undefined;
     this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
-    this.score = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0 };
+    this.rewards?.reset();
     this.startTime = 0;
     this.isRunActive = false;
     this.hasWon = false;
@@ -635,6 +677,9 @@ class PrototypeScene extends Phaser.Scene {
     this.collisionDebugGraphics?.clear();
     this.collisionDebugGraphics = undefined;
     this.itemsGroup = undefined;
+    this.bonusBlocksGroup = undefined;
+    this.checkpointController = undefined;
+    this.oneWayGateController = undefined;
     this.enemiesGroup = undefined;
     this.goal = undefined;
     this.finalScoreText = undefined;
@@ -794,7 +839,7 @@ class PrototypeScene extends Phaser.Scene {
       this.stageConstants.worldHeight + FALL_RESET_WORLD_MARGIN,
     );
     this.cameras.main.setBounds(0, this.stageConstants.worldTop, this.editorStage.worldWidth, this.stageConstants.worldHeight);
-    this.player.setPosition(this.editorStage.playerStart.x, this.editorStage.playerStart.y);
+    movePlayerToCheckpointStart(this.currentStageId, this.editorStage, this.player);
     this.player.setVelocity(0, 0);
     this.player.setAcceleration(0, 0);
     this.player.setDrag(0, 0);
@@ -931,6 +976,7 @@ class PrototypeScene extends Phaser.Scene {
     this.movingPlatformInstances = [];
     this.clearStaticGroup(this.decorationPlatforms);
     this.clearStaticGroup(this.itemsGroup);
+    this.clearStaticGroup(this.bonusBlocksGroup);
     this.clearDynamicGroup(this.enemiesGroup);
 
     renderStageObjects({
@@ -949,6 +995,13 @@ class PrototypeScene extends Phaser.Scene {
       placements: this.editorStage.items,
       trackStageObject: (object) => this.trackStageObject(object),
     });
+    populateBonusBlocks({
+      scene: this,
+      blocksGroup: this.bonusBlocksGroup,
+      placements: this.editorStage.bonusBlocks ?? [],
+    });
+    this.checkpointController?.rebuild();
+    this.oneWayGateController?.rebuild();
     populateEnemies(this.enemiesGroup, this.editorStage.enemies ?? []);
     if (this.stageEditor?.isEnabled) {
       freezeEnemies(this.enemiesGroup);
@@ -988,6 +1041,22 @@ class PrototypeScene extends Phaser.Scene {
 
     this.backgrounds?.applyStageDefaults(this.editorStage.backgrounds);
     stageBackgroundDefaultsAppliedFor = this.currentStageId;
+  }
+
+  private handlePlatformCollision(
+    _playerObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile,
+    platformObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile,
+  ) {
+    handleSpecialPlatformCollision({
+      scene: this,
+      player: this.player,
+      platformObject,
+      canInteract: () => this.isRunActive && !this.stageEditor?.isEnabled,
+      onLaunch: () => {
+      this.isLanding = false;
+      this.landingFastForwarded = false;
+      },
+    });
   }
 
   private canLandOnDecorationPlatform(
@@ -1185,11 +1254,27 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private damagePlayer(enemy: Phaser.Physics.Arcade.Sprite) {
-    if (!this.isRunActive || this.stageEditor?.isEnabled || this.time.now < this.invulnerableUntil || !enemy.active) {
+    if (!this.isRunActive || this.stageEditor?.isEnabled || !enemy.active) {
+      return;
+    }
+
+    if (this.rewards?.isStarActive()) {
+      defeatEnemy(enemy, false);
+      this.rewards.addEnemyDefeatScore(enemy);
+      return;
+    }
+
+    const stomped = tryStompEnemy(this.player, enemy, () => {
+      this.isLanding = false;
+      this.landingFastForwarded = false;
+      this.rewards?.addEnemyDefeatScore(enemy);
+    });
+    if (stomped || this.time.now < this.invulnerableUntil) {
       return;
     }
 
     const direction = this.player.x < enemy.x ? -1 : 1;
+    this.rewards?.noteDamage();
     this.hurtUntil = this.time.now + DAMAGE_INPUT_LOCK_MS;
     this.invulnerableUntil = this.time.now + DAMAGE_INVULNERABLE_MS;
     this.isLanding = false;
@@ -1235,12 +1320,12 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    const total = this.getItemScore();
+    const total = this.rewards?.getItemScore() ?? 0;
     this.scoreText.setText(`${t(this.locale, "hud.score")}:${total}`);
   }
 
   private tryEmitScoreDanmaku() {
-    if (this.hasScoreMilestoneDanmakuPlayed || this.getItemScore() <= SCORE_DANMAKU_THRESHOLD) {
+    if (this.hasScoreMilestoneDanmakuPlayed || (this.rewards?.getItemScore() ?? 0) <= SCORE_DANMAKU_THRESHOLD) {
       return;
     }
 
@@ -1317,6 +1402,13 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private updateCollisionDebug() {
+    if (!this.player) {
+      setPlayerPositionDebugUI(false, 0, 0);
+      this.collisionDebugGraphics?.clear();
+      return;
+    }
+
+    setPlayerPositionDebugUI(this.collisionDebugEnabled, this.player.x, this.player.y);
     if (!this.collisionDebugGraphics) {
       return;
     }
@@ -1380,10 +1472,6 @@ class PrototypeScene extends Phaser.Scene {
       .fillStyle(color, fillAlpha)
       .fillRect(body.x, body.y, body.width, body.height)
       .strokeRect(body.x, body.y, body.width, body.height);
-  }
-
-  private getItemScore() {
-    return Object.values(this.score).reduce((sum, value) => sum + value, 0);
   }
 
   private getRemainingMilliseconds() {
@@ -1717,8 +1805,10 @@ class PrototypeScene extends Phaser.Scene {
     this.hasWon = true;
     const remaining = this.getRemainingMilliseconds();
     const timeBonus = this.roundScoreValue((remaining / 1000) * TIME_BONUS_PER_SECOND);
-    const itemScore = this.roundScoreValue(this.getItemScore());
+    const itemScore = this.roundScoreValue(this.rewards?.getItemScore() ?? 0);
     const finalScore = this.roundScoreValue(itemScore + timeBonus);
+    const clearRank = this.rewards?.getClearRank(finalScore, remaining, GAME_TIME_MS) ?? "C";
+    const missionLine = this.rewards?.getMissionSummary(remaining, GAME_TIME_MS) ?? "";
     this.timerText.setText(
       `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,
     );
@@ -1728,7 +1818,7 @@ class PrototypeScene extends Phaser.Scene {
       .text(
         GAME_WIDTH / 2,
         GAME_HEIGHT / 2,
-        `${t(this.locale, "hud.clear")}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}\n${t(
+        `${t(this.locale, "hud.clear")}  ${clearRank}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}\n${missionLine}\n${t(
           this.locale,
           "hud.timeBonus",
         )} ${this.formatScoreValue(timeBonus)}`,

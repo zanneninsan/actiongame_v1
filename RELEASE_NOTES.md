@@ -2,11 +2,83 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
-## v0.1.188
+## v0.1.198
 ### English
 - Restored the leaderboard `NEW` marker after a best score update by matching the current score row by player, score, and rank when the submission id is not yet visible in the fetched entry.
 ### Japanese
 - ベストスコア更新後、取得したランキング行に送信IDがまだ反映されていない場合でも、プレイヤーID、スコア、順位から今回の行を判定して `NEW` 表示が出るようにしました。
+
+## v0.1.197
+### English
+- Added floating score popups when collecting score items, matching the enemy defeat score feedback.
+- Increased floating score popup text size for both item pickups and enemy defeats.
+### Japanese
+- スコア付きアイテムを取った時にも、敵撃破時と同じフローティングスコア表示を出すようにしました。
+- アイテム取得時と敵撃破時のフローティングスコア表示を、これまでより大きくしました。
+
+## v0.1.196
+### English
+- Added per-enemy stomp score settings, with enemies that do not specify a value defaulting to 10 points.
+- Tuned higher-risk enemy types with individual stomp score values for score balance.
+### Japanese
+- 敵ごとに踏みつけ撃破時の得点を設定できるようにし、未設定の敵は10点になるようにしました。
+- 得点バランス調整用に、危険度の高い敵へ個別の踏みつけ得点を設定しました。
+
+## v0.1.195
+### English
+- Fixed startup stopping after stage rendering when the HIT debug position readout ran before the player sprite existed.
+- Added defensive enemy animation handling so one broken enemy sheet cannot stop the rest of the game scene from starting.
+### Japanese
+- HITデバッグの座標表示がプレイヤー生成前に走って、ステージ描画後に起動が止まる問題を修正しました。
+- 敵アニメーション素材に問題があっても、ゲームシーン全体の開始が止まらないように防御処理を追加しました。
+
+## v0.1.194
+### English
+- Added a live player position readout beside the HIT debug toggle while collision debug is enabled.
+### Japanese
+- HITデバッグを有効にしている間、プレイヤーの現在座標をHITボタンの横に表示するようにしました。
+
+## v0.1.193
+### English
+- Resolved build-time UI asset URL warnings by making CSS image references resolve through the project asset graph.
+- Raised the Vite chunk warning limit to match the current Phaser/Firebase game bundle size and avoid noisy chunk-size warnings.
+### Japanese
+- CSS内のUI画像参照をビルド時に解決できる形へ直し、UI画像URL警告が出ないようにしました。
+- PhaserとFirebaseを含む現在のゲームバンドルサイズに合わせてViteのチャンク警告閾値を調整し、不要なチャンクサイズ警告を抑えました。
+
+## v0.1.192
+### English
+- Restored Shibuya City stage data to match `04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`, removing the moving, fragile, and secret-route additions from the base Shibuya City stage.
+### Japanese
+- シブヤシティのステージデータを`04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`の状態に揃え、通常のシブヤシティから動く足場、落ちる足場、秘密ルート追加分を取り除きました。
+
+## v0.1.191
+### English
+- Rebuilt the Rabbit Traveler walk sprite from the pre-transparency source sheet with conservative background removal, and switched the runtime asset to WebP.
+- Added documented asset processing rules for WebP runtime outputs, reversible intermediates, and safe-side transparency cleanup.
+### Japanese
+- ラビットトラベラーの歩行スプライトを透過前の元シートから作り直し、透過しすぎない控えめな背景除去に変更したうえで、実行時アセットをWebPに切り替えました。
+- 素材加工では最終成果物をWebPにすること、途中経過を可逆な状態で残すこと、透過処理は安全側に倒すことをドキュメントに追記しました。
+
+## v0.1.190
+### English
+- Added Heart Cannon turret enemies with generated raster art, aimed heart shots, and new placements in Neo Shibuya City and Skybridge Sprint.
+- Added a secret upper-route branch in Neo Shibuya City with hidden dash-ring access, bonus coins, and fragile/moving platforms.
+### Japanese
+- 画像生成で作成したハートキャノン砲台を追加し、狙い撃ちのハート弾とネオシブヤシティ、スカイブリッジ・スプリントへの配置を実装しました。
+- ネオシブヤシティに、隠しダッシュリングから入れる上側の秘密ルートを追加し、ボーナスコイン、壊れやすい足場、動く足場を組み込みました。
+
+## v0.1.189
+### English
+- Split the enhanced Shibuya City layout into a new Neo Shibuya City stage while restoring Shibuya City to the main-branch layout from `04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`.
+### Japanese
+- 強化版のシブヤシティを新しいステージ「ネオシブヤシティ」として分け、シブヤシティ本体は`04400ffd636148a98c25cf0b7c1d9b88c6f8bc6f`時点のmainブランチの構成に戻しました。
+
+## v0.1.188
+### English
+- Added a Mario-style feature pack with enemy stomps and combo scoring, spring and fragile platforms, coins, bonus blocks, powerups, checkpoints, clear ranks, missions, a neon idol shooter enemy, breakable blocks, and one-way gates.
+### Japanese
+- 敵の踏みつけ撃破と連続ボーナス、ジャンプ台、崩れる足場、コイン、はてなブロックと隠しブロック、パワーアップ、チェックポイント、クリアランク、ミッション表示、ネオンアイドル系の射撃敵、壊せるブロック、一方通行ゲートを追加しました。
 
 ## v0.1.187
 ### English

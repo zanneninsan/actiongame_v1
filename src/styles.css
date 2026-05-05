@@ -49,7 +49,7 @@ canvas {
   gap: 11px;
   padding: clamp(54px, 8vw, 72px) clamp(58px, 9vw, 86px) clamp(38px, 6vw, 56px);
   border: 0;
-  background: url("../assets/ui/fantasy/start_modal_window.webp") center / 100% 100% no-repeat;
+  background: url("../public/assets/ui/fantasy/start_modal_window.webp") center / 100% 100% no-repeat;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
 }
 
@@ -61,7 +61,7 @@ canvas {
   display: grid;
   place-items: center;
   padding: 0 22px;
-  background: url("../assets/ui/fantasy/title_plate_safe.webp") center / 100% 100% no-repeat;
+  background: url("../public/assets/ui/fantasy/title_plate_safe.webp") center / 100% 100% no-repeat;
   font-size: clamp(18px, 3.4vw, 25px);
   font-weight: 800;
   line-height: 1.1;
@@ -97,14 +97,14 @@ canvas {
 
 .start-dialog input {
   margin-top: 2px;
-  background: url("../assets/ui/fantasy/label_plate_safe.webp") center / 100% 100% no-repeat;
+  background: url("../public/assets/ui/fantasy/label_plate_safe.webp") center / 100% 100% no-repeat;
 }
 
 .start-dialog select {
   appearance: none;
   -webkit-appearance: none;
   padding-right: 62px;
-  background: url("../assets/ui/fantasy/select_field_safe.webp") center / 100% 100% no-repeat;
+  background: url("../public/assets/ui/fantasy/select_field_safe.webp") center / 100% 100% no-repeat;
 }
 
 .start-dialog select option,
@@ -131,7 +131,7 @@ canvas {
   min-width: 0;
   height: 42px;
   border: 0;
-  background: url("../assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
   color: #f8fafc;
   font: inherit;
   font-weight: 800;
@@ -147,7 +147,7 @@ canvas {
 
 .mode-button.is-selected,
 .sound-button.is-selected {
-  background-image: url("../assets/ui/fantasy/button_primary_selected_safe.webp");
+  background-image: url("../public/assets/ui/fantasy/button_primary_selected_safe.webp");
   color: #fef3c7;
 }
 
@@ -177,7 +177,7 @@ canvas {
   width: min(100%, calc(100% - 34px));
   justify-self: center;
   height: 48px;
-  background-image: url("../assets/ui/fantasy/button_primary_selected_safe.webp");
+  background-image: url("../public/assets/ui/fantasy/button_primary_selected_safe.webp");
   color: #ffffff;
   font-size: 18px;
   filter: brightness(1.34) saturate(1.22) drop-shadow(0 0 12px rgba(253, 230, 138, 0.42));
@@ -486,12 +486,25 @@ canvas {
   white-space: nowrap;
 }
 
+#player-position-label {
+  color: #fef3c7;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  padding: 4px 7px;
+  border: 1px solid rgba(253, 230, 138, 0.55);
+  background: rgba(2, 6, 23, 0.68);
+  text-shadow: 1px 1px 2px #020617;
+  white-space: nowrap;
+}
+
 .ui-button {
   pointer-events: auto;
   width: 40px;
   height: 40px;
   border: 0;
-  background: url("../assets/ui/fantasy/icon_button.webp") center / 100% 100% no-repeat;
+  background: url("../public/assets/ui/fantasy/icon_button.webp") center / 100% 100% no-repeat;
   color: #f8fafc;
   font-size: 18px;
   cursor: pointer;
@@ -511,7 +524,7 @@ canvas {
 }
 
 .debug-toggle.is-active {
-  background-image: url("../assets/ui/fantasy/icon_button_alt.webp");
+  background-image: url("../public/assets/ui/fantasy/icon_button_alt.webp");
   color: #fef3c7;
 }
 
@@ -536,7 +549,7 @@ canvas {
   gap: 14px;
   padding: clamp(52px, 10vw, 64px) clamp(46px, 8vw, 66px) clamp(34px, 7vw, 48px);
   border: 0;
-  background: url("../assets/ui/fantasy/options_modal_window.webp") center / 100% 100% no-repeat;
+  background: url("../public/assets/ui/fantasy/options_modal_window.webp") center / 100% 100% no-repeat;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
 }
 
@@ -546,7 +559,7 @@ canvas {
   display: grid;
   place-items: center;
   padding: 0 20px;
-  background: url("../assets/ui/fantasy/title_plate_safe.webp") center / 100% 100% no-repeat;
+  background: url("../public/assets/ui/fantasy/title_plate_safe.webp") center / 100% 100% no-repeat;
   font-size: clamp(18px, 5vw, 24px);
   font-weight: 800;
   text-align: center;
@@ -587,7 +600,7 @@ canvas {
   height: 40px;
   border: 0;
   padding: 0 16px;
-  background: url("../assets/ui/fantasy/select_field_safe.webp") center / 100% 100% no-repeat;
+  background: url("../public/assets/ui/fantasy/select_field_safe.webp") center / 100% 100% no-repeat;
   color: #f8fafc;
   font: inherit;
   font-weight: 800;
@@ -598,7 +611,7 @@ canvas {
 #options-close {
   width: 100%;
   margin-top: 8px;
-  background-image: url("../assets/ui/fantasy/button_primary_safe.webp");
+  background-image: url("../public/assets/ui/fantasy/button_primary_safe.webp");
   font-size: 16px;
   font-weight: 800;
 }
@@ -623,7 +636,7 @@ canvas {
   grid-template-rows: auto auto auto auto minmax(0, 1fr) auto auto;
   gap: clamp(9px, 1.3vw, 16px);
   padding: clamp(72px, 7vw, 98px) clamp(86px, 8vw, 124px) clamp(56px, 5vw, 78px);
-  background: url("../assets/ui/fantasy/leaderboard_window.webp") center / 100% 100% no-repeat;
+  background: url("../public/assets/ui/fantasy/leaderboard_window.webp") center / 100% 100% no-repeat;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
 }
 
@@ -635,7 +648,7 @@ canvas {
   display: grid;
   place-items: center;
   padding: 0 36px;
-  background: url("../assets/ui/fantasy/leaderboard_title_plate.png") center / 100% 100% no-repeat;
+  background: url("../public/assets/ui/fantasy/leaderboard_title_plate.png") center / 100% 100% no-repeat;
   font-size: clamp(24px, 3.7vw, 38px);
   font-weight: 800;
   text-align: center;
@@ -717,7 +730,7 @@ canvas {
 .leaderboard-entry {
   position: relative;
   min-height: clamp(44px, 5vw, 58px);
-  background: url("../assets/ui/fantasy/leaderboard_row_plate.png") center / 100% 100% no-repeat;
+  background: url("../public/assets/ui/fantasy/leaderboard_row_plate.png") center / 100% 100% no-repeat;
   font-size: clamp(15px, 1.9vw, 20px);
   font-weight: 800;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
@@ -821,7 +834,7 @@ canvas {
   justify-self: center;
   width: min(78%, 720px);
   margin-top: 4px;
-  background-image: url("../assets/ui/fantasy/leaderboard_button_plate.png");
+  background-image: url("../public/assets/ui/fantasy/leaderboard_button_plate.png");
   min-height: clamp(42px, 5.5vw, 56px);
   font-size: clamp(16px, 2.5vw, 22px);
   font-weight: 800;

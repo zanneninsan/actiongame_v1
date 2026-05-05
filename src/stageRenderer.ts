@@ -18,6 +18,8 @@ const PLATFORM_DEPTH = -0.55;
 const DECORATION_DEPTH = -1.2;
 const STREET_LAMP_LIGHT_DEPTH = DECORATION_DEPTH - 0.08;
 const STREET_LAMP_GROUND_LIGHT_DEPTH = PLATFORM_DEPTH + 0.02;
+const SPRING_PLATFORM_TINT = 0x7cffb7;
+const FRAGILE_PLATFORM_TINT = 0xffb86b;
 const MOVING_PLATFORM_VERTICAL_CARRY_TOLERANCE = 64;
 const MOVING_PLATFORM_DEBUG_STORAGE_KEY = "actiongame_debug_moving_platforms";
 const MOVING_PLATFORM_DEBUG_QUERY_KEY = "debugMovingPlatforms";
@@ -66,18 +68,16 @@ const buildStage = (options: StageRenderOptions) => {
       return;
     }
 
-    addPlatformRun(options, options.platforms, platform.x, platform.y, platform.units, platform.collides ?? true);
+    addPlatformRun(options, options.platforms, platform);
   });
 };
 
 const addPlatformRun = (
   options: StageRenderOptions,
   platforms: Phaser.Physics.Arcade.StaticGroup,
-  x: number,
-  y: number,
-  units: number,
-  collides = true,
+  platform: PlatformRunPlacement,
 ) => {
+  const { x, y, units } = platform;
   for (let i = 0; i < units; i += 1) {
     let texture: PlatformAsset = PLATFORM_ASSETS.middle;
     if (units === 1) {
@@ -89,9 +89,26 @@ const addPlatformRun = (
     }
 
     const unitX = x + i * PLATFORM_UNIT_WIDTH;
-    options.trackStageObject(options.scene.add.image(unitX, y, texture).setOrigin(0, 0).setDepth(PLATFORM_DEPTH));
-    if (collides) {
-      addPlatformHitbox(platforms, unitX, y, PLATFORM_UNIT_WIDTH, PLATFORM_UNIT_HEIGHT);
+    const visual = options.trackStageObject(
+      options.scene.add.image(unitX, y, texture).setOrigin(0, 0).setDepth(PLATFORM_DEPTH),
+    );
+    if (platform.spring) {
+      visual.setTint(SPRING_PLATFORM_TINT);
+    } else if (platform.fragile) {
+      visual.setTint(FRAGILE_PLATFORM_TINT);
+    }
+    if (platform.collides ?? true) {
+      const hitbox = addPlatformHitbox(platforms, unitX, y, PLATFORM_UNIT_WIDTH, PLATFORM_UNIT_HEIGHT);
+      if (platform.spring) {
+        hitbox.setData("platformBehavior", "spring");
+        hitbox.setData("springVelocity", platform.spring.velocity);
+      }
+      if (platform.fragile) {
+        hitbox.setData("platformBehavior", "fragile");
+        hitbox.setData("fragileDelayMs", platform.fragile.delayMs);
+        hitbox.setData("fragileRespawnMs", platform.fragile.respawnMs);
+        hitbox.setData("fragileVisual", visual);
+      }
     }
   }
 };
@@ -500,4 +517,5 @@ const addPlatformHitbox = (
   block.setDisplaySize(width, height);
   block.setVisible(false);
   block.refreshBody();
+  return block as Phaser.Physics.Arcade.Image;
 };

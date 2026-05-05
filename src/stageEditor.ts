@@ -5,6 +5,7 @@ import {
   STAGE_OBJECT_ASSETS,
   ITEM_DEFINITIONS,
   resolveStageName,
+  type BonusBlockPlacement,
   type EnemyPlacement,
   type ItemPlacement,
   type PlatformRunPlacement,
@@ -717,6 +718,12 @@ export class StageEditor {
       value.decorations.every((decoration) => this.isDecorationPlacement(decoration)) &&
       Array.isArray(value.items) &&
       value.items.every((item) => this.isItemPlacement(item)) &&
+      (value.bonusBlocks === undefined ||
+        (Array.isArray(value.bonusBlocks) && value.bonusBlocks.every((block) => this.isBonusBlockPlacement(block)))) &&
+      (value.checkpoints === undefined ||
+        (Array.isArray(value.checkpoints) && value.checkpoints.every((checkpoint) => this.isCheckpointPlacement(checkpoint)))) &&
+      (value.oneWayGates === undefined ||
+        (Array.isArray(value.oneWayGates) && value.oneWayGates.every((gate) => this.isOneWayGatePlacement(gate)))) &&
       (value.enemies === undefined ||
         (Array.isArray(value.enemies) && value.enemies.every((enemy) => this.isEnemyPlacement(enemy))))
     );
@@ -729,7 +736,21 @@ export class StageEditor {
       this.isNumber(value.y) &&
       this.isNumber(value.units) &&
       (value.collides === undefined || typeof value.collides === "boolean") &&
-      (value.moving === undefined || this.isMovingPlatformConfig(value.moving))
+      (value.moving === undefined || this.isMovingPlatformConfig(value.moving)) &&
+      (value.spring === undefined || this.isSpringPlatformConfig(value.spring)) &&
+      (value.fragile === undefined || this.isFragilePlatformConfig(value.fragile))
+    );
+  }
+
+  private isSpringPlatformConfig(value: unknown) {
+    return this.isRecord(value) && (value.velocity === undefined || this.isNumber(value.velocity));
+  }
+
+  private isFragilePlatformConfig(value: unknown) {
+    return (
+      this.isRecord(value) &&
+      (value.delayMs === undefined || this.isNumber(value.delayMs)) &&
+      (value.respawnMs === undefined || this.isNumber(value.respawnMs))
     );
   }
 
@@ -779,6 +800,24 @@ export class StageEditor {
       typeof value.type === "string" &&
       value.type in ITEM_DEFINITIONS
     );
+  }
+
+  private isBonusBlockPlacement(value: unknown): value is BonusBlockPlacement {
+    return (
+      this.isRecord(value) &&
+      (value.type === "hidden" || value.type === "question" || value.type === "breakable") &&
+      this.isNumber(value.x) &&
+      this.isNumber(value.y) &&
+      (value.reward === undefined || (typeof value.reward === "string" && value.reward in ITEM_DEFINITIONS))
+    );
+  }
+
+  private isCheckpointPlacement(value: unknown) {
+    return this.isPoint(value);
+  }
+
+  private isOneWayGatePlacement(value: unknown) {
+    return this.isRecord(value) && this.isNumber(value.x) && this.isNumber(value.y) && this.isOptionalNumber(value.height);
   }
 
   private isEnemyPlacement(value: unknown): value is EnemyPlacement {
