@@ -633,7 +633,7 @@ canvas {
   width: min(1160px, calc(100vw - clamp(20px, 5vw, 48px)), calc((100dvh - clamp(20px, 5vw, 48px)) * 1.5789));
   aspect-ratio: 1200 / 760;
   display: grid;
-  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto auto;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr) auto auto auto;
   gap: clamp(9px, 1.3vw, 16px);
   padding: clamp(72px, 7vw, 98px) clamp(86px, 8vw, 124px) clamp(56px, 5vw, 78px);
   background: url("../public/assets/ui/fantasy/leaderboard_window.webp") center / 100% 100% no-repeat;
@@ -830,6 +830,58 @@ canvas {
   text-align: right;
 }
 
+.leaderboard-account-prompt {
+  min-height: clamp(58px, 6.2vw, 74px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(190px, 24vw, 270px);
+  align-items: center;
+  gap: clamp(10px, 1.4vw, 18px);
+  margin: 0 6px;
+  padding: 8px clamp(20px, 2.4vw, 32px);
+  border: 1px solid rgba(184, 233, 255, 0.26);
+  background: rgba(3, 20, 34, 0.42);
+  color: #f8fafc;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.leaderboard-account-prompt[hidden] {
+  display: none;
+}
+
+.leaderboard-account-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.leaderboard-account-copy strong {
+  color: #f5c76a;
+  font-size: clamp(13px, 1.45vw, 17px);
+}
+
+.leaderboard-account-copy span {
+  font-size: clamp(11px, 1.12vw, 13px);
+  line-height: 1.45;
+}
+
+.leaderboard-google-button {
+  min-height: clamp(38px, 4.5vw, 50px);
+  border: 0;
+  padding: 0 16px;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #f8fafc;
+  font: inherit;
+  font-size: clamp(13px, 1.55vw, 17px);
+  font-weight: 900;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+  cursor: pointer;
+}
+
+.leaderboard-google-button:disabled {
+  opacity: 0.72;
+  cursor: wait;
+}
+
 #leaderboard-close {
   justify-self: center;
   width: min(78%, 720px);
@@ -874,6 +926,16 @@ canvas {
   }
 
   .leaderboard-current-status {
+    display: none;
+  }
+
+  .leaderboard-account-prompt {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 8px 16px;
+  }
+
+  .leaderboard-account-copy span {
     display: none;
   }
 }

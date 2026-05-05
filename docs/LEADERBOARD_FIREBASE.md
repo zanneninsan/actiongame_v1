@@ -10,7 +10,7 @@ Copy `.env.example` to `.env.local` and fill the Firebase web app values. `VITE_
 
 Use `firebase/firestore.rules`. The leaderboard documents are public to read, but writes are denied from the client. The callable function is responsible for validation and writes.
 
-Each accepted leaderboard row requires a persistent client `playerId` and is keyed by stage plus that `playerId`, so one player keeps one row per stage. If a later submission is lower than the saved score, the callable updates identity metadata without lowering the ranked score.
+Each accepted leaderboard row requires a persistent Firebase Auth `playerId` and is keyed by stage plus that `playerId`, so one player keeps one row per stage. Anonymous Auth lets players submit without registration, and the score screen can prompt them to link Google afterward so the same ID survives across browsers and devices. If a later submission is lower than the saved score, the callable updates identity metadata without lowering the ranked score.
 
 Create this composite index if Firestore asks for it:
 
@@ -38,6 +38,9 @@ export const submitScore = onCall(
 
     const data = request.data ?? {};
     const playerId = cleanPlayerId(data.playerId);
+    if (playerId !== request.auth.uid) {
+      throw new HttpsError("permission-denied", "Player id must match the authenticated user.");
+    }
     const itemScore = clampNumber(data.itemScore, 0, 100_000);
     const remainingMs = clampNumber(data.remainingMs, 0, MAX_GAME_TIME_MS);
     const expectedScore = roundScore(itemScore + (remainingMs / 1000) * TIME_BONUS_PER_SECOND);

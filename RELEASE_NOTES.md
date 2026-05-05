@@ -1,12 +1,14 @@
-# Release Notes / リリースノート
+﻿# Release Notes / リリースノート
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
 ## v0.1.203
 ### English
 - Moved story message content into stage definitions so each stage can define its own dialogue lines, trigger position, and timing while keeping the message UI renderer reusable.
+- Added optional Google account linking after score submission so leaderboard player IDs can persist across browsers and devices while still allowing unregistered play.
 ### Japanese
 - ストーリーメッセージの内容をステージ定義へ移し、ステージごとに会話文、表示位置、進行タイミングを変えられるようにしました。
+- スコア登録後に任意でGoogleアカウントと連携できる案内を追加し、未登録のまま遊べる状態を残しつつ、連携後はリーダーボードIDを別ブラウザや別端末でも維持できるようにしました。
 
 ## v0.1.202
 ### English

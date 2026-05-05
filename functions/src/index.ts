@@ -13,6 +13,9 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
   }
 
   const payload = cleanLeaderboardPayload(request.data);
+  if (payload.playerId !== request.auth.uid) {
+    throw new HttpsError("permission-denied", "Player id must match the authenticated user.");
+  }
 
   const firestore = getFirestore();
   const uid = request.auth.uid;
@@ -85,4 +88,3 @@ async function getLeaderboardRank(firestore: Firestore, stageId: string, score: 
     .get();
   return higherScores.data().count + 1;
 }
-
