@@ -2,13 +2,21 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
-## v0.1.254
+## v0.1.255
 ### English
 - Updated the start screen and browser title to 作成中ネオシブヤシティ.
 - Reduced the Skybridge Sprint midground opacity to improve stage readability.
 ### Japanese
 - スタート画面とブラウザタイトルを「作成中ネオシブヤシティ」に変更しました。
 - 動物園ステージの視認性を上げるため、中景を少し薄く表示するようにしました。
+
+## v0.1.254
+### English
+- Reworked the mobile start screen into a dedicated vertical layout with a sticky start area, collapsed ghost options, and hidden background controls while the modal is open.
+- Reworked leaderboard, account, and options modals for mobile with full-height sheets, tighter columns, fixed modal isolation, and compact landscape layouts.
+### Japanese
+- スマホ向けスタート画面を専用の縦レイアウトに作り直し、スタート操作を下部に固定し、ゴースト設定を折りたたみ、モーダル表示中は背後の操作UIを隠すようにしました。
+- ランキング、アカウント、設定モーダルをスマホ向けの全高シートに作り直し、列幅と横画面レイアウトを調整し、モーダル表示中は背後のUIが干渉しないようにしました。
 
 ## v0.1.253
 ### English

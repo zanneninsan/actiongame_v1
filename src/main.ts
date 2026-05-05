@@ -84,7 +84,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.254";
+const DEBUG_VERSION = "v0.1.255";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -1044,6 +1044,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.dismissLeaderboard();
     document.getElementById("account-modal")?.remove();
+    document.body.classList.remove("is-account-modal-open");
     this.setupComplete = false;
     this.restartStageEditorEnabled = false;
     this.restartEditorStage = undefined;
@@ -1059,6 +1060,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private dismissLeaderboard() {
     document.getElementById("leaderboard-modal")?.remove();
+    document.body.classList.remove("is-leaderboard-modal-open");
   }
 
   private startRun() {
