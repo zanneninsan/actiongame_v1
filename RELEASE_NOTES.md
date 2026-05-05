@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.272
+### English
+- Hid the PWA install prompt immediately after the install flow is accepted, including when returning focus to the original browser game screen.
+### Japanese
+- PWA追加を受け入れた直後や元のブラウザ画面に戻った時に、追加案内が残らないようにしました。
+
 ## v0.1.271
 ### English
 - Added an account-screen test tool that clears Google-linked app settings and recorded flags without deleting stage scores.

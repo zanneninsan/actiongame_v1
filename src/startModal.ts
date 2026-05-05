@@ -226,6 +226,9 @@ export class StartModal {
     });
     window.addEventListener("actiongame:pwa-install-ready", refreshInstallPanel);
     window.addEventListener("actiongame:pwa-installed", refreshInstallPanel);
+    window.addEventListener("focus", refreshInstallPanel);
+    window.addEventListener("pageshow", refreshInstallPanel);
+    document.addEventListener("visibilitychange", refreshInstallPanel);
     const updateOrientationPromptText = (failed = false, mode: OrientationPromptMode = orientationPromptMode) => {
       orientationPromptMode = mode;
       orientationMessage.textContent =
@@ -327,6 +330,9 @@ export class StartModal {
       screen.orientation?.removeEventListener?.("change", refreshGhostFullscreenButton);
       window.removeEventListener("actiongame:pwa-install-ready", refreshInstallPanel);
       window.removeEventListener("actiongame:pwa-installed", refreshInstallPanel);
+      window.removeEventListener("focus", refreshInstallPanel);
+      window.removeEventListener("pageshow", refreshInstallPanel);
+      document.removeEventListener("visibilitychange", refreshInstallPanel);
     };
     const loadGhostOptions = async () => {
       ghostSelect.innerHTML = `<option value="">${t(this.options.locale, "start.ghostRankingLoading")}</option>`;

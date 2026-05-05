@@ -5,6 +5,7 @@ type BeforeInstallPromptEvent = Event & {
 
 let deferredInstallPrompt: BeforeInstallPromptEvent | undefined;
 let appInstalled = false;
+let installAcceptedThisSession = false;
 
 export function initializePwaInstall() {
   window.addEventListener("beforeinstallprompt", (event) => {
@@ -15,6 +16,7 @@ export function initializePwaInstall() {
 
   window.addEventListener("appinstalled", () => {
     appInstalled = true;
+    installAcceptedThisSession = true;
     deferredInstallPrompt = undefined;
     window.dispatchEvent(new CustomEvent("actiongame:pwa-installed"));
   });
@@ -29,6 +31,10 @@ export async function promptPwaInstall() {
   deferredInstallPrompt = undefined;
   await promptEvent.prompt();
   const choice = await promptEvent.userChoice;
+  if (choice.outcome === "accepted") {
+    installAcceptedThisSession = true;
+    window.dispatchEvent(new CustomEvent("actiongame:pwa-installed"));
+  }
   return choice.outcome;
 }
 
@@ -37,7 +43,7 @@ export function canPromptPwaInstall() {
 }
 
 export function isPwaInstalled() {
-  return appInstalled || window.matchMedia("(display-mode: standalone)").matches || isNavigatorStandalone();
+  return appInstalled || installAcceptedThisSession || window.matchMedia("(display-mode: standalone)").matches || isNavigatorStandalone();
 }
 
 function isNavigatorStandalone() {
