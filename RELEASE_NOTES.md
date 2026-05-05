@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.244
+### English
+- Limited dash-boosted jumps to moments when dash input is actively held, preventing dash linger momentum from turning normal jumps into super jumps.
+### Japanese
+- ダッシュ強化ジャンプはShift/ダッシュ入力を実際に押している時だけ発生するようにし、ダッシュ残留中の慣性で通常ジャンプがスーパージャンプ化しないようにしました。
+
 ## v0.1.243
 ### English
 - Made stamina recover twice as fast while crouching, and documented crouch recovery plus drop-through floors in the player spec and control hints.
