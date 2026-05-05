@@ -2,6 +2,8 @@
 
 This file is the short context packet for future Codex sessions. Read this first before scanning the whole repository.
 
+For the No1-No20 feature/backlog handoff, also read `docs/NO1_20_HANDOFF.md`.
+
 ## Project
 
 - Browser-playable 2D side-scrolling dot/pixel action game.
