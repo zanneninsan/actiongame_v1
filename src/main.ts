@@ -7,6 +7,7 @@ import {
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
   resolveStageName,
+  type StageDefinition,
 } from "./assets";
 import { DEFAULT_STAGE_ID, PLAYABLE_STAGE_IDS, STAGES, cloneStage, type StageId } from "./stages";
 import { RainbowWinPipeline } from "./rainbowPipeline";
@@ -69,7 +70,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.199";
+const DEBUG_VERSION = "v0.1.200";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -184,6 +185,8 @@ class PrototypeScene extends Phaser.Scene {
   private editorStage = cloneStage(STAGES[DEFAULT_STAGE_ID]);
   private stageConstants: ResolvedStageConstants = resolveStageConstants(STAGES[DEFAULT_STAGE_ID]);
   private stageEditor?: StageEditor;
+  private restartStageEditorEnabled = false;
+  private restartEditorStage?: StageDefinition;
   private storyDialogue?: StoryDialogueController;
   private hasAdvancedStoryDialogueAtX = false;
   private storyDialogueNextEvent?: Phaser.Time.TimerEvent;
@@ -724,6 +727,8 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.dismissLeaderboard();
+    this.restartStageEditorEnabled = this.stageEditor?.isEnabled ?? false;
+    this.restartEditorStage = this.restartStageEditorEnabled ? cloneStage(this.editorStage) : undefined;
     this.isRestarting = true;
     this.resetRunState();
     this.bgm?.stop();
@@ -837,7 +842,9 @@ class PrototypeScene extends Phaser.Scene {
 
   private applySelectedStage(stageId: StageId) {
     this.currentStageId = stageId;
-    this.editorStage = cloneStage(STAGES[stageId]);
+    this.editorStage = this.restartEditorStage ? cloneStage(this.restartEditorStage) : cloneStage(STAGES[stageId]);
+    this.restartEditorStage = undefined;
+    this.restartStageEditorEnabled = false;
     this.stageConstants = resolveStageConstants(this.editorStage);
     this.applyStageBackgroundDefaults();
     this.physics.world.setBounds(
@@ -1187,10 +1194,11 @@ class PrototypeScene extends Phaser.Scene {
     await Promise.resolve(requestFullscreen?.call(target)).catch(() => undefined);
   }
 
-  private createStageEditor() {
+  private createStageEditor(initialEnabled = this.stageEditor?.isEnabled ?? this.restartStageEditorEnabled) {
     this.removeStageEditor();
 
     this.stageEditor = new StageEditor(this, {
+      initialEnabled,
       tile: TILE,
       platformUnitWidth: PLATFORM_UNIT_WIDTH,
       platformUnitHeight: PLATFORM_UNIT_HEIGHT,
@@ -1242,8 +1250,7 @@ class PrototypeScene extends Phaser.Scene {
       onDanmakuChange: (enabled) => this.setDanmakuEnabled(enabled),
       onLocaleChange: (locale) => {
         this.setLocale(locale);
-        this.removeStageEditor();
-        this.createStageEditor();
+        this.createStageEditor(this.stageEditor?.isEnabled ?? false);
         this.createGlobalUI();
       },
       onLeaderboardOpen: () => this.showLeaderboard(),

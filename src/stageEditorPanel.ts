@@ -24,6 +24,7 @@ export type EditorTool =
 
 type StageEditorPanelOptions = {
   initialTool: EditorTool;
+  initialEnabled?: boolean;
   locale: Locale;
   onToggle: (enabled: boolean) => void;
   onToolChange: (tool: EditorTool) => void;
@@ -95,6 +96,7 @@ export class StageEditorPanel {
 
   show() {
     this.remove();
+    this.enabled = Boolean(this.options.initialEnabled);
 
     const panel = document.createElement("div");
     panel.id = "stage-editor";
@@ -216,6 +218,8 @@ export class StageEditorPanel {
     const importButton = panel.querySelector<HTMLButtonElement>("[data-editor-import]")!;
     const loadFileButton = panel.querySelector<HTMLButtonElement>("[data-editor-load-file]")!;
     toolSelect.value = this.options.initialTool;
+    panel.classList.toggle("is-open", this.enabled);
+    toggleButton.textContent = this.enabled ? t(this.options.locale, "editor.toggleOn") : t(this.options.locale, "editor.toggle");
 
     const toggleEditor = () => {
       this.enabled = !this.enabled;

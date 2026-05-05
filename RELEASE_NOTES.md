@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.200
+### English
+- Preserved the stage editor enabled state and in-progress edited stage layout across R-key and miss restarts.
+### Japanese
+- Rキーやミスによるリスタート後も、ステージ編集のON状態と編集中のステージ配置を維持するようにしました。
+
 ## v0.1.199
 ### English
 - Paused the remaining-time countdown while the stage editor is enabled, including clear-time score and time bonus calculations.
