@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.261
+### English
+- Renamed the top-right spec shortcut to Guide.
+- Updated the mobile Full button to request landscape orientation when entering fullscreen and refresh the Phaser layout afterward.
+### Japanese
+- 右上の「仕様」ボタン表記を「取説」に変更しました。
+- スマホモードの「Full」ボタンでフルスクリーンに入る時に横画面もリクエストし、その後Phaserの表示領域を再計算するようにしました。
+
 ## v0.1.260
 ### English
 - Forced Phaser to refresh its scale layout after landscape fullscreen restoration so the canvas no longer keeps a portrait-sized drawing area.

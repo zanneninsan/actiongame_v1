@@ -84,7 +84,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.260";
+const DEBUG_VERSION = "v0.1.261";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -1780,6 +1780,16 @@ class PrototypeScene extends Phaser.Scene {
     const requestFullscreen =
       target.requestFullscreen ?? target.webkitRequestFullscreen ?? target.msRequestFullscreen;
     await Promise.resolve(requestFullscreen?.call(target)).catch(() => undefined);
+    await Promise.resolve(screen.orientation?.lock?.("landscape")).catch((error) =>
+      console.warn("Landscape orientation lock failed.", error),
+    );
+    this.scheduleGameLayoutRefresh();
+  }
+
+  private scheduleGameLayoutRefresh() {
+    for (const delayMs of [0, 80, 180, 360, 720]) {
+      window.setTimeout(this.handleGameLayoutRefresh, delayMs);
+    }
   }
 
   private createStageEditor(initialEnabled = this.stageEditor?.isEnabled ?? this.restartStageEditorEnabled) {
