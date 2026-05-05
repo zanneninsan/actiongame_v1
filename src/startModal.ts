@@ -256,6 +256,7 @@ export class StartModal {
         orientationPrompt.hidden = true;
         return;
       }
+      this.orientationPromptSatisfied = false;
       showOrientationPrompt(!orientationNote.hidden, orientationPromptMode);
     };
 
@@ -503,7 +504,7 @@ export class StartModal {
         soundOn,
         locale: selectedLocale,
       };
-      if (shouldSuggestMobileFullscreen() && !this.orientationPromptSatisfied) {
+      if (shouldConfirmPortraitStart() || (shouldSuggestMobileFullscreen() && !this.orientationPromptSatisfied)) {
         pendingStartSettings = settings;
         showOrientationPrompt(false, "startConfirm");
         return;
@@ -559,6 +560,10 @@ function shouldSuggestMobileFullscreen() {
     return false;
   }
   return !isLandscapeViewport() || !hasFullscreenElement();
+}
+
+function shouldConfirmPortraitStart() {
+  return isLikelySmartphone() && !isLandscapeViewport();
 }
 
 function getManualInstallMessage(locale: Locale) {

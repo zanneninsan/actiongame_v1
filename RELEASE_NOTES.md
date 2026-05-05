@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.270
+### English
+- Fixed the start button flow so smartphone players are prompted again when starting from a portrait viewport, even after a previous landscape setup succeeded.
+### Japanese
+- スマホで一度横画面設定に成功した後でも、プレイ開始時に現在の画面が縦向きなら、横向きにするかこのまま開始するかを再確認するようにしました。
+
 ## v0.1.269
 ### English
 - Changed the top-right Title shortcut from text to a home-style icon.
