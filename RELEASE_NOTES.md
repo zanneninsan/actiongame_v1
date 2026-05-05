@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.184
+### English
+- Updated the start screen language label to show both the current UI language label and `Language`.
+### Japanese
+- 開始画面の言語ラベルを、現在の表示言語名と `Language` を併記する表示にしました。
+
 ## v0.1.183
 ### English
 - Localized the story message UI lines and next-message accessibility label for English and Japanese.
