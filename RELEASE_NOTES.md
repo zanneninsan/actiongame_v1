@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.262
+### English
+- Temporarily hid clear rank and mission summary lines from the result display while keeping the calculations available for later restoration.
+### Japanese
+- クリア時のランク表示とミッション達成表示をリザルトから一時的に非表示にし、後で戻せるように計算処理は残しました。
+
 ## v0.1.261
 ### English
 - Renamed the top-right spec shortcut to Guide.

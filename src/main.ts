@@ -84,7 +84,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.261";
+const DEBUG_VERSION = "v0.1.262";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -184,6 +184,7 @@ const GHOST_RECORD_INTERVAL_MS = 50;
 const GHOST_EXPORT_BUTTON_X = GAME_WIDTH - 168;
 const GHOST_EXPORT_BUTTON_Y = 118;
 const CLEAR_MENU_BUTTON_Y = GHOST_EXPORT_BUTTON_Y + 46;
+const SHOW_CLEAR_RANK_AND_MISSIONS = false;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
@@ -2925,6 +2926,8 @@ class PrototypeScene extends Phaser.Scene {
     const finalScore = this.roundScoreValue(itemScore + timeBonus);
     const clearRank = this.rewards?.getClearRank(finalScore, remaining, GAME_TIME_MS) ?? "C";
     const missionLine = this.rewards?.getMissionSummary(remaining, GAME_TIME_MS) ?? "";
+    const clearTitle = SHOW_CLEAR_RANK_AND_MISSIONS ? `${t(this.locale, "hud.clear")}  ${clearRank}` : t(this.locale, "hud.clear");
+    const missionResultLine = SHOW_CLEAR_RANK_AND_MISSIONS && missionLine ? `${missionLine}\n` : "";
     this.stopGhostRecording();
     this.timerText.setText(
       `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,
@@ -2935,7 +2938,7 @@ class PrototypeScene extends Phaser.Scene {
       .text(
         GAME_WIDTH / 2,
         GAME_HEIGHT / 2,
-        `${t(this.locale, "hud.clear")}  ${clearRank}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}\n${missionLine}\n${t(
+        `${clearTitle}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}\n${missionResultLine}${t(
           this.locale,
           "hud.timeBonus",
         )} ${this.formatScoreValue(timeBonus)}`,
