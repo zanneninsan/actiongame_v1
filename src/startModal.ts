@@ -1,8 +1,5 @@
 import { LOCALE_OPTIONS, t, type Locale } from "./i18n";
 
-const getPlayerSpecUrl = (locale: Locale) =>
-  `${import.meta.env.BASE_URL}player-spec/index.html?lang=${encodeURIComponent(locale)}`;
-
 export type ControlMode = "pc" | "mobile";
 export type StageOption = { id: string; label: Record<Locale, string> };
 export type StartAccountStatus = {
@@ -54,11 +51,11 @@ export class StartModal {
     overlay.innerHTML = `
       <form class="start-dialog">
         <h1>SUPER ZANNENIN SISTERS</h1>
-        <label>
+        <label class="start-field">
           <span>${t(this.options.locale, "start.playerName")}</span>
           <input name="playerName" type="text" maxlength="16" autocomplete="off" value="${escapeHtml(this.options.playerName)}" />
         </label>
-        <label>
+        <label class="start-field">
           <span>${t(this.options.locale, "start.language")}</span>
           <select name="locale">
             ${LOCALE_OPTIONS.map(
@@ -67,7 +64,7 @@ export class StartModal {
             ).join("")}
           </select>
         </label>
-        <label>
+        <label class="start-field">
           <span>${t(this.options.locale, "start.stage")}</span>
           <select name="stage">
             ${this.options.stageOptions
@@ -88,10 +85,6 @@ export class StartModal {
           <button type="button" data-sound="on" class="sound-button">&#128266; ${t(this.options.locale, "start.soundOn")}</button>
           <button type="button" data-sound="off" class="sound-button">&#128263; ${t(this.options.locale, "start.soundOff")}</button>
         </div>
-        <a class="start-spec-link" href="${getPlayerSpecUrl(this.options.locale)}" target="_blank" rel="noopener">${t(
-          this.options.locale,
-          "start.playerSpec",
-        )}</a>
         <div class="start-ghost-panel">
           <input id="start-ghost-file" class="start-ghost-file" type="file" accept="application/json,.json" />
           <label for="start-ghost-file" class="start-ghost-load">${t(this.options.locale, "start.ghostLoad")}</label>

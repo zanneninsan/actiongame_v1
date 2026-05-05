@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.251
+### English
+- Tightened the start screen by removing the player spec link, renaming ghost loading to ghost file loading, and placing player name, language, and stage inputs beside their labels.
+### Japanese
+- スタート画面からゲーム仕様リンクを削除し、ゴースト読込をゴーストFile読込に変更して、プレイヤー名・言語・ステージをラベル左、入力右の横並びにしました。
+
 ## v0.1.250
 ### English
 - Changed ranking ghost selection to start unselected and load immediately when a ghost is chosen, removing the separate load button.

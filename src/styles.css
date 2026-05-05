@@ -71,15 +71,24 @@ canvas {
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 10px rgba(245, 199, 106, 0.22);
 }
 
-.start-dialog label {
+.start-field {
   width: min(100%, calc(100% - 34px));
   justify-self: center;
   display: grid;
-  gap: 5px;
+  grid-template-columns: minmax(92px, 0.34fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
   font-size: 13px;
   font-weight: 800;
   color: #f5c76a;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9);
+}
+
+.start-field span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .start-dialog input,
@@ -98,7 +107,6 @@ canvas {
 }
 
 .start-dialog input {
-  margin-top: 2px;
   background: url("../public/assets/ui/fantasy/label_plate_safe.webp") center / 100% 100% no-repeat;
 }
 
@@ -230,15 +238,6 @@ canvas {
   opacity: 0.82;
 }
 
-.start-spec-link {
-  justify-self: center;
-  color: #8cffd2;
-  font-size: 13px;
-  font-weight: 800;
-  text-decoration: none;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
-}
-
 .start-ghost-panel {
   width: min(100%, calc(100% - 34px));
   justify-self: center;
@@ -299,12 +298,6 @@ canvas {
   white-space: nowrap;
 }
 
-.start-spec-link:hover,
-.start-spec-link:focus-visible {
-  color: #fef3c7;
-  text-decoration: underline;
-}
-
 .start-button:hover,
 .start-button:focus-visible,
 .start-google-login:not(:disabled):hover,
@@ -334,7 +327,7 @@ canvas {
     font-size: 18px;
   }
 
-  .start-dialog label,
+  .start-field,
   .mode-row,
   .sound-row,
   .start-account-panel,
@@ -347,6 +340,11 @@ canvas {
     height: 38px;
     padding-left: 24px;
     font-size: 16px;
+  }
+
+  .start-field {
+    grid-template-columns: minmax(76px, 0.34fr) minmax(0, 1fr);
+    gap: 8px;
   }
 
   .mode-row,
