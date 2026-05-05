@@ -1580,16 +1580,82 @@ export const SKY_SHAFT_CLIMB_STAGE: StageDefinition = {
   ],
 };
 
+export const RANKING_CHECK_STAGE: StageDefinition = {
+  name: {
+    jp: "ランキング確認",
+    en: "Ranking Check",
+  },
+  backgrounds: {
+    rearKey: "rear-starry-sky",
+    midgroundKey: "midground-city-loop-strip",
+  },
+  worldWidth: 1600,
+  worldTop: -360,
+  worldBottom: 720,
+  groundTopY: 672,
+  playerStart: {
+    x: 120,
+    y: 552,
+  },
+  goal: {
+    x: 1180,
+    y: 568,
+  },
+  platforms: [
+    { x: 0, y: 672, units: 25 },
+    { x: 360, y: 548, units: 4 },
+    { x: 680, y: 488, units: 4 },
+    { x: 980, y: 548, units: 4 },
+  ],
+  streetLamps: [
+    { x: 260, key: "street-lamp-single", scale: 0.62 },
+    { x: 1120, key: "street-lamp-double", scale: 0.6 },
+  ],
+  decorations: [
+    { x: 520, y: 672, key: "stage-props-vending-machine", scale: 0.5 },
+    { x: 880, y: 672, key: "stage-props-planter-box", scale: 0.5 },
+    { x: 1320, y: 672, key: "stage-structures-chainlink-fence", scale: 0.56 },
+  ],
+  items: [
+    { type: "coin", x: 220, y: 610 },
+    { type: "coin", x: 280, y: 610 },
+    { type: "energyDrink", x: 380, y: 492 },
+    { type: "bubbleTea", x: 470, y: 492 },
+    { type: "shoppingBag", x: 560, y: 492 },
+    { type: "coin", x: 660, y: 610 },
+    { type: "coin", x: 720, y: 610 },
+    { type: "energyDrink", x: 700, y: 432 },
+    { type: "bubbleTea", x: 790, y: 432 },
+    { type: "shoppingBag", x: 880, y: 432 },
+    { type: "coin", x: 960, y: 610 },
+    { type: "coin", x: 1020, y: 610 },
+    { type: "energyDrink", x: 1000, y: 492 },
+    { type: "bubbleTea", x: 1090, y: 492 },
+    { type: "shoppingBag", x: 1160, y: 610 },
+  ],
+  bonusBlocks: [],
+  checkpoints: [],
+  oneWayGates: [],
+  enemies: [],
+};
+
 export const STAGES = {
   originalDowntown: ORIGINAL_DOWNTOWN_STAGE,
   neonCanal: NEON_CANAL_STAGE,
   neoShibuyaCity: NEO_SHIBUYA_STAGE,
   skybridgeSprint: SKYBRIDGE_SPRINT_STAGE,
   skyShaftClimb: SKY_SHAFT_CLIMB_STAGE,
+  rankingCheck: RANKING_CHECK_STAGE,
 };
 export type StageId = keyof typeof STAGES;
 export const DEFAULT_STAGE_ID = "neonCanal" satisfies StageId;
-export const PLAYABLE_STAGE_IDS = ["neonCanal", "neoShibuyaCity", "skybridgeSprint", "skyShaftClimb"] as const satisfies readonly StageId[];
+export const PLAYABLE_STAGE_IDS = [
+  "neonCanal",
+  "neoShibuyaCity",
+  "skybridgeSprint",
+  "skyShaftClimb",
+  "rankingCheck",
+] as const satisfies readonly StageId[];
 export const ACTIVE_STAGE = STAGES[DEFAULT_STAGE_ID];
 
 export const cloneStage = (stage: StageDefinition): StageDefinition => ({

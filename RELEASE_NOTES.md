@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.248
+### English
+- Added a short Ranking Check stage with a nearby goal and several items for quick leaderboard and ghost replay testing.
+### Japanese
+- ランキングとゴースト確認用に、ゴールが近くアイテムを複数配置した短い確認ステージを追加しました。
+
 ## v0.1.247
 ### English
 - Changed the Firebase ranking ghost replay storage format so Firestore accepts saved replay frames without nested arrays.

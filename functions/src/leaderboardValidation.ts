@@ -19,6 +19,7 @@ const STAGE_SCORE_LIMITS: Record<string, StageScoreLimit> = {
   neoShibuyaCity: {maxScoreBeforeTimeBonus: 5000, minElapsedMs: 1000},
   skybridgeSprint: {maxScoreBeforeTimeBonus: 3700, minElapsedMs: 1000},
   skyShaftClimb: {maxScoreBeforeTimeBonus: 1900, minElapsedMs: 1000},
+  rankingCheck: {maxScoreBeforeTimeBonus: 1500, minElapsedMs: 0},
 };
 
 export type CleanLeaderboardPayload = {
