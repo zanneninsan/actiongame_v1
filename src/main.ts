@@ -80,7 +80,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.222";
+const DEBUG_VERSION = "v0.1.223";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -96,6 +96,7 @@ const SCORE_DANMAKU_THRESHOLD = 1000;
 const CROUCH_DANMAKU_HOLD_MS = 2000;
 const JUMP_CHAIN_DANMAKU_COUNT = 5;
 const FALL_MISS_RESTART_DELAY_MS = 4800;
+const TIME_UP_HURT_TO_MISS_DELAY_MS = 520;
 const FALL_RESET_WORLD_MARGIN = 640;
 const PLATFORM_UNIT_WIDTH = 64;
 const PLATFORM_UNIT_HEIGHT = 32;
@@ -540,10 +541,14 @@ class PrototypeScene extends Phaser.Scene {
     if (!this.isRunActive) {
       if (!this.isDefeatSequenceActive) {
         this.applyPlayerBody(false);
+        this.player.setVelocity(0, 0);
       }
       this.updateCollisionDebug();
       this.player.setAcceleration(0, 0);
-      this.player.setVelocity(0, 0);
+      return;
+    }
+    if (this.getRemainingMilliseconds() <= 0) {
+      this.playTimeUpMissSequence();
       return;
     }
 
@@ -2153,6 +2158,49 @@ class PrototypeScene extends Phaser.Scene {
     });
   }
 
+  private playTimeUpMissSequence() {
+    if (this.isDefeatSequenceActive || this.isRestarting || this.hasWon) {
+      return;
+    }
+
+    this.dismissLeaderboard();
+    this.isDefeatSequenceActive = true;
+    this.isRunActive = false;
+    this.hurtUntil = 0;
+    this.invulnerableUntil = 0;
+    this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
+    this.mobileJumpQueued = false;
+    freezeEnemies(this.enemiesGroup);
+    this.timerText?.setText(`${t(this.locale, "hud.time")}:0.00`);
+    this.isLanding = false;
+    this.landingFastForwarded = false;
+    this.resetPlayerIdleState();
+    this.damageTween?.stop();
+    this.damageTween = undefined;
+    this.player.clearTint();
+    this.player.setAlpha(1);
+    this.player.setAngle(0);
+    this.applyPlayerBody(false);
+    this.player.body.setAllowGravity(true);
+    this.player.setAcceleration(0, 0);
+    this.player.setVelocity(this.player.flipX ? DAMAGE_KNOCKBACK_X : -DAMAGE_KNOCKBACK_X, DAMAGE_KNOCKBACK_Y);
+    this.player.setDragX(AIR_DRAG);
+    this.player.anims.timeScale = 1;
+    this.player.anims.play("player-air", true);
+    this.playDamageMotion(this.player.flipX ? -1 : 1);
+    this.cameras.main.flash(180, 253, 224, 71);
+    this.cameras.main.shake(220, 0.008);
+    this.time.delayedCall(TIME_UP_HURT_TO_MISS_DELAY_MS, () => {
+      this.damageTween?.stop();
+      this.damageTween = undefined;
+      this.player.clearTint();
+      this.player.setVelocity(0, 0);
+      this.player.anims.stop();
+      this.player.setAlpha(0.55);
+      this.showMissPresentation("timeUp");
+    });
+  }
+
   private playFallMissSequence() {
     if (this.isDefeatSequenceActive || this.isRestarting) {
       return;
@@ -2173,8 +2221,16 @@ class PrototypeScene extends Phaser.Scene {
     this.player.setAlpha(0.55);
     this.cameras.main.flash(220, 255, 34, 68);
     this.cameras.main.shake(320, 0.012);
+    this.showMissPresentation("miss");
+  }
+
+  private showMissPresentation(danmakuKind: "miss" | "timeUp") {
     if (this.danmakuEnabled) {
-      this.danmaku?.emitMiss();
+      if (danmakuKind === "timeUp") {
+        this.danmaku?.emitTimeUp();
+      } else {
+        this.danmaku?.emitMiss();
+      }
     }
     this.missText?.destroy();
     const missBurst = this.add

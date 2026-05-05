@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.223
+### English
+- Added a time-up miss sequence that knocks the player back before showing MISS, with center-burst danmaku comments for timeouts.
+### Japanese
+- 残り時間が0になったとき、のけぞり後にMISS扱いへ移行し、中央から文字が増える時間切れ用の弾幕を表示するようにしました。
+
 ## v0.1.222
 ### English
 - Reduced the stamina cost for air jumps from 28 to 20.
