@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.202
+### English
+- Hardened leaderboard submission error handling, added server-side stage score limits, skipped edited-stage runs from submission, and added leaderboard fetch retry/logging plus Functions validation tests.
+### Japanese
+- ランキング登録のエラー処理を強化し、サーバー側のステージ別スコア上限、編集済みランの送信除外、ランキング取得のリトライとログ、Functionsの検証テストを追加しました。
+
 ## v0.1.201
 ### English
 - Added the Firestore index needed by leaderboard rank calculation and made rank lookup fail-safe so score submission no longer returns 500 when ranking is temporarily unavailable.

@@ -70,7 +70,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.201";
+const DEBUG_VERSION = "v0.1.202";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -169,6 +169,7 @@ class PrototypeScene extends Phaser.Scene {
   private startTime = 0;
   private editorTimerPausedMs = 0;
   private editorTimerPauseStartedAt = 0;
+  private hasUsedStageEditorThisRun = false;
   private isRunActive = false;
   private isRestarting = false;
   private setupComplete = false;
@@ -662,6 +663,7 @@ class PrototypeScene extends Phaser.Scene {
     this.startTime = 0;
     this.editorTimerPausedMs = 0;
     this.editorTimerPauseStartedAt = 0;
+    this.hasUsedStageEditorThisRun = false;
     this.isRunActive = false;
     this.hasWon = false;
     this.hasScoreMilestoneDanmakuPlayed = false;
@@ -761,6 +763,7 @@ class PrototypeScene extends Phaser.Scene {
     this.startTime = 0;
     this.editorTimerPausedMs = 0;
     this.editorTimerPauseStartedAt = 0;
+    this.hasUsedStageEditorThisRun = false;
     this.updateTimerText();
 
     this.countdownOverlay = new StartCountdownOverlay({
@@ -780,6 +783,7 @@ class PrototypeScene extends Phaser.Scene {
     this.startTime = this.time.now;
     this.editorTimerPausedMs = 0;
     this.editorTimerPauseStartedAt = this.stageEditor?.isEnabled ? this.time.now : 0;
+    this.hasUsedStageEditorThisRun = this.stageEditor?.isEnabled ?? false;
     this.isRunActive = true;
     this.resetPlayerIdleState(this.time.now);
     this.physics.resume();
@@ -1416,6 +1420,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     if (enabled) {
+      this.hasUsedStageEditorThisRun = true;
       this.editorTimerPauseStartedAt ||= this.time.now;
       return;
     }
@@ -1552,6 +1557,14 @@ class PrototypeScene extends Phaser.Scene {
 
   private submitWinScore(finalScore: number, itemScore: number, timeBonus: number, remainingMs: number) {
     if (!isLeaderboardConfigured()) {
+      return;
+    }
+
+    if (this.hasUsedStageEditorThisRun) {
+      this.showLeaderboard(t(this.locale, "leaderboard.scoreSubmitFailed"), undefined, {
+        score: finalScore,
+        scoreUpdated: false,
+      });
       return;
     }
 
