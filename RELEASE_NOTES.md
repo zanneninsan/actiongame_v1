@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.259
+### English
+- Added a mobile restore button after loading a local ghost JSON file so players can re-enter landscape fullscreen when the file picker exits fullscreen or rotates the screen.
+### Japanese
+- スマホでローカルのゴーストJSONファイルを読み込んだ後、ファイル選択でフルスクリーン解除や縦画面戻りが起きた場合に、横フルスクリーンへ戻れるボタンを表示するようにしました。
+
 ## v0.1.258
 ### English
 - Changed the clear result text to use a thin outline.

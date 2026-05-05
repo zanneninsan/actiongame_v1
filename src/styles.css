@@ -359,6 +359,29 @@ canvas {
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
 }
 
+.start-ghost-fullscreen {
+  grid-column: 1 / -1;
+  box-sizing: border-box;
+  width: min(100%, 280px);
+  justify-self: center;
+  min-height: 36px;
+  border: 0;
+  padding: 0 14px;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #dbeafe;
+  font-size: 12px;
+  font-weight: 900;
+  cursor: pointer;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.start-ghost-fullscreen:disabled {
+  cursor: default;
+  filter: brightness(0.66) saturate(0.72);
+  opacity: 0.78;
+}
+
 .start-ghost-select {
   min-width: 0;
   height: 36px;
@@ -551,7 +574,8 @@ canvas {
   }
 
   .start-ghost-load,
-  .start-ghost-select {
+  .start-ghost-select,
+  .start-ghost-fullscreen {
     height: 44px;
     font-size: 15px;
   }
