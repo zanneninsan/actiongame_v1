@@ -72,7 +72,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.216";
+const DEBUG_VERSION = "v0.1.217";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -128,6 +128,10 @@ const BOOSTED_JUMP_VELOCITY = -675;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
 const DASH_SPEED_MULTIPLIER = 2;
 const DASH_MAX_VERTICAL_SPEED = Math.abs(BOOSTED_JUMP_VELOCITY) * DASH_SPEED_MULTIPLIER;
+const MAX_STAMINA = 100;
+const AIR_JUMP_STAMINA_COST = 28;
+const DASH_STAMINA_DRAIN_PER_SECOND = 32;
+const STAMINA_RECOVERY_PER_SECOND = 42;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
@@ -163,6 +167,9 @@ class PrototypeScene extends Phaser.Scene {
   private playerNameText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
+  private staminaText!: Phaser.GameObjects.Text;
+  private staminaBarBack!: Phaser.GameObjects.Rectangle;
+  private staminaBarFill!: Phaser.GameObjects.Rectangle;
   private controlHintText!: Phaser.GameObjects.Text;
   private countdownOverlay?: StartCountdownOverlay;
   private finalScoreText?: Phaser.GameObjects.Text;
@@ -175,6 +182,7 @@ class PrototypeScene extends Phaser.Scene {
   private startTime = 0;
   private editorTimerPausedMs = 0;
   private editorTimerPauseStartedAt = 0;
+  private stamina = MAX_STAMINA;
   private hasUsedStageEditorThisRun = false;
   private isRunActive = false;
   private isRestarting = false;
@@ -449,6 +457,20 @@ class PrototypeScene extends Phaser.Scene {
       .setShadow(1, 1, "#020617", 2, true, true);
     this.updateTimerText();
 
+    this.staminaText = this.add
+      .text(58, 92, "", {
+        fontFamily: "monospace",
+        fontSize: "12px",
+        color: "#bbf7d0",
+      })
+      .setScrollFactor(0)
+      .setDepth(100)
+      .setShadow(1, 1, "#020617", 2, true, true);
+    this.staminaBarBack = this.add.rectangle(150, 101, 132, 9, 0x0f172a, 0.78).setOrigin(0, 0.5).setScrollFactor(0).setDepth(99);
+    this.staminaBarBack.setStrokeStyle(1, 0x86efac, 0.8);
+    this.staminaBarFill = this.add.rectangle(152, 101, 128, 5, 0x86efac, 0.95).setOrigin(0, 0.5).setScrollFactor(0).setDepth(100);
+    this.updateStaminaHud();
+
     this.controlHintText = this.add
       .text(GAME_WIDTH / 2, 8, "", {
         fontFamily: "monospace",
@@ -525,7 +547,8 @@ class PrototypeScene extends Phaser.Scene {
     const left = this.keys.a.isDown || this.cursors.left.isDown || this.mobileInput.a;
     const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
     const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
-    const isShiftSpeedActive = this.keys.shift.isDown || this.mobileInput.shift;
+    const wantsDash = this.keys.shift.isDown || this.mobileInput.shift;
+    const isShiftSpeedActive = this.updateStamina(onFloor, wantsDash, deltaMs);
     const speedMultiplier = (isShiftSpeedActive ? DASH_SPEED_MULTIPLIER : 1) * (this.rewards?.getSpeedMultiplier() ?? 1);
     const jumpMultiplier = this.rewards?.getJumpMultiplier() ?? 1;
     const isCrouchInputActive = down && onFloor;
@@ -547,7 +570,8 @@ class PrototypeScene extends Phaser.Scene {
     }
     const springLaunchedRecently = this.time.now - this.lastSpringLaunchAt <= SPRING_LAUNCH_NORMAL_JUMP_SUPPRESS_MS;
     const jump = (debugJump || normalJump) && !springLaunchedRecently;
-    const canJump = onFloor || debugJump;
+    const wantsAirJump = jump && !onFloor && debugJump;
+    const canJump = onFloor || (wantsAirJump && this.consumeStamina(AIR_JUMP_STAMINA_COST));
     let startedJump = false;
     const baseHorizontalAcceleration = onFloor
       ? isCrouchInputActive
@@ -687,6 +711,7 @@ class PrototypeScene extends Phaser.Scene {
     this.startTime = 0;
     this.editorTimerPausedMs = 0;
     this.editorTimerPauseStartedAt = 0;
+    this.stamina = MAX_STAMINA;
     this.hasUsedStageEditorThisRun = false;
     this.isRunActive = false;
     this.hasWon = false;
@@ -983,6 +1008,7 @@ class PrototypeScene extends Phaser.Scene {
     this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
     this.updateScoreText();
     this.updateTimerText();
+    this.updateStaminaHud();
     this.updateControlHintText();
   }
 
@@ -1447,6 +1473,43 @@ class PrototypeScene extends Phaser.Scene {
 
     const total = this.rewards?.getItemScore() ?? 0;
     this.scoreText.setText(`${t(this.locale, "hud.score")}:${total}`);
+  }
+
+  private updateStamina(onFloor: boolean, wantsDash: boolean, deltaMs: number) {
+    const deltaSeconds = deltaMs / 1000;
+    let dashActive = false;
+
+    if (wantsDash && this.stamina > 0) {
+      dashActive = true;
+      this.stamina = Math.max(0, this.stamina - DASH_STAMINA_DRAIN_PER_SECOND * deltaSeconds);
+    } else if (onFloor && !wantsDash) {
+      this.stamina = Math.min(MAX_STAMINA, this.stamina + STAMINA_RECOVERY_PER_SECOND * deltaSeconds);
+    }
+
+    this.updateStaminaHud();
+    return dashActive;
+  }
+
+  private consumeStamina(cost: number) {
+    if (this.stamina < cost) {
+      return false;
+    }
+
+    this.stamina = Math.max(0, this.stamina - cost);
+    this.updateStaminaHud();
+    return true;
+  }
+
+  private updateStaminaHud() {
+    if (!this.staminaText || !this.staminaBarFill) {
+      return;
+    }
+
+    const staminaValue = Math.max(0, Math.min(MAX_STAMINA, this.stamina));
+    const ratio = staminaValue / MAX_STAMINA;
+    this.staminaText.setText(`${t(this.locale, "hud.stamina")}:${Math.round(staminaValue)}`);
+    this.staminaBarFill.width = 128 * ratio;
+    this.staminaBarFill.setFillStyle(ratio > 0.5 ? 0x86efac : ratio > 0.22 ? 0xfde68a : 0xfb7185, 0.95);
   }
 
   private tryEmitScoreDanmaku() {

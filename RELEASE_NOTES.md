@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.217
+### English
+- Added a stamina gauge that limits W air jumps and Shift dash, with gradual recovery while grounded.
+### Japanese
+- スタミナゲージを追加し、Wの空中ジャンプとShiftダッシュに消費制限を入れ、地上で徐々に回復するようにしました。
+
 ## v0.1.216
 ### English
 - Slightly increased normal jump height and boosted running jump height.
