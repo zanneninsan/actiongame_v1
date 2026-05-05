@@ -87,6 +87,7 @@ export class StageEditor {
       },
       onUndo: () => this.undo(),
       onRedo: () => this.redo(),
+      onCreatePlainStage: () => this.createPlainStage(),
       onExport: () => {
         this.refreshExport();
         this.panel?.copyExportToClipboard();
@@ -306,6 +307,49 @@ export class StageEditor {
     }
 
     this.refreshExport();
+  }
+
+  private createPlainStage() {
+    if (!this.enabled) {
+      return;
+    }
+
+    const previousStage = cloneStage(this.stage);
+    const currentStage = this.stage;
+    const plainStage: StageDefinition = {
+      name: {
+        jp: "空のステージ",
+        en: "Plain Stage",
+      },
+      worldWidth: currentStage.worldWidth,
+      worldTop: currentStage.worldTop,
+      worldBottom: currentStage.worldBottom,
+      groundTopY: currentStage.groundTopY,
+      groundVisualY: currentStage.groundVisualY,
+      streetLampGroundY: currentStage.streetLampGroundY,
+      playerStart: { x: 160, y: this.stageConstants.groundTopY - 120 },
+      goal: { x: Math.max(320, currentStage.worldWidth - 220), y: this.stageConstants.groundTopY - 104 },
+      platforms: [],
+      streetLamps: [],
+      decorations: [],
+      items: [],
+      bonusBlocks: [],
+      checkpoints: [],
+      oneWayGates: [],
+      enemies: [],
+    };
+
+    this.options.setStage(plainStage);
+    this.selected = undefined;
+    this.draggingSelection = false;
+    this.lastDragX = undefined;
+    this.lastDragY = undefined;
+    this.dragHistorySnapshot = undefined;
+    this.clearMarkers();
+    this.rebuildStageObjects();
+    this.recordChange(previousStage);
+    this.refreshExport();
+    this.panel?.setImportStatus(t(this.options.getLocale(), "editor.status.plainStageCreated"));
   }
 
   private handlePointerMove(pointer: Phaser.Input.Pointer) {

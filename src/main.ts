@@ -80,7 +80,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.226";
+const DEBUG_VERSION = "v0.1.227";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -137,6 +137,7 @@ const BOOSTED_JUMP_VELOCITY = -675;
 const BOOST_JUMP_SPEED_THRESHOLD = 285;
 const DASH_SPEED_MULTIPLIER = 2;
 const DASH_MAX_VERTICAL_SPEED = Math.abs(BOOSTED_JUMP_VELOCITY) * DASH_SPEED_MULTIPLIER;
+const EDITOR_FLY_SPEED = 360;
 const MAX_STAMINA = 100;
 const AIR_JUMP_STAMINA_COST = 20;
 const DASH_STAMINA_DRAIN_PER_SECOND = 32;
@@ -560,6 +561,15 @@ class PrototypeScene extends Phaser.Scene {
     } else {
       updateEnemies(this.enemiesGroup, this.player, this.stageConstants.worldBottom + 32);
     }
+    const left = this.keys.a.isDown || this.cursors.left.isDown || this.mobileInput.a;
+    const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
+    const up = this.keys.w.isDown || this.cursors.up.isDown || this.cursors.space.isDown || this.mobileInput.w;
+    const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
+    const wantsDash = this.keys.shift.isDown || this.mobileInput.shift;
+    if (this.stageEditor?.isEnabled) {
+      this.updateEditorPlayerMovement(left, right, up, down, wantsDash);
+      return;
+    }
     const onDescendingMovingPlatform = isPlayerSupportedByDescendingMovingPlatform(
       this.player,
       this.movingPlatformInstances,
@@ -577,10 +587,6 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    const left = this.keys.a.isDown || this.cursors.left.isDown || this.mobileInput.a;
-    const right = this.keys.d.isDown || this.cursors.right.isDown || this.mobileInput.d;
-    const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
-    const wantsDash = this.keys.shift.isDown || this.mobileInput.shift;
     const isShiftSpeedActive = this.updateStamina(onFloor, wantsDash, deltaMs);
     const speedMultiplier = (isShiftSpeedActive ? DASH_SPEED_MULTIPLIER : 1) * (this.rewards?.getSpeedMultiplier() ?? 1);
     const jumpMultiplier = this.rewards?.getJumpMultiplier() ?? 1;
@@ -693,6 +699,33 @@ class PrototypeScene extends Phaser.Scene {
 
     if (this.player.y > this.stageConstants.worldBottom + 32) {
       this.playFallMissSequence();
+    }
+  }
+
+  private updateEditorPlayerMovement(left: boolean, right: boolean, up: boolean, down: boolean, wantsDash: boolean) {
+    const speed = EDITOR_FLY_SPEED * (wantsDash ? DASH_SPEED_MULTIPLIER : 1);
+    const velocityX = left === right ? 0 : left ? -speed : speed;
+    const velocityY = up === down ? 0 : up ? -speed : speed;
+    this.applyPlayerBody(false);
+    this.player.body.setAllowGravity(false);
+    this.player.setAcceleration(0, 0);
+    this.player.setDrag(0, 0);
+    this.player.setMaxVelocity(speed, speed);
+    this.player.setVelocity(velocityX, velocityY);
+    if (velocityX < 0) {
+      this.player.setFlipX(true);
+    } else if (velocityX > 0) {
+      this.player.setFlipX(false);
+    }
+    this.updateCollisionDebug();
+    this.wasOnFloor = false;
+    this.isLanding = false;
+    this.landingFastForwarded = false;
+    this.resetPlayerIdleState();
+    if (velocityX !== 0 || velocityY !== 0) {
+      this.player.anims.play("player-air", true);
+    } else {
+      this.updatePlayerIdleAnimation();
     }
   }
 
@@ -1544,6 +1577,12 @@ class PrototypeScene extends Phaser.Scene {
       setRemainingTimeSeconds: (seconds) => this.setRemainingTimeSeconds(seconds),
       onToggle: (enabled) => {
         this.updateEditorTimerPause(enabled);
+        this.player.body.setAllowGravity(!enabled);
+        this.player.setAcceleration(0, 0);
+        this.player.setVelocity(0, 0);
+        if (!enabled) {
+          this.player.setMaxVelocity(MAX_RUN_SPEED, MAX_FALL_SPEED);
+        }
         this.rebuildEditableStageObjects();
         this.updateControlHintText();
         this.updateTimerText();

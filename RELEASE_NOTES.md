@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.227
+### English
+- Added an empty stage creation button to the stage editor and made edit mode use no-gravity free movement, including downward movement with down input.
+### Japanese
+- ステージ編集で空のステージを作成できるボタンを追加し、編集モード中は重力なしで移動でき、下入力で下方向へ動けるようにしました。
+
 ## v0.1.226
 ### English
 - Added stationary and no-gravity stationary enemy behavior overrides to enemy placements and the stage editor.
