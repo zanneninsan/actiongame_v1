@@ -42,25 +42,27 @@ test("rejects unknown stages", () => {
   );
 });
 
-test("rejects score before time bonus above the selected stage limit", () => {
-  assertHttpsError(
-    () => cleanLeaderboardPayload({...basePayload, stageId: "skyShaftClimb", itemScore: 1900.01, score: 1900.01}),
-    "failed-precondition",
-  );
+test("accepts score before time bonus above the selected stage limit while anti-cheat is disabled", () => {
+  const payload = cleanLeaderboardPayload({
+    ...basePayload,
+    stageId: "skyShaftClimb",
+    itemScore: 1900.01,
+    score: 1900.01,
+  });
+
+  assert.equal(payload.expectedScore, 1900.01);
 });
 
-test("rejects score values that do not match item score plus time bonus", () => {
-  assertHttpsError(
-    () => cleanLeaderboardPayload({...basePayload, score: 4251}),
-    "failed-precondition",
-  );
+test("accepts score values that do not match item score plus time bonus while anti-cheat is disabled", () => {
+  const payload = cleanLeaderboardPayload({...basePayload, score: 4251});
+
+  assert.equal(payload.expectedScore, 4251);
 });
 
-test("rejects impossible instant clears", () => {
-  assertHttpsError(
-    () => cleanLeaderboardPayload({...basePayload, score: 7850, remainingMs: 360000, elapsedMs: 0}),
-    "failed-precondition",
-  );
+test("accepts impossible instant clears while anti-cheat is disabled", () => {
+  const payload = cleanLeaderboardPayload({...basePayload, score: 7850, remainingMs: 360000, elapsedMs: 0});
+
+  assert.equal(payload.expectedScore, 7850);
 });
 
 function assertHttpsError(fn: () => unknown, code: HttpsError["code"]) {

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.206
+### English
+- Temporarily disabled leaderboard anti-cheat score and timer checks behind a server-side flag while keeping the validation mechanism in place.
+### Japanese
+- ランキングの不正チェック機構は残したまま、サーバー側フラグでスコアとタイマーの不正チェックを一時的に無効化しました。
+
 ## v0.1.205
 ### English
 - Fixed leaderboard validation so enemy stomp bonus points are accepted as part of the score before time bonus.

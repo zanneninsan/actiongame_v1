@@ -5,6 +5,7 @@ export const MAX_GAME_TIME_MS = 360_000;
 export const TIME_BONUS_PER_SECOND = 10;
 const MAX_SCORE_DRIFT = 0.01;
 const TIMER_DRIFT_MS = 1000;
+const LEADERBOARD_ANTI_CHEAT_ENABLED = false;
 
 type StageScoreLimit = {
   maxScoreBeforeTimeBonus: number;
@@ -50,32 +51,12 @@ export function cleanLeaderboardPayload(data: unknown): CleanLeaderboardPayload 
   }
 
   const itemScore = readFiniteNumber(payload.itemScore);
-  if (itemScore < 0 || itemScore > stageLimit.maxScoreBeforeTimeBonus) {
-    throw new HttpsError("failed-precondition", "Score before time bonus exceeds the stage limit.");
-  }
-
   const remainingMs = readFiniteNumber(payload.remainingMs);
   const elapsedMs = readFiniteNumber(payload.elapsedMs);
-  if (remainingMs < 0 || remainingMs > MAX_GAME_TIME_MS || elapsedMs < 0 || elapsedMs > MAX_GAME_TIME_MS) {
-    throw new HttpsError("failed-precondition", "Timer payload is invalid.");
-  }
-  if (elapsedMs + remainingMs > MAX_GAME_TIME_MS + TIMER_DRIFT_MS) {
-    throw new HttpsError("failed-precondition", "Timer payload is invalid.");
-  }
-  if (elapsedMs < stageLimit.minElapsedMs || remainingMs > MAX_GAME_TIME_MS - stageLimit.minElapsedMs + TIMER_DRIFT_MS) {
-    throw new HttpsError("failed-precondition", "Clear time is too short for leaderboard submission.");
-  }
-
-  const expectedScore = roundScore(itemScore + (remainingMs / 1000) * TIME_BONUS_PER_SECOND);
-  const maxScore = stageLimit.maxScoreBeforeTimeBonus + (MAX_GAME_TIME_MS / 1000) * TIME_BONUS_PER_SECOND;
   const submittedScoreValue = readFiniteNumber(payload.score);
-  if (submittedScoreValue < 0 || submittedScoreValue > maxScore) {
-    throw new HttpsError("failed-precondition", "Score payload is invalid.");
-  }
-  const submittedScore = roundScore(submittedScoreValue);
-  if (Math.abs(submittedScore - expectedScore) > MAX_SCORE_DRIFT) {
-    throw new HttpsError("failed-precondition", "Score payload is invalid.");
-  }
+  const expectedScore = LEADERBOARD_ANTI_CHEAT_ENABLED ?
+    validateScorePayload({itemScore, remainingMs, elapsedMs, submittedScoreValue, stageLimit}) :
+    roundScore(submittedScoreValue);
 
   return {
     submissionId,
@@ -119,4 +100,44 @@ function readFiniteNumber(value: unknown) {
 
 export function roundScore(value: number) {
   return Math.round(value * 100) / 100;
+}
+
+function validateScorePayload({
+  itemScore,
+  remainingMs,
+  elapsedMs,
+  submittedScoreValue,
+  stageLimit,
+}: {
+  itemScore: number;
+  remainingMs: number;
+  elapsedMs: number;
+  submittedScoreValue: number;
+  stageLimit: StageScoreLimit;
+}) {
+  if (itemScore < 0 || itemScore > stageLimit.maxScoreBeforeTimeBonus) {
+    throw new HttpsError("failed-precondition", "Score before time bonus exceeds the stage limit.");
+  }
+
+  if (remainingMs < 0 || remainingMs > MAX_GAME_TIME_MS || elapsedMs < 0 || elapsedMs > MAX_GAME_TIME_MS) {
+    throw new HttpsError("failed-precondition", "Timer payload is invalid.");
+  }
+  if (elapsedMs + remainingMs > MAX_GAME_TIME_MS + TIMER_DRIFT_MS) {
+    throw new HttpsError("failed-precondition", "Timer payload is invalid.");
+  }
+  if (elapsedMs < stageLimit.minElapsedMs || remainingMs > MAX_GAME_TIME_MS - stageLimit.minElapsedMs + TIMER_DRIFT_MS) {
+    throw new HttpsError("failed-precondition", "Clear time is too short for leaderboard submission.");
+  }
+
+  const expectedScore = roundScore(itemScore + (remainingMs / 1000) * TIME_BONUS_PER_SECOND);
+  const maxScore = stageLimit.maxScoreBeforeTimeBonus + (MAX_GAME_TIME_MS / 1000) * TIME_BONUS_PER_SECOND;
+  if (submittedScoreValue < 0 || submittedScoreValue > maxScore) {
+    throw new HttpsError("failed-precondition", "Score payload is invalid.");
+  }
+  const submittedScore = roundScore(submittedScoreValue);
+  if (Math.abs(submittedScore - expectedScore) > MAX_SCORE_DRIFT) {
+    throw new HttpsError("failed-precondition", "Score payload is invalid.");
+  }
+
+  return expectedScore;
 }
