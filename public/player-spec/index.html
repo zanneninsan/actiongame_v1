@@ -253,6 +253,7 @@
         </div>
         <nav aria-label="Page sections">
           <a href="#score" data-i18n="navScore"></a>
+          <a href="#controls" data-i18n="navControls"></a>
           <a href="#stomp-combo" data-i18n="navCombo"></a>
           <a href="#powerups" data-i18n="navPowerups"></a>
           <a href="#clear-rank" data-i18n="navRank"></a>
@@ -289,6 +290,12 @@
               <tbody data-table-body="enemies"></tbody>
             </table>
           </div>
+        </section>
+
+        <section id="controls">
+          <h2 data-i18n="controlsTitle"></h2>
+          <p data-i18n="controlsLead"></p>
+          <ul class="rule-list" data-list="controlsRules"></ul>
         </section>
 
         <section id="stomp-combo">
@@ -361,6 +368,7 @@
           lead:
             "スコア、踏みつけコンボ、パワーアップ、クリア評価を確認するためのプレイヤー向け仕様メモです。ゲーム内チュートリアルではなく、プレイ外で読み返すリファレンスです。",
           navScore: "スコア",
+          navControls: "操作/スタミナ",
           navCombo: "踏みつけコンボ",
           navPowerups: "パワーアップ",
           navRank: "クリアランク",
@@ -376,6 +384,8 @@
           itemsTitle: "アイテム",
           enemyTitle: "敵の踏みつけスコア",
           enemyBody: "敵を踏みつけたときのスコアはボーナスとして加算されます。個別設定がない敵の基本踏みつけスコアは10点です。",
+          controlsTitle: "操作とスタミナ",
+          controlsLead: "移動、ジャンプ、ダッシュ、しゃがみの基本仕様です。",
           comboTitle: "踏みつけコンボ",
           comboLead: "短い間隔で敵を踏み続けると、踏みつけスコアの倍率が上がります。",
           comboConditionTitle: "コンボ条件",
@@ -405,6 +415,11 @@
             ["ダメージ状態", "NO DMG OK または DMG n"],
             ["集めたコイン数", "COIN n"],
             ["高速クリア状態", "FAST OK または FAST --"],
+          ],
+          controlsRules: [
+            "PC操作ではA/Dで移動、WまたはSpaceでジャンプ、Shiftでダッシュ、Sまたは下入力でしゃがみます。",
+            "ダッシュと空中ジャンプはスタミナを使います。スタミナは地上で回復し、しゃがみ中は通常の2倍の速度で回復します。",
+            "バス停の屋根や街灯などの装飾足場では、しゃがみ続けると下へすり抜けて降りられます。",
           ],
           tables: {
             items: {
@@ -483,6 +498,7 @@
           lead:
             "A player-facing reference for score sources, stomp combos, power-ups, and clear ranks. This is a readable spec outside the game, not an in-game tutorial.",
           navScore: "Score",
+          navControls: "Controls/Stamina",
           navCombo: "Stomp Combo",
           navPowerups: "Power-Ups",
           navRank: "Clear Rank",
@@ -498,6 +514,8 @@
           itemsTitle: "Items",
           enemyTitle: "Enemy Stomp Score",
           enemyBody: "Enemy stomp score is added as bonus score. If an enemy does not define a custom stomp score, its base stomp score is 10.",
+          controlsTitle: "Controls and Stamina",
+          controlsLead: "Core movement, jump, dash, and crouch behavior.",
           comboTitle: "Stomp Combo",
           comboLead: "The stomp combo increases the score multiplier when enemies are stomped in quick succession.",
           comboConditionTitle: "Combo Condition",
@@ -527,6 +545,11 @@
             ["Damage state", "NO DMG OK or DMG n"],
             ["Collected coin count", "COIN n"],
             ["Fast clear state", "FAST OK or FAST --"],
+          ],
+          controlsRules: [
+            "On keyboard, A/D move, W or Space jumps, Shift dashes, and S or Down crouches.",
+            "Dash and air jump consume stamina. Stamina recovers while grounded, and crouching doubles the recovery speed.",
+            "On decoration platforms such as bus shelter roofs and street lamps, holding crouch drops through the floor.",
           ],
           tables: {
             items: {
@@ -686,6 +709,7 @@
         Object.entries(text.tables).forEach(([name, table]) => renderTable(name, table));
         renderList("comboRules", text.comboRules);
         renderList("popupRules", text.popupRules);
+        renderList("controlsRules", text.controlsRules);
         renderList("missions", text.missions);
 
         document.querySelectorAll("[data-lang]").forEach((button) => {

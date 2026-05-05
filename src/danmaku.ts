@@ -65,19 +65,23 @@ const MISS_COMMENTS = [
   "見なかったことにしよう",
 ];
 
-const TIME_UP_COMMENTS = [
+const TIME_UP_SCENE_COMMENTS = [
+  "時間がないぞ",
+  "カウント見てた？",
+  "0.00秒です",
+  "延長はありません",
+  "タイマーくん無慈悲",
+  "あと一歩だった",
+  "急ぎ足りない",
+  "時は止まらない",
+  "間に合わなかった",
+  "次は巻いていこう",
+  "残り時間、消滅",
   "TIME UP",
-  "時間切れ",
-  "0秒です",
-  "タイマー見て",
-  "延長戦なし",
-  "ここで終了",
-  "あと少しだった",
-  "急いでー",
-  "無情なカウント",
-  "MISS扱いです",
-  "リトライだ",
-  "次は間に合う",
+  "締め切りです",
+  "無念のタイムアウト",
+  "ここで鐘が鳴る",
+  "もう一回走ろう",
 ];
 
 const LIVE_CHAT_USERS = [
@@ -173,12 +177,18 @@ export class DanmakuOverlay {
   }
 
   emitTimeUp() {
-    this.emitCenterBurst(TIME_UP_COMMENTS, 28, 58, {
+    const style = {
       color: "#fef08a",
       stroke: "#7f1d1d",
       fontSize: 29,
-      duration: 2400,
-    });
+      duration: 3800,
+    };
+    if (this.mode === "liveChat") {
+      this.emitBurst(TIME_UP_SCENE_COMMENTS, 16, 85, style);
+      return;
+    }
+
+    this.emitDeathReaction(TIME_UP_SCENE_COMMENTS);
   }
 
   clear() {

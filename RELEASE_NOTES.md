@@ -2,6 +2,36 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.243
+### English
+- Made stamina recover twice as fast while crouching, and documented crouch recovery plus drop-through floors in the player spec and control hints.
+### Japanese
+- しゃがみ中はスタミナが通常の2倍速で回復するようにし、取説と操作ヒントにしゃがみ回復と床すり抜けの説明を追記しました。
+
+## v0.1.242
+### English
+- Halved the display timing for the X-position story dialogue and its follow-up message.
+### Japanese
+- X軸地点に到達した時に出るストーリーメッセージと、その後のメッセージの表示時間を半分にしました。
+
+## v0.1.241
+### English
+- Added a queued story-message popup for the first Aqua Mascot stomp, using the sad portrait and a five-second apology line.
+### Japanese
+- 初めてAqua Mascotを踏んだ時に、sad表情のメッセージUIで謝罪セリフを5秒表示するようにしました。既に会話UIが出ている場合は順番待ちで表示されます。
+
+## v0.1.240
+### English
+- Changed the time-up danmaku presentation to use the same centered fixed reaction-wave style as MISS while keeping dedicated timeout comments.
+### Japanese
+- 時間切れ時の弾幕演出を、専用コメントのままMISS時と同じ中央揃えの固定リアクション波に変更しました。
+
+## v0.1.239
+### English
+- Added a dedicated timeout-scene danmaku comment set so time-up reactions no longer reuse generic miss wording.
+### Japanese
+- 時間切れシーン専用の弾幕コメントを新しく用意し、通常のMISSとは違うリアクションが出るようにしました。
+
 ## v0.1.238
 ### English
 - Added an overhead stamina gauge that appears above the player while stamina is reduced and hides again at full recovery.
