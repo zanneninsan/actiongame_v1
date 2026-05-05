@@ -80,7 +80,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.224";
+const DEBUG_VERSION = "v0.1.225";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1540,6 +1540,8 @@ class PrototypeScene extends Phaser.Scene {
       getStageConstants: () => this.stageConstants,
       rebuildStageObjects: () => this.rebuildEditableStageObjects(),
       moveGoalTo: (x, y) => this.moveGoalTo(x, y),
+      getRemainingTimeSeconds: () => this.getRemainingMilliseconds() / 1000,
+      setRemainingTimeSeconds: (seconds) => this.setRemainingTimeSeconds(seconds),
       onToggle: (enabled) => {
         this.updateEditorTimerPause(enabled);
         this.rebuildEditableStageObjects();
@@ -1891,6 +1893,19 @@ class PrototypeScene extends Phaser.Scene {
       this.editorTimerPauseStartedAt === 0 ? 0 : Math.max(0, this.time.now - this.editorTimerPauseStartedAt);
     const elapsed = Math.max(0, this.time.now - this.startTime - this.editorTimerPausedMs - activeEditorPauseMs);
     return Math.max(0, GAME_TIME_MS - elapsed);
+  }
+
+  private setRemainingTimeSeconds(seconds: number) {
+    if (!this.isRunActive || this.startTime === 0 || !Number.isFinite(seconds)) {
+      return;
+    }
+
+    const remainingMs = Phaser.Math.Clamp(Math.round(seconds * 1000), 0, GAME_TIME_MS);
+    const activeEditorPauseMs =
+      this.editorTimerPauseStartedAt === 0 ? 0 : Math.max(0, this.time.now - this.editorTimerPauseStartedAt);
+    const elapsedMs = GAME_TIME_MS - remainingMs;
+    this.startTime = this.time.now - this.editorTimerPausedMs - activeEditorPauseMs - elapsedMs;
+    this.updateTimerText();
   }
 
   private formatTimeSeconds(milliseconds: number) {

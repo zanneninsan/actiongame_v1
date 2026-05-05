@@ -38,6 +38,8 @@ type StageEditorOptions = {
   getStageConstants: () => ResolvedStageConstants;
   rebuildStageObjects: () => void;
   moveGoalTo: (x: number, y: number) => void;
+  getRemainingTimeSeconds: () => number;
+  setRemainingTimeSeconds: (seconds: number) => void;
   onToggle?: (enabled: boolean) => void;
 };
 
@@ -92,6 +94,8 @@ export class StageEditor {
         this.panel?.setImportStatus(t(this.options.getLocale(), "editor.status.exported"));
       },
       onImport: (json) => this.importStage(json),
+      getRemainingTimeSeconds: () => this.options.getRemainingTimeSeconds(),
+      onRemainingTimeChange: (seconds) => this.options.setRemainingTimeSeconds(seconds),
     });
     this.panel.show();
     this.enabled = Boolean(this.options.initialEnabled);

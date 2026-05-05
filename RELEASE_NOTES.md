@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.225
+### English
+- Added a debug control in the stage editor panel for setting the remaining time during a run.
+### Japanese
+- デバッグ用に、ステージ編集パネルからプレイ中の残り時間を変更できる入力欄を追加しました。
+
 ## v0.1.224
 ### English
 - Made the stage editor panel show only the option rows related to the currently selected tool.

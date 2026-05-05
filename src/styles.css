@@ -498,6 +498,25 @@ canvas {
   padding: 0 8px;
 }
 
+.editor-inline-control {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px;
+  gap: 6px;
+}
+
+.editor-inline-control button {
+  min-width: 0;
+  height: 30px;
+  border: 1px solid rgba(56, 189, 248, 0.58);
+  border-radius: 5px;
+  background: rgba(15, 23, 42, 0.92);
+  color: #bae6fd;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .editor-history-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
