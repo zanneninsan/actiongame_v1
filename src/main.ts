@@ -84,7 +84,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.246";
+const DEBUG_VERSION = "v0.1.247";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -1992,7 +1992,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private async loadLeaderboardGhostReplay(ghostId: string): Promise<GhostReplayLoadResult> {
-    return this.loadGhostReplayData(await fetchLeaderboardGhostReplay(ghostId));
+    return this.loadGhostReplayData((await fetchLeaderboardGhostReplay(ghostId)) as Partial<GhostReplayData>);
   }
 
   private loadGhostReplayData(parsed: Partial<GhostReplayData>): GhostReplayLoadResult {

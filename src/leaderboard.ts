@@ -297,7 +297,7 @@ export async function fetchLeaderboardGhostOptions(stageId: string, maxEntries =
     }));
 }
 
-export async function fetchLeaderboardGhostReplay(ghostId: string) {
+export async function fetchLeaderboardGhostReplay(ghostId: string): Promise<unknown> {
   const services = await getFirebaseServices();
   if (!services) {
     throw new Error("Leaderboard is not configured.");
@@ -317,15 +317,31 @@ export async function fetchLeaderboardGhostReplay(ghostId: string) {
   return expanded;
 }
 
-function expandCompactGhostReplay(value: unknown) {
+function expandCompactGhostReplay(value: unknown): unknown {
   if (!isRecord(value)) {
     return undefined;
   }
-  if (value.format !== "compact-v1" || !Array.isArray(value.frames)) {
+  if (!Array.isArray(value.frames)) {
+    return value;
+  }
+  if (value.format === "compact-v2") {
+    return expandCompactGhostReplayFrames(value, (frame) => {
+      if (!isRecord(frame)) {
+        return undefined;
+      }
+      return [frame.t, frame.x, frame.y, frame.f, frame.a];
+    });
+  }
+  if (value.format !== "compact-v1") {
     return value;
   }
 
+  return expandCompactGhostReplayFrames(value, (frame) => (Array.isArray(frame) ? frame : undefined));
+}
+
+function expandCompactGhostReplayFrames(value: Record<string, unknown>, getFrameValues: (frame: unknown) => unknown[] | undefined) {
   const animations = Array.isArray(value.animations) ? value.animations.map((animation) => String(animation ?? "")) : [""];
+  const frames = Array.isArray(value.frames) ? value.frames : [];
   return {
     schema: value.schema,
     gameVersion: value.gameVersion,
@@ -334,7 +350,8 @@ function expandCompactGhostReplay(value: unknown) {
     controlMode: value.controlMode,
     createdAt: value.createdAt,
     durationMs: value.durationMs,
-    frames: value.frames
+    frames: frames
+      .map(getFrameValues)
       .filter((frame): frame is unknown[] => Array.isArray(frame))
       .map((frame) => {
         const flags = Number(frame[3]) || 0;

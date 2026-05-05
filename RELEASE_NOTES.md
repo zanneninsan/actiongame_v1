@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.247
+### English
+- Changed the Firebase ranking ghost replay storage format so Firestore accepts saved replay frames without nested arrays.
+### Japanese
+- Firebaseのランキングゴースト保存形式をFirestore対応に変更し、リプレイフレームが保存エラーにならないようにしました。
+
 ## v0.1.246
 ### English
 - Added a clear result message after score submission that verifies whether the ranking ghost replay can actually be loaded from Firebase.

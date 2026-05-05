@@ -136,7 +136,7 @@ function compactGhostReplay(ghostReplay: NonNullable<ReturnType<typeof cleanLead
   const animations = Array.from(new Set(ghostReplay.frames.map((frame) => frame.anim ?? "")));
   return {
     schema: ghostReplay.schema,
-    format: "compact-v1",
+    format: "compact-v2",
     gameVersion: ghostReplay.gameVersion,
     stageId: ghostReplay.stageId,
     playerName: ghostReplay.playerName,
@@ -144,18 +144,19 @@ function compactGhostReplay(ghostReplay: NonNullable<ReturnType<typeof cleanLead
     createdAt: ghostReplay.createdAt,
     durationMs: ghostReplay.durationMs,
     animations,
-    frames: ghostReplay.frames.map((frame) => [
-      frame.t,
-      frame.x,
-      frame.y,
-      (frame.left ? 1 : 0) |
+    frames: ghostReplay.frames.map((frame) => ({
+      t: frame.t,
+      x: frame.x,
+      y: frame.y,
+      f:
+        (frame.left ? 1 : 0) |
         (frame.right ? 2 : 0) |
         (frame.up ? 4 : 0) |
         (frame.down ? 8 : 0) |
         (frame.dash ? 16 : 0) |
         (frame.flipX ? 32 : 0),
-      Math.max(0, animations.indexOf(frame.anim ?? "")),
-    ]),
+      a: Math.max(0, animations.indexOf(frame.anim ?? "")),
+    })),
   };
 }
 
