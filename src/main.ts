@@ -57,7 +57,7 @@ import {
   createMobileControls as createMobileControlElements,
   type MobileInputKey,
 } from "./mobileControls";
-import { DanmakuOverlay } from "./danmaku";
+import { DanmakuOverlay, type DanmakuMode } from "./danmaku";
 import {
   fetchLeaderboardEntries,
   fetchMyLeaderboardEntries,
@@ -80,7 +80,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.230";
+const DEBUG_VERSION = "v0.1.231";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -229,6 +229,7 @@ class PrototypeScene extends Phaser.Scene {
   private soundVolumePercent = 50;
   private soundMuted = false;
   private danmakuEnabled = true;
+  private danmakuMode: DanmakuMode = "classic";
   private startModal?: StartModal;
   private controlHint = t(this.locale, "hint.pc");
   private editorStage = cloneStage(STAGES[DEFAULT_STAGE_ID]);
@@ -344,6 +345,7 @@ class PrototypeScene extends Phaser.Scene {
     this.soundVolumePercent = this.getSavedVolumePercent();
     this.soundMuted = this.getCookieValue("actiongame_muted") === "1";
     this.danmakuEnabled = this.getCookieValue("actiongame_danmaku_disabled") !== "1";
+    this.danmakuMode = this.getSavedDanmakuMode();
     this.applySoundSettings();
     this.resetRunState();
     this.isRestarting = false;
@@ -528,6 +530,7 @@ class PrototypeScene extends Phaser.Scene {
     this.scale.on("resize", this.handleScaleResize, this);
     this.updateControlHintText();
     this.danmaku = new DanmakuOverlay(this, GAME_WIDTH, GAME_HEIGHT);
+    this.danmaku.setMode(this.danmakuMode);
 
     this.input.keyboard!.off("keydown-R");
     this.input.keyboard!.on("keydown-R", () => this.handleRestartKey());
@@ -1131,6 +1134,7 @@ class PrototypeScene extends Phaser.Scene {
       soundVolumePercent: this.soundVolumePercent,
       soundMuted: this.soundMuted,
       danmakuEnabled: this.danmakuEnabled,
+      danmakuMode: this.danmakuMode,
     };
   }
 
@@ -1157,6 +1161,11 @@ class PrototypeScene extends Phaser.Scene {
       if (typeof settings.danmakuEnabled === "boolean") {
         this.danmakuEnabled = settings.danmakuEnabled;
         this.setCookieValue("actiongame_danmaku_disabled", settings.danmakuEnabled ? "0" : "1");
+      }
+      if (settings.danmakuMode === "classic" || settings.danmakuMode === "liveChat") {
+        this.danmakuMode = settings.danmakuMode;
+        this.setCookieValue("actiongame_danmaku_mode", settings.danmakuMode);
+        this.danmaku?.setMode(this.danmakuMode);
       }
       this.applySoundSettings();
       this.refreshLocalizedUI();
@@ -1287,6 +1296,10 @@ class PrototypeScene extends Phaser.Scene {
     return Phaser.Math.Clamp(Math.round(savedVolume), 0, 100);
   }
 
+  private getSavedDanmakuMode(): DanmakuMode {
+    return this.getCookieValue("actiongame_danmaku_mode") === "liveChat" ? "liveChat" : "classic";
+  }
+
   private saveVolumeSettings(volume: number, isMuted: boolean) {
     this.setCookieValue("actiongame_volume", String(Phaser.Math.Clamp(Math.round(volume), 0, 100)));
     this.setCookieValue("actiongame_muted", isMuted ? "1" : "0");
@@ -1319,6 +1332,13 @@ class PrototypeScene extends Phaser.Scene {
     if (!enabled) {
       this.danmaku?.clear();
     }
+  }
+
+  private setDanmakuMode(mode: DanmakuMode) {
+    this.danmakuMode = mode;
+    this.setCookieValue("actiongame_danmaku_mode", mode);
+    this.danmaku?.setMode(mode);
+    this.scheduleLeaderboardUserSettingsSave();
   }
 
   private trackStageObject<T extends Phaser.GameObjects.GameObject>(object: T) {
@@ -1633,6 +1653,7 @@ class PrototypeScene extends Phaser.Scene {
       soundVolumePercent: this.soundVolumePercent,
       soundMuted: this.soundMuted,
       danmakuEnabled: this.danmakuEnabled,
+      danmakuMode: this.danmakuMode,
       collisionDebugEnabled: this.collisionDebugEnabled,
       onCollisionToggle: (button) => {
         this.collisionDebugEnabled = !this.collisionDebugEnabled;
@@ -1649,6 +1670,7 @@ class PrototypeScene extends Phaser.Scene {
         this.applySoundSettings();
       },
       onDanmakuChange: (enabled) => this.setDanmakuEnabled(enabled),
+      onDanmakuModeChange: (mode) => this.setDanmakuMode(mode),
       onLocaleChange: (locale) => {
         this.setLocale(locale);
         this.createStageEditor(this.stageEditor?.isEnabled ?? false);

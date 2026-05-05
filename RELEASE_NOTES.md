@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.231
+### English
+- Added a danmaku display style setting with a live chat column mode that stacks comments upward from the lower-left side of the screen.
+### Japanese
+- 弾幕の表示形式を切り替えられる設定を追加し、画面左側で下から上へコメントが積み上がるライブチャット風モードを選べるようにしました。
+
 ## v0.1.230
 ### English
 - Increased the score HUD size and aligned the remaining time on the same row.

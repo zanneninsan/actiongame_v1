@@ -84,18 +84,26 @@ type ActiveComment = Phaser.GameObjects.Text & {
   destroyTimer?: Phaser.Time.TimerEvent;
 };
 
+export type DanmakuMode = "classic" | "liveChat";
+
 export class DanmakuOverlay {
   private readonly scene: Phaser.Scene;
   private readonly width: number;
   private readonly height: number;
   private readonly activeComments = new Set<ActiveComment>();
+  private readonly liveChatComments: ActiveComment[] = [];
   private readonly pendingTimers = new Set<Phaser.Time.TimerEvent>();
   private nextLane = 0;
+  private mode: DanmakuMode = "classic";
 
   constructor(scene: Phaser.Scene, width: number, height: number) {
     this.scene = scene;
     this.width = width;
     this.height = height;
+  }
+
+  setMode(mode: DanmakuMode) {
+    this.mode = mode;
   }
 
   emitScoreMilestone() {
@@ -151,6 +159,7 @@ export class DanmakuOverlay {
       comment.destroy();
     });
     this.activeComments.clear();
+    this.liveChatComments.length = 0;
   }
 
   destroy() {
@@ -166,7 +175,11 @@ export class DanmakuOverlay {
     for (let index = 0; index < count; index += 1) {
       const timer = this.scene.time.delayedCall(index * staggerMs, () => {
         this.pendingTimers.delete(timer);
-        this.emit(comments[index % comments.length], options);
+        if (this.mode === "liveChat") {
+          this.emitLiveChat(comments[index % comments.length], options);
+        } else {
+          this.emit(comments[index % comments.length], options);
+        }
       });
       this.pendingTimers.add(timer);
     }
@@ -214,10 +227,86 @@ export class DanmakuOverlay {
     for (let index = 0; index < count; index += 1) {
       const timer = this.scene.time.delayedCall(index * staggerMs, () => {
         this.pendingTimers.delete(timer);
-        this.emitCenter(comments[index % comments.length], index, options);
+        if (this.mode === "liveChat") {
+          this.emitLiveChat(comments[index % comments.length], options);
+        } else {
+          this.emitCenter(comments[index % comments.length], index, options);
+        }
       });
       this.pendingTimers.add(timer);
     }
+  }
+
+  private emitLiveChat(message: string, options: Partial<DanmakuStyle> = {}) {
+    const style = {
+      color: options.color ?? "#f8fafc",
+      stroke: options.stroke ?? "#020617",
+      fontSize: Math.max(15, Math.round((options.fontSize ?? 22) * 0.72)),
+      duration: Math.max(4200, options.duration ?? 5200),
+    };
+    const lineHeight = style.fontSize + 12;
+    const x = 24;
+    const bottomY = this.height - 86;
+    const topY = 96;
+    this.liveChatComments.forEach((comment) => {
+      this.scene.tweens.add({
+        targets: comment,
+        y: comment.y - lineHeight,
+        duration: 170,
+        ease: "Sine.easeOut",
+      });
+    });
+
+    const comment = this.scene.add
+      .text(x, bottomY, message, {
+        fontFamily: "monospace",
+        fontSize: `${style.fontSize}px`,
+        color: style.color,
+        stroke: style.stroke,
+        strokeThickness: 4,
+        backgroundColor: "rgba(2, 6, 23, 0.58)",
+        padding: { x: 8, y: 4 },
+        wordWrap: { width: Math.min(380, this.width * 0.36), useAdvancedWrap: true },
+      })
+      .setOrigin(0, 1)
+      .setScrollFactor(0)
+      .setDepth(182)
+      .setAlpha(0)
+      .setShadow(1, 1, "#000000", 2, true, true) as ActiveComment;
+
+    this.activeComments.add(comment);
+    this.liveChatComments.push(comment);
+    this.scene.tweens.add({
+      targets: comment,
+      alpha: 0.96,
+      x: x + 10,
+      duration: 160,
+      ease: "Sine.easeOut",
+    });
+    this.trimLiveChat(topY);
+    comment.destroyTimer = this.scene.time.delayedCall(style.duration, () => this.fadeLiveChatComment(comment));
+  }
+
+  private trimLiveChat(topY: number) {
+    while (this.liveChatComments.length > 0 && (this.liveChatComments[0].y < topY || this.liveChatComments.length > 15)) {
+      const comment = this.liveChatComments[0];
+      this.removeComment(comment);
+    }
+  }
+
+  private fadeLiveChatComment(comment: ActiveComment) {
+    if (!this.activeComments.has(comment)) {
+      return;
+    }
+
+    this.scene.tweens.add({
+      targets: comment,
+      alpha: 0,
+      x: comment.x - 16,
+      duration: 240,
+      ease: "Sine.easeIn",
+      onComplete: () => this.removeComment(comment),
+    });
   }
 
   private emitCenter(message: string, index: number, options: Partial<DanmakuStyle> = {}) {
@@ -285,6 +374,10 @@ export class DanmakuOverlay {
 
     comment.destroyTimer?.remove(false);
     this.activeComments.delete(comment);
+    const liveIndex = this.liveChatComments.indexOf(comment);
+    if (liveIndex >= 0) {
+      this.liveChatComments.splice(liveIndex, 1);
+    }
     comment.destroy();
   }
 }
