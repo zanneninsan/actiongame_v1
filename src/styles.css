@@ -264,62 +264,19 @@ canvas {
   letter-spacing: 0;
 }
 
+.fullscreen-button {
+  font-size: calc(var(--mobile-button-size) * 0.2);
+  letter-spacing: 0;
+}
+
 .mobile-button.is-pressed {
   border-color: rgba(253, 230, 138, 0.96);
   background: rgba(56, 189, 248, 0.82);
 }
 
-#mobile-orientation-prompt {
-  position: fixed;
-  inset: 0;
-  z-index: 24;
-  display: none;
-  place-items: center;
-  padding: 24px;
-  background: rgba(2, 6, 23, 0.9);
-  color: #f8fafc;
-  font-family: system-ui, sans-serif;
-  text-align: center;
-  pointer-events: none;
-}
-
-.orientation-dialog {
-  width: min(360px, calc(100vw - 48px));
-  display: grid;
-  gap: 10px;
-  justify-items: center;
-}
-
-.orientation-icon {
-  width: 72px;
-  height: 72px;
-  display: grid;
-  place-items: center;
-  border: 2px solid rgba(253, 230, 138, 0.9);
-  border-radius: 8px;
-  color: #fde68a;
-  font-size: 44px;
-  line-height: 1;
-}
-
-.orientation-title {
-  font-size: 24px;
-  font-weight: 900;
-  line-height: 1.2;
-}
-
-.orientation-message {
-  color: #cbd5e1;
-  font-size: 15px;
-  font-weight: 700;
-  line-height: 1.5;
-}
-
-@media (orientation: portrait) {
-  #mobile-orientation-prompt {
-    display: grid;
-    pointer-events: auto;
-  }
+.mobile-button.is-active {
+  border-color: rgba(134, 239, 172, 0.95);
+  background: rgba(22, 163, 74, 0.78);
 }
 
 .pad-up {

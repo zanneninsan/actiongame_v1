@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.182
+### English
+- Stopped forcing or waiting for landscape orientation in mobile mode and added a mobile fullscreen toggle button.
+### Japanese
+- スマホ操作時に横画面を強制したり待機したりする処理をやめ、モバイル操作ボタンに全画面化と解除を切り替えるボタンを追加しました。
+
 ## v0.1.181
 ### English
 - Normalized leaderboard score payload rounding so Sky Shaft Climb clear scores pass the server-side score validation.
