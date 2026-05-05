@@ -1,6 +1,9 @@
 import { LOCALE_OPTIONS, t, type Locale } from "./i18n";
+import { canPromptPwaInstall, isPwaInstalled, promptPwaInstall } from "./pwaInstall";
+import { hasFullscreenElement, isLandscapeViewport, isLikelySmartphone } from "./mobileViewport";
 
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
+const PWA_INSTALL_DISMISSED_KEY = "actiongame_pwa_install_dismissed";
 
 export type ControlMode = "pc" | "mobile";
 export type StageOption = { id: string; label: Record<Locale, string> };
@@ -36,6 +39,9 @@ type StartModalOptions = {
   onGhostReplaySelect: (ghostId: string) => Promise<StartGhostLoadResult>;
   onSubmit: (settings: { playerName: string; controlMode: ControlMode; stageId: string; soundOn: boolean; locale: Locale }) => void;
 };
+
+type StartSettings = { playerName: string; controlMode: ControlMode; stageId: string; soundOn: boolean; locale: Locale };
+type OrientationPromptMode = "initial" | "startConfirm";
 
 export class StartModal {
   private readonly options: StartModalOptions;
@@ -104,6 +110,15 @@ export class StartModal {
             <button type="button" data-sound="off" class="sound-button">&#128263; ${t(this.options.locale, "start.soundOff")}</button>
           </div>
         </div>
+        <div class="start-install-panel" hidden>
+          <strong>${t(this.options.locale, "start.installTitle")}</strong>
+          <span>${t(this.options.locale, "start.installBody")}</span>
+          <div class="start-install-actions">
+            <button type="button" class="start-install-button">${t(this.options.locale, "start.installButton")}</button>
+            <button type="button" class="start-install-dismiss">${t(this.options.locale, "start.installLater")}</button>
+          </div>
+          <p class="start-install-note" hidden></p>
+        </div>
         <details class="start-advanced-panel">
           <summary>${t(this.options.locale, "start.advanced")}</summary>
           <div class="start-ghost-panel">
@@ -143,6 +158,10 @@ export class StartModal {
     const accountStatus = overlay.querySelector<HTMLSpanElement>(".start-account-status")!;
     const startButton = overlay.querySelector<HTMLButtonElement>(".start-button")!;
     const googleLoginButton = overlay.querySelector<HTMLButtonElement>(".start-google-login")!;
+    const installPanel = overlay.querySelector<HTMLDivElement>(".start-install-panel")!;
+    const installButton = overlay.querySelector<HTMLButtonElement>(".start-install-button")!;
+    const installDismissButton = overlay.querySelector<HTMLButtonElement>(".start-install-dismiss")!;
+    const installNote = overlay.querySelector<HTMLParagraphElement>(".start-install-note")!;
     const orientationPrompt = overlay.querySelector<HTMLDivElement>(".start-orientation-prompt")!;
     const orientationMessage = overlay.querySelector<HTMLParagraphElement>(".start-orientation-message")!;
     const orientationNote = overlay.querySelector<HTMLParagraphElement>(".start-orientation-note")!;
@@ -153,6 +172,8 @@ export class StartModal {
     let soundOn = this.options.soundOn;
     let selectedLocale = this.options.locale;
     let localGhostFileLoaded = false;
+    let orientationPromptMode: OrientationPromptMode = "initial";
+    let pendingStartSettings: StartSettings | undefined;
 
     input.addEventListener("keydown", (event) => event.stopPropagation());
     input.addEventListener("keyup", (event) => event.stopPropagation());
@@ -169,14 +190,62 @@ export class StartModal {
     ghostSelect.addEventListener("keydown", (event) => event.stopPropagation());
     ghostSelect.addEventListener("keyup", (event) => event.stopPropagation());
     ghostSelect.addEventListener("keypress", (event) => event.stopPropagation());
-    const showOrientationPrompt = (failed = false) => {
-      if (this.orientationPromptDismissed || this.orientationPromptSatisfied || !shouldSuggestMobileFullscreen()) {
+    const refreshInstallPanel = () => {
+      const shouldShow = isLikelySmartphone() && !isPwaInstalled() && getStorageValue(PWA_INSTALL_DISMISSED_KEY) !== "1";
+      installPanel.hidden = !shouldShow;
+      installNote.hidden = true;
+      installButton.textContent = canPromptPwaInstall()
+        ? t(this.options.locale, "start.installButton")
+        : t(this.options.locale, "start.installHowTo");
+    };
+
+    installButton.addEventListener("click", async () => {
+      installButton.disabled = true;
+      try {
+        if (canPromptPwaInstall()) {
+          const result = await promptPwaInstall();
+          installNote.textContent = result === "accepted" ? t(this.options.locale, "start.installAccepted") : t(this.options.locale, "start.installDismissed");
+          installNote.hidden = false;
+          if (result === "accepted") {
+            installPanel.hidden = true;
+          }
+        } else {
+          installNote.textContent = getManualInstallMessage(this.options.locale);
+          installNote.hidden = false;
+        }
+      } finally {
+        installButton.disabled = false;
+        installButton.textContent = canPromptPwaInstall()
+          ? t(this.options.locale, "start.installButton")
+          : t(this.options.locale, "start.installHowTo");
+      }
+    });
+    installDismissButton.addEventListener("click", () => {
+      setStorageValue(PWA_INSTALL_DISMISSED_KEY, "1");
+      installPanel.hidden = true;
+    });
+    window.addEventListener("actiongame:pwa-install-ready", refreshInstallPanel);
+    window.addEventListener("actiongame:pwa-installed", refreshInstallPanel);
+    const updateOrientationPromptText = (failed = false, mode: OrientationPromptMode = orientationPromptMode) => {
+      orientationPromptMode = mode;
+      orientationMessage.textContent =
+        mode === "startConfirm" ? t(this.options.locale, "start.orientationStartPrompt") : t(this.options.locale, "start.orientationPrompt");
+      orientationNote.hidden = !failed;
+      orientationNote.textContent = failed ? t(this.options.locale, "start.orientationFallback") : "";
+      orientationYes.hidden = false;
+      orientationNo.hidden = false;
+      orientationYes.textContent =
+        mode === "startConfirm" ? t(this.options.locale, "start.orientationTurnLandscape") : t(this.options.locale, "start.orientationYes");
+      orientationNo.textContent =
+        mode === "startConfirm" ? t(this.options.locale, "start.orientationContinuePortrait") : t(this.options.locale, "start.orientationNo");
+    };
+
+    const showOrientationPrompt = (failed = false, mode: OrientationPromptMode = "initial") => {
+      if ((mode === "initial" && this.orientationPromptDismissed) || this.orientationPromptSatisfied || !shouldSuggestMobileFullscreen()) {
         orientationPrompt.hidden = true;
         return;
       }
-      orientationMessage.textContent = t(this.options.locale, "start.orientationPrompt");
-      orientationNote.hidden = !failed;
-      orientationNote.textContent = failed ? t(this.options.locale, "start.orientationFallback") : "";
+      updateOrientationPromptText(failed, mode);
       orientationPrompt.hidden = false;
       orientationYes.focus();
     };
@@ -187,7 +256,7 @@ export class StartModal {
         orientationPrompt.hidden = true;
         return;
       }
-      showOrientationPrompt(!orientationNote.hidden);
+      showOrientationPrompt(!orientationNote.hidden, orientationPromptMode);
     };
 
     const refreshGhostFullscreenButton = () => {
@@ -206,17 +275,38 @@ export class StartModal {
         scheduleGameLayoutRefresh();
         this.orientationPromptSatisfied = succeeded || isLandscapeViewport();
         if (this.orientationPromptSatisfied) {
-          orientationPrompt.hidden = true;
+          orientationMessage.textContent = t(this.options.locale, "start.orientationSuccess");
+          orientationNote.hidden = true;
+          orientationYes.hidden = true;
+          orientationNo.hidden = true;
+          if (pendingStartSettings) {
+            const settings = pendingStartSettings;
+            pendingStartSettings = undefined;
+            window.setTimeout(() => this.options.onSubmit({ ...settings, controlMode: selectedMode }), 350);
+          } else {
+            window.setTimeout(() => {
+              orientationPrompt.hidden = true;
+            }, 850);
+          }
         } else {
-          showOrientationPrompt(true);
+          showOrientationPrompt(true, orientationPromptMode);
         }
       } finally {
         orientationYes.disabled = false;
         orientationNo.disabled = false;
-        orientationYes.textContent = t(this.options.locale, "start.orientationYes");
+        if (!this.orientationPromptSatisfied) {
+          updateOrientationPromptText(!orientationNote.hidden, orientationPromptMode);
+        }
       }
     });
     orientationNo.addEventListener("click", () => {
+      if (orientationPromptMode === "startConfirm" && pendingStartSettings) {
+        const settings = pendingStartSettings;
+        pendingStartSettings = undefined;
+        orientationPrompt.hidden = true;
+        this.options.onSubmit(settings);
+        return;
+      }
       this.orientationPromptDismissed = true;
       orientationPrompt.hidden = true;
       input.focus();
@@ -234,6 +324,8 @@ export class StartModal {
       document.removeEventListener("fullscreenchange", refreshGhostFullscreenButton);
       window.removeEventListener("resize", refreshGhostFullscreenButton);
       screen.orientation?.removeEventListener?.("change", refreshGhostFullscreenButton);
+      window.removeEventListener("actiongame:pwa-install-ready", refreshInstallPanel);
+      window.removeEventListener("actiongame:pwa-installed", refreshInstallPanel);
     };
     const loadGhostOptions = async () => {
       ghostSelect.innerHTML = `<option value="">${t(this.options.locale, "start.ghostRankingLoading")}</option>`;
@@ -404,18 +496,25 @@ export class StartModal {
 
     form.addEventListener("submit", (event) => {
       event.preventDefault();
-      this.options.onSubmit({
+      const settings = {
         playerName: input.value.trim() || "PLAYER",
         controlMode: selectedMode,
         stageId: selectedStageId,
         soundOn,
         locale: selectedLocale,
-      });
+      };
+      if (shouldSuggestMobileFullscreen() && !this.orientationPromptSatisfied) {
+        pendingStartSettings = settings;
+        showOrientationPrompt(false, "startConfirm");
+        return;
+      }
+      this.options.onSubmit(settings);
     });
 
     refreshMode();
     refreshSound();
     refreshAccount();
+    refreshInstallPanel();
     void loadGhostOptions();
     showOrientationPrompt();
     if (orientationPrompt.hidden) {
@@ -456,27 +555,37 @@ export class StartModal {
 }
 
 function shouldSuggestMobileFullscreen() {
-  if (!isProbablySmartphone()) {
+  if (!isLikelySmartphone()) {
     return false;
   }
-  return !isLandscapeViewport() || !document.fullscreenElement;
+  return !isLandscapeViewport() || !hasFullscreenElement();
 }
 
-function isProbablySmartphone() {
-  const userAgent = navigator.userAgent || "";
-  const uaLooksMobile = /Android|iPhone|iPod|Windows Phone|Mobile/i.test(userAgent);
-  const hasTouch = navigator.maxTouchPoints > 0 || matchMedia("(pointer: coarse)").matches;
-  const shortSide = Math.min(window.innerWidth, window.innerHeight);
-  const longSide = Math.max(window.innerWidth, window.innerHeight);
-  return uaLooksMobile || (hasTouch && shortSide <= 560 && longSide <= 980);
+function getManualInstallMessage(locale: Locale) {
+  if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    return t(locale, "start.installIos");
+  }
+  return t(locale, "start.installManual");
 }
 
-function isLandscapeViewport() {
-  return window.innerWidth > window.innerHeight;
+function getStorageValue(key: string) {
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function setStorageValue(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+  } catch {
+    // Ignore storage failures; the prompt can simply appear again next session.
+  }
 }
 
 async function requestFullscreenAndLandscape() {
-  let fullscreenSucceeded = Boolean(document.fullscreenElement);
+  let fullscreenSucceeded = hasFullscreenElement();
   try {
     if (!fullscreenSucceeded && document.documentElement.requestFullscreen) {
       await document.documentElement.requestFullscreen();

@@ -78,13 +78,16 @@ import {
 } from "./leaderboard";
 import { showLeaderboardPanel, type LeaderboardGhostSaveStatus } from "./leaderboardUi";
 import { showAccountPanel } from "./accountUi";
+import { initializePwaInstall } from "./pwaInstall";
+import { getScaledSeVolume, SE_VOLUME_REGISTRY_KEY } from "./audioSettings";
+import { hasFullscreenElement, isLikelySmartphone } from "./mobileViewport";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.263";
+const DEBUG_VERSION = "v0.1.268";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -278,6 +281,9 @@ class PrototypeScene extends Phaser.Scene {
   private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false, shift: false };
   private mobileJumpQueued = false;
   private mobileControlCleanup: Array<() => void> = [];
+  private mobileFullscreenRecoveryOverlay?: HTMLDivElement;
+  private mobileFullscreenWasActive = false;
+  private mobileFullscreenRecoveryDismissed = false;
   private rewards?: RewardSystem;
   private startTime = 0;
   private editorTimerPausedMs = 0;
@@ -298,7 +304,8 @@ class PrototypeScene extends Phaser.Scene {
   private controlMode: ControlMode = "pc";
   private currentStageId: StageId = DEFAULT_STAGE_ID;
   private locale: Locale = getBrowserLocale();
-  private soundVolumePercent = 50;
+  private bgmVolumePercent = 50;
+  private seVolumePercent = 50;
   private soundMuted = false;
   private danmakuEnabled = true;
   private danmakuMode: DanmakuMode = "classic";
@@ -312,6 +319,16 @@ class PrototypeScene extends Phaser.Scene {
   private readonly handleGameLayoutRefresh = () => {
     this.scale.refresh();
     this.applyHudScale();
+  };
+  private readonly handleFullscreenChange = () => {
+    const fullscreenActive = hasFullscreenElement();
+    if (fullscreenActive) {
+      this.mobileFullscreenWasActive = true;
+      this.mobileFullscreenRecoveryDismissed = false;
+      this.removeMobileFullscreenRecovery();
+    }
+    this.scheduleGameLayoutRefresh();
+    this.refreshMobileFullscreenRecovery();
   };
   private storyDialogue?: StoryDialogueController;
   private storyDialogueQueue: QueuedStoryDialogue[] = [];
@@ -422,11 +439,19 @@ class PrototypeScene extends Phaser.Scene {
     this.locale = this.getSavedLocale();
     this.currentStageId = this.getSavedStageId();
     this.editorStage = cloneStage(STAGES[this.currentStageId]);
-    this.soundVolumePercent = this.getSavedVolumePercent();
+    const savedVolumeSettings = this.getSavedVolumeSettings();
+    this.bgmVolumePercent = savedVolumeSettings.bgm;
+    this.seVolumePercent = savedVolumeSettings.se;
     this.soundMuted = this.getCookieValue("actiongame_muted") === "1";
     this.danmakuEnabled = this.getCookieValue("actiongame_danmaku_disabled") !== "1";
     this.danmakuMode = this.getSavedDanmakuMode();
     this.applySoundSettings();
+    document.removeEventListener("fullscreenchange", this.handleFullscreenChange);
+    document.addEventListener("fullscreenchange", this.handleFullscreenChange);
+    document.removeEventListener("webkitfullscreenchange", this.handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", this.handleFullscreenChange);
+    document.removeEventListener("MSFullscreenChange", this.handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", this.handleFullscreenChange);
     this.resetRunState();
     this.isRestarting = false;
     this.stageConstants = resolveStageConstants(this.editorStage);
@@ -639,7 +664,8 @@ class PrototypeScene extends Phaser.Scene {
     this.createStageEditor();
     this.createGlobalUI();
 
-    this.bgm = this.sound.add("game-bgm", { loop: true, volume: 1.0 });
+    this.bgm = this.sound.add("game-bgm", { loop: true, volume: this.bgmVolumePercent / 100 });
+    this.applySoundSettings();
 
     if (this.setupComplete) {
       this.startRun();
@@ -767,7 +793,7 @@ class PrototypeScene extends Phaser.Scene {
       startedJump = true;
       this.resetPlayerIdleState();
       this.player.anims.play("player-jump-start", true);
-      this.sound.play("player-jump-sfx", { volume: 0.42 });
+      this.sound.play("player-jump-sfx", { volume: getScaledSeVolume(this, 0.42) });
     }
 
     const isMovingHorizontally = Math.abs(this.player.body.velocity.x) > 8;
@@ -1092,6 +1118,8 @@ class PrototypeScene extends Phaser.Scene {
     this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
     this.updateControlHintText();
     if (this.controlMode === "mobile") {
+      this.mobileFullscreenWasActive = hasFullscreenElement();
+      this.mobileFullscreenRecoveryDismissed = false;
       this.createMobileControls();
     }
     this.startCountdown();
@@ -1143,7 +1171,7 @@ class PrototypeScene extends Phaser.Scene {
       stageId: this.currentStageId,
       stageOptions: this.getStageOptions(),
       locale: this.locale,
-      soundOn: !this.soundMuted && this.soundVolumePercent > 0,
+      soundOn: !this.soundMuted && (this.bgmVolumePercent > 0 || this.seVolumePercent > 0),
       accountStatus: this.getStartAccountStatus(),
       onLocaleChange: (locale) => this.setLocale(locale),
       onSoundOnChange: (soundOn) => this.setSoundEnabled(soundOn),
@@ -1314,7 +1342,9 @@ class PrototypeScene extends Phaser.Scene {
       playerName: this.playerName,
       locale: this.locale,
       stageId: this.currentStageId,
-      soundVolumePercent: this.soundVolumePercent,
+      soundVolumePercent: Math.round((this.bgmVolumePercent + this.seVolumePercent) / 2),
+      bgmVolumePercent: this.bgmVolumePercent,
+      seVolumePercent: this.seVolumePercent,
       soundMuted: this.soundMuted,
       danmakuEnabled: this.danmakuEnabled,
       danmakuMode: this.danmakuMode,
@@ -1335,9 +1365,16 @@ class PrototypeScene extends Phaser.Scene {
         this.currentStageId = this.resolveStageId(settings.stageId);
         this.setCookieValue(STAGE_ID_STORAGE_KEY, this.currentStageId);
       }
-      if (typeof settings.soundVolumePercent === "number") {
-        this.soundVolumePercent = Phaser.Math.Clamp(Math.round(settings.soundVolumePercent), 0, 100);
-      }
+      const legacyVolumePercent =
+        typeof settings.soundVolumePercent === "number" ? Phaser.Math.Clamp(Math.round(settings.soundVolumePercent), 0, 100) : undefined;
+      this.bgmVolumePercent =
+        typeof settings.bgmVolumePercent === "number"
+          ? Phaser.Math.Clamp(Math.round(settings.bgmVolumePercent), 0, 100)
+          : legacyVolumePercent ?? this.bgmVolumePercent;
+      this.seVolumePercent =
+        typeof settings.seVolumePercent === "number"
+          ? Phaser.Math.Clamp(Math.round(settings.seVolumePercent), 0, 100)
+          : legacyVolumePercent ?? this.seVolumePercent;
       if (typeof settings.soundMuted === "boolean") {
         this.soundMuted = settings.soundMuted;
       }
@@ -1477,10 +1514,18 @@ class PrototypeScene extends Phaser.Scene {
     this.playerNameText.setText(`${t(this.locale, "hud.player")}:${this.playerName}${playerIdLabel}`);
   }
 
-  private getSavedVolumePercent() {
-    const savedVolume = Number(this.getCookieValue("actiongame_volume"));
+  private getSavedVolumeSettings() {
+    const legacyVolume = this.getSavedVolumePercent("actiongame_volume", 50);
+    return {
+      bgm: this.getSavedVolumePercent("actiongame_bgm_volume", legacyVolume),
+      se: this.getSavedVolumePercent("actiongame_se_volume", legacyVolume),
+    };
+  }
+
+  private getSavedVolumePercent(cookieName: string, fallback: number) {
+    const savedVolume = Number(this.getCookieValue(cookieName));
     if (!Number.isFinite(savedVolume)) {
-      return 50;
+      return fallback;
     }
     return Phaser.Math.Clamp(Math.round(savedVolume), 0, 100);
   }
@@ -1489,29 +1534,41 @@ class PrototypeScene extends Phaser.Scene {
     return this.getCookieValue("actiongame_danmaku_mode") === "liveChat" ? "liveChat" : "classic";
   }
 
-  private saveVolumeSettings(volume: number, isMuted: boolean) {
-    this.setCookieValue("actiongame_volume", String(Phaser.Math.Clamp(Math.round(volume), 0, 100)));
+  private saveVolumeSettings(bgmVolume: number, seVolume: number, isMuted: boolean) {
+    const normalizedBgmVolume = Phaser.Math.Clamp(Math.round(bgmVolume), 0, 100);
+    const normalizedSeVolume = Phaser.Math.Clamp(Math.round(seVolume), 0, 100);
+    this.setCookieValue("actiongame_bgm_volume", String(normalizedBgmVolume));
+    this.setCookieValue("actiongame_se_volume", String(normalizedSeVolume));
+    this.setCookieValue("actiongame_volume", String(Math.round((normalizedBgmVolume + normalizedSeVolume) / 2)));
     this.setCookieValue("actiongame_muted", isMuted ? "1" : "0");
   }
 
   private applySoundSettings() {
-    this.sound.volume = this.soundVolumePercent / 100;
+    this.sound.volume = 1;
     this.sound.mute = this.soundMuted;
-    this.saveVolumeSettings(this.soundVolumePercent, this.soundMuted);
+    this.registry.set(SE_VOLUME_REGISTRY_KEY, this.seVolumePercent);
+    this.setBgmVolume();
+    this.saveVolumeSettings(this.bgmVolumePercent, this.seVolumePercent, this.soundMuted);
     this.refreshGlobalSoundUI();
     this.scheduleLeaderboardUserSettingsSave();
   }
 
   private setSoundEnabled(soundOn: boolean) {
-    if (soundOn && this.soundVolumePercent === 0) {
-      this.soundVolumePercent = 50;
+    if (soundOn && this.bgmVolumePercent === 0 && this.seVolumePercent === 0) {
+      this.bgmVolumePercent = 50;
+      this.seVolumePercent = 50;
     }
     this.soundMuted = !soundOn;
     this.applySoundSettings();
   }
 
   private refreshGlobalSoundUI() {
-    setGlobalSoundUI(this.soundVolumePercent, this.soundMuted);
+    setGlobalSoundUI(this.bgmVolumePercent, this.seVolumePercent, this.soundMuted);
+  }
+
+  private setBgmVolume() {
+    const bgm = this.bgm as (Phaser.Sound.WebAudioSound | Phaser.Sound.HTML5AudioSound | Phaser.Sound.NoAudioSound) | undefined;
+    bgm?.setVolume(this.bgmVolumePercent / 100);
   }
 
   private setDanmakuEnabled(enabled: boolean) {
@@ -1770,26 +1827,33 @@ class PrototypeScene extends Phaser.Scene {
         void this.toggleMobileFullscreen();
       },
     });
+    this.refreshMobileFullscreenRecovery();
   }
 
   private removeMobileControls() {
     this.mobileControlCleanup.forEach((cleanup) => cleanup());
     this.mobileControlCleanup = [];
     document.getElementById("mobile-controls")?.remove();
+    this.removeMobileFullscreenRecovery();
   }
 
   private async toggleMobileFullscreen() {
-    const fullscreenDocument = document as FullscreenDocument;
-    const fullscreenElement =
-      document.fullscreenElement ?? fullscreenDocument.webkitFullscreenElement ?? fullscreenDocument.msFullscreenElement;
-    const exitFullscreen =
-      fullscreenDocument.exitFullscreen ?? fullscreenDocument.webkitExitFullscreen ?? fullscreenDocument.msExitFullscreen;
-
-    if (fullscreenElement) {
-      await Promise.resolve(exitFullscreen?.call(document)).catch(() => undefined);
+    if (hasFullscreenElement()) {
+      await this.exitMobileFullscreen();
       return;
     }
 
+    await this.enterMobileFullscreen();
+  }
+
+  private async exitMobileFullscreen() {
+    const fullscreenDocument = document as FullscreenDocument;
+    const exitFullscreen =
+      fullscreenDocument.exitFullscreen ?? fullscreenDocument.webkitExitFullscreen ?? fullscreenDocument.msExitFullscreen;
+    await Promise.resolve(exitFullscreen?.call(document)).catch(() => undefined);
+  }
+
+  private async enterMobileFullscreen() {
     const target = document.documentElement as FullscreenTarget;
     const requestFullscreen =
       target.requestFullscreen ?? target.webkitRequestFullscreen ?? target.msRequestFullscreen;
@@ -1797,7 +1861,59 @@ class PrototypeScene extends Phaser.Scene {
     await Promise.resolve(screen.orientation?.lock?.("landscape")).catch((error) =>
       console.warn("Landscape orientation lock failed.", error),
     );
+    if (hasFullscreenElement()) {
+      this.mobileFullscreenWasActive = true;
+      this.mobileFullscreenRecoveryDismissed = false;
+      this.removeMobileFullscreenRecovery();
+    }
     this.scheduleGameLayoutRefresh();
+  }
+
+  private refreshMobileFullscreenRecovery() {
+    if (
+      this.controlMode !== "mobile" ||
+      !this.setupComplete ||
+      this.startModal ||
+      !isLikelySmartphone() ||
+      hasFullscreenElement() ||
+      !this.mobileFullscreenWasActive ||
+      this.mobileFullscreenRecoveryDismissed
+    ) {
+      this.removeMobileFullscreenRecovery();
+      return;
+    }
+
+    if (this.mobileFullscreenRecoveryOverlay) {
+      return;
+    }
+
+    const overlay = document.createElement("div");
+    overlay.className = "mobile-fullscreen-recovery";
+    overlay.innerHTML = `
+      <strong>${t(this.locale, "mobile.fullscreenRestoreTitle")}</strong>
+      <span>${t(this.locale, "mobile.fullscreenRestoreBody")}</span>
+      <div class="mobile-fullscreen-recovery-actions">
+        <button type="button" data-action="restore">${t(this.locale, "mobile.fullscreenRestoreButton")}</button>
+        <button type="button" data-action="dismiss">${t(this.locale, "mobile.fullscreenRestoreLater")}</button>
+      </div>
+    `;
+    const restoreButton = overlay.querySelector<HTMLButtonElement>("[data-action='restore']")!;
+    const dismissButton = overlay.querySelector<HTMLButtonElement>("[data-action='dismiss']")!;
+    restoreButton.addEventListener("click", () => {
+      void this.enterMobileFullscreen();
+    });
+    dismissButton.addEventListener("click", () => {
+      this.mobileFullscreenRecoveryDismissed = true;
+      this.removeMobileFullscreenRecovery();
+    });
+    overlay.addEventListener("pointerdown", (event) => event.stopPropagation());
+    document.body.appendChild(overlay);
+    this.mobileFullscreenRecoveryOverlay = overlay;
+  }
+
+  private removeMobileFullscreenRecovery() {
+    this.mobileFullscreenRecoveryOverlay?.remove();
+    this.mobileFullscreenRecoveryOverlay = undefined;
   }
 
   private scheduleGameLayoutRefresh() {
@@ -1852,7 +1968,8 @@ class PrototypeScene extends Phaser.Scene {
     createGlobalUIElements({
       version: DEBUG_VERSION,
       locale: this.locale,
-      soundVolumePercent: this.soundVolumePercent,
+      bgmVolumePercent: this.bgmVolumePercent,
+      seVolumePercent: this.seVolumePercent,
       soundMuted: this.soundMuted,
       danmakuEnabled: this.danmakuEnabled,
       danmakuMode: this.danmakuMode,
@@ -1866,8 +1983,9 @@ class PrototypeScene extends Phaser.Scene {
       onMidgroundBackgroundToggle: (button) => this.backgrounds?.cycleMidgroundBackground(button),
       updateRearBackgroundToggle: (button) => this.backgrounds?.updateRearDebugToggle(button),
       updateMidgroundBackgroundToggle: (button) => this.backgrounds?.updateMidgroundDebugToggle(button),
-      onSoundChange: (volumePercent, muted) => {
-        this.soundVolumePercent = volumePercent;
+      onSoundChange: (bgmVolumePercent, seVolumePercent, muted) => {
+        this.bgmVolumePercent = bgmVolumePercent;
+        this.seVolumePercent = seVolumePercent;
         this.soundMuted = muted;
         this.applySoundSettings();
       },
@@ -3009,6 +3127,9 @@ document.addEventListener("contextmenu", (event) => {
   event.preventDefault();
 });
 
+initializePwaInstall();
+registerServiceWorker();
+
 new Phaser.Game({
   type: Phaser.AUTO,
   parent: "game",
@@ -3029,3 +3150,15 @@ new Phaser.Game({
   },
   scene: PrototypeScene,
 });
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register(`${ASSET_BASE}sw.js`).catch((error) => {
+      console.warn("Service worker registration failed.", error);
+    });
+  });
+}

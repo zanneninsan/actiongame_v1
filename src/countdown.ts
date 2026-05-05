@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { getScaledSeVolume } from "./audioSettings";
 import { t, type Locale } from "./i18n";
 
 type StartCountdownOverlayOptions = {
@@ -130,7 +131,7 @@ export class StartCountdownOverlay {
     if (!this.scene.cache.audio.exists(key)) {
       return;
     }
-    this.scene.sound.play(key, { volume });
+    this.scene.sound.play(key, { volume: getScaledSeVolume(this.scene, volume) });
   }
 
   private createCountdownText(

@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { getScaledSeVolume } from "./audioSettings";
 import {
   ITEM_DEFINITIONS,
   ITEM_GLOW_COLORS,
@@ -124,7 +125,7 @@ const collectItem = (
   const itemType = item.getData("itemType") as ItemType;
   const definition = ITEM_DEFINITIONS[itemType];
   onCollect(itemType, definition.points, item.x, item.y);
-  scene.sound.play("item-pickup", { volume: 0.65 });
+  scene.sound.play("item-pickup", { volume: getScaledSeVolume(scene, 0.65) });
   const glow = item.getData("glow") as Phaser.GameObjects.Image | undefined;
   if (glow) {
     scene.tweens.killTweensOf(glow);

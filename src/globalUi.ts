@@ -7,7 +7,8 @@ const getPlayerSpecUrl = (locale: Locale) =>
 type GlobalUiOptions = {
   version: string;
   locale: Locale;
-  soundVolumePercent: number;
+  bgmVolumePercent: number;
+  seVolumePercent: number;
   soundMuted: boolean;
   danmakuEnabled: boolean;
   danmakuMode: DanmakuMode;
@@ -17,7 +18,7 @@ type GlobalUiOptions = {
   onMidgroundBackgroundToggle: (button: HTMLButtonElement) => void;
   updateRearBackgroundToggle: (button: HTMLButtonElement) => void;
   updateMidgroundBackgroundToggle: (button: HTMLButtonElement) => void;
-  onSoundChange: (volumePercent: number, muted: boolean) => void;
+  onSoundChange: (bgmVolumePercent: number, seVolumePercent: number, muted: boolean) => void;
   onDanmakuChange: (enabled: boolean) => void;
   onDanmakuModeChange: (mode: DanmakuMode) => void;
   onLocaleChange: (locale: Locale) => void;
@@ -67,8 +68,12 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
     <div class="options-dialog">
       <h2>${t(options.locale, "options.title")}</h2>
       <label>
-        <span>${t(options.locale, "options.volume")}</span>
-        <input id="volume-slider" type="range" min="0" max="100" />
+        <span>${t(options.locale, "options.bgmVolume")}</span>
+        <input id="bgm-volume-slider" type="range" min="0" max="100" />
+      </label>
+      <label>
+        <span>${t(options.locale, "options.seVolume")}</span>
+        <input id="se-volume-slider" type="range" min="0" max="100" />
       </label>
       <label>
         <span>${t(options.locale, "options.language")}</span>
@@ -105,7 +110,8 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const titleToggle = document.getElementById("title-toggle") as HTMLButtonElement;
   const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
   const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
-  const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement;
+  const bgmVolumeSlider = document.getElementById("bgm-volume-slider") as HTMLInputElement;
+  const seVolumeSlider = document.getElementById("se-volume-slider") as HTMLInputElement;
   const languageSelect = document.getElementById("language-select") as HTMLSelectElement;
   const danmakuToggle = document.getElementById("danmaku-toggle") as HTMLInputElement;
   const danmakuModeSelect = document.getElementById("danmaku-mode-select") as HTMLSelectElement;
@@ -115,15 +121,17 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   };
   const closeGlobalMenu = () => setGlobalMenuOpen(false);
 
-  let currentVolumePercent = options.soundVolumePercent;
+  let currentBgmVolumePercent = options.bgmVolumePercent;
+  let currentSeVolumePercent = options.seVolumePercent;
   let currentMuted = options.soundMuted;
-  const changeSound = (volumePercent: number, muted: boolean) => {
-    currentVolumePercent = volumePercent;
+  const changeSound = (bgmVolumePercent: number, seVolumePercent: number, muted: boolean) => {
+    currentBgmVolumePercent = bgmVolumePercent;
+    currentSeVolumePercent = seVolumePercent;
     currentMuted = muted;
-    options.onSoundChange(volumePercent, muted);
+    options.onSoundChange(bgmVolumePercent, seVolumePercent, muted);
   };
 
-  setGlobalSoundUI(currentVolumePercent, currentMuted);
+  setGlobalSoundUI(currentBgmVolumePercent, currentSeVolumePercent, currentMuted);
   collisionDebugToggle.classList.toggle("is-active", options.collisionDebugEnabled);
   options.updateRearBackgroundToggle(rearDebugToggle);
   options.updateMidgroundBackgroundToggle(midgroundDebugToggle);
@@ -159,11 +167,12 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   });
 
   bgmToggle.addEventListener("click", () => {
-    const currentVolume = parseInt(volumeSlider.value, 10);
-    if (currentVolume === 0) {
-      changeSound(50, false);
+    const currentBgmVolume = parseInt(bgmVolumeSlider.value, 10);
+    const currentSeVolume = parseInt(seVolumeSlider.value, 10);
+    if (currentBgmVolume === 0 && currentSeVolume === 0) {
+      changeSound(50, 50, false);
     } else {
-      changeSound(currentVolume, !currentMuted);
+      changeSound(currentBgmVolume, currentSeVolume, !currentMuted);
     }
     closeGlobalMenu();
   });
@@ -179,10 +188,16 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
     document.body.classList.remove("is-options-modal-open");
   });
 
-  volumeSlider.addEventListener("input", (event) => {
+  bgmVolumeSlider.addEventListener("input", (event) => {
     event.stopPropagation();
-    const volumePercent = parseInt(volumeSlider.value, 10);
-    changeSound(volumePercent, volumePercent <= 0);
+    const bgmVolumePercent = parseInt(bgmVolumeSlider.value, 10);
+    changeSound(bgmVolumePercent, currentSeVolumePercent, bgmVolumePercent <= 0 && currentSeVolumePercent <= 0);
+  });
+
+  seVolumeSlider.addEventListener("input", (event) => {
+    event.stopPropagation();
+    const seVolumePercent = parseInt(seVolumeSlider.value, 10);
+    changeSound(currentBgmVolumePercent, seVolumePercent, currentBgmVolumePercent <= 0 && seVolumePercent <= 0);
   });
 
   languageSelect.addEventListener("change", (event) => {
@@ -235,13 +250,17 @@ export const setPlayerPositionDebugUI = (enabled: boolean, x: number, y: number)
   }
 };
 
-export const setGlobalSoundUI = (volumePercent: number, muted: boolean) => {
+export const setGlobalSoundUI = (bgmVolumePercent: number, seVolumePercent: number, muted: boolean) => {
   const bgmToggle = document.getElementById("bgm-toggle") as HTMLButtonElement | null;
-  const volumeSlider = document.getElementById("volume-slider") as HTMLInputElement | null;
-  if (volumeSlider) {
-    volumeSlider.value = String(volumePercent);
+  const bgmVolumeSlider = document.getElementById("bgm-volume-slider") as HTMLInputElement | null;
+  const seVolumeSlider = document.getElementById("se-volume-slider") as HTMLInputElement | null;
+  if (bgmVolumeSlider) {
+    bgmVolumeSlider.value = String(bgmVolumePercent);
+  }
+  if (seVolumeSlider) {
+    seVolumeSlider.value = String(seVolumePercent);
   }
   if (bgmToggle) {
-    bgmToggle.innerHTML = muted || volumePercent === 0 ? "&#128263;" : "&#128266;";
+    bgmToggle.innerHTML = muted || (bgmVolumePercent === 0 && seVolumePercent === 0) ? "&#128263;" : "&#128266;";
   }
 };

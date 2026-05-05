@@ -72,6 +72,10 @@ export function showAccountPanel(options: AccountPanelOptions) {
     modal.remove();
     document.body.classList.remove("is-account-modal-open");
   };
+  const setStatus = (message: string, isError = false) => {
+    status.textContent = message;
+    status.classList.toggle("is-error", isError);
+  };
 
   const renderIdentity = (identity: LeaderboardIdentity | undefined) => {
     playerId.textContent = identity?.playerId ? `#${identity.playerId.slice(0, 8)}` : "-";
@@ -83,31 +87,31 @@ export function showAccountPanel(options: AccountPanelOptions) {
   };
 
   const refresh = async (message?: string) => {
-    status.textContent = message ?? t(locale, "account.loading");
+    setStatus(message ?? t(locale, "account.loading"));
     try {
       const [identity, entries] = await Promise.all([options.getIdentity(), options.fetchEntries()]);
       renderIdentity(identity);
       renderScores(scoreList, entries, locale);
-      status.textContent = t(locale, "account.ready");
+      setStatus(t(locale, "account.ready"));
     } catch (error) {
       console.warn("Account panel refresh failed.", error);
-      status.textContent = t(locale, "account.unavailable");
+      setStatus(t(locale, "account.unavailable"), true);
     }
   };
 
   linkButton.addEventListener("click", () => {
     linkButton.disabled = true;
     loginButton.disabled = true;
-    status.textContent = t(locale, "account.linking");
+    setStatus(t(locale, "account.linking"));
     options
       .onGoogleSignIn()
       .then((identity) => {
         renderIdentity(identity);
-        status.textContent = t(locale, "account.linkedMessage");
+        setStatus(t(locale, "account.linkedMessage"));
       })
       .catch((error) => {
         console.warn("Google account link failed.", error);
-        status.textContent = t(locale, "account.linkFailed");
+        setStatus(t(locale, "account.linkFailed"), true);
       })
       .finally(() => {
         linkButton.disabled = false;
@@ -118,18 +122,18 @@ export function showAccountPanel(options: AccountPanelOptions) {
   loginButton.addEventListener("click", () => {
     linkButton.disabled = true;
     loginButton.disabled = true;
-    status.textContent = t(locale, "account.loggingIn");
+    setStatus(t(locale, "account.loggingIn"));
     options
       .onGoogleLogin()
       .then((identity) => {
         renderIdentity(identity);
-        status.textContent = t(locale, "account.loggedInMessage");
+        setStatus(t(locale, "account.loggedInMessage"));
         return options.fetchEntries();
       })
       .then((entries) => renderScores(scoreList, entries, locale))
       .catch((error) => {
         console.warn("Google account login failed.", error);
-        status.textContent = t(locale, "account.loginFailed");
+        setStatus(t(locale, "account.loginFailed"), true);
       })
       .finally(() => {
         linkButton.disabled = false;
@@ -139,16 +143,16 @@ export function showAccountPanel(options: AccountPanelOptions) {
 
   unlinkButton.addEventListener("click", () => {
     unlinkButton.disabled = true;
-    status.textContent = t(locale, "account.unlinking");
+    setStatus(t(locale, "account.unlinking"));
     options
       .onGoogleUnlink()
       .then((identity) => {
         renderIdentity(identity);
-        status.textContent = t(locale, "account.unlinkedMessage");
+        setStatus(t(locale, "account.unlinkedMessage"));
       })
       .catch((error) => {
         console.warn("Google account unlink failed.", error);
-        status.textContent = t(locale, "account.unlinkFailed");
+        setStatus(t(locale, "account.unlinkFailed"), true);
       })
       .finally(() => {
         unlinkButton.disabled = false;

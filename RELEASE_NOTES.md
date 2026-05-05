@@ -2,6 +2,44 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.268
+### English
+- Added a short touch-control tutorial stage that introduces movement, jumping, dash, a checkpoint, and a simple stationary enemy.
+- Refined smartphone detection to use mobile user agents, coarse touch pointers, and viewport shape consistently across start-screen guidance and PWA prompts.
+- Added a mobile fullscreen recovery prompt when fullscreen is dropped after touch play has entered fullscreen once.
+### Japanese
+- タッチ操作向けの短いチュートリアルステージを追加し、移動、ジャンプ、ダッシュ、チェックポイント、静止敵を軽く試せるようにしました。
+- スマートフォン判定を見直し、ユーザーエージェント、タッチポインタ、画面サイズの条件を開始画面の案内とPWA導線で共通化しました。
+- モバイルプレイ中にフルスクリーンが解除された場合、フルスクリーンへ戻す案内を表示するようにしました。
+
+## v0.1.267
+### English
+- Split option-screen audio controls into separate BGM and SE volume sliders while keeping the top sound button as a global mute toggle.
+- Migrated existing single-volume settings into both BGM and SE volumes and included the new values in Google-linked setting sync.
+### Japanese
+- オプション画面の音量設定をBGM音量とSE音量に分け、上部のサウンドボタンは全体ミュートとして使えるようにしました。
+- 既存の単一音量設定はBGM/SEの両方へ引き継ぎ、Google連携時の設定同期にも新しい音量値を含めるようにしました。
+
+## v0.1.266
+### English
+- Added a smartphone home-screen install path with PWA metadata, a service worker, and start-screen guidance.
+- Highlighted the mobile control buttons the first time mobile mode starts so new players can spot the touch layout quickly.
+### Japanese
+- スマートフォン向けにホーム画面追加の導線を追加し、PWA用のメタ情報とサービスワーカー、開始画面での案内を整えました。
+- モバイルモード初回開始時だけ操作ボタンをハイライトし、タッチ操作の配置をすぐ把握しやすくしました。
+
+## v0.1.265
+### English
+- Made leaderboard and Google account failure messages clearer about whether play can continue, highlighted account/ranking errors, and improved mobile safe-area spacing for controls and the top menu.
+### Japanese
+- ランキングやGoogle連携の失敗時にプレイ継続可否が分かる文言へ調整し、エラー表示を目立たせ、スマホ操作ボタンと上部メニューのsafe-area対応を強化しました。
+
+## v0.1.264
+### English
+- Improved the smartphone startup flow with a success message after landscape fullscreen setup and a portrait-start confirmation that can either retry landscape fullscreen or start anyway.
+### Japanese
+- スマートフォン向け初回導線を改善し、横画面・フルスクリーン切り替え成功時の表示と、縦画面開始時に「横向きにする」か「このまま開始」を選べる確認を追加しました。
+
 ## v0.1.263
 ### English
 - Aligned the top-left stamina gauge fill with its outer frame at 100 stamina.
