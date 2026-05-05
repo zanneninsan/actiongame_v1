@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.199
+### English
+- Paused the remaining-time countdown while the stage editor is enabled, including clear-time score and time bonus calculations.
+### Japanese
+- ステージ編集が有効な間は残り時間のカウントダウンを止め、クリア時のスコアとタイムボーナス計算にも反映するようにしました。
+
 ## v0.1.198
 ### English
 - Restored the leaderboard `NEW` marker after a best score update by matching the current score row by player, score, and rank when the submission id is not yet visible in the fetched entry.

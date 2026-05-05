@@ -69,7 +69,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.198";
+const DEBUG_VERSION = "v0.1.199";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -166,6 +166,8 @@ class PrototypeScene extends Phaser.Scene {
   private mobileControlCleanup: Array<() => void> = [];
   private rewards?: RewardSystem;
   private startTime = 0;
+  private editorTimerPausedMs = 0;
+  private editorTimerPauseStartedAt = 0;
   private isRunActive = false;
   private isRestarting = false;
   private setupComplete = false;
@@ -655,6 +657,8 @@ class PrototypeScene extends Phaser.Scene {
     this.mobileJumpQueued = false;
     this.rewards?.reset();
     this.startTime = 0;
+    this.editorTimerPausedMs = 0;
+    this.editorTimerPauseStartedAt = 0;
     this.isRunActive = false;
     this.hasWon = false;
     this.hasScoreMilestoneDanmakuPlayed = false;
@@ -750,6 +754,8 @@ class PrototypeScene extends Phaser.Scene {
     this.physics.pause();
     this.isRunActive = false;
     this.startTime = 0;
+    this.editorTimerPausedMs = 0;
+    this.editorTimerPauseStartedAt = 0;
     this.updateTimerText();
 
     this.countdownOverlay = new StartCountdownOverlay({
@@ -767,6 +773,8 @@ class PrototypeScene extends Phaser.Scene {
     this.countdownOverlay?.clear();
     this.countdownOverlay = undefined;
     this.startTime = this.time.now;
+    this.editorTimerPausedMs = 0;
+    this.editorTimerPauseStartedAt = this.stageEditor?.isEnabled ? this.time.now : 0;
     this.isRunActive = true;
     this.resetPlayerIdleState(this.time.now);
     this.physics.resume();
@@ -1194,9 +1202,11 @@ class PrototypeScene extends Phaser.Scene {
       getStageConstants: () => this.stageConstants,
       rebuildStageObjects: () => this.rebuildEditableStageObjects(),
       moveGoalTo: (x, y) => this.moveGoalTo(x, y),
-      onToggle: () => {
+      onToggle: (enabled) => {
+        this.updateEditorTimerPause(enabled);
         this.rebuildEditableStageObjects();
         this.updateControlHintText();
+        this.updateTimerText();
       },
     });
     this.stageEditor.show();
@@ -1392,6 +1402,25 @@ class PrototypeScene extends Phaser.Scene {
     this.timerText.setText(`${t(this.locale, "hud.time")}:${this.formatTimeSeconds(this.getRemainingMilliseconds())}`);
   }
 
+  private updateEditorTimerPause(enabled = this.stageEditor?.isEnabled ?? false) {
+    if (!this.isRunActive) {
+      this.editorTimerPauseStartedAt = 0;
+      return;
+    }
+
+    if (enabled) {
+      this.editorTimerPauseStartedAt ||= this.time.now;
+      return;
+    }
+
+    if (this.editorTimerPauseStartedAt === 0) {
+      return;
+    }
+
+    this.editorTimerPausedMs += Math.max(0, this.time.now - this.editorTimerPauseStartedAt);
+    this.editorTimerPauseStartedAt = 0;
+  }
+
   private updateControlHintText() {
     if (!this.controlHintText) {
       return;
@@ -1479,7 +1508,9 @@ class PrototypeScene extends Phaser.Scene {
       return GAME_TIME_MS;
     }
 
-    const elapsed = Math.max(0, this.time.now - this.startTime);
+    const activeEditorPauseMs =
+      this.editorTimerPauseStartedAt === 0 ? 0 : Math.max(0, this.time.now - this.editorTimerPauseStartedAt);
+    const elapsed = Math.max(0, this.time.now - this.startTime - this.editorTimerPausedMs - activeEditorPauseMs);
     return Math.max(0, GAME_TIME_MS - elapsed);
   }
 
