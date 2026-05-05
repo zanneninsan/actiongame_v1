@@ -11,6 +11,7 @@
 - For gameplay changes, search exact symbols in the focused module first; use `src/main.ts` for player movement, run state, collisions, score/timer integration, and scene wiring.
 - Keep `src/main.ts` focused on core game behavior and thin integration hooks.
 - For HUD and rich in-game UI visuals, do not rely on CSS decoration as the primary look. Generate polished raster UI assets with GPT Image2, place them under `public/assets`, and keep DOM/CSS usage limited to positioning, text overlays, and interaction hooks.
+- For raster asset processing, follow `docs/ASSET_PROCESSING.md`: final runtime outputs should be WebP, reversible/lossless intermediates should be preserved under `assets_source`, and transparency cleanup should bias toward preserving subject pixels rather than cutting too aggressively.
 - For debug/global UI behavior, start with `src/globalUi.ts`; use `src/backgrounds.ts` for background switching.
 - For mobile control behavior, start with `src/mobileControls.ts`.
 - For stage editor behavior changes, start with `src/stageEditor.ts`; use `src/stageEditorPanel.ts` for editor panel DOM/UI only.

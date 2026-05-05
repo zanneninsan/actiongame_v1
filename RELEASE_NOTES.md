@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.184
+### English
+- Rebuilt the Rabbit Traveler walk sprite from the pre-transparency source sheet with conservative background removal, and switched the runtime asset to WebP.
+- Added documented asset processing rules for WebP runtime outputs, reversible intermediates, and safe-side transparency cleanup.
+### Japanese
+- ラビットトラベラーの歩行スプライトを透過前の元シートから作り直し、透過しすぎない控えめな背景除去に変更したうえで、実行時アセットをWebPに切り替えました。
+- 素材加工では最終成果物をWebPにすること、途中経過を可逆な状態で残すこと、透過処理は安全側に倒すことをドキュメントに追記しました。
+
 ## v0.1.183
 ### English
 - Added Heart Cannon turret enemies with generated raster art, aimed heart shots, and new placements in Neo Shibuya City and Skybridge Sprint.

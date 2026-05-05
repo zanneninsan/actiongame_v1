@@ -295,7 +295,7 @@ export const ENEMY_DEFINITIONS: Record<
     aiType: "chase",
     animation: {
       key: "enemy-rabbit-traveler-walk",
-      assetPath: "assets/enemies/rabbit_traveler_walk.png",
+      assetPath: "assets/enemies/rabbit_traveler_walk.webp",
       frameWidth: 160,
       frameHeight: 190,
       frameCount: 5,

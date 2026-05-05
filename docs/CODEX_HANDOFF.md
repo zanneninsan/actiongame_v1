@@ -61,6 +61,10 @@ This file is the short context packet for future Codex sessions. Read this first
   - DOM UI styling: start modal, mobile controls, editor, debug UI.
 - `public/assets`
   - Sprites, backgrounds, platforms, items, stage objects, sound assets.
+- `assets_source`
+  - Reversible, lossless source and intermediate raster assets. Runtime assets should not depend on files here.
+- `docs/ASSET_PROCESSING.md`
+  - Asset processing rules: final runtime rasters should be WebP, reversible intermediates should be preserved, and transparency cleanup should bias toward preserving subject pixels.
 - `RELEASE_NOTES.md`
   - Version notes. Update when making user-visible changes.
 
@@ -159,6 +163,9 @@ Asset keys are centralized in `src/assets.ts`.
 
 - If adding new stage object images, add the asset definition there.
 - Put runtime assets under `public/assets`.
+- Runtime raster outputs should be WebP where supported.
+- Keep reversible source/intermediate files under `assets_source`.
+- When removing backgrounds, use conservative transparency settings; preserve subject pixels, outlines, hair, glows, and pale clothing rather than cutting too much away.
 - Keep heavy unused source files out of tracked/public runtime assets when possible.
 
 ## Quota-Saving Prompt For New Sessions
