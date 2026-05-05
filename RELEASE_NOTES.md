@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.263
+### English
+- Aligned the top-left stamina gauge fill with its outer frame at 100 stamina.
+### Japanese
+- 左上のスタミナゲージが100の時、外枠とゲージ本体のサイズが揃うようにしました。
+
 ## v0.1.262
 ### English
 - Temporarily hid clear rank and mission summary lines from the result display while keeping the calculations available for later restoration.

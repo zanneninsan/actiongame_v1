@@ -84,7 +84,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.262";
+const DEBUG_VERSION = "v0.1.263";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -169,11 +169,12 @@ const HUD_PLAYER_NAME_Y = 28;
 const HUD_SCORE_Y = 56;
 const HUD_TIMER_X = 230;
 const HUD_STAMINA_Y = 80;
+const HUD_STAMINA_BAR_X = 150;
 const HUD_STAMINA_BAR_Y = 89;
 const HUD_STAMINA_BAR_WIDTH = 132;
 const HUD_STAMINA_BAR_HEIGHT = 9;
-const HUD_STAMINA_FILL_WIDTH = 128;
-const HUD_STAMINA_FILL_HEIGHT = 5;
+const HUD_STAMINA_FILL_WIDTH = HUD_STAMINA_BAR_WIDTH;
+const HUD_STAMINA_FILL_HEIGHT = HUD_STAMINA_BAR_HEIGHT;
 const OVERHEAD_STAMINA_BAR_WIDTH = 76;
 const OVERHEAD_STAMINA_BAR_HEIGHT = 8;
 const OVERHEAD_STAMINA_FILL_WIDTH = 70;
@@ -255,6 +256,7 @@ class PrototypeScene extends Phaser.Scene {
   private staminaText!: Phaser.GameObjects.Text;
   private staminaBarBack!: Phaser.GameObjects.Rectangle;
   private staminaBarFill!: Phaser.GameObjects.Rectangle;
+  private staminaBarFrame!: Phaser.GameObjects.Rectangle;
   private overheadStaminaBarBack!: Phaser.GameObjects.Rectangle;
   private overheadStaminaBarFill!: Phaser.GameObjects.Rectangle;
   private controlHintText!: Phaser.GameObjects.Text;
@@ -580,16 +582,21 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(100)
       .setShadow(1, 1, "#020617", 2, true, true);
     this.staminaBarBack = this.add
-      .rectangle(150, HUD_STAMINA_BAR_Y, 132, 9, 0x0f172a, 0.78)
+      .rectangle(HUD_STAMINA_BAR_X, HUD_STAMINA_BAR_Y, HUD_STAMINA_BAR_WIDTH, HUD_STAMINA_BAR_HEIGHT, 0x0f172a, 0.78)
       .setOrigin(0, 0.5)
       .setScrollFactor(0)
       .setDepth(99);
-    this.staminaBarBack.setStrokeStyle(1, 0x86efac, 0.8);
     this.staminaBarFill = this.add
-      .rectangle(152, HUD_STAMINA_BAR_Y, 128, 5, 0x86efac, 0.95)
+      .rectangle(HUD_STAMINA_BAR_X, HUD_STAMINA_BAR_Y, HUD_STAMINA_FILL_WIDTH, HUD_STAMINA_FILL_HEIGHT, 0x86efac, 0.95)
       .setOrigin(0, 0.5)
       .setScrollFactor(0)
       .setDepth(100);
+    this.staminaBarFrame = this.add
+      .rectangle(HUD_STAMINA_BAR_X, HUD_STAMINA_BAR_Y, HUD_STAMINA_BAR_WIDTH, HUD_STAMINA_BAR_HEIGHT, 0x0f172a, 0)
+      .setOrigin(0, 0.5)
+      .setScrollFactor(0)
+      .setDepth(101);
+    this.staminaBarFrame.setStrokeStyle(1, 0x86efac, 0.8);
     this.overheadStaminaBarBack = this.add
       .rectangle(this.player.x, this.player.y, OVERHEAD_STAMINA_BAR_WIDTH, OVERHEAD_STAMINA_BAR_HEIGHT, 0x020617, 0.78)
       .setOrigin(0.5, 0.5)
@@ -1437,16 +1444,22 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     if (this.staminaBarBack) {
-      this.staminaBarBack.setPosition(150 * scale, HUD_STAMINA_BAR_Y * scale);
+      this.staminaBarBack.setPosition(HUD_STAMINA_BAR_X * scale, HUD_STAMINA_BAR_Y * scale);
       this.staminaBarBack.width = HUD_STAMINA_BAR_WIDTH * scale;
       this.staminaBarBack.height = HUD_STAMINA_BAR_HEIGHT * scale;
-      this.staminaBarBack.setStrokeStyle(Math.max(1, Math.round(scale)), 0x86efac, 0.8);
     }
 
     if (this.staminaBarFill) {
-      this.staminaBarFill.setPosition(152 * scale, HUD_STAMINA_BAR_Y * scale);
+      this.staminaBarFill.setPosition(HUD_STAMINA_BAR_X * scale, HUD_STAMINA_BAR_Y * scale);
       this.staminaBarFill.height = HUD_STAMINA_FILL_HEIGHT * scale;
       this.updateStaminaHud();
+    }
+
+    if (this.staminaBarFrame) {
+      this.staminaBarFrame.setPosition(HUD_STAMINA_BAR_X * scale, HUD_STAMINA_BAR_Y * scale);
+      this.staminaBarFrame.width = HUD_STAMINA_BAR_WIDTH * scale;
+      this.staminaBarFrame.height = HUD_STAMINA_BAR_HEIGHT * scale;
+      this.staminaBarFrame.setStrokeStyle(Math.max(1, Math.round(scale)), 0x86efac, 0.8);
     }
 
     if (this.controlHintText) {
