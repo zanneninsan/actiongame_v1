@@ -18,6 +18,8 @@ This file is the short context packet for future Codex sessions. Read this first
 - Version is displayed in-game through `DEBUG_VERSION` in `src/main.ts`.
 - Build command: `npm run build`.
 - Dev server command: `npm run dev`.
+  - When starting a dev server from a Codex worktree, avoid the default port if another worktree may already be using it. Pick a separate port such as `5176` and run `npm run dev -- --host 127.0.0.1 --port 5176`.
+  - Before reusing a port, check which worktree owns it; do not stop another worktree's server unless the user asks.
 - GitHub Pages deployment runs from GitHub Actions.
 - The worktree may contain user or external changes. Always check `git status --short --branch` before editing.
 
@@ -97,6 +99,7 @@ This file is the short context packet for future Codex sessions. Read this first
 - Before committing, check:
   - `git status --short`
   - `git diff --stat`
+- When merging a work branch back into `main`, expect README and version/release-note files to conflict. Resolve them deliberately by preserving the newest user-facing version entry, keeping both relevant README changes when possible, and re-running `npm run build` before the merge commit is considered done.
 - If pushing, bump `DEBUG_VERSION` and add release notes.
 - Also bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` for large or user-visible updates, even when not pushing yet.
 - When updating `RELEASE_NOTES.md`, write the `### Japanese` section in natural Japanese text. Do not use romanized Japanese such as "wo", "ni", or "shimashita".

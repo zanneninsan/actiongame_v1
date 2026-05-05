@@ -2,6 +2,24 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.210
+### English
+- Renamed the Player Spec display label to Game Spec across the game UI and spec page titles.
+### Japanese
+- ゲーム内UIと仕様ページの表示名を「プレイヤー仕様」から「ゲーム仕様」に変更しました。
+
+## v0.1.209
+### English
+- Localized the in-game Game Spec link and SPEC button, and passed the current game language to the Game Spec page.
+### Japanese
+- ゲーム内のGame SpecリンクとSPECボタンを多言語対応し、現在のゲーム言語をGame Specページへ渡すようにしました。
+
+## v0.1.208
+### English
+- Localized the Game Spec page with Japanese/English language switching and fixed the broken Japanese text on the page.
+### Japanese
+- Game Specページを日本語と英語で切り替えられるようにし、ページ内の文字化けしていた日本語を修正しました。
+
 ## v0.1.207
 ### English
 - Preserve edited stage layouts across R-key and miss restarts even when the stage editor panel is currently closed.

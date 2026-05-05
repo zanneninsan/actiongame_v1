@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Player Spec - SUPER ZANNENIN SISTERS</title>
+    <title>Game Spec - SUPER ZANNENIN SISTERS</title>
     <style>
       :root {
         color-scheme: dark;
@@ -68,6 +68,31 @@
         margin: 18px 0 0;
         color: var(--muted);
         font-size: 16px;
+      }
+
+      .language-switch {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 18px 0 0;
+      }
+
+      .language-switch button {
+        min-height: 34px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #1b2230;
+        color: var(--text);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .language-switch button[aria-pressed="true"] {
+        border-color: var(--gold);
+        color: var(--gold);
       }
 
       nav {
@@ -219,193 +244,472 @@
   <body>
     <div class="page-shell">
       <header>
-        <p class="kicker">Core Player Reference</p>
-        <h1>SUPER ZANNENIN SISTERS Player Spec</h1>
-        <p class="lead">
-          スコア、踏みつけコンボ、パワーアップ、クリア評価を詰めたいプレイヤー向けの仕様説明書です。
-          ゲーム内ヘルプではなく、プレイ外で読み返せるリファレンスとして整理しています。
-        </p>
+        <p class="kicker" data-i18n="kicker"></p>
+        <h1 data-i18n="title"></h1>
+        <p class="lead" data-i18n="lead"></p>
+        <div class="language-switch" aria-label="Language">
+          <button type="button" data-lang="ja">日本語</button>
+          <button type="button" data-lang="en">English</button>
+        </div>
         <nav aria-label="Page sections">
-          <a href="#score">Score</a>
-          <a href="#stomp-combo">Stomp Combo</a>
-          <a href="#powerups">Power-Ups</a>
-          <a href="#clear-rank">Clear Rank</a>
-          <a href="#missions">Mission Summary</a>
-          <a class="back-link" href="../">Back to Game</a>
+          <a href="#score" data-i18n="navScore"></a>
+          <a href="#stomp-combo" data-i18n="navCombo"></a>
+          <a href="#powerups" data-i18n="navPowerups"></a>
+          <a href="#clear-rank" data-i18n="navRank"></a>
+          <a href="#missions" data-i18n="navMissions"></a>
+          <a class="back-link" href="../" data-i18n="navBack"></a>
         </nav>
       </header>
 
       <main>
         <section id="status">
-          <h2>Status</h2>
-          <p class="spec-note">Last updated from code state: <code>v0.1.207</code></p>
+          <h2 data-i18n="statusTitle"></h2>
+          <p class="spec-note"><span data-i18n="updatedLabel"></span> <code data-spec-version></code></p>
           <div class="callout">
-            <p><strong>踏みつけ撃破:</strong> 完全クローズ。</p>
-            <p><strong>連続踏みボーナス:</strong> 現仕様を下のセクションに記載。</p>
+            <p><strong data-i18n="calloutStompTitle"></strong> <span data-i18n="calloutStompBody"></span></p>
+            <p><strong data-i18n="calloutComboTitle"></strong> <span data-i18n="calloutComboBody"></span></p>
           </div>
         </section>
 
         <section id="score">
-          <h2>Score Sources</h2>
-          <h3>Items</h3>
+          <h2 data-i18n="scoreTitle"></h2>
+          <h3 data-i18n="itemsTitle"></h3>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th class="num">Points</th>
-                  <th>Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Energy drink</td><td class="num">100</td><td>Score item.</td></tr>
-                <tr><td>Shopping bag</td><td class="num">250</td><td>Score item.</td></tr>
-                <tr><td>Bubble tea</td><td class="num">150</td><td>Score item.</td></tr>
-                <tr><td>Coin</td><td class="num">25</td><td>Also increments the coin count shown in the mission summary.</td></tr>
-                <tr><td>Speed power-up</td><td class="num">0</td><td>Grants a temporary speed multiplier.</td></tr>
-                <tr><td>Jump power-up</td><td class="num">0</td><td>Grants a temporary jump multiplier.</td></tr>
-                <tr><td>Star</td><td class="num">0</td><td>Grants temporary star invulnerability.</td></tr>
-                <tr><td>Dash ring</td><td class="num">0</td><td>Grants a short forward dash boost.</td></tr>
-              </tbody>
+              <thead data-table-head="items"></thead>
+              <tbody data-table-body="items"></tbody>
             </table>
           </div>
 
-          <h3>Enemy Stomp Score</h3>
-          <p>Enemy stomp score is added as bonus score. If an enemy does not define a custom stomp score, its base stomp score is 10.</p>
+          <h3 data-i18n="enemyTitle"></h3>
+          <p data-i18n="enemyBody"></p>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Enemy</th>
-                  <th class="num">Base Stomp Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Knife Punk</td><td class="num">10</td></tr>
-                <tr><td>Aqua Mascot</td><td class="num">10</td></tr>
-                <tr><td>Horned Cyborg</td><td class="num">20</td></tr>
-                <tr><td>Cone Golem</td><td class="num">15</td></tr>
-                <tr><td>Rabbit Traveler</td><td class="num">20</td></tr>
-                <tr><td>Neon Idol</td><td class="num">30</td></tr>
-                <tr><td>Heart Cannon</td><td class="num">25</td></tr>
-              </tbody>
+              <thead data-table-head="enemies"></thead>
+              <tbody data-table-body="enemies"></tbody>
             </table>
           </div>
         </section>
 
         <section id="stomp-combo">
-          <h2>Stomp Combo</h2>
-          <p>The stomp combo increases the score multiplier when enemies are stomped in quick succession.</p>
-          <h3>Combo Condition</h3>
-          <ul class="rule-list">
-            <li>A stomp starts or continues the combo when the next enemy stomp happens within <strong>1400 ms</strong> of the previous enemy stomp.</li>
-            <li>If more than 1400 ms passes between enemy stomps, the next stomp starts over at combo 1.</li>
-            <li>Landing on the floor resets the current combo count to 0.</li>
-            <li>Stomping an enemy bounces the player upward, so another stomp can continue the combo before landing.</li>
-            <li>When multiple enemies overlap the player in the same frame, a valid stomp target is prioritized over damage.</li>
-          </ul>
-          <h3>Score Formula</h3>
-          <pre><code>stomp points = enemy base stomp score * current stomp combo count</code></pre>
+          <h2 data-i18n="comboTitle"></h2>
+          <p data-i18n="comboLead"></p>
+          <h3 data-i18n="comboConditionTitle"></h3>
+          <ul class="rule-list" data-list="comboRules"></ul>
+          <h3 data-i18n="scoreFormulaTitle"></h3>
+          <pre><code data-i18n="scoreFormula"></code></pre>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Sequence</th>
-                  <th class="num">Enemy Base Score</th>
-                  <th class="num">Combo Count</th>
-                  <th class="num">Awarded Points</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>First stomp</td><td class="num">10</td><td class="num">1</td><td class="num">10</td></tr>
-                <tr><td>Second quick stomp</td><td class="num">10</td><td class="num">2</td><td class="num">20</td></tr>
-                <tr><td>Third quick stomp</td><td class="num">20</td><td class="num">3</td><td class="num">60</td></tr>
-                <tr><td>Stomp after landing</td><td class="num">10</td><td class="num">1</td><td class="num">10</td></tr>
-              </tbody>
+              <thead data-table-head="comboExamples"></thead>
+              <tbody data-table-body="comboExamples"></tbody>
             </table>
           </div>
-          <h3>On-Screen Popup</h3>
-          <ul class="rule-list">
-            <li>Combo 1 shows only the gained score, such as <code>+10</code>.</li>
-            <li>Combo 2 or higher shows the gained score and combo count, such as <code>+20 x2</code>.</li>
-          </ul>
+          <h3 data-i18n="popupTitle"></h3>
+          <ul class="rule-list" data-list="popupRules"></ul>
         </section>
 
         <section id="powerups">
-          <h2>Power-Ups</h2>
+          <h2 data-i18n="powerupsTitle"></h2>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Power-Up</th>
-                  <th class="num">Duration</th>
-                  <th>Effect</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>Speed</td><td class="num">9000 ms</td><td>Multiplies player speed by 1.28.</td></tr>
-                <tr><td>Jump</td><td class="num">9000 ms</td><td>Multiplies jump velocity by 1.18.</td></tr>
-                <tr><td>Star</td><td class="num">9000 ms</td><td>Sets the star invulnerability timer.</td></tr>
-                <tr><td>Dash ring</td><td class="num">900 ms</td><td>Sets horizontal velocity to 720 in the facing direction and applies the speed multiplier during the boost.</td></tr>
-              </tbody>
+              <thead data-table-head="powerups"></thead>
+              <tbody data-table-body="powerups"></tbody>
             </table>
           </div>
         </section>
 
         <section id="clear-rank">
-          <h2>Clear Rank</h2>
-          <p>Clear rank is calculated from three bonuses.</p>
+          <h2 data-i18n="rankTitle"></h2>
+          <p data-i18n="rankLead"></p>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Bonus</th>
-                  <th>Condition</th>
-                  <th class="num">Rank Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>No damage</td><td>Damage taken is 0.</td><td class="num">1</td></tr>
-                <tr><td>Fast clear</td><td>Remaining time is at least 55% of total stage time.</td><td class="num">1</td></tr>
-                <tr><td>Score bonus</td><td>Final score is at least 4200.</td><td class="num">1</td></tr>
-                <tr><td>Partial score bonus</td><td>Final score is at least 2600 and below 4200.</td><td class="num">0.5</td></tr>
-              </tbody>
+              <thead data-table-head="rankBonuses"></thead>
+              <tbody data-table-body="rankBonuses"></tbody>
             </table>
           </div>
 
-          <h3>Rank Thresholds</h3>
+          <h3 data-i18n="rankThresholdTitle"></h3>
           <div class="table-wrap">
             <table>
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th class="num">Required Rank Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr><td>S</td><td class="num">2.5 or higher</td></tr>
-                <tr><td>A</td><td class="num">1.5 or higher</td></tr>
-                <tr><td>B</td><td class="num">0.5 or higher</td></tr>
-                <tr><td>C</td><td class="num">Below 0.5</td></tr>
-              </tbody>
+              <thead data-table-head="rankThresholds"></thead>
+              <tbody data-table-body="rankThresholds"></tbody>
             </table>
           </div>
         </section>
 
         <section id="missions">
-          <h2>Mission Summary</h2>
-          <p>The clear mission summary currently reports:</p>
-          <ul class="rule-list">
-            <li>Damage state: <code>NO DMG OK</code> or <code>DMG n</code></li>
-            <li>Collected coin count: <code>COIN n</code></li>
-            <li>Fast clear state: <code>FAST OK</code> or <code>FAST --</code></li>
-          </ul>
+          <h2 data-i18n="missionsTitle"></h2>
+          <p data-i18n="missionsLead"></p>
+          <ul class="rule-list" data-list="missions"></ul>
         </section>
       </main>
 
       <footer>
-        <p>This page is part of the SUPER ZANNENIN SISTERS site and is intended as a precise gameplay reference, not an in-game tutorial.</p>
+        <p data-i18n="footer"></p>
       </footer>
     </div>
+
+    <script>
+      const SPEC_VERSION = "v0.1.210";
+      const STORAGE_KEY = "actiongame_locale";
+
+      const specText = {
+        ja: {
+          metaTitle: "ゲーム仕様 - SUPER ZANNENIN SISTERS",
+          kicker: "Core Player Reference",
+          title: "SUPER ZANNENIN SISTERS ゲーム仕様",
+          lead:
+            "スコア、踏みつけコンボ、パワーアップ、クリア評価を確認するためのプレイヤー向け仕様メモです。ゲーム内チュートリアルではなく、プレイ外で読み返すリファレンスです。",
+          navScore: "スコア",
+          navCombo: "踏みつけコンボ",
+          navPowerups: "パワーアップ",
+          navRank: "クリアランク",
+          navMissions: "ミッションまとめ",
+          navBack: "ゲームに戻る",
+          statusTitle: "ステータス",
+          updatedLabel: "コード状態からの最終更新:",
+          calloutStompTitle: "踏みつけ撃破:",
+          calloutStompBody: "敵を踏みつけて倒すと、ボーナススコアが加算されます。",
+          calloutComboTitle: "連続踏みつけボーナス:",
+          calloutComboBody: "短い間隔で踏み続けるほど、獲得点が増えます。",
+          scoreTitle: "スコア源",
+          itemsTitle: "アイテム",
+          enemyTitle: "敵の踏みつけスコア",
+          enemyBody: "敵を踏みつけたときのスコアはボーナスとして加算されます。個別設定がない敵の基本踏みつけスコアは10点です。",
+          comboTitle: "踏みつけコンボ",
+          comboLead: "短い間隔で敵を踏み続けると、踏みつけスコアの倍率が上がります。",
+          comboConditionTitle: "コンボ条件",
+          scoreFormulaTitle: "スコア計算式",
+          scoreFormula: "踏みつけ点 = 敵の基本踏みつけスコア * 現在の踏みつけコンボ数",
+          popupTitle: "画面上のポップアップ",
+          powerupsTitle: "パワーアップ",
+          rankTitle: "クリアランク",
+          rankLead: "クリアランクは3種類のボーナスから計算されます。",
+          rankThresholdTitle: "ランクしきい値",
+          missionsTitle: "ミッションまとめ",
+          missionsLead: "クリア時のミッションまとめには、現在次の内容が表示されます。",
+          footer:
+            "このページはSUPER ZANNENIN SISTERSサイトの一部です。ゲーム内チュートリアルではなく、正確なプレイ仕様の参照用ページです。",
+          comboRules: [
+            "前回の敵踏みつけから1400ミリ秒以内に次の敵を踏むと、コンボが開始または継続します。",
+            "敵踏みつけの間隔が1400ミリ秒を超えると、次の踏みつけはコンボ1から始まります。",
+            "床に着地すると、現在のコンボ数は0に戻ります。",
+            "敵を踏むとプレイヤーが上に跳ねるため、着地前に次の踏みつけへつなげられます。",
+            "同じフレームで複数の敵がプレイヤーに重なった場合、有効な踏みつけ対象がダメージより優先されます。",
+          ],
+          popupRules: [
+            "コンボ1では、+10 のように獲得スコアだけが表示されます。",
+            "コンボ2以上では、+20 x2 のように獲得スコアとコンボ数が表示されます。",
+          ],
+          missions: [
+            ["ダメージ状態", "NO DMG OK または DMG n"],
+            ["集めたコイン数", "COIN n"],
+            ["高速クリア状態", "FAST OK または FAST --"],
+          ],
+          tables: {
+            items: {
+              heads: ["アイテム", "点数", "メモ"],
+              numeric: [1],
+              rows: [
+                ["エナジードリンク", "100", "スコアアイテムです。"],
+                ["ショッピングバッグ", "250", "スコアアイテムです。"],
+                ["タピオカティー", "150", "スコアアイテムです。"],
+                ["コイン", "25", "ミッションまとめのコイン数も増えます。"],
+                ["スピード", "0", "一時的に移動速度倍率を付与します。"],
+                ["ジャンプ", "0", "一時的にジャンプ倍率を付与します。"],
+                ["スター", "0", "一時的なスター無敵を付与します。"],
+                ["ダッシュリング", "0", "短時間の前方ダッシュを付与します。"],
+              ],
+            },
+            enemies: {
+              heads: ["敵", "基本踏みつけスコア"],
+              numeric: [1],
+              rows: [
+                ["Knife Punk", "10"],
+                ["Aqua Mascot", "10"],
+                ["Horned Cyborg", "20"],
+                ["Cone Golem", "15"],
+                ["Rabbit Traveler", "20"],
+                ["Neon Idol", "30"],
+                ["Heart Cannon", "25"],
+              ],
+            },
+            comboExamples: {
+              heads: ["流れ", "敵の基本点", "コンボ数", "獲得点"],
+              numeric: [1, 2, 3],
+              rows: [
+                ["1体目を踏む", "10", "1", "10"],
+                ["すばやく2体目を踏む", "10", "2", "20"],
+                ["すばやく3体目を踏む", "20", "3", "60"],
+                ["着地後に踏む", "10", "1", "10"],
+              ],
+            },
+            powerups: {
+              heads: ["パワーアップ", "効果時間", "効果"],
+              numeric: [1],
+              rows: [
+                ["スピード", "9000 ms", "プレイヤー速度を1.28倍にします。"],
+                ["ジャンプ", "9000 ms", "ジャンプ速度を1.18倍にします。"],
+                ["スター", "9000 ms", "スター無敵タイマーを設定します。"],
+                ["ダッシュリング", "900 ms", "向いている方向へ横速度720を設定し、ブースト中はスピード倍率も適用します。"],
+              ],
+            },
+            rankBonuses: {
+              heads: ["ボーナス", "条件", "ランク点"],
+              numeric: [2],
+              rows: [
+                ["ノーダメージ", "受けたダメージが0。", "1"],
+                ["高速クリア", "残り時間がステージ総時間の55%以上。", "1"],
+                ["スコアボーナス", "最終スコアが4200以上。", "1"],
+                ["部分スコアボーナス", "最終スコアが2600以上4200未満。", "0.5"],
+              ],
+            },
+            rankThresholds: {
+              heads: ["ランク", "必要ランク点"],
+              numeric: [1],
+              rows: [
+                ["S", "2.5以上"],
+                ["A", "1.5以上"],
+                ["B", "0.5以上"],
+                ["C", "0.5未満"],
+              ],
+            },
+          },
+        },
+        en: {
+          metaTitle: "Game Spec - SUPER ZANNENIN SISTERS",
+          kicker: "Core Player Reference",
+          title: "SUPER ZANNENIN SISTERS Game Spec",
+          lead:
+            "A player-facing reference for score sources, stomp combos, power-ups, and clear ranks. This is a readable spec outside the game, not an in-game tutorial.",
+          navScore: "Score",
+          navCombo: "Stomp Combo",
+          navPowerups: "Power-Ups",
+          navRank: "Clear Rank",
+          navMissions: "Mission Summary",
+          navBack: "Back to Game",
+          statusTitle: "Status",
+          updatedLabel: "Last updated from code state:",
+          calloutStompTitle: "Enemy stomps:",
+          calloutStompBody: "Stomping enemies adds bonus score.",
+          calloutComboTitle: "Quick stomp bonus:",
+          calloutComboBody: "Chaining stomps in quick succession increases the awarded points.",
+          scoreTitle: "Score Sources",
+          itemsTitle: "Items",
+          enemyTitle: "Enemy Stomp Score",
+          enemyBody: "Enemy stomp score is added as bonus score. If an enemy does not define a custom stomp score, its base stomp score is 10.",
+          comboTitle: "Stomp Combo",
+          comboLead: "The stomp combo increases the score multiplier when enemies are stomped in quick succession.",
+          comboConditionTitle: "Combo Condition",
+          scoreFormulaTitle: "Score Formula",
+          scoreFormula: "stomp points = enemy base stomp score * current stomp combo count",
+          popupTitle: "On-Screen Popup",
+          powerupsTitle: "Power-Ups",
+          rankTitle: "Clear Rank",
+          rankLead: "Clear rank is calculated from three bonuses.",
+          rankThresholdTitle: "Rank Thresholds",
+          missionsTitle: "Mission Summary",
+          missionsLead: "The clear mission summary currently reports:",
+          footer:
+            "This page is part of the SUPER ZANNENIN SISTERS site and is intended as a precise gameplay reference, not an in-game tutorial.",
+          comboRules: [
+            "A stomp starts or continues the combo when the next enemy stomp happens within 1400 ms of the previous enemy stomp.",
+            "If more than 1400 ms passes between enemy stomps, the next stomp starts over at combo 1.",
+            "Landing on the floor resets the current combo count to 0.",
+            "Stomping an enemy bounces the player upward, so another stomp can continue the combo before landing.",
+            "When multiple enemies overlap the player in the same frame, a valid stomp target is prioritized over damage.",
+          ],
+          popupRules: [
+            "Combo 1 shows only the gained score, such as +10.",
+            "Combo 2 or higher shows the gained score and combo count, such as +20 x2.",
+          ],
+          missions: [
+            ["Damage state", "NO DMG OK or DMG n"],
+            ["Collected coin count", "COIN n"],
+            ["Fast clear state", "FAST OK or FAST --"],
+          ],
+          tables: {
+            items: {
+              heads: ["Item", "Points", "Notes"],
+              numeric: [1],
+              rows: [
+                ["Energy drink", "100", "Score item."],
+                ["Shopping bag", "250", "Score item."],
+                ["Bubble tea", "150", "Score item."],
+                ["Coin", "25", "Also increments the coin count shown in the mission summary."],
+                ["Speed power-up", "0", "Grants a temporary speed multiplier."],
+                ["Jump power-up", "0", "Grants a temporary jump multiplier."],
+                ["Star", "0", "Grants temporary star invulnerability."],
+                ["Dash ring", "0", "Grants a short forward dash boost."],
+              ],
+            },
+            enemies: {
+              heads: ["Enemy", "Base Stomp Score"],
+              numeric: [1],
+              rows: [
+                ["Knife Punk", "10"],
+                ["Aqua Mascot", "10"],
+                ["Horned Cyborg", "20"],
+                ["Cone Golem", "15"],
+                ["Rabbit Traveler", "20"],
+                ["Neon Idol", "30"],
+                ["Heart Cannon", "25"],
+              ],
+            },
+            comboExamples: {
+              heads: ["Sequence", "Enemy Base Score", "Combo Count", "Awarded Points"],
+              numeric: [1, 2, 3],
+              rows: [
+                ["First stomp", "10", "1", "10"],
+                ["Second quick stomp", "10", "2", "20"],
+                ["Third quick stomp", "20", "3", "60"],
+                ["Stomp after landing", "10", "1", "10"],
+              ],
+            },
+            powerups: {
+              heads: ["Power-Up", "Duration", "Effect"],
+              numeric: [1],
+              rows: [
+                ["Speed", "9000 ms", "Multiplies player speed by 1.28."],
+                ["Jump", "9000 ms", "Multiplies jump velocity by 1.18."],
+                ["Star", "9000 ms", "Sets the star invulnerability timer."],
+                ["Dash ring", "900 ms", "Sets horizontal velocity to 720 in the facing direction and applies the speed multiplier during the boost."],
+              ],
+            },
+            rankBonuses: {
+              heads: ["Bonus", "Condition", "Rank Score"],
+              numeric: [2],
+              rows: [
+                ["No damage", "Damage taken is 0.", "1"],
+                ["Fast clear", "Remaining time is at least 55% of total stage time.", "1"],
+                ["Score bonus", "Final score is at least 4200.", "1"],
+                ["Partial score bonus", "Final score is at least 2600 and below 4200.", "0.5"],
+              ],
+            },
+            rankThresholds: {
+              heads: ["Rank", "Required Rank Score"],
+              numeric: [1],
+              rows: [
+                ["S", "2.5 or higher"],
+                ["A", "1.5 or higher"],
+                ["B", "0.5 or higher"],
+                ["C", "Below 0.5"],
+              ],
+            },
+          },
+        },
+      };
+
+      function clearChildren(element) {
+        while (element.firstChild) {
+          element.removeChild(element.firstChild);
+        }
+      }
+
+      function renderList(name, rows) {
+        const list = document.querySelector(`[data-list="${name}"]`);
+        if (!list) return;
+        clearChildren(list);
+        rows.forEach((row) => {
+          const li = document.createElement("li");
+          if (Array.isArray(row)) {
+            li.append(`${row[0]}: `);
+            const code = document.createElement("code");
+            code.textContent = row[1];
+            li.append(code);
+          } else {
+            li.textContent = row;
+          }
+          list.append(li);
+        });
+      }
+
+      function renderTable(name, table) {
+        const head = document.querySelector(`[data-table-head="${name}"]`);
+        const body = document.querySelector(`[data-table-body="${name}"]`);
+        if (!head || !body) return;
+        clearChildren(head);
+        clearChildren(body);
+
+        const headerRow = document.createElement("tr");
+        table.heads.forEach((label, index) => {
+          const th = document.createElement("th");
+          th.textContent = label;
+          if (table.numeric.includes(index)) th.className = "num";
+          headerRow.append(th);
+        });
+        head.append(headerRow);
+
+        table.rows.forEach((row) => {
+          const tr = document.createElement("tr");
+          row.forEach((value, index) => {
+            const td = document.createElement("td");
+            td.textContent = value;
+            if (table.numeric.includes(index)) td.className = "num";
+            tr.append(td);
+          });
+          body.append(tr);
+        });
+      }
+
+      function normalizeLocale(value) {
+        return value && value.toLowerCase().startsWith("en") ? "en" : "ja";
+      }
+
+      function getInitialLocale() {
+        const params = new URLSearchParams(window.location.search);
+        const queryLocale = params.get("lang");
+        if (queryLocale === "ja" || queryLocale === "en") return queryLocale;
+
+        try {
+          const storedLocale = window.localStorage.getItem(STORAGE_KEY);
+          if (storedLocale === "ja" || storedLocale === "en") return storedLocale;
+        } catch {
+          // Local storage can be blocked in some embedded browsers.
+        }
+
+        return normalizeLocale(window.navigator.language);
+      }
+
+      function setLanguage(locale) {
+        const text = specText[locale] ?? specText.ja;
+        document.documentElement.lang = locale;
+        document.title = text.metaTitle;
+
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          const key = element.getAttribute("data-i18n");
+          element.textContent = text[key] ?? "";
+        });
+        document.querySelectorAll("[data-spec-version]").forEach((element) => {
+          element.textContent = SPEC_VERSION;
+        });
+        Object.entries(text.tables).forEach(([name, table]) => renderTable(name, table));
+        renderList("comboRules", text.comboRules);
+        renderList("popupRules", text.popupRules);
+        renderList("missions", text.missions);
+
+        document.querySelectorAll("[data-lang]").forEach((button) => {
+          const isActive = button.getAttribute("data-lang") === locale;
+          button.setAttribute("aria-pressed", String(isActive));
+        });
+
+        try {
+          window.localStorage.setItem(STORAGE_KEY, locale);
+        } catch {
+          // Local storage can be blocked in some embedded browsers.
+        }
+      }
+
+      document.querySelectorAll("[data-lang]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const locale = button.getAttribute("data-lang");
+          if (locale === "ja" || locale === "en") {
+            setLanguage(locale);
+          }
+        });
+      });
+
+      setLanguage(getInitialLocale());
+    </script>
   </body>
 </html>

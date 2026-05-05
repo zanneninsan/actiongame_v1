@@ -1,6 +1,7 @@
 import { isLocale, LOCALE_OPTIONS, t, type Locale } from "./i18n";
 
-const PLAYER_SPEC_URL = `${import.meta.env.BASE_URL}player-spec/index.html`;
+const getPlayerSpecUrl = (locale: Locale) =>
+  `${import.meta.env.BASE_URL}player-spec/index.html?lang=${encodeURIComponent(locale)}`;
 
 type GlobalUiOptions = {
   version: string;
@@ -32,7 +33,10 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
     <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch rear background">RB1</button>
     <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">MG1</button>
     <button id="leaderboard-toggle" class="ui-button" type="button" aria-label="Open leaderboard">&#127942;</button>
-    <button id="player-spec-toggle" class="ui-button spec-toggle" type="button" aria-label="Open player spec">SPEC</button>
+    <button id="player-spec-toggle" class="ui-button spec-toggle" type="button" aria-label="${t(
+      options.locale,
+      "aria.playerSpec",
+    )}">${t(options.locale, "global.playerSpecShort")}</button>
     <button id="bgm-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.toggleSound")}">&#128266;</button>
     <button id="options-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.options")}">&#9881;&#65039;</button>
   `;
@@ -93,7 +97,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   rearDebugToggle.addEventListener("click", () => options.onRearBackgroundToggle(rearDebugToggle));
   midgroundDebugToggle.addEventListener("click", () => options.onMidgroundBackgroundToggle(midgroundDebugToggle));
   leaderboardToggle.addEventListener("click", () => options.onLeaderboardOpen());
-  playerSpecToggle.addEventListener("click", () => window.open(PLAYER_SPEC_URL, "_blank", "noopener"));
+  playerSpecToggle.addEventListener("click", () => window.open(getPlayerSpecUrl(options.locale), "_blank", "noopener"));
 
   bgmToggle.addEventListener("click", () => {
     const currentVolume = parseInt(volumeSlider.value, 10);
