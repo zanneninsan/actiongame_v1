@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.233
+### English
+- Updated live chat danmaku comments to show a user icon and name before each comment, and spaced stacked comments by their rendered height to prevent overlap.
+### Japanese
+- ライブチャット風の弾幕をユーザーアイコン・名前・コメントの体裁にし、表示行の高さに合わせて積み上げることで文字同士が重なりにくいようにしました。
+
 ## v0.1.232
 ### English
 - Reworked the item pickup sound into a brighter collection chime and reused the previous pickup sound as the player jump sound effect.

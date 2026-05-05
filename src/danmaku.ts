@@ -80,6 +80,15 @@ const TIME_UP_COMMENTS = [
   "次は間に合う",
 ];
 
+const LIVE_CHAT_USERS = [
+  { icon: "◆", name: "zannen_fan" },
+  { icon: "●", name: "SisterWatcher" },
+  { icon: "★", name: "残念院推し" },
+  { icon: "■", name: "stage_maker" },
+  { icon: "▲", name: "neon_runner" },
+  { icon: "✦", name: "初見さん" },
+];
+
 type ActiveComment = Phaser.GameObjects.Text & {
   destroyTimer?: Phaser.Time.TimerEvent;
 };
@@ -94,6 +103,7 @@ export class DanmakuOverlay {
   private readonly liveChatComments: ActiveComment[] = [];
   private readonly pendingTimers = new Set<Phaser.Time.TimerEvent>();
   private nextLane = 0;
+  private nextLiveChatUser = 0;
   private mode: DanmakuMode = "classic";
 
   constructor(scene: Phaser.Scene, width: number, height: number) {
@@ -244,21 +254,13 @@ export class DanmakuOverlay {
       fontSize: Math.max(15, Math.round((options.fontSize ?? 22) * 0.72)),
       duration: Math.max(4200, options.duration ?? 5200),
     };
-    const lineHeight = style.fontSize + 12;
     const x = 24;
     const bottomY = this.height - 86;
     const topY = 96;
-    this.liveChatComments.forEach((comment) => {
-      this.scene.tweens.add({
-        targets: comment,
-        y: comment.y - lineHeight,
-        duration: 170,
-        ease: "Sine.easeOut",
-      });
-    });
+    const user = this.getNextLiveChatUser();
 
     const comment = this.scene.add
-      .text(x, bottomY, message, {
+      .text(x, bottomY, `${user.icon} ${user.name}：${message}`, {
         fontFamily: "monospace",
         fontSize: `${style.fontSize}px`,
         color: style.color,
@@ -276,6 +278,7 @@ export class DanmakuOverlay {
 
     this.activeComments.add(comment);
     this.liveChatComments.push(comment);
+    this.layoutLiveChatComments(bottomY, topY, false);
     this.scene.tweens.add({
       targets: comment,
       alpha: 0.96,
@@ -283,12 +286,37 @@ export class DanmakuOverlay {
       duration: 160,
       ease: "Sine.easeOut",
     });
-    this.trimLiveChat(topY);
     comment.destroyTimer = this.scene.time.delayedCall(style.duration, () => this.fadeLiveChatComment(comment));
   }
 
-  private trimLiveChat(topY: number) {
-    while (this.liveChatComments.length > 0 && (this.liveChatComments[0].y < topY || this.liveChatComments.length > 15)) {
+  private getNextLiveChatUser() {
+    const user = LIVE_CHAT_USERS[this.nextLiveChatUser % LIVE_CHAT_USERS.length];
+    this.nextLiveChatUser += Phaser.Math.Between(1, 2);
+    return user;
+  }
+
+  private layoutLiveChatComments(bottomY = this.height - 86, topY = 96, animate = true) {
+    let cursorY = bottomY;
+    for (let index = this.liveChatComments.length - 1; index >= 0; index -= 1) {
+      const comment = this.liveChatComments[index];
+      const targetY = cursorY;
+      if (animate) {
+        this.scene.tweens.add({
+          targets: comment,
+          y: targetY,
+          duration: 170,
+          ease: "Sine.easeOut",
+        });
+      } else {
+        comment.setY(targetY);
+      }
+      cursorY -= comment.height + 8;
+    }
+
+    while (
+      this.liveChatComments.length > 0 &&
+      (this.liveChatComments[0].y - this.liveChatComments[0].height < topY || this.liveChatComments.length > 12)
+    ) {
       const comment = this.liveChatComments[0];
       this.removeComment(comment);
     }
@@ -379,6 +407,9 @@ export class DanmakuOverlay {
       this.liveChatComments.splice(liveIndex, 1);
     }
     comment.destroy();
+    if (liveIndex >= 0) {
+      this.layoutLiveChatComments();
+    }
   }
 }
 
