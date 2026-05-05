@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.224
+### English
+- Made the stage editor panel show only the option rows related to the currently selected tool.
+### Japanese
+- ステージ編集パネルで、現在選択中のツールに関係する設定項目だけを表示するようにしました。
+
 ## v0.1.223
 ### English
 - Added a time-up miss sequence that knocks the player back before showing MISS, with center-burst danmaku comments for timeouts.

@@ -477,6 +477,10 @@ canvas {
   font-size: 12px;
 }
 
+.editor-row[hidden] {
+  display: none;
+}
+
 .editor-row select,
 .editor-row input,
 [data-editor-export] {

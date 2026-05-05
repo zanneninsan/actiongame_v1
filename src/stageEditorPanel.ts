@@ -122,11 +122,11 @@ export class StageEditorPanel {
             <option value="goal">${t(this.options.locale, "editor.tool.goal")}</option>
           </select>
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="platform movingPlatform">
           <label>${t(this.options.locale, "editor.units")}</label>
           <input data-platform-units type="number" min="1" max="16" value="3" />
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="movingPlatform">
           <label>${t(this.options.locale, "editor.movingAxis")}</label>
           <select data-moving-axis>
             <option value="x">${t(this.options.locale, "editor.movingAxis.x")}</option>
@@ -134,19 +134,19 @@ export class StageEditorPanel {
             <option value="xy">${t(this.options.locale, "editor.movingAxis.xy")}</option>
           </select>
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="movingPlatform">
           <label>${t(this.options.locale, "editor.movingDistance")}</label>
           <input data-moving-distance type="number" min="-960" max="960" step="32" value="256" />
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="movingPlatform">
           <label>${t(this.options.locale, "editor.movingDistanceY")}</label>
           <input data-moving-distance-y type="number" min="-960" max="960" step="32" value="160" />
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="movingPlatform">
           <label>${t(this.options.locale, "editor.movingSpeed")}</label>
           <input data-moving-speed type="number" min="16" max="360" step="8" value="90" />
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="item">
           <label>${t(this.options.locale, "editor.item")}</label>
           <select data-item-type>
             <option value="energyDrink">${t(this.options.locale, "editor.item.energy")}</option>
@@ -159,20 +159,20 @@ export class StageEditorPanel {
             <option value="dashRing">${t(this.options.locale, "editor.item.dashRing")}</option>
           </select>
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="enemy">
           <label>${t(this.options.locale, "editor.enemy")}</label>
           <select data-enemy-type>
             ${Object.entries(ENEMY_DEFINITIONS).map(([type, definition]) => `<option value="${type}">${definition.label}</option>`).join("")}
           </select>
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="streetLamp">
           <label>${t(this.options.locale, "editor.lamp")}</label>
           <select data-lamp-type>
             <option value="${PROP_ASSETS.lampSingle}">${t(this.options.locale, "editor.lamp.single")}</option>
             <option value="${PROP_ASSETS.lampDouble}">${t(this.options.locale, "editor.lamp.double")}</option>
           </select>
         </div>
-        <div class="editor-row">
+        <div class="editor-row" data-editor-fields="decoration">
           <label>${t(this.options.locale, "editor.object")}</label>
           <select data-decoration-key>
             ${STAGE_OBJECT_ASSETS.map((asset) => `<option value="${asset.key}">${asset.key.replace("stage-", "")}</option>`).join("")}
@@ -217,9 +217,17 @@ export class StageEditorPanel {
     const exportButton = panel.querySelector<HTMLButtonElement>(".editor-export-button")!;
     const importButton = panel.querySelector<HTMLButtonElement>("[data-editor-import]")!;
     const loadFileButton = panel.querySelector<HTMLButtonElement>("[data-editor-load-file]")!;
+    const toolFieldRows = Array.from(panel.querySelectorAll<HTMLElement>("[data-editor-fields]"));
     toolSelect.value = this.options.initialTool;
     panel.classList.toggle("is-open", this.enabled);
     toggleButton.textContent = this.enabled ? t(this.options.locale, "editor.toggleOn") : t(this.options.locale, "editor.toggle");
+    const refreshToolFields = () => {
+      const selectedTool = toolSelect.value;
+      toolFieldRows.forEach((row) => {
+        const tools = row.dataset.editorFields?.split(/\s+/) ?? [];
+        row.hidden = !tools.includes(selectedTool);
+      });
+    };
 
     const toggleEditor = () => {
       this.enabled = !this.enabled;
@@ -229,6 +237,7 @@ export class StageEditorPanel {
     };
     const setTool = () => {
       this.options.onToolChange(toolSelect.value as EditorTool);
+      refreshToolFields();
     };
     const importFromTextarea = () => {
       this.options.onImport(this.exportTextarea?.value ?? "");
@@ -271,6 +280,7 @@ export class StageEditorPanel {
       loadFileButton.removeEventListener("click", openImportFile);
       this.importFileInput?.removeEventListener("change", importSelectedFile);
     });
+    refreshToolFields();
     this.bindDrag(panel);
   }
 
