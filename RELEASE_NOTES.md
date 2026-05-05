@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.253
+### English
+- Prevented stomp combo resets during the brief post-stomp free-jump window, avoiding accidental combo loss from transient landing detection.
+### Japanese
+- 踏みつけ直後の無料ジャンプ受付中は連続踏みコンボを着地リセットしないようにし、一瞬の着地判定でコンボが切れないようにしました。
+
 ## v0.1.252
 ### English
 - Added a short free-jump window after stomping an enemy so pressing jump can launch again without spending stamina.

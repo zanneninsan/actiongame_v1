@@ -84,7 +84,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.252";
+const DEBUG_VERSION = "v0.1.253";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -758,7 +758,7 @@ class PrototypeScene extends Phaser.Scene {
     const isCrouching = down && onFloor && !startedJump;
     this.updateJumpChainDanmaku(startedJump, landedThisFrame);
     this.updateCrouchDanmaku(isCrouching);
-    if (landedThisFrame) {
+    if (landedThisFrame && this.time.now > this.stompFreeJumpUntil) {
       this.rewards?.resetStompComboOnLanding();
     }
 
