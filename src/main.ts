@@ -80,7 +80,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.229";
+const DEBUG_VERSION = "v0.1.230";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -148,9 +148,11 @@ const HUD_MIN_SCALE = 1;
 const HUD_MAX_SCALE = 1.45;
 const HUD_PLAYER_NAME_FONT_SIZE = 15;
 const HUD_MAIN_FONT_SIZE = 12;
+const HUD_SCORE_FONT_SIZE = 15;
 const HUD_HINT_FONT_SIZE = 11;
 const HUD_PLAYER_NAME_Y = 28;
 const HUD_SCORE_Y = 56;
+const HUD_TIMER_X = 230;
 const HUD_STAMINA_Y = 80;
 const HUD_STAMINA_BAR_Y = 89;
 const HUD_STAMINA_BAR_WIDTH = 132;
@@ -469,7 +471,7 @@ class PrototypeScene extends Phaser.Scene {
     this.scoreText = this.add
       .text(58, HUD_SCORE_Y, "", {
         fontFamily: "monospace",
-        fontSize: `${HUD_MAIN_FONT_SIZE}px`,
+        fontSize: `${HUD_SCORE_FONT_SIZE}px`,
         color: "#f8fafc",
       })
       .setScrollFactor(0)
@@ -478,7 +480,7 @@ class PrototypeScene extends Phaser.Scene {
     this.updateScoreText();
 
     this.timerText = this.add
-      .text(178, 68, "", {
+      .text(HUD_TIMER_X, HUD_SCORE_Y, "", {
         fontFamily: "monospace",
         fontSize: `${HUD_MAIN_FONT_SIZE}px`,
         color: "#fde68a",
@@ -1236,11 +1238,11 @@ class PrototypeScene extends Phaser.Scene {
 
     if (this.scoreText) {
       this.scoreText.setPosition(58 * scale, HUD_SCORE_Y * scale);
-      this.scoreText.setFontSize(`${Math.round(HUD_MAIN_FONT_SIZE * scale)}px`);
+      this.scoreText.setFontSize(`${Math.round(HUD_SCORE_FONT_SIZE * scale)}px`);
     }
 
     if (this.timerText) {
-      this.timerText.setPosition(178 * scale, 68 * scale);
+      this.timerText.setPosition(HUD_TIMER_X * scale, HUD_SCORE_Y * scale);
       this.timerText.setFontSize(`${Math.round(HUD_MAIN_FONT_SIZE * scale)}px`);
     }
 

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.230
+### English
+- Increased the score HUD size and aligned the remaining time on the same row.
+### Japanese
+- スコア表示を少し大きくし、残り時間をスコアと同じ行に並べました。
+
 ## v0.1.229
 ### English
 - Moved the player, score, and stamina HUD elements slightly upward.
