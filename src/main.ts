@@ -69,7 +69,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.189";
+const DEBUG_VERSION = "v0.1.190";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -351,7 +351,7 @@ class PrototypeScene extends Phaser.Scene {
       player: this.player,
       placements: this.editorStage.items,
       canCollect: () => !this.stageEditor?.isEnabled,
-      onCollect: (itemType, points) => this.rewards?.collectItem(itemType, points),
+      onCollect: (itemType, points, x, y) => this.rewards?.collectItem(itemType, points, x, y),
       trackStageObject: (object) => this.trackStageObject(object),
     });
     this.bonusBlocksGroup = createBonusBlocks({

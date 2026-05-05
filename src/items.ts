@@ -12,7 +12,7 @@ type CreateItemsOptions = {
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   placements: readonly ItemPlacement[];
   canCollect: () => boolean;
-  onCollect: (type: ItemType, points: number) => void;
+  onCollect: (type: ItemType, points: number, x: number, y: number) => void;
   trackStageObject: <T extends Phaser.GameObjects.GameObject>(object: T) => T;
 };
 
@@ -115,7 +115,7 @@ const collectItem = (
   scene: Phaser.Scene,
   item: Phaser.Physics.Arcade.Sprite,
   canCollect: () => boolean,
-  onCollect: (type: ItemType, points: number) => void,
+  onCollect: (type: ItemType, points: number, x: number, y: number) => void,
 ) => {
   if (!item.active || !canCollect()) {
     return;
@@ -123,7 +123,7 @@ const collectItem = (
 
   const itemType = item.getData("itemType") as ItemType;
   const definition = ITEM_DEFINITIONS[itemType];
-  onCollect(itemType, definition.points);
+  onCollect(itemType, definition.points, item.x, item.y);
   scene.sound.play("item-pickup", { volume: 0.65 });
   const glow = item.getData("glow") as Phaser.GameObjects.Image | undefined;
   if (glow) {

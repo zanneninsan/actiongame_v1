@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.190
+### English
+- Added floating score popups when collecting score items, matching the enemy defeat score feedback.
+- Increased floating score popup text size for both item pickups and enemy defeats.
+### Japanese
+- スコア付きアイテムを取った時にも、敵撃破時と同じフローティングスコア表示を出すようにしました。
+- アイテム取得時と敵撃破時のフローティングスコア表示を、これまでより大きくしました。
+
 ## v0.1.189
 ### English
 - Added per-enemy stomp score settings, with enemies that do not specify a value defaulting to 10 points.

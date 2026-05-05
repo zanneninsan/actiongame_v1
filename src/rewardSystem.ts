@@ -65,7 +65,7 @@ export class RewardSystem {
     return now < this.jumpPowerUntil ? POWER_JUMP_MULTIPLIER : 1;
   }
 
-  collectItem(itemType: ItemType, points: number) {
+  collectItem(itemType: ItemType, points: number, x?: number, y?: number) {
     if (points > 0) {
       this.score[itemType] = (this.score[itemType] ?? 0) + points;
     }
@@ -75,6 +75,9 @@ export class RewardSystem {
     this.applyPowerup(itemType);
     this.onScoreChanged();
     this.onScoreMilestone();
+    if (points > 0 && x !== undefined && y !== undefined) {
+      this.showFloatingText(x, y - 48, `+${points}`);
+    }
   }
 
   applyBonusBlockReward(itemType: ItemType, x: number, y: number) {
@@ -115,7 +118,7 @@ export class RewardSystem {
     const popup = this.scene.add
       .text(x, y, text, {
         fontFamily: "monospace",
-        fontSize: "20px",
+        fontSize: "28px",
         color: "#fde68a",
       })
       .setOrigin(0.5)
