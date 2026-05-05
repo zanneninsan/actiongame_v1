@@ -31,6 +31,7 @@ type StageEditorPanelOptions = {
   onToolChange: (tool: EditorTool) => void;
   onUndo: () => void;
   onRedo: () => void;
+  onCreatePlainStage: () => void;
   onExport: () => void;
   onImport: (json: string) => void;
   getRemainingTimeSeconds: () => number;
@@ -200,6 +201,9 @@ export class StageEditorPanel {
           <button data-editor-undo type="button" disabled>${t(this.options.locale, "editor.undo")}</button>
           <button data-editor-redo type="button" disabled>${t(this.options.locale, "editor.redo")}</button>
         </div>
+        <div class="editor-io-row">
+          <button data-editor-plain-stage type="button">${t(this.options.locale, "editor.plainStage")}</button>
+        </div>
         <div class="editor-row editor-time-row">
           <label>${t(this.options.locale, "editor.remainingTime")}</label>
           <div class="editor-inline-control">
@@ -247,6 +251,7 @@ export class StageEditorPanel {
     const importButton = panel.querySelector<HTMLButtonElement>("[data-editor-import]")!;
     const loadFileButton = panel.querySelector<HTMLButtonElement>("[data-editor-load-file]")!;
     const applyTimeButton = panel.querySelector<HTMLButtonElement>("[data-editor-apply-time]")!;
+    const plainStageButton = panel.querySelector<HTMLButtonElement>("[data-editor-plain-stage]")!;
     const toolFieldRows = Array.from(panel.querySelectorAll<HTMLElement>("[data-editor-fields]"));
     toolSelect.value = this.options.initialTool;
     panel.classList.toggle("is-open", this.enabled);
@@ -310,6 +315,7 @@ export class StageEditorPanel {
     toolSelect.addEventListener("change", setTool);
     this.undoButton.addEventListener("click", this.options.onUndo);
     this.redoButton.addEventListener("click", this.options.onRedo);
+    plainStageButton.addEventListener("click", this.options.onCreatePlainStage);
     exportButton.addEventListener("click", this.options.onExport);
     importButton.addEventListener("click", importFromTextarea);
     loadFileButton.addEventListener("click", openImportFile);
@@ -320,6 +326,7 @@ export class StageEditorPanel {
       toolSelect.removeEventListener("change", setTool);
       this.undoButton?.removeEventListener("click", this.options.onUndo);
       this.redoButton?.removeEventListener("click", this.options.onRedo);
+      plainStageButton.removeEventListener("click", this.options.onCreatePlainStage);
       exportButton.removeEventListener("click", this.options.onExport);
       importButton.removeEventListener("click", importFromTextarea);
       loadFileButton.removeEventListener("click", openImportFile);
