@@ -2,17 +2,57 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.218
+### English
+- Made the in-game HUD scale more dynamically with the displayed screen size, including player name, score, timer, stamina, and control hints.
+### Japanese
+- 画面の表示サイズに応じて、プレイヤー名、スコア、タイマー、スタミナ、操作ヒントなどのHUD表示がより大きく見えるように調整しました。
+
+## v0.1.217
+### English
+- Added a stamina gauge that limits W air jumps and Shift dash, with gradual recovery while grounded.
+### Japanese
+- スタミナゲージを追加し、Wの空中ジャンプとShiftダッシュに消費制限を入れ、地上で徐々に回復するようにしました。
+
+## v0.1.216
+### English
+- Slightly increased normal jump height and boosted running jump height.
+### Japanese
+- 通常ジャンプと加速中ジャンプのジャンプ力を少しだけ上げました。
+
+## v0.1.215
+### English
+- Shifted spring platform big-jump timing later by reducing the pre-contact buffer and adding a short post-launch upgrade window.
+### Japanese
+- ジャンプ台大ジャンプの判定タイミングを後ろ寄りに調整し、接触後の短い猶予でも大ジャンプへ昇格できるようにしました。
+
+## v0.1.214
+### English
+- Fixed spring platform big jumps so the stronger upward velocity is no longer clamped to the normal vertical speed limit.
+### Japanese
+- ジャンプ台大ジャンプの上向き速度が通常の縦速度上限で丸められ、通常ジャンプ台と同じ高さになる問題を修正しました。
+
+## v0.1.213
+### English
+- Added a bright burst, upward sparks, and a BIG JUMP popup when the spring platform big jump succeeds.
+### Japanese
+- ジャンプ台の大ジャンプ成功時に、発光リング、上向きの火花、BIG JUMP表示が出る演出を追加しました。
+
 ## v0.1.212
 ### English
 - Added a Google login path for already-linked leaderboard accounts and made Firebase Auth persistence explicit to keep player IDs stable across reloads.
+- Relaxed big spring jump timing so holding jump or pressing jump within a wider input buffer triggers the big launch.
 ### Japanese
 - 連携済みのランキング用Googleアカウントでログインできる導線を追加し、リロード後もプレイヤーIDが維持されるようFirebase Authの永続化を明示しました。
+- ジャンプ台大ジャンプの判定を緩和し、ジャンプ入力の押しっぱなしや広めの入力猶予でも大ジャンプが出るようにしました。
 
 ## v0.1.211
 ### English
 - Added an account window that shows Google link status, allows unlinking Google, and lists the player's registered scores by stage.
+- Added a big spring jump when jump input is timed just before or as the player lands on a spring platform.
 ### Japanese
 - Google連携状況の確認、Google連携の解除、自分のステージ別登録スコアを確認できるアカウント画面を追加しました。
+- ジャンプ台に乗る直前または同時にジャンプ入力を押すと、通常より高く跳べる大ジャンプを追加しました。
 
 ## v0.1.210
 ### English
