@@ -196,6 +196,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetX: number;
     bodyOffsetY: number;
     aiType: EnemyAiType;
+    stompScore?: number;
     animation?: {
       key: string;
       assetPath: string;
@@ -255,6 +256,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetX: 28,
     bodyOffsetY: 32,
     aiType: "flyingPatrol",
+    stompScore: 20,
     animation: {
       key: "enemy-horned-cyborg-walk",
       assetPath: "assets/enemies/horned_cyborg_walk.png",
@@ -274,6 +276,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetX: 14,
     bodyOffsetY: 30,
     aiType: "hoppingPatrol",
+    stompScore: 15,
     animation: {
       key: "enemy-cone-golem-walk",
       assetPath: "assets/enemies/cone_golem_walk.png",
@@ -293,6 +296,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetX: 18,
     bodyOffsetY: 30,
     aiType: "chase",
+    stompScore: 20,
     animation: {
       key: "enemy-rabbit-traveler-walk",
       assetPath: "assets/enemies/rabbit_traveler_walk.webp",
@@ -313,6 +317,7 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetX: 20,
     bodyOffsetY: 28,
     aiType: "shooter",
+    stompScore: 30,
   },
   heartCannonTurret: {
     key: "enemy-heart-cannon-turret",
@@ -325,5 +330,6 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetX: 18,
     bodyOffsetY: 26,
     aiType: "turret",
+    stompScore: 25,
   },
 };

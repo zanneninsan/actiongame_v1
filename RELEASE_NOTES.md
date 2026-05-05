@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.189
+### English
+- Added per-enemy stomp score settings, with enemies that do not specify a value defaulting to 10 points.
+- Tuned higher-risk enemy types with individual stomp score values for score balance.
+### Japanese
+- 敵ごとに踏みつけ撃破時の得点を設定できるようにし、未設定の敵は10点になるようにしました。
+- 得点バランス調整用に、危険度の高い敵へ個別の踏みつけ得点を設定しました。
+
 ## v0.1.188
 ### English
 - Fixed startup stopping after stage rendering when the HIT debug position readout ran before the player sprite existed.

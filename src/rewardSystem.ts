@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { ITEM_DEFINITIONS, type ItemType, type ScoreState } from "./assets";
+import { ENEMY_DEFINITIONS, ITEM_DEFINITIONS, type EnemyType, type ItemType, type ScoreState } from "./assets";
 
 const POWERUP_DURATION_MS = 9000;
 const POWER_SPEED_MULTIPLIER = 1.28;
@@ -7,7 +7,7 @@ const POWER_JUMP_MULTIPLIER = 1.18;
 const DASH_RING_VELOCITY_X = 720;
 const DASH_RING_BOOST_MS = 900;
 const ENEMY_STOMP_COMBO_MS = 1400;
-const ENEMY_STOMP_BASE_SCORE = 200;
+const DEFAULT_ENEMY_STOMP_SCORE = 10;
 
 export class RewardSystem {
   private score: ScoreState = { energyDrink: 0, shoppingBag: 0, bubbleTea: 0, coin: 0 };
@@ -94,11 +94,21 @@ export class RewardSystem {
   addEnemyDefeatScore(enemy: Phaser.Physics.Arcade.Sprite) {
     this.enemyStompCombo = this.scene.time.now - this.lastEnemyStompAt <= ENEMY_STOMP_COMBO_MS ? this.enemyStompCombo + 1 : 1;
     this.lastEnemyStompAt = this.scene.time.now;
-    const points = ENEMY_STOMP_BASE_SCORE * this.enemyStompCombo;
+    const points = this.getEnemyStompScore(enemy) * this.enemyStompCombo;
     this.bonusScore += points;
     this.onScoreChanged();
     this.onScoreMilestone();
     this.showFloatingText(enemy.x, enemy.y - 48, `+${points}${this.enemyStompCombo > 1 ? ` x${this.enemyStompCombo}` : ""}`);
+  }
+
+  private getEnemyStompScore(enemy: Phaser.Physics.Arcade.Sprite) {
+    const enemyType = enemy.getData("enemyType") as EnemyType | undefined;
+    if (!enemyType || !(enemyType in ENEMY_DEFINITIONS)) {
+      return DEFAULT_ENEMY_STOMP_SCORE;
+    }
+
+    const configuredScore = ENEMY_DEFINITIONS[enemyType].stompScore;
+    return configuredScore ?? DEFAULT_ENEMY_STOMP_SCORE;
   }
 
   showFloatingText(x: number, y: number, text: string) {
