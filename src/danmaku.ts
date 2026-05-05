@@ -50,6 +50,19 @@ const JUMP_CHAIN_COMMENTS = [
   "これは浮いてる",
 ];
 
+const AFK_IDLE_COMMENTS = [
+  "あれ、トイレかな？",
+  "お、寝落ちか・・・・？",
+  "回線切断した・・・・？",
+  "止まった？",
+  "急に静かになった",
+  "今のうちに休憩タイム",
+  "操作忘れてる説",
+  "離席中かな",
+  "配信止まってない？",
+  "まだそこにいる？",
+];
+
 const MISS_COMMENTS = [
   "あっ",
   "落ちたｗ",
@@ -158,6 +171,15 @@ export class DanmakuOverlay {
       stroke: "#075985",
       fontSize: 26,
       duration: 4200,
+    });
+  }
+
+  emitAfkIdle() {
+    this.emitBurst(AFK_IDLE_COMMENTS, 16, 92, {
+      color: "#fef3c7",
+      stroke: "#713f12",
+      fontSize: 25,
+      duration: 4300,
     });
   }
 

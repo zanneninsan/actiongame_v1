@@ -88,7 +88,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.273";
+const DEBUG_VERSION = "v0.1.274";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
@@ -117,6 +117,7 @@ const TIME_BONUS_PER_SECOND = 10;
 const SCORE_DANMAKU_THRESHOLD = 1000;
 const CROUCH_DANMAKU_HOLD_MS = 2000;
 const JUMP_CHAIN_DANMAKU_COUNT = 5;
+const AFK_IDLE_DANMAKU_DELAY_MS = 15000;
 const FALL_MISS_RESTART_DELAY_MS = 4800;
 const TIME_UP_HURT_TO_MISS_DELAY_MS = 520;
 const FALL_RESET_WORLD_MARGIN = 640;
@@ -357,6 +358,8 @@ class PrototypeScene extends Phaser.Scene {
   private hasCrouchDanmakuPlayed = false;
   private jumpChainCount = 0;
   private hasJumpChainDanmakuPlayed = false;
+  private afkIdleStartedAt = 0;
+  private hasAfkIdleDanmakuPlayed = false;
   private lastJumpInputAt = -Infinity;
   private lastSpringLaunchAt = -Infinity;
   private pendingSpringBigJumpUntil = -Infinity;
@@ -769,6 +772,8 @@ class PrototypeScene extends Phaser.Scene {
     }
     const springLaunchedRecently = this.time.now - this.lastSpringLaunchAt <= SPRING_LAUNCH_NORMAL_JUMP_SUPPRESS_MS;
     const jump = (debugJump || normalJump) && !springLaunchedRecently;
+    const hasGameplayInput = left || right || up || down || wantsDash || debugJump || normalJump;
+    this.updateAfkIdleDanmaku(hasGameplayInput);
     const wantsStompFreeJump = jump && !onFloor && this.time.now <= this.stompFreeJumpUntil;
     const wantsAirJump = jump && !onFloor && debugJump;
     const canJump = onFloor || wantsStompFreeJump || (wantsAirJump && this.consumeStamina(AIR_JUMP_STAMINA_COST));
@@ -972,6 +977,8 @@ class PrototypeScene extends Phaser.Scene {
     this.hasCrouchDanmakuPlayed = false;
     this.jumpChainCount = 0;
     this.hasJumpChainDanmakuPlayed = false;
+    this.afkIdleStartedAt = 0;
+    this.hasAfkIdleDanmakuPlayed = false;
     this.lastJumpInputAt = -Infinity;
     this.lastSpringLaunchAt = -Infinity;
     this.pendingSpringBigJumpUntil = -Infinity;
@@ -1204,6 +1211,7 @@ class PrototypeScene extends Phaser.Scene {
     this.isRunActive = true;
     this.startGhostRecording();
     this.resetPlayerIdleState(this.time.now);
+    this.resetAfkIdleDanmakuState(this.time.now);
     this.physics.resume();
     this.updateTimerText();
     if (!this.bgm?.isPlaying) {
@@ -2485,6 +2493,38 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.danmaku?.emitJumpChain();
+  }
+
+  private resetAfkIdleDanmakuState(startedAt = 0) {
+    this.afkIdleStartedAt = startedAt;
+    this.hasAfkIdleDanmakuPlayed = false;
+  }
+
+  private updateAfkIdleDanmaku(hasGameplayInput: boolean) {
+    if (this.hasAfkIdleDanmakuPlayed) {
+      return;
+    }
+
+    if (hasGameplayInput) {
+      this.afkIdleStartedAt = this.time.now;
+      return;
+    }
+
+    if (this.afkIdleStartedAt === 0) {
+      this.afkIdleStartedAt = this.time.now;
+      return;
+    }
+
+    if (this.time.now - this.afkIdleStartedAt < AFK_IDLE_DANMAKU_DELAY_MS) {
+      return;
+    }
+
+    this.hasAfkIdleDanmakuPlayed = true;
+    if (!this.danmakuEnabled) {
+      return;
+    }
+
+    this.danmaku?.emitAfkIdle();
   }
 
   private updateTimerText() {

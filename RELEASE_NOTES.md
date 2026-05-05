@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.274
+### English
+- Added a one-time danmaku reaction when gameplay controls are left untouched for 15 seconds, with comments wondering whether the player stepped away, fell asleep, or disconnected.
+### Japanese
+- プレイ中に操作しない状態が15秒続いた時、一度だけ離席や寝落ち、回線切断を心配する弾幕が流れるようにしました。
+
 ## v0.1.273
 ### English
 - Added a one-time four-second story message when the player passes the stage midpoint, using the stage's wider axis for horizontal stages and taller axis for vertical stages.
