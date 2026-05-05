@@ -60,6 +60,7 @@ import {
 } from "./mobileControls";
 import { DanmakuOverlay, type DanmakuMode } from "./danmaku";
 import {
+  clearLeaderboardUserSettings,
   fetchLeaderboardEntries,
   fetchLeaderboardGhostOptions,
   fetchLeaderboardGhostReplay,
@@ -87,7 +88,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.270";
+const DEBUG_VERSION = "v0.1.271";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -2647,6 +2648,21 @@ class PrototypeScene extends Phaser.Scene {
     return result.identity;
   }
 
+  private async clearLeaderboardGoogleTestData() {
+    const result = await clearLeaderboardUserSettings();
+    if (!result.ok) {
+      throw new Error(result.reason);
+    }
+
+    if (this.leaderboardSettingsSaveTimer !== undefined) {
+      window.clearTimeout(this.leaderboardSettingsSaveTimer);
+      this.leaderboardSettingsSaveTimer = undefined;
+    }
+    this.leaderboardSettingsSyncLoadedForPlayerId = result.identity.playerId;
+    this.applyLeaderboardIdentity(result.identity);
+    return result.identity;
+  }
+
   private showAccount() {
     showAccountPanel({
       locale: this.locale,
@@ -2658,6 +2674,7 @@ class PrototypeScene extends Phaser.Scene {
       onGoogleSignIn: () => this.linkLeaderboardGoogleAccount(),
       onGoogleLogin: () => this.logInLeaderboardGoogleAccount(),
       onGoogleUnlink: () => this.unlinkLeaderboardGoogleAccount(),
+      onGoogleTestDataClear: () => this.clearLeaderboardGoogleTestData(),
     });
   }
 

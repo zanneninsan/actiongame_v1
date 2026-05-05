@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.271
+### English
+- Added an account-screen test tool that clears Google-linked app settings and recorded flags without deleting stage scores.
+### Japanese
+- アカウント画面に、スコアを残したままGoogle連携の設定や記録済みフラグを削除できるテスト用の操作を追加しました。
+
 ## v0.1.270
 ### English
 - Fixed the start button flow so smartphone players are prompted again when starting from a portrait viewport, even after a previous landscape setup succeeded.

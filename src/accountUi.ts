@@ -9,6 +9,7 @@ type AccountPanelOptions = {
   onGoogleSignIn: () => Promise<LeaderboardIdentity | undefined>;
   onGoogleLogin: () => Promise<LeaderboardIdentity | undefined>;
   onGoogleUnlink: () => Promise<LeaderboardIdentity | undefined>;
+  onGoogleTestDataClear: () => Promise<LeaderboardIdentity | undefined>;
 };
 
 export function showAccountPanel(options: AccountPanelOptions) {
@@ -41,6 +42,7 @@ export function showAccountPanel(options: AccountPanelOptions) {
           <button class="account-google-link" type="button">${escapeHtml(t(locale, "account.linkGoogle"))}</button>
           <button class="account-google-login" type="button">${escapeHtml(t(locale, "account.loginGoogle"))}</button>
           <button class="account-google-unlink" type="button">${escapeHtml(t(locale, "account.unlinkGoogle"))}</button>
+          <button class="account-google-clear-test" type="button">${escapeHtml(t(locale, "account.clearTestData"))}</button>
         </div>
         <p class="account-note">${escapeHtml(t(locale, "account.unlinkNote"))}</p>
       </section>
@@ -66,6 +68,7 @@ export function showAccountPanel(options: AccountPanelOptions) {
   const linkButton = modal.querySelector<HTMLButtonElement>(".account-google-link")!;
   const loginButton = modal.querySelector<HTMLButtonElement>(".account-google-login")!;
   const unlinkButton = modal.querySelector<HTMLButtonElement>(".account-google-unlink")!;
+  const clearTestDataButton = modal.querySelector<HTMLButtonElement>(".account-google-clear-test")!;
   const scoreList = modal.querySelector<HTMLOListElement>(".account-score-list")!;
   const closeButton = modal.querySelector<HTMLButtonElement>("#account-close")!;
   const close = () => {
@@ -84,6 +87,7 @@ export function showAccountPanel(options: AccountPanelOptions) {
     linkButton.hidden = Boolean(identity?.isGoogleLinked);
     loginButton.hidden = Boolean(identity?.isGoogleLinked);
     unlinkButton.hidden = !identity?.isGoogleLinked;
+    clearTestDataButton.hidden = !identity?.isGoogleLinked;
   };
 
   const refresh = async (message?: string) => {
@@ -155,6 +159,30 @@ export function showAccountPanel(options: AccountPanelOptions) {
         setStatus(t(locale, "account.unlinkFailed"), true);
       })
       .finally(() => {
+        unlinkButton.disabled = false;
+      });
+  });
+
+  clearTestDataButton.addEventListener("click", () => {
+    if (!window.confirm(t(locale, "account.clearTestDataConfirm"))) {
+      return;
+    }
+
+    clearTestDataButton.disabled = true;
+    unlinkButton.disabled = true;
+    setStatus(t(locale, "account.clearingTestData"));
+    options
+      .onGoogleTestDataClear()
+      .then((identity) => {
+        renderIdentity(identity);
+        setStatus(t(locale, "account.clearedTestDataMessage"));
+      })
+      .catch((error) => {
+        console.warn("Google-linked test data clear failed.", error);
+        setStatus(t(locale, "account.clearTestDataFailed"), true);
+      })
+      .finally(() => {
+        clearTestDataButton.disabled = false;
         unlinkButton.disabled = false;
       });
   });

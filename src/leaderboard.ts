@@ -14,6 +14,7 @@ import {
 } from "firebase/auth";
 import {
   collection,
+  deleteDoc,
   doc,
   getDocs,
   getDoc,
@@ -206,6 +207,21 @@ export async function saveLeaderboardUserSettings(settings: LeaderboardUserSetti
     { merge: true },
   );
   return true;
+}
+
+export async function clearLeaderboardUserSettings() {
+  const services = await getFirebaseServices();
+  if (!services) {
+    return { ok: false as const, reason: "Leaderboard is not configured." };
+  }
+
+  const user = await ensureAnonymousAuth(services.auth);
+  if (!isGoogleLinkedUser(user)) {
+    return { ok: false as const, reason: "Google account is not linked." };
+  }
+
+  await deleteDoc(doc(services.firestore, "users", user.uid, "settings", USER_SETTINGS_DOC));
+  return { ok: true as const, identity: createLeaderboardIdentity(user) };
 }
 
 export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) {
