@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.188
+### English
+- Restored the leaderboard `NEW` marker after a best score update by matching the current score row by player, score, and rank when the submission id is not yet visible in the fetched entry.
+### Japanese
+- ベストスコア更新後、取得したランキング行に送信IDがまだ反映されていない場合でも、プレイヤーID、スコア、順位から今回の行を判定して `NEW` 表示が出るようにしました。
+
 ## v0.1.187
 ### English
 - Disabled the browser context menu so right-clicking the game screen no longer opens the default menu.

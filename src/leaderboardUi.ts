@@ -76,7 +76,9 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
 
       status.textContent = options.statusMessage ?? t(locale, "leaderboard.topScores");
       list.replaceChildren(
-        ...entries.map((entry, index) => createEntryRow(entry, index + 1, options.currentSubmissionId, options.currentPlayerId)),
+        ...entries.map((entry, index) =>
+          createEntryRow(entry, index + 1, options.currentSubmissionId, options.currentPlayerId, options.currentScore),
+        ),
       );
       list.querySelector(".leaderboard-entry.is-current-score")?.scrollIntoView({ block: "center" });
     })
@@ -85,10 +87,16 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
     });
 }
 
-function createEntryRow(entry: LeaderboardEntry, rank: number, currentSubmissionId?: string, currentPlayerId?: string) {
+function createEntryRow(
+  entry: LeaderboardEntry,
+  rank: number,
+  currentSubmissionId?: string,
+  currentPlayerId?: string,
+  currentScore?: LeaderboardCurrentScore,
+) {
   const row = document.createElement("li");
   row.className = "leaderboard-entry";
-  const isCurrentScore = Boolean(currentSubmissionId && entry.submissionId === currentSubmissionId);
+  const isCurrentScore = isCurrentScoreEntry(entry, rank, currentSubmissionId, currentPlayerId, currentScore);
   const playerId = entry.playerId || (isCurrentScore ? currentPlayerId ?? "" : extractPlayerIdFromDocumentId(entry.id, entry.stageId));
   if (isCurrentScore) {
     row.classList.add("is-current-score");
@@ -102,6 +110,26 @@ function createEntryRow(entry: LeaderboardEntry, rank: number, currentSubmission
     <span class="leaderboard-date">${formatDate(entry.createdAt)}</span>
   `;
   return row;
+}
+
+function isCurrentScoreEntry(
+  entry: LeaderboardEntry,
+  rank: number,
+  currentSubmissionId?: string,
+  currentPlayerId?: string,
+  currentScore?: LeaderboardCurrentScore,
+) {
+  if (currentSubmissionId && entry.submissionId === currentSubmissionId) {
+    return true;
+  }
+
+  return Boolean(
+    currentScore?.scoreUpdated &&
+      currentPlayerId &&
+      entry.playerId === currentPlayerId &&
+      Math.abs(entry.score - currentScore.score) < 0.005 &&
+      (!currentScore.rank || currentScore.rank === rank),
+  );
 }
 
 function renderCurrentScore(container: HTMLElement, currentScore: LeaderboardCurrentScore | undefined, locale: Locale) {
