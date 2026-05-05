@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.257
+### English
+- Added a mobile-only function menu button that slides out the top-right controls while keeping the version label visible.
+- Moved the stage editor panel into the same mobile slide-out flow so it stays tucked away until the menu is opened.
+### Japanese
+- スマホ表示時だけ右上の機能ボタンをメニューアイコンにまとめ、押すと横からスライド表示されるようにしました。
+- ステージ編集パネルも同じスマホ用メニューの開閉に合わせて表示し、バージョン表記は常に見えるようにしました。
+
 ## v0.1.256
 ### English
 - Changed the clear result text to use a thin outline.
