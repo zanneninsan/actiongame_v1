@@ -590,8 +590,8 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
 
 export const NEO_SHIBUYA_STAGE: StageDefinition = {
   "name": {
-    "jp": "ネオシブヤシティ",
-    "en": "Neo Shibuya City"
+    "jp": "作成中ネオシブヤシティ",
+    "en": "WIP Neo Shibuya City"
   },
   "backgrounds": {
     "rearKey": "rear-starry-sky",
