@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.266
+### English
+- Set the first-play default stage explicitly to Shibu-ya city instead of the legacy neonCanal alias.
+### Japanese
+- 初回プレイ時のデフォルトステージを、旧名称のneonCanalではなく明示的にシブヤシティへ設定しました。
+
 ## v0.1.265
 ### English
 - Reflected the imported Shibu-ya city stage JSON into the playable Shibu-ya city stage layout.

@@ -1662,9 +1662,9 @@ export const STAGES = {
   rankingCheck: RANKING_CHECK_STAGE,
 };
 export type StageId = keyof typeof STAGES;
-export const DEFAULT_STAGE_ID = "neonCanal" satisfies StageId;
+export const DEFAULT_STAGE_ID = "originalDowntown" satisfies StageId;
 export const PLAYABLE_STAGE_IDS = [
-  "neonCanal",
+  "originalDowntown",
   "neoShibuyaCity",
   "skybridgeSprint",
   "skyShaftClimb",
