@@ -30,7 +30,7 @@ import {
 } from "./enemies";
 import { createItems, populateItems } from "./items";
 import { createBonusBlocks, populateBonusBlocks } from "./bonusBlocks";
-import { defeatEnemy, tryStompEnemy } from "./enemyCombat";
+import { defeatEnemy, findOverlappingStompEnemy, tryStompEnemy } from "./enemyCombat";
 import { RewardSystem } from "./rewardSystem";
 import {
   CheckpointController,
@@ -69,7 +69,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.199";
+const DEBUG_VERSION = "v0.1.200";
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1264,10 +1264,11 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    const stomped = tryStompEnemy(this.player, enemy, () => {
+    const stompTarget = findOverlappingStompEnemy(this.player, this.enemiesGroup) ?? enemy;
+    const stomped = tryStompEnemy(this.player, stompTarget, () => {
       this.isLanding = false;
       this.landingFastForwarded = false;
-      this.rewards?.addEnemyDefeatScore(enemy);
+      this.rewards?.addEnemyDefeatScore(stompTarget);
     });
     if (stomped || this.time.now < this.invulnerableUntil) {
       return;

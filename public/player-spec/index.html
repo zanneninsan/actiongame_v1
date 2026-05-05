@@ -238,7 +238,7 @@
       <main>
         <section id="status">
           <h2>Status</h2>
-          <p class="spec-note">Last updated from code state: <code>v0.1.198</code></p>
+          <p class="spec-note">Last updated from code state: <code>v0.1.200</code></p>
           <div class="callout">
             <p><strong>踏みつけ撃破:</strong> 完全クローズ。</p>
             <p><strong>連続踏みボーナス:</strong> 現仕様を下のセクションに記載。</p>
@@ -302,6 +302,7 @@
             <li>If more than 1400 ms passes between enemy stomps, the next stomp starts over at combo 1.</li>
             <li>Landing on the floor resets the current combo count to 0.</li>
             <li>Stomping an enemy bounces the player upward, so another stomp can continue the combo before landing.</li>
+            <li>When multiple enemies overlap the player in the same frame, a valid stomp target is prioritized over damage.</li>
           </ul>
           <h3>Score Formula</h3>
           <pre><code>stomp points = enemy base stomp score * current stomp combo count</code></pre>

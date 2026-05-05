@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.200
+### English
+- Improved stomp collision priority so clustered enemies no longer cause side-damage before a valid top stomp can resolve.
+- Updated the Player Spec page with the clustered-enemy stomp priority rule.
+### Japanese
+- 敵が密集している場面で、上から踏める敵がいるのに横当たりダメージが先に処理される問題を修正しました。
+- Player Specページに、敵が重なった時の踏みつけ優先ルールを追記しました。
+
 ## v0.1.199
 ### English
 - Added a site-level Player Spec page for core players, with readable tables for scoring, stomp combos, power-ups, clear rank, and mission summary rules.
