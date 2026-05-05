@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.213
+### English
+- Added a bright burst, upward sparks, and a BIG JUMP popup when the spring platform big jump succeeds.
+### Japanese
+- ジャンプ台の大ジャンプ成功時に、発光リング、上向きの火花、BIG JUMP表示が出る演出を追加しました。
+
 ## v0.1.212
 ### English
 - Relaxed big spring jump timing so holding jump or pressing jump within a wider input buffer triggers the big launch.

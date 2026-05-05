@@ -5,6 +5,7 @@ import type { StageId } from "./stages";
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const SPRING_PLATFORM_DEFAULT_VELOCITY = -820;
 const SPRING_PLATFORM_BIG_JUMP_MULTIPLIER = 1.28;
+const SPRING_BIG_JUMP_EFFECT_DEPTH = 125;
 const FRAGILE_PLATFORM_DELAY_MS = 360;
 const FRAGILE_PLATFORM_RESPAWN_MS = 2800;
 const reachedCheckpoints = new Map<StageId, { x: number; y: number }>();
@@ -163,6 +164,9 @@ export const handleSpecialPlatformCollision = (options: {
     options.player.setVelocityY(isBigJump ? velocity * SPRING_PLATFORM_BIG_JUMP_MULTIPLIER : velocity);
     options.player.anims.play("player-air", true);
     options.scene.cameras.main.shake(isBigJump ? 120 : 80, isBigJump ? 0.003 : 0.002);
+    if (isBigJump) {
+      showBigSpringJumpEffect(options.scene, platform);
+    }
     options.onLaunch();
   } else if (behavior === "fragile") {
     queueFragilePlatformCollapse(options.scene, platform);
@@ -179,6 +183,69 @@ const didPlayerLandOnStaticPlatform = (player: PlayerSprite, platform: Phaser.Ph
   const previousBottom = playerBody.prev.y + playerBody.height;
   const overlapsHorizontally = playerBody.right > platformBody.x + 3 && playerBody.x < platformBody.x + platformBody.width - 3;
   return overlapsHorizontally && playerBody.velocity.y >= 0 && previousBottom <= platformBody.y + DECORATION_PLATFORM_LAND_TOLERANCE;
+};
+
+const showBigSpringJumpEffect = (scene: Phaser.Scene, platform: Phaser.Physics.Arcade.Image) => {
+  const x = platform.x;
+  const y = platform.y - 18;
+  const ring = scene.add.circle(x, y, 18, 0x7cffb7, 0.18).setDepth(SPRING_BIG_JUMP_EFFECT_DEPTH);
+  ring.setStrokeStyle(4, 0xeaff8f, 0.95);
+  const core = scene.add.circle(x, y, 8, 0xeaff8f, 0.85).setDepth(SPRING_BIG_JUMP_EFFECT_DEPTH + 1);
+  const label = scene.add
+    .text(x, y - 38, "BIG JUMP", {
+      fontFamily: "monospace",
+      fontSize: "22px",
+      color: "#ecfccb",
+      fontStyle: "bold",
+    })
+    .setOrigin(0.5)
+    .setDepth(SPRING_BIG_JUMP_EFFECT_DEPTH + 2)
+    .setShadow(0, 0, "#22c55e", 8, true, true);
+
+  const sparks = Array.from({ length: 8 }, (_, index) => {
+    const angle = -Math.PI + (Math.PI * index) / 7;
+    const spark = scene.add.rectangle(x, y, 5, 18, 0xeaff8f, 0.95).setDepth(SPRING_BIG_JUMP_EFFECT_DEPTH + 1);
+    spark.setRotation(angle + Math.PI / 2);
+    scene.tweens.add({
+      targets: spark,
+      x: x + Math.cos(angle) * 52,
+      y: y + Math.sin(angle) * 32 - 18,
+      alpha: 0,
+      scaleY: 0.3,
+      duration: 360,
+      ease: "Sine.easeOut",
+      onComplete: () => spark.destroy(),
+    });
+    return spark;
+  });
+
+  scene.tweens.add({
+    targets: ring,
+    radius: 56,
+    alpha: 0,
+    duration: 420,
+    ease: "Sine.easeOut",
+    onComplete: () => ring.destroy(),
+  });
+  scene.tweens.add({
+    targets: core,
+    y: y - 26,
+    scale: 0.2,
+    alpha: 0,
+    duration: 300,
+    ease: "Sine.easeOut",
+    onComplete: () => core.destroy(),
+  });
+  scene.tweens.add({
+    targets: label,
+    y: y - 74,
+    alpha: 0,
+    duration: 620,
+    ease: "Sine.easeOut",
+    onComplete: () => label.destroy(),
+  });
+
+  scene.time.delayedCall(700, () => sparks.forEach((spark) => spark.destroy()));
 };
 
 const queueFragilePlatformCollapse = (scene: Phaser.Scene, platform: Phaser.Physics.Arcade.Image) => {
