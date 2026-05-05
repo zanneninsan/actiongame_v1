@@ -81,7 +81,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.240";
+const DEBUG_VERSION = "v0.1.241";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
@@ -98,6 +98,7 @@ const SPRING_BIG_JUMP_POST_LAUNCH_BUFFER_MS = 260;
 const SPRING_LAUNCH_NORMAL_JUMP_SUPPRESS_MS = 140;
 const STORY_DIALOGUE_ADVANCE_X = 600;
 const STORY_DIALOGUE_STEP_DELAY_MS = 8000;
+const STORY_DIALOGUE_TRIGGER_DURATION_SCALE = 0.5;
 const TIME_BONUS_PER_SECOND = 10;
 const SCORE_DANMAKU_THRESHOLD = 1000;
 const CROUCH_DANMAKU_HOLD_MS = 2000;
@@ -862,9 +863,10 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.hasAdvancedStoryDialogueAtX = true;
+    const stepDelayMs = (storyDialogue.stepDelayMs ?? STORY_DIALOGUE_STEP_DELAY_MS) * STORY_DIALOGUE_TRIGGER_DURATION_SCALE;
     this.enqueueStoryDialogue({
       lines: resolveStoryDialogueLines(storyDialogue, this.locale),
-      stepDelayMs: storyDialogue.stepDelayMs ?? STORY_DIALOGUE_STEP_DELAY_MS,
+      stepDelayMs,
     });
   }
 

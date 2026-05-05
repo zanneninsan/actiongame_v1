@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.241
+### English
+- Halved the display timing for the X-position story dialogue and its follow-up message.
+### Japanese
+- X軸地点に到達した時に出るストーリーメッセージと、その後のメッセージの表示時間を半分にしました。
+
 ## v0.1.240
 ### English
 - Added a queued story-message popup for the first Aqua Mascot stomp, using the sad portrait and a five-second apology line.
