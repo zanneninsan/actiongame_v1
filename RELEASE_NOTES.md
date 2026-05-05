@@ -11,26 +11,34 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 ## v0.1.242
 ### English
 - Halved the display timing for the X-position story dialogue and its follow-up message.
+- Halved dash stamina drain and added a short dash linger after releasing Shift so tapping dash can conserve stamina while keeping momentum.
 ### Japanese
 - X軸地点に到達した時に出るストーリーメッセージと、その後のメッセージの表示時間を半分にしました。
+- ダッシュのスタミナ消費を半分にし、Shiftを離した後も短くダッシュが持続するようにして、細かく押すことでスタミナを温存できるようにしました。
 
 ## v0.1.241
 ### English
 - Added a queued story-message popup for the first Aqua Mascot stomp, using the sad portrait and a five-second apology line.
+- Added start-screen controls for selecting and loading saved top-ranking ghosts from Firebase.
 ### Japanese
 - 初めてAqua Mascotを踏んだ時に、sad表情のメッセージUIで謝罪セリフを5秒表示するようにしました。既に会話UIが出ている場合は順番待ちで表示されます。
+- スタート画面からFirebaseに保存されたランキング上位ゴーストを選んで読み込めるようにしました。
 
 ## v0.1.240
 ### English
 - Changed the time-up danmaku presentation to use the same centered fixed reaction-wave style as MISS while keeping dedicated timeout comments.
+- Save ghost replay data to Firebase when an accepted leaderboard submission reaches the stage top 10.
 ### Japanese
 - 時間切れ時の弾幕演出を、専用コメントのままMISS時と同じ中央揃えの固定リアクション波に変更しました。
+- ランキング登録でステージ10位以内に入ったプレイのゴーストリプレイをFirebaseに保存するようにしました。
 
 ## v0.1.239
 ### English
 - Added a dedicated timeout-scene danmaku comment set so time-up reactions no longer reuse generic miss wording.
+- Added ghost replay JSON recording, export after clearing a stage, and ghost JSON loading from the start screen.
 ### Japanese
 - 時間切れシーン専用の弾幕コメントを新しく用意し、通常のMISSとは違うリアクションが出るようにしました。
+- ゴーストリプレイ用のJSON記録を追加し、ステージクリア後の出力とスタート画面からの読み込みに対応しました。
 
 ## v0.1.238
 ### English

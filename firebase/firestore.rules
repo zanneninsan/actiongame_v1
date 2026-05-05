@@ -7,6 +7,11 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    match /leaderboardGhosts/{ghostId} {
+      allow read: if true;
+      allow create, update, delete: if false;
+    }
+
     match /users/{userId}/settings/{settingsId} {
       allow read, write: if request.auth != null && request.auth.uid == userId && settingsId == "app";
     }

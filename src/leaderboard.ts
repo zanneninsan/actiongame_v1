@@ -38,6 +38,13 @@ export type LeaderboardEntry = {
   stageName: string;
   gameVersion: string;
   createdAt: Date | null;
+  hasGhost: boolean;
+};
+
+export type LeaderboardGhostOption = {
+  id: string;
+  label: string;
+  stageId: string;
 };
 
 export type LeaderboardSubmitPayload = {
@@ -52,6 +59,7 @@ export type LeaderboardSubmitPayload = {
   timeBonus: number;
   elapsedMs: number;
   remainingMs: number;
+  ghostReplay?: unknown;
 };
 
 export type LeaderboardSubmitResult =
@@ -61,6 +69,7 @@ export type LeaderboardSubmitResult =
       submissionId?: string;
       scoreUpdated: boolean;
       rank?: number;
+      ghostSaved?: boolean;
     }
   | { ok: false; reason: string };
 
@@ -252,9 +261,79 @@ export async function fetchLeaderboardEntries(stageId: string, maxEntries = DEFA
         stageName: typeof data.stageName === "string" ? data.stageName : stageId,
         gameVersion: typeof data.gameVersion === "string" ? data.gameVersion : "",
         createdAt: createdAtValue?.toDate?.() ?? null,
+        hasGhost: data.hasGhost === true,
       };
     })
     .filter((entry) => entry.playerId);
+}
+
+export async function fetchLeaderboardGhostOptions(stageId: string, maxEntries = 10): Promise<LeaderboardGhostOption[]> {
+  const entries = await fetchLeaderboardEntries(stageId, maxEntries);
+  return entries
+    .map((entry, index) => ({ entry, rank: index + 1 }))
+    .filter(({ entry }) => entry.hasGhost)
+    .map(({ entry, rank }) => ({
+      id: entry.id,
+      stageId: entry.stageId,
+      label: `#${rank} ${entry.playerName} ${entry.score.toFixed(2)}`,
+    }));
+}
+
+export async function fetchLeaderboardGhostReplay(ghostId: string) {
+  const services = await getFirebaseServices();
+  if (!services) {
+    throw new Error("Leaderboard is not configured.");
+  }
+
+  const safeGhostId = String(ghostId).trim();
+  if (!/^[a-zA-Z0-9_-]+_[a-zA-Z0-9_-]+$/.test(safeGhostId)) {
+    throw new Error("Ghost id is invalid.");
+  }
+
+  const snapshot = await getDoc(doc(services.firestore, "leaderboardGhosts", safeGhostId));
+  const ghostReplay = snapshot.data()?.ghostReplay;
+  const expanded = expandCompactGhostReplay(ghostReplay);
+  if (!expanded) {
+    throw new Error("Ghost replay is unavailable.");
+  }
+  return expanded;
+}
+
+function expandCompactGhostReplay(value: unknown) {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+  if (value.format !== "compact-v1" || !Array.isArray(value.frames)) {
+    return value;
+  }
+
+  const animations = Array.isArray(value.animations) ? value.animations.map((animation) => String(animation ?? "")) : [""];
+  return {
+    schema: value.schema,
+    gameVersion: value.gameVersion,
+    stageId: value.stageId,
+    playerName: value.playerName,
+    controlMode: value.controlMode,
+    createdAt: value.createdAt,
+    durationMs: value.durationMs,
+    frames: value.frames
+      .filter((frame): frame is unknown[] => Array.isArray(frame))
+      .map((frame) => {
+        const flags = Number(frame[3]) || 0;
+        return {
+          t: Number(frame[0]),
+          x: Number(frame[1]),
+          y: Number(frame[2]),
+          left: Boolean(flags & 1),
+          right: Boolean(flags & 2),
+          up: Boolean(flags & 4),
+          down: Boolean(flags & 8),
+          dash: Boolean(flags & 16),
+          flipX: Boolean(flags & 32),
+          anim: animations[Number(frame[4]) || 0] || undefined,
+        };
+      }),
+  };
 }
 
 export async function fetchMyLeaderboardEntries(): Promise<LeaderboardEntry[]> {
@@ -282,6 +361,7 @@ export async function fetchMyLeaderboardEntries(): Promise<LeaderboardEntry[]> {
         stageName: typeof data.stageName === "string" ? data.stageName : "",
         gameVersion: typeof data.gameVersion === "string" ? data.gameVersion : "",
         createdAt: createdAtValue?.toDate?.() ?? null,
+        hasGhost: data.hasGhost === true,
       };
     })
     .filter((entry) => entry.playerId === user.uid && entry.stageId && entry.status === "accepted")
@@ -387,6 +467,10 @@ function sanitizePlayerName(playerName: string) {
 function sanitizePlayerId(playerId: unknown) {
   const normalizedPlayerId = String(playerId ?? "").trim().slice(0, 80);
   return /^[a-zA-Z0-9_-]{8,80}$/.test(normalizedPlayerId) ? normalizedPlayerId : "";
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
 
 function roundScore(score: number) {

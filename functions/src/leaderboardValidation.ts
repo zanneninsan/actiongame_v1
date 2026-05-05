@@ -3,6 +3,8 @@ import {HttpsError} from "firebase-functions/v2/https";
 export const MAX_NAME_LENGTH = 16;
 export const MAX_GAME_TIME_MS = 360_000;
 export const TIME_BONUS_PER_SECOND = 10;
+export const GHOST_REPLAY_SCHEMA = "zannenin-ghost-v1";
+export const MAX_GHOST_FRAMES = 9_000;
 const MAX_SCORE_DRIFT = 0.01;
 const TIMER_DRIFT_MS = 1000;
 const LEADERBOARD_ANTI_CHEAT_ENABLED = false;
@@ -30,6 +32,31 @@ export type CleanLeaderboardPayload = {
   itemScore: number;
   elapsedMs: number;
   remainingMs: number;
+  ghostReplay?: CleanGhostReplay;
+};
+
+export type CleanGhostReplayFrame = {
+  t: number;
+  x: number;
+  y: number;
+  left: boolean;
+  right: boolean;
+  up: boolean;
+  down: boolean;
+  dash: boolean;
+  flipX: boolean;
+  anim?: string;
+};
+
+export type CleanGhostReplay = {
+  schema: typeof GHOST_REPLAY_SCHEMA;
+  gameVersion: string;
+  stageId: string;
+  playerName: string;
+  controlMode: "pc" | "mobile";
+  createdAt: string;
+  durationMs: number;
+  frames: CleanGhostReplayFrame[];
 };
 
 export function cleanLeaderboardPayload(data: unknown): CleanLeaderboardPayload {
@@ -69,6 +96,7 @@ export function cleanLeaderboardPayload(data: unknown): CleanLeaderboardPayload 
     itemScore,
     elapsedMs,
     remainingMs,
+    ghostReplay: cleanGhostReplay(payload.ghostReplay, {stageId, playerName: cleanText(payload.playerName, MAX_NAME_LENGTH) || "PLAYER"}),
   };
 }
 
@@ -100,6 +128,67 @@ function readFiniteNumber(value: unknown) {
 
 export function roundScore(value: number) {
   return Math.round(value * 100) / 100;
+}
+
+function cleanGhostReplay(value: unknown, context: {stageId: string; playerName: string}): CleanGhostReplay | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  if (!isRecord(value)) {
+    throw new HttpsError("invalid-argument", "Ghost replay payload is invalid.");
+  }
+  if (value.schema !== GHOST_REPLAY_SCHEMA) {
+    throw new HttpsError("invalid-argument", "Ghost replay schema is invalid.");
+  }
+  const stageId = cleanStageId(value.stageId);
+  if (stageId !== context.stageId) {
+    throw new HttpsError("invalid-argument", "Ghost replay stage does not match the score stage.");
+  }
+  const framesValue = Array.isArray(value.frames) ? value.frames : undefined;
+  if (!framesValue || framesValue.length < 2 || framesValue.length > MAX_GHOST_FRAMES) {
+    throw new HttpsError("invalid-argument", "Ghost replay frame count is invalid.");
+  }
+
+  let previousTime = -1;
+  const frames = framesValue.map((frameValue) => {
+    if (!isRecord(frameValue)) {
+      throw new HttpsError("invalid-argument", "Ghost replay frame is invalid.");
+    }
+    const t = Math.round(readFiniteNumber(frameValue.t));
+    const x = Math.round(readFiniteNumber(frameValue.x) * 10) / 10;
+    const y = Math.round(readFiniteNumber(frameValue.y) * 10) / 10;
+    if (t < 0 || t > MAX_GAME_TIME_MS || t < previousTime) {
+      throw new HttpsError("invalid-argument", "Ghost replay frame time is invalid.");
+    }
+    previousTime = t;
+    return {
+      t,
+      x,
+      y,
+      left: Boolean(frameValue.left),
+      right: Boolean(frameValue.right),
+      up: Boolean(frameValue.up),
+      down: Boolean(frameValue.down),
+      dash: Boolean(frameValue.dash),
+      flipX: Boolean(frameValue.flipX),
+      anim: cleanText(frameValue.anim, 40) || undefined,
+    };
+  });
+
+  return {
+    schema: GHOST_REPLAY_SCHEMA,
+    gameVersion: cleanText(value.gameVersion, 24),
+    stageId,
+    playerName: cleanText(value.playerName, MAX_NAME_LENGTH) || context.playerName,
+    controlMode: value.controlMode === "mobile" ? "mobile" : "pc",
+    createdAt: cleanText(value.createdAt, 40),
+    durationMs: clamp(Math.round(readFiniteNumber(value.durationMs)), 0, MAX_GAME_TIME_MS),
+    frames,
+  };
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value));
 }
 
 function validateScorePayload({

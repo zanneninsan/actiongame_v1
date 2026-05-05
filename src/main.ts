@@ -61,6 +61,8 @@ import {
 import { DanmakuOverlay, type DanmakuMode } from "./danmaku";
 import {
   fetchLeaderboardEntries,
+  fetchLeaderboardGhostOptions,
+  fetchLeaderboardGhostReplay,
   fetchMyLeaderboardEntries,
   fetchLeaderboardUserSettings,
   getLeaderboardIdentity,
@@ -148,7 +150,8 @@ const DASH_MAX_VERTICAL_SPEED = Math.abs(BOOSTED_JUMP_VELOCITY) * DASH_SPEED_MUL
 const EDITOR_FLY_SPEED = 360;
 const MAX_STAMINA = 100;
 const AIR_JUMP_STAMINA_COST = 20;
-const DASH_STAMINA_DRAIN_PER_SECOND = 32;
+const DASH_STAMINA_DRAIN_PER_SECOND = 16;
+const DASH_LINGER_MS = 260;
 const STAMINA_RECOVERY_PER_SECOND = 42;
 const CROUCH_STAMINA_RECOVERY_MULTIPLIER = 2;
 const HUD_SCALE_BASE_WIDTH = 1280;
@@ -173,6 +176,9 @@ const OVERHEAD_STAMINA_BAR_HEIGHT = 8;
 const OVERHEAD_STAMINA_FILL_WIDTH = 70;
 const OVERHEAD_STAMINA_FILL_HEIGHT = 4;
 const OVERHEAD_STAMINA_OFFSET_Y = 18;
+const GHOST_REPLAY_SCHEMA = "zannenin-ghost-v1";
+const GHOST_RECORD_INTERVAL_MS = 50;
+const GHOST_EXPORT_BUTTON_Y = GAME_HEIGHT / 2 + 180;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
@@ -190,6 +196,33 @@ type QueuedStoryDialogue = {
   lines: StoryDialogueLine[];
   stepDelayMs?: number;
   durationMs?: number;
+};
+
+type GhostReplayFrame = {
+  t: number;
+  x: number;
+  y: number;
+  left: boolean;
+  right: boolean;
+  up: boolean;
+  down: boolean;
+  dash: boolean;
+  flipX: boolean;
+  anim?: string;
+};
+type GhostReplayData = {
+  schema: typeof GHOST_REPLAY_SCHEMA;
+  gameVersion: string;
+  stageId: string;
+  playerName: string;
+  controlMode: ControlMode;
+  createdAt: string;
+  durationMs: number;
+  frames: GhostReplayFrame[];
+};
+type GhostReplayLoadResult = {
+  label: string;
+  stageId?: string;
 };
 
 let extraTouchPointersAdded = false;
@@ -220,6 +253,15 @@ class PrototypeScene extends Phaser.Scene {
   private overheadStaminaBarFill!: Phaser.GameObjects.Rectangle;
   private controlHintText!: Phaser.GameObjects.Text;
   private hudScale = 1;
+  private loadedGhostReplay?: GhostReplayData;
+  private ghostReplaySprite?: Phaser.GameObjects.Sprite;
+  private ghostReplayFrameIndex = 0;
+  private ghostRecordingFrames: GhostReplayFrame[] = [];
+  private ghostRecordingActive = false;
+  private ghostRecordingDisabled = false;
+  private lastGhostRecordAt = -Infinity;
+  private ghostExportButton?: Phaser.GameObjects.Text;
+  private dashLingerUntil = -Infinity;
   private countdownOverlay?: StartCountdownOverlay;
   private finalScoreText?: Phaser.GameObjects.Text;
   private missText?: Phaser.GameObjects.Text;
@@ -589,6 +631,7 @@ class PrototypeScene extends Phaser.Scene {
   update(_time: number, deltaMs: number) {
     this.updateBackground();
     this.updateTimerText();
+    this.updateGhostReplay();
     this.updateOverheadStaminaBar();
     const movingPlatformsActive = this.isRunActive && !this.stageEditor?.isEnabled;
     updateMovingPlatforms(this.movingPlatformInstances, movingPlatformsActive, deltaMs);
@@ -620,6 +663,7 @@ class PrototypeScene extends Phaser.Scene {
     const down = this.keys.s.isDown || this.cursors.down.isDown || this.mobileInput.s;
     const wantsDash = this.keys.shift.isDown || this.mobileInput.shift;
     if (this.stageEditor?.isEnabled) {
+      this.disableGhostRecording();
       this.updateEditorPlayerMovement(left, right, up, down, wantsDash);
       return;
     }
@@ -749,6 +793,7 @@ class PrototypeScene extends Phaser.Scene {
       this.updatePlayerIdleAnimation();
     }
 
+    this.recordGhostFrame({ left, right, up, down, dash: wantsDash });
     this.wasOnFloor = onFloor;
 
     if (this.player.y > this.stageConstants.worldBottom + 32) {
@@ -827,6 +872,16 @@ class PrototypeScene extends Phaser.Scene {
     this.missText = undefined;
     this.danmaku?.destroy();
     this.danmaku = undefined;
+    this.ghostReplaySprite?.destroy();
+    this.ghostReplaySprite = undefined;
+    this.ghostReplayFrameIndex = 0;
+    this.ghostExportButton?.destroy();
+    this.ghostExportButton = undefined;
+    this.ghostRecordingFrames = [];
+    this.ghostRecordingActive = false;
+    this.ghostRecordingDisabled = false;
+    this.lastGhostRecordAt = -Infinity;
+    this.dashLingerUntil = -Infinity;
     this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
     this.rewards?.reset();
@@ -834,6 +889,7 @@ class PrototypeScene extends Phaser.Scene {
     this.editorTimerPausedMs = 0;
     this.editorTimerPauseStartedAt = 0;
     this.stamina = MAX_STAMINA;
+    this.dashLingerUntil = -Infinity;
     this.hasUsedStageEditorThisRun = false;
     this.isRunActive = false;
     this.hasWon = false;
@@ -995,6 +1051,7 @@ class PrototypeScene extends Phaser.Scene {
   private startRun() {
     this.removeStartModal();
     this.applySelectedStage(this.currentStageId);
+    this.prepareGhostReplayForRun();
     this.updatePlayerNameText();
     this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
     this.updateControlHintText();
@@ -1032,6 +1089,7 @@ class PrototypeScene extends Phaser.Scene {
     this.editorTimerPauseStartedAt = this.stageEditor?.isEnabled ? this.time.now : 0;
     this.hasUsedStageEditorThisRun = this.stageEditor?.isEnabled ?? false;
     this.isRunActive = true;
+    this.startGhostRecording();
     this.resetPlayerIdleState(this.time.now);
     this.physics.resume();
     this.updateTimerText();
@@ -1054,6 +1112,9 @@ class PrototypeScene extends Phaser.Scene {
       onLocaleChange: (locale) => this.setLocale(locale),
       onSoundOnChange: (soundOn) => this.setSoundEnabled(soundOn),
       onGoogleLogin: () => this.logInLeaderboardGoogleAccount(),
+      onGhostReplayLoad: (jsonText) => this.loadGhostReplayFromJson(jsonText),
+      onFetchGhostOptions: (stageId) => fetchLeaderboardGhostOptions(this.resolveStageId(stageId), 10),
+      onGhostReplaySelect: (ghostId) => this.loadLeaderboardGhostReplay(ghostId),
       onSubmit: ({ playerName, controlMode, stageId, soundOn, locale }) => {
         this.playerName = playerName;
         this.setCookieValue("actiongame_player_name", this.playerName);
@@ -1713,6 +1774,9 @@ class PrototypeScene extends Phaser.Scene {
       setRemainingTimeSeconds: (seconds) => this.setRemainingTimeSeconds(seconds),
       onToggle: (enabled) => {
         this.updateEditorTimerPause(enabled);
+        if (enabled) {
+          this.disableGhostRecording();
+        }
         this.player.body.setAllowGravity(!enabled);
         this.player.setAcceleration(0, 0);
         this.player.setVelocity(0, 0);
@@ -1856,18 +1920,17 @@ class PrototypeScene extends Phaser.Scene {
 
   private updateStamina(onFloor: boolean, wantsDash: boolean, isCrouching: boolean, deltaMs: number) {
     const deltaSeconds = deltaMs / 1000;
-    let dashActive = false;
 
     if (wantsDash && this.stamina > 0) {
-      dashActive = true;
       this.stamina = Math.max(0, this.stamina - DASH_STAMINA_DRAIN_PER_SECOND * deltaSeconds);
+      this.dashLingerUntil = this.time.now + DASH_LINGER_MS;
     } else if (onFloor && !wantsDash) {
       const recoveryMultiplier = isCrouching ? CROUCH_STAMINA_RECOVERY_MULTIPLIER : 1;
       this.stamina = Math.min(MAX_STAMINA, this.stamina + STAMINA_RECOVERY_PER_SECOND * recoveryMultiplier * deltaSeconds);
     }
 
     this.updateStaminaHud();
-    return dashActive;
+    return this.time.now <= this.dashLingerUntil;
   }
 
   private consumeStamina(cost: number) {
@@ -1916,6 +1979,215 @@ class PrototypeScene extends Phaser.Scene {
     this.overheadStaminaBarFill.setPosition(centerX - OVERHEAD_STAMINA_FILL_WIDTH / 2, centerY);
     this.overheadStaminaBarFill.width = OVERHEAD_STAMINA_FILL_WIDTH * ratio;
     this.overheadStaminaBarFill.setFillStyle(fillColor ?? (ratio > 0.5 ? 0x86efac : ratio > 0.22 ? 0xfde68a : 0xfb7185), 0.98);
+  }
+
+  private loadGhostReplayFromJson(jsonText: string): GhostReplayLoadResult {
+    const parsed = JSON.parse(jsonText) as Partial<GhostReplayData>;
+    return this.loadGhostReplayData(parsed);
+  }
+
+  private async loadLeaderboardGhostReplay(ghostId: string): Promise<GhostReplayLoadResult> {
+    return this.loadGhostReplayData(await fetchLeaderboardGhostReplay(ghostId));
+  }
+
+  private loadGhostReplayData(parsed: Partial<GhostReplayData>): GhostReplayLoadResult {
+    if (
+      parsed.schema !== GHOST_REPLAY_SCHEMA ||
+      typeof parsed.stageId !== "string" ||
+      typeof parsed.playerName !== "string" ||
+      typeof parsed.durationMs !== "number" ||
+      !Array.isArray(parsed.frames)
+    ) {
+      throw new Error("Invalid ghost replay JSON.");
+    }
+
+    const frames = parsed.frames
+      .map((frame) => ({
+        t: Number(frame.t),
+        x: Number(frame.x),
+        y: Number(frame.y),
+        left: Boolean(frame.left),
+        right: Boolean(frame.right),
+        up: Boolean(frame.up),
+        down: Boolean(frame.down),
+        dash: Boolean(frame.dash),
+        flipX: Boolean(frame.flipX),
+        anim: typeof frame.anim === "string" ? frame.anim : undefined,
+      }))
+      .filter((frame) => Number.isFinite(frame.t) && Number.isFinite(frame.x) && Number.isFinite(frame.y))
+      .sort((a, b) => a.t - b.t);
+
+    if (frames.length < 2) {
+      throw new Error("Ghost replay has no frames.");
+    }
+
+    this.loadedGhostReplay = {
+      schema: GHOST_REPLAY_SCHEMA,
+      gameVersion: typeof parsed.gameVersion === "string" ? parsed.gameVersion : "unknown",
+      stageId: parsed.stageId,
+      playerName: parsed.playerName,
+      controlMode: parsed.controlMode === "mobile" ? "mobile" : "pc",
+      createdAt: typeof parsed.createdAt === "string" ? parsed.createdAt : new Date().toISOString(),
+      durationMs: Math.max(0, Number(parsed.durationMs) || frames[frames.length - 1].t),
+      frames,
+    };
+
+    return {
+      stageId: this.loadedGhostReplay.stageId,
+      label: `${t(this.locale, "start.ghostLoaded")} ${this.loadedGhostReplay.playerName} / ${this.loadedGhostReplay.stageId}`,
+    };
+  }
+
+  private prepareGhostReplayForRun() {
+    this.ghostReplaySprite?.destroy();
+    this.ghostReplaySprite = undefined;
+    this.ghostReplayFrameIndex = 0;
+    if (!this.loadedGhostReplay || this.loadedGhostReplay.stageId !== this.currentStageId) {
+      return;
+    }
+
+    const firstFrame = this.loadedGhostReplay.frames[0];
+    this.ghostReplaySprite = this.add
+      .sprite(firstFrame.x, firstFrame.y, "player-idle")
+      .setDisplaySize(PLAYER_DISPLAY_WIDTH, PLAYER_DISPLAY_HEIGHT)
+      .setAlpha(0.34)
+      .setTint(0x67e8f9)
+      .setDepth(88);
+    this.ghostReplaySprite.play("player-idle", true);
+  }
+
+  private updateGhostReplay() {
+    if (!this.ghostReplaySprite || !this.loadedGhostReplay || !this.isRunActive || this.startTime === 0) {
+      return;
+    }
+
+    const frames = this.loadedGhostReplay.frames;
+    if (frames.length < 2) {
+      return;
+    }
+
+    const elapsedMs = this.getRunElapsedMilliseconds();
+    while (this.ghostReplayFrameIndex < frames.length - 2 && frames[this.ghostReplayFrameIndex + 1].t <= elapsedMs) {
+      this.ghostReplayFrameIndex += 1;
+    }
+
+    const current = frames[this.ghostReplayFrameIndex];
+    const next = frames[Math.min(this.ghostReplayFrameIndex + 1, frames.length - 1)];
+    const span = Math.max(1, next.t - current.t);
+    const progress = Phaser.Math.Clamp((elapsedMs - current.t) / span, 0, 1);
+    this.ghostReplaySprite.setPosition(Phaser.Math.Linear(current.x, next.x, progress), Phaser.Math.Linear(current.y, next.y, progress));
+    this.ghostReplaySprite.setFlipX(current.flipX);
+    if (current.anim && this.anims.exists(current.anim) && this.ghostReplaySprite.anims.currentAnim?.key !== current.anim) {
+      this.ghostReplaySprite.play(current.anim, true);
+    }
+  }
+
+  private startGhostRecording() {
+    this.ghostRecordingFrames = [];
+    this.ghostRecordingDisabled = this.stageEditor?.isEnabled ?? false;
+    this.ghostRecordingActive = !this.ghostRecordingDisabled;
+    this.lastGhostRecordAt = -Infinity;
+    if (this.ghostRecordingActive) {
+      this.recordGhostFrame({ left: false, right: false, up: false, down: false, dash: false }, true);
+    }
+  }
+
+  private disableGhostRecording() {
+    if (!this.ghostRecordingActive && this.ghostRecordingDisabled) {
+      return;
+    }
+
+    this.ghostRecordingActive = false;
+    this.ghostRecordingDisabled = true;
+    this.ghostRecordingFrames = [];
+  }
+
+  private recordGhostFrame(
+    input: Pick<GhostReplayFrame, "left" | "right" | "up" | "down" | "dash">,
+    force = false,
+  ) {
+    if (!this.ghostRecordingActive || this.ghostRecordingDisabled || this.startTime === 0) {
+      return;
+    }
+
+    const elapsedMs = this.getRunElapsedMilliseconds();
+    if (!force && elapsedMs - this.lastGhostRecordAt < GHOST_RECORD_INTERVAL_MS) {
+      return;
+    }
+
+    this.lastGhostRecordAt = elapsedMs;
+    this.ghostRecordingFrames.push({
+      t: Math.round(elapsedMs),
+      x: Math.round(this.player.x * 10) / 10,
+      y: Math.round(this.player.y * 10) / 10,
+      left: input.left,
+      right: input.right,
+      up: input.up,
+      down: input.down,
+      dash: input.dash,
+      flipX: this.player.flipX,
+      anim: this.player.anims.currentAnim?.key,
+    });
+  }
+
+  private stopGhostRecording() {
+    if (!this.ghostRecordingActive) {
+      return;
+    }
+
+    this.recordGhostFrame({ left: false, right: false, up: false, down: false, dash: false }, true);
+    this.ghostRecordingActive = false;
+  }
+
+  private buildGhostReplayJson() {
+    return JSON.stringify(this.buildGhostReplayData(), null, 2);
+  }
+
+  private buildGhostReplayData(): GhostReplayData {
+    return {
+      schema: GHOST_REPLAY_SCHEMA,
+      gameVersion: DEBUG_VERSION,
+      stageId: this.currentStageId,
+      playerName: this.playerName,
+      controlMode: this.controlMode,
+      createdAt: new Date().toISOString(),
+      durationMs: this.getRunElapsedMilliseconds(),
+      frames: this.ghostRecordingFrames,
+    };
+  }
+
+  private showGhostExportButton() {
+    this.ghostExportButton?.destroy();
+    this.ghostExportButton = undefined;
+    if (this.ghostRecordingDisabled || this.ghostRecordingFrames.length < 2) {
+      return;
+    }
+
+    this.ghostExportButton = this.add
+      .text(GAME_WIDTH / 2, GHOST_EXPORT_BUTTON_Y, t(this.locale, "ghost.exportJson"), {
+        fontFamily: "monospace",
+        fontSize: "22px",
+        color: "#dcfce7",
+        backgroundColor: "#14532dcc",
+        padding: { x: 18, y: 10 },
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(210)
+      .setInteractive({ useHandCursor: true })
+      .on("pointerdown", () => this.downloadGhostReplayJson());
+  }
+
+  private downloadGhostReplayJson() {
+    const blob = new Blob([this.buildGhostReplayJson()], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `ghost-${this.currentStageId}-${Date.now()}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   }
 
   private tryEmitScoreDanmaku() {
@@ -2093,10 +2365,17 @@ class PrototypeScene extends Phaser.Scene {
       return GAME_TIME_MS;
     }
 
+    return Math.max(0, GAME_TIME_MS - this.getRunElapsedMilliseconds());
+  }
+
+  private getRunElapsedMilliseconds() {
+    if (this.startTime === 0) {
+      return 0;
+    }
+
     const activeEditorPauseMs =
       this.editorTimerPauseStartedAt === 0 ? 0 : Math.max(0, this.time.now - this.editorTimerPauseStartedAt);
-    const elapsed = Math.max(0, this.time.now - this.startTime - this.editorTimerPausedMs - activeEditorPauseMs);
-    return Math.max(0, GAME_TIME_MS - elapsed);
+    return Math.max(0, this.time.now - this.startTime - this.editorTimerPausedMs - activeEditorPauseMs);
   }
 
   private setRemainingTimeSeconds(seconds: number) {
@@ -2227,6 +2506,8 @@ class PrototypeScene extends Phaser.Scene {
         timeBonus,
         elapsedMs,
         remainingMs,
+        ghostReplay:
+          !this.ghostRecordingDisabled && this.ghostRecordingFrames.length >= 2 ? this.buildGhostReplayData() : undefined,
       });
 
         if (!result.ok) {
@@ -2554,6 +2835,7 @@ class PrototypeScene extends Phaser.Scene {
     const finalScore = this.roundScoreValue(itemScore + timeBonus);
     const clearRank = this.rewards?.getClearRank(finalScore, remaining, GAME_TIME_MS) ?? "C";
     const missionLine = this.rewards?.getMissionSummary(remaining, GAME_TIME_MS) ?? "";
+    this.stopGhostRecording();
     this.timerText.setText(
       `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,
     );
@@ -2578,6 +2860,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(200)
       .setShadow(3, 3, "#020617", 4, true, true);
+    this.showGhostExportButton();
     this.submitWinScore(finalScore, itemScore, timeBonus, remaining);
   }
 
