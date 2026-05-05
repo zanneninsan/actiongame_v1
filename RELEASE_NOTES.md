@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.205
+### English
+- Fixed leaderboard validation so enemy stomp bonus points are accepted as part of the score before time bonus.
+- Show a clear leaderboard message when a run used the stage editor and is therefore not submitted.
+### Japanese
+- 敵の踏みつけ撃破ボーナスを、タイムボーナス前のスコアとしてランキング検証で受け付けるように修正しました。
+- ステージ編集を使ったランがランキング登録対象外になる場合、理由が分かるメッセージを表示するようにしました。
+
 ## v0.1.204
 ### English
 - Improved stomp collision priority so clustered enemies no longer cause side-damage before a valid top stomp can resolve.

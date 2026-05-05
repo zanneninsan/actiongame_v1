@@ -106,6 +106,7 @@ const translations = {
     "leaderboard.scoreSubmitted": "Score submitted.",
     "leaderboard.scoreSubmittedBestNotUpdated": "Score submitted. Best score was not updated.",
     "leaderboard.scoreSubmitFailed": "Score could not be submitted.",
+    "leaderboard.editedStageNotSubmitted": "Edited-stage runs are not submitted.",
   },
   ja: {
     "start.playerName": "プレイヤー名",
@@ -205,6 +206,7 @@ const translations = {
     "leaderboard.scoreSubmitted": "スコアを登録しました。",
     "leaderboard.scoreSubmittedBestNotUpdated": "スコアを登録しました。ベストスコアは更新されませんでした。",
     "leaderboard.scoreSubmitFailed": "スコアを登録できませんでした。",
+    "leaderboard.editedStageNotSubmitted": "ステージ編集を使ったランはランキングに登録されません。",
   },
 } as const;
 

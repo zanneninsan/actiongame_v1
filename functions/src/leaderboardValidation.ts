@@ -7,15 +7,15 @@ const MAX_SCORE_DRIFT = 0.01;
 const TIMER_DRIFT_MS = 1000;
 
 type StageScoreLimit = {
-  maxItemScore: number;
+  maxScoreBeforeTimeBonus: number;
   minElapsedMs: number;
 };
 
 const STAGE_SCORE_LIMITS: Record<string, StageScoreLimit> = {
-  neonCanal: {maxItemScore: 4250, minElapsedMs: 1000},
-  neoShibuyaCity: {maxItemScore: 4425, minElapsedMs: 1000},
-  skybridgeSprint: {maxItemScore: 2750, minElapsedMs: 1000},
-  skyShaftClimb: {maxItemScore: 1600, minElapsedMs: 1000},
+  neonCanal: {maxScoreBeforeTimeBonus: 4350, minElapsedMs: 1000},
+  neoShibuyaCity: {maxScoreBeforeTimeBonus: 5000, minElapsedMs: 1000},
+  skybridgeSprint: {maxScoreBeforeTimeBonus: 3700, minElapsedMs: 1000},
+  skyShaftClimb: {maxScoreBeforeTimeBonus: 1900, minElapsedMs: 1000},
 };
 
 export type CleanLeaderboardPayload = {
@@ -50,8 +50,8 @@ export function cleanLeaderboardPayload(data: unknown): CleanLeaderboardPayload 
   }
 
   const itemScore = readFiniteNumber(payload.itemScore);
-  if (itemScore < 0 || itemScore > stageLimit.maxItemScore) {
-    throw new HttpsError("failed-precondition", "Item score exceeds the stage limit.");
+  if (itemScore < 0 || itemScore > stageLimit.maxScoreBeforeTimeBonus) {
+    throw new HttpsError("failed-precondition", "Score before time bonus exceeds the stage limit.");
   }
 
   const remainingMs = readFiniteNumber(payload.remainingMs);
@@ -67,7 +67,7 @@ export function cleanLeaderboardPayload(data: unknown): CleanLeaderboardPayload 
   }
 
   const expectedScore = roundScore(itemScore + (remainingMs / 1000) * TIME_BONUS_PER_SECOND);
-  const maxScore = stageLimit.maxItemScore + (MAX_GAME_TIME_MS / 1000) * TIME_BONUS_PER_SECOND;
+  const maxScore = stageLimit.maxScoreBeforeTimeBonus + (MAX_GAME_TIME_MS / 1000) * TIME_BONUS_PER_SECOND;
   const submittedScoreValue = readFiniteNumber(payload.score);
   if (submittedScoreValue < 0 || submittedScoreValue > maxScore) {
     throw new HttpsError("failed-precondition", "Score payload is invalid.");

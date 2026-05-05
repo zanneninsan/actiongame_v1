@@ -24,6 +24,17 @@ test("accepts a valid leaderboard payload", () => {
   assert.equal(payload.expectedScore, 4250);
 });
 
+test("accepts enemy defeat bonus in the score before time bonus", () => {
+  const payload = cleanLeaderboardPayload({
+    ...basePayload,
+    itemScore: 4350,
+    score: 4350,
+  });
+
+  assert.equal(payload.itemScore, 4350);
+  assert.equal(payload.expectedScore, 4350);
+});
+
 test("rejects unknown stages", () => {
   assertHttpsError(
     () => cleanLeaderboardPayload({...basePayload, stageId: "futureStage"}),
@@ -31,9 +42,9 @@ test("rejects unknown stages", () => {
   );
 });
 
-test("rejects item scores above the selected stage limit", () => {
+test("rejects score before time bonus above the selected stage limit", () => {
   assertHttpsError(
-    () => cleanLeaderboardPayload({...basePayload, stageId: "skyShaftClimb", itemScore: 1600.01, score: 1600.01}),
+    () => cleanLeaderboardPayload({...basePayload, stageId: "skyShaftClimb", itemScore: 1900.01, score: 1900.01}),
     "failed-precondition",
   );
 });
