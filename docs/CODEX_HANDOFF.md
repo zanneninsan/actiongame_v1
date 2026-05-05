@@ -126,6 +126,19 @@ If only making small local notes, documentation tweaks, or internal refactors wi
 
 ## Common Tasks
 
+### Named Workflow: ship-main
+
+When the user says `ship-main` or asks for the usual main shipping flow:
+
+1. Confirm the current branch and a clean worktree.
+2. Fetch `origin/main`.
+3. Merge the current branch into `main`.
+4. Run `npm run build`.
+5. Push `main`.
+6. Run `firebase deploy` from the repository root.
+7. Switch back to the original work branch.
+8. Fast-forward the original work branch to `main`.
+
 ### Stage Layout
 
 Start with `src/stages.ts`.
