@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.332
+### English
+- Added the Nightmare longrun stage from the selected commit.
+### Japanese
+- 指定コミットからナイトメアのロングランステージを取り込みました。
+
 ## v0.1.331
 ### English
 - Changed the return-to-title home button to a friendlier house emoji.
