@@ -2,6 +2,18 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.284
+### English
+- Made the account test-data clear action also remove local app settings and Firebase sign-in persistence while keeping scores intact.
+- Updated the OGP/Twitter card image to the newer game logo artwork and removed the previous source image.
+- Added a 1200x630 title illustration as the site's OGP/Twitter card image.
+- Fixed leaderboard result actions so share and close buttons align cleanly on desktop and compact mobile layouts.
+### Japanese
+- アカウント画面のテストデータ削除で、スコアを残したままローカルのアプリ設定とFirebaseログイン保持も削除するようにしました。
+- OGP/Twitterカード画像を新しいゲームロゴ画像に差し替え、前の元画像をソース管理から削除しました。
+- サイトのOGP/Twitterカード画像として、タイトルイラストを1200×630に加工して設定しました。
+- ランキング結果画面のシェアと閉じるボタンがPCとスマホで崩れないよう、下部レイアウトを整理しました。
+
 ## v0.1.283
 ### English
 - Made the danmaku options tutorial strictly once per account, so test-data clearing no longer resets its seen flag.

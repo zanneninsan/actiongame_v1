@@ -175,6 +175,7 @@ export function showAccountPanel(options: AccountPanelOptions) {
       .onGoogleTestDataClear()
       .then((identity) => {
         renderIdentity(identity);
+        renderScores(scoreList, [], locale);
         setStatus(t(locale, "account.clearedTestDataMessage"));
       })
       .catch((error) => {

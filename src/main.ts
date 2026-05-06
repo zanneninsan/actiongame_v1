@@ -71,6 +71,7 @@ import {
   logInLeaderboardWithGoogle,
   saveLeaderboardUserSettings,
   signInLeaderboardWithGoogle,
+  signOutLeaderboardAuth,
   submitLeaderboardScore,
   type LeaderboardIdentity,
   type LeaderboardSubmitResult,
@@ -88,7 +89,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.283";
+const DEBUG_VERSION = "v0.1.284";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -1415,6 +1416,34 @@ class PrototypeScene extends Phaser.Scene {
 
   private setCookieValue(name: string, value: string) {
     document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; max-age=31536000; path=/; SameSite=Lax`;
+  }
+
+  private deleteCookieValue(name: string) {
+    document.cookie = `${encodeURIComponent(name)}=; max-age=0; path=/; SameSite=Lax`;
+  }
+
+  private clearLeaderboardLocalTestData() {
+    for (const key of [LEADERBOARD_PLAYER_ID_STORAGE_KEY, LOCALE_STORAGE_KEY]) {
+      try {
+        window.localStorage.removeItem(key);
+      } catch {
+        // Ignore local storage failures; this action is best-effort cleanup for testing.
+      }
+    }
+
+    for (const key of [
+      "actiongame_player_name",
+      STAGE_ID_STORAGE_KEY,
+      "actiongame_muted",
+      "actiongame_bgm_volume",
+      "actiongame_se_volume",
+      "actiongame_volume",
+      "actiongame_danmaku_disabled",
+      "actiongame_danmaku_mode",
+      LEADERBOARD_PLAYER_ID_STORAGE_KEY,
+    ]) {
+      this.deleteCookieValue(key);
+    }
   }
 
   private getOrCreateLeaderboardPlayerId() {
@@ -2875,9 +2904,16 @@ class PrototypeScene extends Phaser.Scene {
       window.clearTimeout(this.leaderboardSettingsSaveTimer);
       this.leaderboardSettingsSaveTimer = undefined;
     }
-    this.leaderboardSettingsSyncLoadedForPlayerId = result.identity.playerId;
-    this.applyLeaderboardIdentity(result.identity);
-    return result.identity;
+    this.clearLeaderboardLocalTestData();
+    await signOutLeaderboardAuth();
+    this.leaderboardSettingsSyncLoadedForPlayerId = "";
+    this.leaderboardPlayerId = "";
+    this.leaderboardGoogleLinked = false;
+    this.leaderboardGoogleEmail = null;
+    this.leaderboardGoogleDisplayName = null;
+    this.startModal?.setAccountStatus(this.getStartAccountStatus());
+    this.updatePlayerNameText();
+    return undefined;
   }
 
   private showAccount() {
