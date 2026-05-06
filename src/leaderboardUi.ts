@@ -29,6 +29,7 @@ type LeaderboardAccountPrompt = {
 export type LeaderboardGhostSaveStatus = "saved" | "missing" | "notEligible" | "notRecorded" | "unknown";
 
 const LEADERBOARD_FETCH_RETRY_MS = 800;
+const GAME_SHARE_URL = "https://zannenin-sisters-leaderboard.web.app/";
 
 export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
   document.getElementById("leaderboard-modal")?.remove();
@@ -51,8 +52,13 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
       </div>
       <ol class="leaderboard-list"></ol>
       <div class="leaderboard-current-score" hidden></div>
-      <div class="leaderboard-account-prompt" hidden></div>
-      <button id="leaderboard-close" class="ui-button" type="button">${escapeHtml(t(locale, "leaderboard.close"))}</button>
+      <div class="leaderboard-footer">
+        <div class="leaderboard-account-prompt" hidden></div>
+        <div class="leaderboard-actions">
+          <button id="leaderboard-share-x" class="ui-button" type="button" hidden>${escapeHtml(t(locale, "leaderboard.shareX"))}</button>
+          <button id="leaderboard-close" class="ui-button" type="button">${escapeHtml(t(locale, "leaderboard.close"))}</button>
+        </div>
+      </div>
     </div>
   `;
   document.body.appendChild(modal);
@@ -62,6 +68,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
   const list = modal.querySelector<HTMLOListElement>(".leaderboard-list")!;
   const currentScore = modal.querySelector<HTMLElement>(".leaderboard-current-score")!;
   const accountPrompt = modal.querySelector<HTMLElement>(".leaderboard-account-prompt")!;
+  const shareButton = modal.querySelector<HTMLButtonElement>("#leaderboard-share-x")!;
   const closeButton = modal.querySelector<HTMLButtonElement>("#leaderboard-close")!;
   const close = () => {
     modal.remove();
@@ -69,7 +76,11 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
   };
   renderCurrentScore(currentScore, options.currentScore, locale);
   renderAccountPrompt(accountPrompt, options.accountPrompt, locale);
+  renderShareButton(shareButton, options, locale);
 
+  shareButton.addEventListener("click", () => {
+    openXShare(buildShareText(options, locale));
+  });
   closeButton.addEventListener("click", close);
   modal.addEventListener("pointerdown", (event) => {
     if (event.target === modal) {
@@ -106,6 +117,34 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
       status.classList.add("is-error");
       status.textContent = getLeaderboardErrorMessage(locale, errorCode);
     });
+}
+
+function renderShareButton(button: HTMLButtonElement, options: LeaderboardPanelOptions, locale: Locale) {
+  const canShare = Boolean(options.currentScore);
+  button.hidden = !canShare;
+  button.closest(".leaderboard-actions")?.classList.toggle("is-share-hidden", !canShare);
+  button.setAttribute("aria-label", t(locale, "leaderboard.shareX"));
+}
+
+function buildShareText(options: LeaderboardPanelOptions, locale: Locale) {
+  const currentScore = options.currentScore;
+  if (!currentScore) {
+    return `${t(locale, "leaderboard.shareGeneric")}\n${GAME_SHARE_URL}\n#スーパー残念院さんランド`;
+  }
+
+  const rank = currentScore.scoreUpdated && currentScore.rank ? `RANK ${currentScore.rank}` : "RANK -";
+  const bestStatus = currentScore.scoreUpdated ? t(locale, "leaderboard.bestUpdated") : t(locale, "leaderboard.bestNotUpdated");
+  const scoreLine = t(locale, "leaderboard.shareScore")
+    .replace("{stage}", options.stageName)
+    .replace("{score}", currentScore.score.toFixed(2))
+    .replace("{rank}", rank)
+    .replace("{status}", bestStatus);
+  return `${scoreLine}\n${GAME_SHARE_URL}\n#スーパー残念院さんランド`;
+}
+
+function openXShare(text: string) {
+  const params = new URLSearchParams({ text });
+  window.open(`https://twitter.com/intent/tweet?${params.toString()}`, "_blank", "noopener,noreferrer");
 }
 
 async function fetchEntriesWithRetry(fetchEntries: () => Promise<LeaderboardEntry[]>) {

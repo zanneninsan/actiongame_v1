@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.277
+### English
+- Compressed the leaderboard result layout for landscape phone screens and added an X share button for the submitted score.
+### Japanese
+- スマホ横表示でランキング結果画面が潰れにくいように下部レイアウトを圧縮し、今回のスコアをXでシェアできるボタンを追加しました。
+
 ## v0.1.276
 ### English
 - Renamed the start-screen advanced panel to "Replay ghost options" so it matches the ghost-only controls inside.
