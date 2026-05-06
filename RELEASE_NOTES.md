@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.288
+### English
+- Restored OGP/Twitter Card metadata and the OGP image asset in the app build, and changed X sharing to pass the game URL through the tweet intent URL parameter.
+### Japanese
+- アプリのビルドにOGP/Twitter Card用のメタタグとOGP画像を含め直し、XシェアではゲームURLを本文ではなく投稿用URLパラメータとして渡すようにしました。
+
 ## v0.1.287
 ### English
 - Swapped the compact header controls so the menu button stays on the right and the screenshot button sits immediately to its left.

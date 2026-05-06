@@ -132,7 +132,7 @@ function renderShareButton(button: HTMLButtonElement, options: LeaderboardPanelO
 function buildShareText(options: LeaderboardPanelOptions, locale: Locale, rankLabel: string) {
   const currentScore = options.currentScore;
   if (!currentScore) {
-    return `${t(locale, "leaderboard.shareGeneric")}\n${GAME_SHARE_URL}\n#スーパー残念院さんランド`;
+    return t(locale, "leaderboard.shareGeneric");
   }
 
   const bestStatus = currentScore.scoreUpdated ? t(locale, "leaderboard.bestUpdated") : t(locale, "leaderboard.bestNotUpdated");
@@ -141,11 +141,15 @@ function buildShareText(options: LeaderboardPanelOptions, locale: Locale, rankLa
     .replace("{score}", currentScore.score.toFixed(2))
     .replace("{rank}", rankLabel)
     .replace("{status}", bestStatus);
-  return `${scoreLine}\n${GAME_SHARE_URL}\n#スーパー残念院さんランド`;
+  return scoreLine;
 }
 
 function openXShare(text: string) {
-  const params = new URLSearchParams({ text });
+  const params = new URLSearchParams({
+    text,
+    url: GAME_SHARE_URL,
+    hashtags: "スーパー残念院さんランド",
+  });
   window.open(`https://twitter.com/intent/tweet?${params.toString()}`, "_blank", "noopener,noreferrer");
 }
 
