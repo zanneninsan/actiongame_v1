@@ -1793,9 +1793,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     { type: "shoppingBag", x: 3600, y: 430 },
     { type: "coin", x: 4140, y: 610 },
   ],
-  bonusBlocks: [
-    { type: "question", x: 2940, y: 300, reward: "energyDrink" },
-  ],
+  bonusBlocks: [],
   checkpoints: [
     { x: 2060, y: 568 },
     { x: 3260, y: 568 },

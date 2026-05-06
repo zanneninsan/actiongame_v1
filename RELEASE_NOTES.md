@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.312
+### English
+- Removed the remaining question block from the tutorial stage to keep the practice flow unambiguous.
+### Japanese
+- チュートリアルステージに残っていたはてなブロックを削除し、練習内容が紛らわしくならないようにしました。
+
 ## v0.1.311
 ### English
 - Raised the tutorial dash wall far above the camera bounds so multi-jumps cannot bypass it.
