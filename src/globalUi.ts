@@ -24,6 +24,7 @@ type GlobalUiOptions = {
   onLeaderboardOpen: () => void;
   onAccountOpen: () => void;
   onReturnToTitle: () => void;
+  onScreenshotOpen: () => void;
 };
 
 export const createGlobalUI = (options: GlobalUiOptions) => {
@@ -42,6 +43,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
       <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(options.locale, "aria.toggleCollision")}">HIT</button>
       <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch rear background">RB1</button>
       <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">MG1</button>
+      <button id="screenshot-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.screenshot")}">📷</button>
       <button id="leaderboard-toggle" class="ui-button" type="button" aria-label="Open leaderboard">&#127942;</button>
       <button id="account-toggle" class="ui-button account-toggle" type="button" aria-label="${t(
         options.locale,
@@ -101,6 +103,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const collisionDebugToggle = document.getElementById("collision-debug-toggle") as HTMLButtonElement;
   const rearDebugToggle = document.getElementById("rear-debug-toggle") as HTMLButtonElement;
   const midgroundDebugToggle = document.getElementById("midground-debug-toggle") as HTMLButtonElement;
+  const screenshotToggle = document.getElementById("screenshot-toggle") as HTMLButtonElement;
   const leaderboardToggle = document.getElementById("leaderboard-toggle") as HTMLButtonElement;
   const accountToggle = document.getElementById("account-toggle") as HTMLButtonElement;
   const playerSpecToggle = document.getElementById("player-spec-toggle") as HTMLButtonElement;
@@ -143,6 +146,10 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   });
   midgroundDebugToggle.addEventListener("click", () => {
     options.onMidgroundBackgroundToggle(midgroundDebugToggle);
+    closeGlobalMenu();
+  });
+  screenshotToggle.addEventListener("click", () => {
+    options.onScreenshotOpen();
     closeGlobalMenu();
   });
   leaderboardToggle.addEventListener("click", () => {
@@ -227,7 +234,14 @@ export const removeGlobalUI = () => {
   document.getElementById("global-ui")?.remove();
   document.getElementById("options-modal")?.remove();
   document.getElementById("account-modal")?.remove();
-  document.body.classList.remove("is-options-modal-open", "is-account-modal-open", "is-leaderboard-modal-open", "is-global-menu-open");
+  document.getElementById("screenshot-modal")?.remove();
+  document.body.classList.remove(
+    "is-options-modal-open",
+    "is-account-modal-open",
+    "is-leaderboard-modal-open",
+    "is-screenshot-modal-open",
+    "is-global-menu-open",
+  );
 };
 
 export const setPlayerPositionDebugUI = (enabled: boolean, x: number, y: number) => {

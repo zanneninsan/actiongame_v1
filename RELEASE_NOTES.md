@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.284
+### English
+- Added game-canvas screenshot capture with F2/PrintScreen, a global screenshot button, and a clear-screen preview/download flow.
+### Japanese
+- F2キーまたはPrintScreenキーでゲーム画面だけを撮影し、機能メニューやクリア後のボタンからプレビューして保存できるようにしました。
+
 ## v0.1.283
 ### English
 - Made the danmaku options tutorial strictly once per account, so test-data clearing no longer resets its seen flag.
