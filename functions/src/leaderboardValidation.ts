@@ -15,8 +15,10 @@ type StageScoreLimit = {
 };
 
 const STAGE_SCORE_LIMITS: Record<string, StageScoreLimit> = {
+  originalDowntown: {maxScoreBeforeTimeBonus: 4350, minElapsedMs: 1000},
   neonCanal: {maxScoreBeforeTimeBonus: 4350, minElapsedMs: 1000},
   neoShibuyaCity: {maxScoreBeforeTimeBonus: 5000, minElapsedMs: 1000},
+  mobileTouchTutorial: {maxScoreBeforeTimeBonus: 1500, minElapsedMs: 1000},
   skybridgeSprint: {maxScoreBeforeTimeBonus: 3700, minElapsedMs: 1000},
   skyShaftClimb: {maxScoreBeforeTimeBonus: 1900, minElapsedMs: 1000},
   rankingCheck: {maxScoreBeforeTimeBonus: 1500, minElapsedMs: 0},
