@@ -125,13 +125,26 @@ const bindMobileButton = (button: HTMLButtonElement, onPressedChange: (pressed: 
     activePointers.clear();
     setPressed(false);
   };
+  const clearPressedOnVisibilityChange = () => {
+    if (document.visibilityState === "hidden") {
+      clearPressed();
+    }
+  };
   const press = (event: PointerEvent) => {
     event.preventDefault();
-    button.setPointerCapture(event.pointerId);
+    try {
+      button.setPointerCapture(event.pointerId);
+    } catch {
+      // Some mobile browsers can drop pointer capture during fullscreen or OS gestures.
+    }
     activePointers.add(event.pointerId);
     setPressed(true);
   };
   const release = (event: PointerEvent) => {
+    const hasPointer = activePointers.has(event.pointerId) || button.hasPointerCapture(event.pointerId);
+    if (!hasPointer) {
+      return;
+    }
     event.preventDefault();
     if (button.hasPointerCapture(event.pointerId)) {
       button.releasePointerCapture(event.pointerId);
@@ -144,16 +157,25 @@ const bindMobileButton = (button: HTMLButtonElement, onPressedChange: (pressed: 
   button.addEventListener("pointerup", release);
   button.addEventListener("pointercancel", release);
   button.addEventListener("lostpointercapture", release);
+  window.addEventListener("pointerup", release, { capture: true });
+  window.addEventListener("pointercancel", release, { capture: true });
   window.addEventListener("blur", clearPressed);
-  document.addEventListener("visibilitychange", clearPressed);
+  window.addEventListener("pagehide", clearPressed);
+  window.addEventListener("contextmenu", clearPressed);
+  document.addEventListener("visibilitychange", clearPressedOnVisibilityChange);
 
   return () => {
+    clearPressed();
     button.removeEventListener("pointerdown", press);
     button.removeEventListener("pointerup", release);
     button.removeEventListener("pointercancel", release);
     button.removeEventListener("lostpointercapture", release);
+    window.removeEventListener("pointerup", release, { capture: true });
+    window.removeEventListener("pointercancel", release, { capture: true });
     window.removeEventListener("blur", clearPressed);
-    document.removeEventListener("visibilitychange", clearPressed);
+    window.removeEventListener("pagehide", clearPressed);
+    window.removeEventListener("contextmenu", clearPressed);
+    document.removeEventListener("visibilitychange", clearPressedOnVisibilityChange);
   };
 };
 

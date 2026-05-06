@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.319
+### English
+- Hardened mobile control release handling so touch buttons are less likely to remain stuck after browser gestures, fullscreen changes, or interrupted pointer events.
+### Japanese
+- モバイル操作のボタンが、ブラウザ操作や全画面切り替え、タッチイベントの中断後に押しっぱなしで固定されにくいよう、解放処理を強化しました。
+
 ## v0.1.318
 ### English
 - Merged the latest `origin/main` multilingual updates into the tutorial branch.
