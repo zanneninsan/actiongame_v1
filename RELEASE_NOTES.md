@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.311
+### English
+- Raised the tutorial dash wall far above the camera bounds so multi-jumps cannot bypass it.
+### Japanese
+- チュートリアルのダッシュ壁をカメラ範囲の上まで大きく伸ばし、多段ジャンプで越えられないようにしました。
+
 ## v0.1.310
 ### English
 - Extended the tutorial dash wall upward so it cannot be bypassed with multi-jumps.
