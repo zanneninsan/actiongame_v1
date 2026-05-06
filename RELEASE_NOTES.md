@@ -2,6 +2,16 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.302
+### English
+- Added Chinese and Korean language options with localized stage labels and key UI text.
+- Marked unfinished stages as WIP while leaving Shibu-ya city and Sky Shaft Climb unmarked.
+- Made the PRESS TO START prompt hold longer on its centered frame to reduce visual noise.
+### Japanese
+- 中国語と韓国語の言語選択を追加し、ステージ名と主要なUI文言を表示できるようにしました。
+- シブヤシティとスカイシャフト・クライム以外の未完成ステージに作成中表示を付けました。
+- PRESS TO STARTが中央位置で長めに止まるようにして、タイトル画面のうるささを抑えました。
+
 ## v0.1.301
 ### English
 - Made the account test-data clear action also reset the first-run title sound confirmation flag.

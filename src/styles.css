@@ -259,7 +259,7 @@ canvas {
 .start-title-screen.is-ready .start-title-prompt {
   animation:
     start-title-prompt-fade 720ms ease-out 980ms forwards,
-    press-start-blink 4200ms steps(4) 1700ms infinite;
+    press-start-blink 5600ms linear 1700ms infinite;
 }
 
 @keyframes maker-splash-sequence {
@@ -596,7 +596,23 @@ canvas {
 }
 
 @keyframes press-start-blink {
-  to {
+  0%,
+  14% {
+    background-position-x: 0%;
+  }
+
+  24%,
+  34% {
+    background-position-x: 33.333%;
+  }
+
+  44%,
+  78% {
+    background-position-x: 66.667%;
+  }
+
+  88%,
+  100% {
     background-position-x: 100%;
   }
 }

@@ -79,10 +79,11 @@ export type EnemyPlacement = {
 export type BonusBlockPlacement = { type: "hidden" | "question" | "breakable"; x: number; y: number; reward?: ItemType };
 export type CheckpointPlacement = { x: number; y: number };
 export type OneWayGatePlacement = { x: number; y: number; height?: number };
-export type StageLocalizedName = { jp: string; en: string };
+export type StageLocale = "ja" | "en" | "zh" | "ko";
+export type StageLocalizedName = { jp: string; en: string; zh?: string; ko?: string };
 export type StageName = string | StageLocalizedName;
 export type StageBackgroundSelection = { rearKey?: string; midgroundKey?: string; midgroundAlpha?: number };
-export type StageLocalizedText = { ja: string; en: string };
+export type StageLocalizedText = { ja: string; en: string; zh?: string; ko?: string };
 export type StageStoryDialogueLine = {
   characterName: StageLocalizedText;
   message: StageLocalizedText;
@@ -115,16 +116,22 @@ export type StageDefinition = {
   enemies?: EnemyPlacement[];
 };
 
-export function resolveStageName(name: StageName, locale: "ja" | "en") {
+export function resolveStageName(name: StageName, locale: StageLocale) {
   if (typeof name === "string") {
     return name;
   }
 
-  return locale === "ja" ? name.jp : name.en;
+  if (locale === "ja") {
+    return name.jp;
+  }
+  return name[locale] ?? name.en;
 }
 
-export function resolveStageText(text: StageLocalizedText, locale: "ja" | "en") {
-  return locale === "ja" ? text.ja : text.en;
+export function resolveStageText(text: StageLocalizedText, locale: StageLocale) {
+  if (locale === "ja") {
+    return text.ja;
+  }
+  return text[locale] ?? text.en;
 }
 
 export const STAGE_OBJECT_ASSETS = [
