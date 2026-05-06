@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.277
+### English
+- Fixed the stage-midpoint story message so its midpoint is recalculated after the selected stage is applied at run start.
+### Japanese
+- プレイ開始時に選択されたステージを反映した後で中間点を計算し直し、中間地点メッセージが正しく表示されるようにしました。
+
 ## v0.1.276
 ### English
 - Replaced the PWA and favicon artwork with a cropped face icon from the new character image, including multi-size PNG outputs and a foreground 満 mark.
