@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.305
+### English
+- Made leaderboard Functions accept safe new stage IDs without requiring a Functions allowlist update for every added stage.
+### Japanese
+- 新しいステージを追加するたびにFunctions側の許可リストを更新しなくても、安全な形式のステージIDならランキング登録できるようにしました。
+
 ## v0.1.304
 ### English
 - Changed the maker splash logo so it stays on screen until tapped, with an automatic advance after eight seconds.
