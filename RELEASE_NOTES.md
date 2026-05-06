@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.315
+### English
+- Added Chinese and Korean translations for start modal account, anonymous play, ghost replay, orientation, and install prompts.
+### Japanese
+- トップ画面の匿名プレイ、Googleログイン、ゴースト、横画面確認、ホーム画面追加などの文言に中国語・韓国語訳を追加しました。
+
 ## v0.1.314
 ### English
 - Added multilingual text to the first-run sound confirmation and filled in missing Chinese and Korean left-side story messages.
