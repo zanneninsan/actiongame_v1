@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.313
+### English
+- Strengthened Chinese font fallbacks for danmaku comments and the left-side story message UI.
+### Japanese
+- 中国語の弾幕コメントと左上メッセージUIが文字化けしにくいように、中国語フォントのフォールバック指定を強化しました。
+
 ## v0.1.312
 ### English
 - Fixed Korean danmaku text rendering by restoring localized comment strings and using CJK font fallbacks, and localized the fixed left-side story messages.

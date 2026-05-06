@@ -65,7 +65,7 @@ const LIVE_CHAT_EMOJI_BOMBS: Record<Locale, readonly string[]> = {
 };
 
 const DANMAKU_FONT_FAMILY =
-  '"Noto Sans CJK KR", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", "Microsoft YaHei", "Noto Sans CJK SC", "Yu Gothic", Meiryo, sans-serif';
+  '"Microsoft YaHei", "Microsoft JhengHei", SimHei, SimSun, "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "Noto Sans CJK KR", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", "Yu Gothic", Meiryo, sans-serif';
 
 type ActiveComment = Phaser.GameObjects.Text & {
   destroyTimer?: Phaser.Time.TimerEvent;
