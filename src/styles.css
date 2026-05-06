@@ -9,6 +9,8 @@ body {
   position: fixed;
   inset: 0;
   touch-action: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -1039,7 +1041,7 @@ canvas {
     height: 34px;
     padding-left: 14px;
     padding-right: 34px;
-    font-size: 14px;
+    font-size: 16px;
   }
 
   .start-choice-panel {

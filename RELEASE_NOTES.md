@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.320
+### English
+- Added Safari-focused mobile zoom guards to reduce accidental page zoom during touch controls and kept compact form fields above iOS auto-zoom font sizes.
+### Japanese
+- Safariのモバイル操作中に意図せず画面が拡大されにくいよう、タッチ操作時のズーム対策を追加し、コンパクト表示の入力欄もiOSの自動拡大条件にかかりにくくしました。
+
 ## v0.1.319
 ### English
 - Hardened mobile control release handling so touch buttons are less likely to remain stuck after browser gestures, fullscreen changes, or interrupted pointer events.

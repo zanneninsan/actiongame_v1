@@ -40,6 +40,7 @@ export const createMobileControls = (options: MobileControlsOptions) => {
     </div>
   `;
   document.body.appendChild(controls);
+  cleanup.push(bindMobileZoomGuards(controls));
 
   if (shouldShowMobileControlsHint()) {
     controls.classList.add("is-first-run-highlight");
@@ -176,6 +177,32 @@ const bindMobileButton = (button: HTMLButtonElement, onPressedChange: (pressed: 
     window.removeEventListener("pagehide", clearPressed);
     window.removeEventListener("contextmenu", clearPressed);
     document.removeEventListener("visibilitychange", clearPressedOnVisibilityChange);
+  };
+};
+
+const bindMobileZoomGuards = (controls: HTMLDivElement) => {
+  let lastTouchEndAt = 0;
+  const preventDefault = (event: Event) => {
+    event.preventDefault();
+  };
+  const preventFastDoubleTapZoom = (event: TouchEvent) => {
+    const now = window.performance.now();
+    if (now - lastTouchEndAt < 380) {
+      event.preventDefault();
+    }
+    lastTouchEndAt = now;
+  };
+
+  controls.addEventListener("touchend", preventFastDoubleTapZoom, { passive: false });
+  document.addEventListener("gesturestart", preventDefault, { passive: false });
+  document.addEventListener("gesturechange", preventDefault, { passive: false });
+  document.addEventListener("gestureend", preventDefault, { passive: false });
+
+  return () => {
+    controls.removeEventListener("touchend", preventFastDoubleTapZoom);
+    document.removeEventListener("gesturestart", preventDefault);
+    document.removeEventListener("gesturechange", preventDefault);
+    document.removeEventListener("gestureend", preventDefault);
   };
 };
 
