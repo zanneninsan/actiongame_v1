@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.292
+### English
+- Added a first-run sound on/off confirmation before the splash logos.
+- Added title-screen music playback with a three-second ending fade and a five-second gap before replaying.
+### Japanese
+- スプラッシュロゴの前に、初回向けの音量オン/オフ確認を追加しました。
+- タイトル画面で音楽を再生し、曲の終わり約3秒でフェードアウトして、約5秒空けてから再び流れるようにしました。
+
 ## v0.1.291
 ### English
 - Added an opaque black mask behind the splash logos so the game canvas cannot briefly show through during title transitions.

@@ -58,6 +58,79 @@ canvas {
   animation: start-splash-mask-release 820ms ease-in-out forwards;
 }
 
+.title-sound-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 4vmin, 44px);
+  background: #000;
+}
+
+.title-sound-gate.is-dismissed {
+  display: none;
+}
+
+.title-sound-gate-panel {
+  box-sizing: border-box;
+  width: min(520px, calc(100vw - 36px));
+  display: grid;
+  gap: 16px;
+  padding: 28px clamp(22px, 5vw, 34px) 26px;
+  border: 2px solid rgba(245, 199, 106, 0.86);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(10, 8, 4, 0.97), rgba(0, 0, 0, 0.98)),
+    url("../public/assets/ui/fantasy/options_modal_window.webp") center / cover no-repeat;
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.68), inset 0 0 22px rgba(245, 199, 106, 0.08);
+  color: #f8fafc;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.title-sound-gate-title {
+  margin: 0;
+  color: #fef3c7;
+  font-size: clamp(20px, 4.8vw, 28px);
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.title-sound-gate-body {
+  margin: 0;
+  color: #dbeafe;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.title-sound-gate-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.title-sound-gate-actions button {
+  min-width: 0;
+  min-height: 48px;
+  border: 0;
+  padding: 0 14px;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #f8fafc;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.title-sound-on {
+  background-image: url("../public/assets/ui/fantasy/button_primary_selected_safe.webp");
+  color: #fff7d6;
+  filter: brightness(1.18) saturate(1.2) drop-shadow(0 0 10px rgba(253, 230, 138, 0.36));
+}
+
 .maker-splash-screen {
   position: fixed;
   inset: 0;
@@ -708,6 +781,30 @@ canvas {
     padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom))
       max(10px, env(safe-area-inset-left));
     overflow: hidden;
+  }
+
+  .title-sound-gate {
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
+
+  .title-sound-gate-panel {
+    gap: 13px;
+    padding: 22px 16px 20px;
+  }
+
+  .title-sound-gate-body {
+    font-size: 13px;
+  }
+
+  .title-sound-gate-actions {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .title-sound-gate-actions button {
+    min-height: 46px;
+    font-size: 15px;
   }
 
   .maker-splash-screen {
