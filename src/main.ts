@@ -88,10 +88,13 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.279";
+const DEBUG_VERSION = "v0.1.283";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
+const GOAL_IN_VIEW_DIALOGUE_DURATION_MS = 3400;
+const DANMAKU_TUTORIAL_DIALOGUE_DELAY_MS = 6800;
+const DANMAKU_TUTORIAL_DIALOGUE_DURATION_MS = 8000;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
   message: "ひゃっ...ぷいりちゃん、ごめんなさいっ",
@@ -107,8 +110,19 @@ const STAMINA_EMPTY_DIALOGUE: StoryDialogueLine = {
   message: "ハァ・・・ハァ・・・ハァッ・・・💦",
   portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_07_sad.png`,
 };
+const GOAL_IN_VIEW_DIALOGUE: StoryDialogueLine = {
+  characterName: "残念院さん",
+  message: "あの青と白のゲートは、もしやゴールでは？",
+  portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_03_happy_open.png`,
+};
+const DANMAKU_TUTORIAL_DIALOGUE: StoryDialogueLine = {
+  characterName: "残念院さん",
+  message: "突然の弾幕・・・びっくりしました！設定から、オンオフやスタイルの切り替えが出来そうな気がします！",
+  portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_06_surprised.png`,
+};
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
+const DANMAKU_TUTORIAL_SEEN_STORAGE_KEY_PREFIX = "actiongame_danmaku_tutorial_seen";
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
 const GAME_TIME_SECONDS = 360;
@@ -356,11 +370,13 @@ class PrototypeScene extends Phaser.Scene {
   private hasShownStageMidpointDialogue = false;
   private storyDialogueAdvanceEvents: Phaser.Time.TimerEvent[] = [];
   private storyDialogueRemoveEvent?: Phaser.Time.TimerEvent;
+  private danmakuTutorialDialogueEvent?: Phaser.Time.TimerEvent;
   private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
   private hasWon = false;
   private hasScoreMilestoneDanmakuPlayed = false;
   private hasShownAquaMascotStompDialogue = false;
   private hasShownStaminaEmptyDialogue = false;
+  private hasShownGoalInViewDialogue = false;
   private crouchDanmakuStartedAt = 0;
   private hasCrouchDanmakuPlayed = false;
   private jumpChainCount = 0;
@@ -467,8 +483,8 @@ class PrototypeScene extends Phaser.Scene {
     this.bgmVolumePercent = savedVolumeSettings.bgm;
     this.seVolumePercent = savedVolumeSettings.se;
     this.soundMuted = this.getCookieValue("actiongame_muted") === "1";
-    this.danmakuEnabled = this.getCookieValue("actiongame_danmaku_disabled") !== "1";
     this.danmakuMode = this.getSavedDanmakuMode();
+    this.danmakuEnabled = this.danmakuMode !== "none";
     this.applySoundSettings();
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange);
     document.addEventListener("fullscreenchange", this.handleFullscreenChange);
@@ -723,6 +739,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.updateStoryDialogueProgress();
     this.updateStageMidpointProgress();
+    this.updateGoalInViewDialogue();
     this.refreshDropThroughDecorationPlatform();
     this.oneWayGateController?.update();
     if (this.stageEditor?.isEnabled) {
@@ -946,11 +963,13 @@ class PrototypeScene extends Phaser.Scene {
     this.removeStageEditor();
     this.removeGlobalUI();
     this.clearStoryDialogueTimers();
+    this.clearDanmakuTutorialDialogueTimer();
     this.storyDialogue?.remove();
     this.storyDialogue = undefined;
     this.hasAdvancedStoryDialogueAtX = false;
     this.hasShownAquaMascotStompDialogue = false;
     this.hasShownStaminaEmptyDialogue = false;
+    this.hasShownGoalInViewDialogue = false;
     this.countdownOverlay?.clear();
     this.countdownOverlay = undefined;
     this.missText?.destroy();
@@ -1009,6 +1028,7 @@ class PrototypeScene extends Phaser.Scene {
     this.collisionDebugGraphics = undefined;
     this.stageMidpointProgress = undefined;
     this.hasShownStageMidpointDialogue = false;
+    this.hasShownGoalInViewDialogue = false;
     this.itemsGroup = undefined;
     this.bonusBlocksGroup = undefined;
     this.checkpointController = undefined;
@@ -1070,12 +1090,76 @@ class PrototypeScene extends Phaser.Scene {
     });
   }
 
+  private updateGoalInViewDialogue() {
+    if (this.hasShownGoalInViewDialogue || !this.goal || this.stageEditor?.isEnabled || this.hasWon) {
+      return;
+    }
+
+    if (!Phaser.Geom.Rectangle.Overlaps(this.cameras.main.worldView, this.goal.getBounds())) {
+      return;
+    }
+
+    this.hasShownGoalInViewDialogue = true;
+    this.enqueueStoryDialogue({
+      lines: [GOAL_IN_VIEW_DIALOGUE],
+      durationMs: GOAL_IN_VIEW_DIALOGUE_DURATION_MS,
+    });
+  }
+
   private clearStoryDialogueTimers() {
     this.storyDialogueAdvanceEvents.forEach((event) => event.remove(false));
     this.storyDialogueRemoveEvent?.remove(false);
     this.storyDialogueAdvanceEvents.length = 0;
     this.storyDialogueRemoveEvent = undefined;
     this.storyDialogueQueue.length = 0;
+  }
+
+  private clearDanmakuTutorialDialogueTimer() {
+    this.danmakuTutorialDialogueEvent?.remove(false);
+    this.danmakuTutorialDialogueEvent = undefined;
+  }
+
+  private getDanmakuTutorialSeenStorageKey(playerId = this.leaderboardPlayerId) {
+    const accountId = isLeaderboardPlayerId(playerId) ? playerId : this.getOrCreateLeaderboardPlayerId();
+    return `${DANMAKU_TUTORIAL_SEEN_STORAGE_KEY_PREFIX}:${accountId}`;
+  }
+
+  private hasSeenDanmakuTutorialDialogue() {
+    try {
+      return window.localStorage.getItem(this.getDanmakuTutorialSeenStorageKey()) === "1";
+    } catch (error) {
+      console.warn("Could not read danmaku tutorial flag.", error);
+      return this.getCookieValue(this.getDanmakuTutorialSeenStorageKey()) === "1";
+    }
+  }
+
+  private markDanmakuTutorialDialogueSeen(playerId = this.leaderboardPlayerId) {
+    const storageKey = this.getDanmakuTutorialSeenStorageKey(playerId);
+    try {
+      window.localStorage.setItem(storageKey, "1");
+    } catch (error) {
+      console.warn("Could not save danmaku tutorial flag.", error);
+    }
+    this.setCookieValue(storageKey, "1");
+  }
+
+  private scheduleDanmakuTutorialDialogue() {
+    if (this.danmakuTutorialDialogueEvent || this.hasSeenDanmakuTutorialDialogue()) {
+      return;
+    }
+
+    this.danmakuTutorialDialogueEvent = this.time.delayedCall(DANMAKU_TUTORIAL_DIALOGUE_DELAY_MS, () => {
+      this.danmakuTutorialDialogueEvent = undefined;
+      if (!this.isRunActive || this.stageEditor?.isEnabled || this.hasWon) {
+        return;
+      }
+      this.markDanmakuTutorialDialogueSeen();
+      this.scheduleLeaderboardUserSettingsSave();
+      this.enqueueStoryDialogue({
+        lines: [DANMAKU_TUTORIAL_DIALOGUE],
+        durationMs: DANMAKU_TUTORIAL_DIALOGUE_DURATION_MS,
+      });
+    });
   }
 
   private showAquaMascotStompDialogueOnce(enemy: Phaser.Physics.Arcade.Sprite) {
@@ -1301,6 +1385,7 @@ class PrototypeScene extends Phaser.Scene {
     this.stageConstants = resolveStageConstants(this.editorStage);
     this.stageMidpointProgress = this.resolveStageMidpointProgress();
     this.hasShownStageMidpointDialogue = false;
+    this.hasShownGoalInViewDialogue = false;
     this.applyStageBackgroundDefaults();
     this.physics.world.setBounds(
       0,
@@ -1415,6 +1500,7 @@ class PrototypeScene extends Phaser.Scene {
       soundMuted: this.soundMuted,
       danmakuEnabled: this.danmakuEnabled,
       danmakuMode: this.danmakuMode,
+      danmakuTutorialSeen: this.hasSeenDanmakuTutorialDialogue(),
     };
   }
 
@@ -1445,14 +1531,21 @@ class PrototypeScene extends Phaser.Scene {
       if (typeof settings.soundMuted === "boolean") {
         this.soundMuted = settings.soundMuted;
       }
-      if (typeof settings.danmakuEnabled === "boolean") {
-        this.danmakuEnabled = settings.danmakuEnabled;
-        this.setCookieValue("actiongame_danmaku_disabled", settings.danmakuEnabled ? "0" : "1");
-      }
-      if (settings.danmakuMode === "classic" || settings.danmakuMode === "liveChat") {
+      if (settings.danmakuMode === "classic" || settings.danmakuMode === "liveChat" || settings.danmakuMode === "none") {
         this.danmakuMode = settings.danmakuMode;
+        this.danmakuEnabled = this.danmakuMode !== "none";
         this.setCookieValue("actiongame_danmaku_mode", settings.danmakuMode);
+        this.setCookieValue("actiongame_danmaku_disabled", this.danmakuEnabled ? "0" : "1");
         this.danmaku?.setMode(this.danmakuMode);
+      } else if (typeof settings.danmakuEnabled === "boolean") {
+        this.danmakuEnabled = settings.danmakuEnabled;
+        this.danmakuMode = settings.danmakuEnabled && this.danmakuMode === "none" ? "classic" : this.danmakuMode;
+        this.setCookieValue("actiongame_danmaku_disabled", settings.danmakuEnabled ? "0" : "1");
+        this.setCookieValue("actiongame_danmaku_mode", this.danmakuMode);
+        this.danmaku?.setMode(this.danmakuMode);
+      }
+      if (settings.danmakuTutorialSeen === true) {
+        this.markDanmakuTutorialDialogueSeen();
       }
       this.applySoundSettings();
       this.refreshLocalizedUI();
@@ -1598,7 +1691,11 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private getSavedDanmakuMode(): DanmakuMode {
-    return this.getCookieValue("actiongame_danmaku_mode") === "liveChat" ? "liveChat" : "classic";
+    const savedMode = this.getCookieValue("actiongame_danmaku_mode");
+    if (savedMode === "none" || this.getCookieValue("actiongame_danmaku_disabled") === "1") {
+      return "none";
+    }
+    return savedMode === "liveChat" ? "liveChat" : "classic";
   }
 
   private saveVolumeSettings(bgmVolume: number, seVolume: number, isMuted: boolean) {
@@ -1649,8 +1746,13 @@ class PrototypeScene extends Phaser.Scene {
 
   private setDanmakuMode(mode: DanmakuMode) {
     this.danmakuMode = mode;
+    this.danmakuEnabled = mode !== "none";
     this.setCookieValue("actiongame_danmaku_mode", mode);
+    this.setCookieValue("actiongame_danmaku_disabled", this.danmakuEnabled ? "0" : "1");
     this.danmaku?.setMode(mode);
+    if (!this.danmakuEnabled) {
+      this.danmaku?.clear();
+    }
     this.scheduleLeaderboardUserSettingsSave();
   }
 
@@ -2056,7 +2158,6 @@ class PrototypeScene extends Phaser.Scene {
         this.soundMuted = muted;
         this.applySoundSettings();
       },
-      onDanmakuChange: (enabled) => this.setDanmakuEnabled(enabled),
       onDanmakuModeChange: (mode) => this.setDanmakuMode(mode),
       onLocaleChange: (locale) => {
         this.setLocale(locale);
@@ -2470,6 +2571,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.danmaku?.emitScoreMilestone();
+    this.scheduleDanmakuTutorialDialogue();
   }
 
   private updateCrouchDanmaku(isCrouching: boolean) {
@@ -2494,6 +2596,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.danmaku?.emitCrouchHold();
+    this.scheduleDanmakuTutorialDialogue();
   }
 
   private updateJumpChainDanmaku(startedJump: boolean, landedThisFrame: boolean) {
@@ -2517,6 +2620,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.danmaku?.emitJumpChain();
+    this.scheduleDanmakuTutorialDialogue();
   }
 
   private resetAfkIdleDanmakuState(startedAt = 0) {
@@ -2549,6 +2653,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.danmaku?.emitAfkIdle();
+    this.scheduleDanmakuTutorialDialogue();
   }
 
   private updateTimerText() {

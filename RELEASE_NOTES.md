@@ -2,6 +2,30 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.283
+### English
+- Made the danmaku options tutorial strictly once per account, so test-data clearing no longer resets its seen flag.
+### Japanese
+- 弾幕設定案内メッセージをアカウントごとに完全に一度きりにし、テストデータ削除でも表示済み状態が戻らないようにしました。
+
+## v0.1.282
+### English
+- Added a once-per-account story message that appears after the first non-MISS danmaku finishes, explaining that comment display can be hidden or restyled from Options.
+### Japanese
+- MISS以外の弾幕が初めて流れた後に、オプションからコメント表示のオンオフやスタイル変更ができることを案内するメッセージを、アカウントごとに一度だけ表示するようにしました。
+
+## v0.1.281
+### English
+- Replaced the separate danmaku visibility checkbox with a single comment display-style selector that includes Hidden, while keeping Nico-style as the default.
+### Japanese
+- オプションの弾幕表示チェックボックスをなくし、コメント(弾幕)表示形式のセレクトボックスに「表示なし」を追加しました。デフォルトはニコ動風のままです。
+
+## v0.1.280
+### English
+- Added a one-time 3.4-second story message with an excited portrait when the goal gate first enters the camera view.
+### Japanese
+- ゴールゲートが初めて視界に入った時、ワクワクした表情でゴールに気づくメッセージを3.4秒だけ表示するようにしました。
+
 ## v0.1.279
 ### English
 - Show an equivalent leaderboard placement for the current score even when the best score is not updated, and use placement wording in share text.

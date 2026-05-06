@@ -123,7 +123,7 @@ type ActiveComment = Phaser.GameObjects.Text & {
   destroyTimer?: Phaser.Time.TimerEvent;
 };
 
-export type DanmakuMode = "classic" | "liveChat";
+export type DanmakuMode = "classic" | "liveChat" | "none";
 
 export class DanmakuOverlay {
   private readonly scene: Phaser.Scene;
@@ -145,6 +145,9 @@ export class DanmakuOverlay {
 
   setMode(mode: DanmakuMode) {
     this.mode = mode;
+    if (mode === "none") {
+      this.clear();
+    }
   }
 
   emitScoreMilestone() {
@@ -235,6 +238,10 @@ export class DanmakuOverlay {
     staggerMs: number,
     options: Partial<DanmakuStyle> = {},
   ) {
+    if (this.mode === "none") {
+      return;
+    }
+
     for (let index = 0; index < count; index += 1) {
       const timer = this.scene.time.delayedCall(index * staggerMs, () => {
         this.pendingTimers.delete(timer);
@@ -329,6 +336,10 @@ export class DanmakuOverlay {
     staggerMs: number,
     options: Partial<DanmakuStyle> = {},
   ) {
+    if (this.mode === "none") {
+      return;
+    }
+
     for (let index = 0; index < count; index += 1) {
       const timer = this.scene.time.delayedCall(index * staggerMs, () => {
         this.pendingTimers.delete(timer);

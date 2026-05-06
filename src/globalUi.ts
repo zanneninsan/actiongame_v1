@@ -19,7 +19,6 @@ type GlobalUiOptions = {
   updateRearBackgroundToggle: (button: HTMLButtonElement) => void;
   updateMidgroundBackgroundToggle: (button: HTMLButtonElement) => void;
   onSoundChange: (bgmVolumePercent: number, seVolumePercent: number, muted: boolean) => void;
-  onDanmakuChange: (enabled: boolean) => void;
   onDanmakuModeChange: (mode: DanmakuMode) => void;
   onLocaleChange: (locale: Locale) => void;
   onLeaderboardOpen: () => void;
@@ -62,6 +61,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   `;
   document.body.appendChild(uiContainer);
 
+  const selectedDanmakuMode: DanmakuMode = options.danmakuEnabled ? options.danmakuMode : "none";
   const optionsModal = document.createElement("div");
   optionsModal.id = "options-modal";
   optionsModal.innerHTML = `
@@ -83,15 +83,12 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
           ).join("")}
         </select>
       </label>
-      <label class="options-checkbox-row">
-        <span>${t(options.locale, "options.danmaku")}</span>
-        <input id="danmaku-toggle" type="checkbox"${options.danmakuEnabled ? " checked" : ""} />
-      </label>
       <label>
         <span>${t(options.locale, "options.danmakuMode")}</span>
         <select id="danmaku-mode-select">
-          <option value="classic"${options.danmakuMode === "classic" ? " selected" : ""}>${t(options.locale, "options.danmakuMode.classic")}</option>
-          <option value="liveChat"${options.danmakuMode === "liveChat" ? " selected" : ""}>${t(options.locale, "options.danmakuMode.liveChat")}</option>
+          <option value="none"${selectedDanmakuMode === "none" ? " selected" : ""}>${t(options.locale, "options.danmakuMode.none")}</option>
+          <option value="classic"${selectedDanmakuMode === "classic" ? " selected" : ""}>${t(options.locale, "options.danmakuMode.classic")}</option>
+          <option value="liveChat"${selectedDanmakuMode === "liveChat" ? " selected" : ""}>${t(options.locale, "options.danmakuMode.liveChat")}</option>
         </select>
       </label>
       <button id="options-close" class="ui-button" type="button">${t(options.locale, "options.close")}</button>
@@ -113,7 +110,6 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const bgmVolumeSlider = document.getElementById("bgm-volume-slider") as HTMLInputElement;
   const seVolumeSlider = document.getElementById("se-volume-slider") as HTMLInputElement;
   const languageSelect = document.getElementById("language-select") as HTMLSelectElement;
-  const danmakuToggle = document.getElementById("danmaku-toggle") as HTMLInputElement;
   const danmakuModeSelect = document.getElementById("danmaku-mode-select") as HTMLSelectElement;
   const setGlobalMenuOpen = (open: boolean) => {
     document.body.classList.toggle("is-global-menu-open", open);
@@ -214,14 +210,9 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
     }
   });
 
-  danmakuToggle.addEventListener("change", (event) => {
-    event.stopPropagation();
-    options.onDanmakuChange(danmakuToggle.checked);
-  });
-
   danmakuModeSelect.addEventListener("change", (event) => {
     event.stopPropagation();
-    const mode = danmakuModeSelect.value === "liveChat" ? "liveChat" : "classic";
+    const mode = danmakuModeSelect.value === "none" ? "none" : danmakuModeSelect.value === "liveChat" ? "liveChat" : "classic";
     options.onDanmakuModeChange(mode);
   });
 

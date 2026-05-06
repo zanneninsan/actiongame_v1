@@ -92,6 +92,7 @@ export type LeaderboardUserSettings = {
   soundMuted?: boolean;
   danmakuEnabled?: boolean;
   danmakuMode?: string;
+  danmakuTutorialSeen?: boolean;
 };
 
 type FirebaseServices = {
@@ -557,8 +558,11 @@ function sanitizeUserSettings(data: unknown): LeaderboardUserSettings {
   if (typeof source.danmakuEnabled === "boolean") {
     settings.danmakuEnabled = source.danmakuEnabled;
   }
-  if (source.danmakuMode === "classic" || source.danmakuMode === "liveChat") {
+  if (source.danmakuMode === "classic" || source.danmakuMode === "liveChat" || source.danmakuMode === "none") {
     settings.danmakuMode = source.danmakuMode;
+  }
+  if (typeof source.danmakuTutorialSeen === "boolean") {
+    settings.danmakuTutorialSeen = source.danmakuTutorialSeen;
   }
   return settings;
 }
