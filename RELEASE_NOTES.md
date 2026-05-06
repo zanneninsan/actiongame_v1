@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.309
+### English
+- Simplified X sharing to use the main game URL with a cache-busting query string and removed the extra card-only share page workaround.
+### Japanese
+- X共有を本体URLにキャッシュ対策クエリを付ける方式へ整理し、カード専用共有ページの回避策を削除しました。
+
 ## v0.1.308
 ### English
 - Switched X share cards to a fresh 1200x600 JPEG image with a new physical URL and removed JavaScript redirects from the card-only share page.
