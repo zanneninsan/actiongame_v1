@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.298
+### English
+- Made the PRESS TO START prompt calmer by reducing its size, glow, opacity, and blink speed on the title screen.
+### Japanese
+- タイトル画面のPRESS TO START表示を少し小さくし、発光、不透明度、点滅速度を抑えて落ち着いた見た目にしました。
+
 ## v0.1.297
 ### English
 - Prevented the title logo fade-in from replaying after the first title video playback, so later still-image holds appear immediately.
