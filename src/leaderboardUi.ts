@@ -45,11 +45,11 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
       <p class="leaderboard-status">${escapeHtml(options.statusMessage ?? t(locale, "leaderboard.loading"))}</p>
       <div class="leaderboard-header">
         <span aria-hidden="true"></span>
-        <span>RANK</span>
-        <span>NAME</span>
-        <span>ID</span>
-        <span>SCORE</span>
-        <span>DATE</span>
+        <span>${escapeHtml(t(locale, "leaderboard.headerRank"))}</span>
+        <span>${escapeHtml(t(locale, "leaderboard.headerName"))}</span>
+        <span>${escapeHtml(t(locale, "leaderboard.headerId"))}</span>
+        <span>${escapeHtml(t(locale, "leaderboard.headerScore"))}</span>
+        <span>${escapeHtml(t(locale, "leaderboard.headerDate"))}</span>
       </div>
       <ol class="leaderboard-list"></ol>
       <div class="leaderboard-current-score" hidden></div>
@@ -110,7 +110,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
       status.textContent = options.statusMessage ?? t(locale, "leaderboard.topScores");
       list.replaceChildren(
         ...entries.map((entry, index) =>
-          createEntryRow(entry, index + 1, options.currentSubmissionId, options.currentPlayerId, options.currentScore),
+          createEntryRow(entry, index + 1, locale, options.currentSubmissionId, options.currentPlayerId, options.currentScore),
         ),
       );
       list.querySelector(".leaderboard-entry.is-current-score")?.scrollIntoView({ block: "center" });
@@ -192,6 +192,7 @@ function wait(milliseconds: number) {
 function createEntryRow(
   entry: LeaderboardEntry,
   rank: number,
+  locale: Locale,
   currentSubmissionId?: string,
   currentPlayerId?: string,
   currentScore?: LeaderboardCurrentScore,
@@ -204,7 +205,7 @@ function createEntryRow(
     row.classList.add("is-current-score");
   }
   row.innerHTML = `
-    <span class="leaderboard-new-marker">${isCurrentScore ? "NEW" : ""}</span>
+    <span class="leaderboard-new-marker">${isCurrentScore ? escapeHtml(t(locale, "leaderboard.newMarker")) : ""}</span>
     <span class="leaderboard-rank">${rank}</span>
     <span class="leaderboard-name">${escapeHtml(entry.playerName)}</span>
     <span class="leaderboard-player-id">${escapeHtml(formatPlayerId(playerId))}</span>

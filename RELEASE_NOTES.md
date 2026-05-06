@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.316
+### English
+- Added Chinese and Korean translations for leaderboard results, Google account linking prompts, and the account/player ID panel.
+### Japanese
+- ランキング画面の結果表示、Google連携の案内、アカウント・プレイヤーID画面に残っていた中国語・韓国語未対応の文言を補いました。
+
 ## v0.1.315
 ### English
 - Added Chinese and Korean translations for start modal account, anonymous play, ghost replay, orientation, and install prompts.
