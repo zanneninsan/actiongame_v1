@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.319
+### English
+- Added Chinese and Korean translations for the stage editor controls, tool labels, import/export statuses, and editor hint text.
+### Japanese
+- ステージエディタの操作ボタン、ツール名、読み込み・書き出しのステータス、エディタ用ヒント文に中国語・韓国語訳を追加しました。
+
 ## v0.1.318
 ### English
 - Added Chinese and Korean support to the player-facing game spec page, including language buttons, URL/local-storage locale detection, navigation labels, tables, and gameplay rule text.
