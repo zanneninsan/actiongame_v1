@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.310
+### English
+- Extended the tutorial dash wall upward so it cannot be bypassed with multi-jumps.
+### Japanese
+- チュートリアルのダッシュ壁を上方向に伸ばし、多段ジャンプで飛び越えられないようにしました。
+
 ## v0.1.309
 ### English
 - Added a dark translucent dash wall to the tutorial dash section that knocks the player back unless they are actively dashing.

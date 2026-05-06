@@ -1802,7 +1802,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
   ],
   oneWayGates: [],
   dashWalls: [
-    { x: 1700, y: 542, width: 40, height: 260 },
+    { x: 1700, y: 156, width: 40, height: 1032 },
   ],
   enemies: [],
 };
