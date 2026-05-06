@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.317
+### English
+- Added Chinese and Korean translations for high-priority player-facing UI such as options, screenshots, mobile controls, fullscreen recovery, global buttons, miss text, and big-jump effects.
+### Japanese
+- オプション、スクリーンショット、モバイル操作、全画面復帰、グローバルボタン、ミス表示、大ジャンプ演出など、プレイヤーがよく見るUIの中国語・韓国語対応を進めました。
+
 ## v0.1.316
 ### English
 - Added Chinese and Korean translations for leaderboard results, Google account linking prompts, and the account/player ID panel.

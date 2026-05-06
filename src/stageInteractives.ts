@@ -145,6 +145,7 @@ export const handleSpecialPlatformCollision = (options: {
   platformObject: Phaser.Types.Physics.Arcade.GameObjectWithBody | Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody | Phaser.Tilemaps.Tile;
   canInteract: () => boolean;
   shouldSpringBigJump?: () => boolean;
+  bigJumpLabel?: string;
   onSpringLaunch?: (details: {
     isBigJump: boolean;
     bigJumpVelocity: number;
@@ -170,7 +171,7 @@ export const handleSpecialPlatformCollision = (options: {
     options.player.setVelocityY(isBigJump ? bigJumpVelocity : velocity);
     options.player.anims.play("player-air", true);
     options.scene.cameras.main.shake(isBigJump ? 120 : 80, isBigJump ? 0.003 : 0.002);
-    const showEffect = () => showBigSpringJumpEffect(options.scene, platform);
+    const showEffect = () => showBigSpringJumpEffect(options.scene, platform, options.bigJumpLabel ?? "BIG JUMP");
     if (isBigJump) {
       showEffect();
     }
@@ -193,14 +194,14 @@ const didPlayerLandOnStaticPlatform = (player: PlayerSprite, platform: Phaser.Ph
   return overlapsHorizontally && playerBody.velocity.y >= 0 && previousBottom <= platformBody.y + DECORATION_PLATFORM_LAND_TOLERANCE;
 };
 
-const showBigSpringJumpEffect = (scene: Phaser.Scene, platform: Phaser.Physics.Arcade.Image) => {
+const showBigSpringJumpEffect = (scene: Phaser.Scene, platform: Phaser.Physics.Arcade.Image, labelText: string) => {
   const x = platform.x;
   const y = platform.y - 18;
   const ring = scene.add.circle(x, y, 18, 0x7cffb7, 0.18).setDepth(SPRING_BIG_JUMP_EFFECT_DEPTH);
   ring.setStrokeStyle(4, 0xeaff8f, 0.95);
   const core = scene.add.circle(x, y, 8, 0xeaff8f, 0.85).setDepth(SPRING_BIG_JUMP_EFFECT_DEPTH + 1);
   const label = scene.add
-    .text(x, y - 38, "BIG JUMP", {
+    .text(x, y - 38, labelText, {
       fontFamily: "monospace",
       fontSize: "22px",
       color: "#ecfccb",

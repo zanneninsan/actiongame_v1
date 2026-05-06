@@ -94,7 +94,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.316";
+const DEBUG_VERSION = "v0.1.317";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -1964,6 +1964,7 @@ class PrototypeScene extends Phaser.Scene {
       platformObject,
       canInteract: () => this.isRunActive && !this.stageEditor?.isEnabled,
       shouldSpringBigJump: () => this.isSpringBigJumpInputActive(),
+      bigJumpLabel: t(this.locale, "hud.bigJump"),
       onSpringLaunch: ({ isBigJump, bigJumpVelocity, showBigJumpEffect }) => {
         this.lastSpringLaunchAt = this.time.now;
         if (isBigJump) {
@@ -3427,8 +3428,9 @@ class PrototypeScene extends Phaser.Scene {
       }
     }
     this.missText?.destroy();
+    const missLabel = t(this.locale, "hud.miss");
     const missBurst = this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "MISS", {
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, missLabel, {
         fontFamily: "monospace",
         fontSize: "104px",
         color: "#ff003c",
@@ -3442,7 +3444,7 @@ class PrototypeScene extends Phaser.Scene {
       .setAlpha(0.72)
       .setShadow(0, 0, "#ff003c", 24, true, true);
     const missEchoLeft = this.add
-      .text(GAME_WIDTH / 2 - 18, GAME_HEIGHT / 2 + 10, "MISS", {
+      .text(GAME_WIDTH / 2 - 18, GAME_HEIGHT / 2 + 10, missLabel, {
         fontFamily: "monospace",
         fontSize: "72px",
         color: "#38bdf8",
@@ -3455,7 +3457,7 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(217)
       .setAlpha(0.58);
     const missEchoRight = this.add
-      .text(GAME_WIDTH / 2 + 20, GAME_HEIGHT / 2 - 8, "MISS", {
+      .text(GAME_WIDTH / 2 + 20, GAME_HEIGHT / 2 - 8, missLabel, {
         fontFamily: "monospace",
         fontSize: "72px",
         color: "#fde047",
@@ -3468,7 +3470,7 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(217)
       .setAlpha(0.58);
     this.missText = this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "MISS", {
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, missLabel, {
         fontFamily: "monospace",
         fontSize: "82px",
         color: "#ff1f4f",

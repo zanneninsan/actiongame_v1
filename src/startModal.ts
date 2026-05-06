@@ -84,7 +84,10 @@ export class StartModal {
       overlay.classList.add("is-title-cleared");
     }
     overlay.innerHTML = `
-      <div class="title-sound-gate${this.soundGateDismissed ? " is-dismissed" : ""}" role="dialog" aria-modal="true" aria-label="Sound setting">
+      <div class="title-sound-gate${this.soundGateDismissed ? " is-dismissed" : ""}" role="dialog" aria-modal="true" aria-label="${t(
+        this.options.locale,
+        "start.soundSetting",
+      )}">
         <div class="title-sound-gate-panel">
           <p class="title-sound-gate-title">音を鳴らしますか？ / Play sound? / 播放声音吗？ / 소리를 켤까요?</p>
           <p class="title-sound-gate-body">

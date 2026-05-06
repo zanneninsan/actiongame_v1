@@ -27,16 +27,16 @@ export const createMobileControls = (options: MobileControlsOptions) => {
   controls.innerHTML = `
     <div class="mobile-pad">
       <button class="mobile-button pad-up" data-key="w" type="button" aria-label="${t(options.locale, "aria.jump")}">&uarr;</button>
-      <button class="mobile-button dash-button pad-dash-left" data-key="shift" type="button" aria-label="${t(options.locale, "aria.dash")}">DASH</button>
+      <button class="mobile-button dash-button pad-dash-left" data-key="shift" type="button" aria-label="${t(options.locale, "aria.dash")}">${t(options.locale, "mobile.dashShort")}</button>
       <button class="mobile-button pad-left" data-key="a" type="button" aria-label="${t(options.locale, "aria.moveLeft")}">&larr;</button>
       <button class="mobile-button pad-down" data-key="s" type="button" aria-label="${t(options.locale, "aria.down")}">&darr;</button>
       <button class="mobile-button pad-right" data-key="d" type="button" aria-label="${t(options.locale, "aria.moveRight")}">&rarr;</button>
     </div>
     <div class="mobile-actions">
-      <button class="mobile-button fullscreen-button" data-action="fullscreen" type="button" aria-label="${options.locale === "ja" ? "全画面切り替え" : "Toggle fullscreen"}">FULL</button>
+      <button class="mobile-button fullscreen-button" data-action="fullscreen" type="button" aria-label="${t(options.locale, "aria.fullscreen")}">${t(options.locale, "mobile.fullscreenShort")}</button>
       <button class="mobile-button" data-key="w" type="button" aria-label="${t(options.locale, "aria.jump")}">&uarr;</button>
-      <button class="mobile-button dash-button" data-key="shift" type="button" aria-label="${t(options.locale, "aria.dash")}">DASH</button>
-      <button class="mobile-button restart-button" data-action="restart" type="button">R</button>
+      <button class="mobile-button dash-button" data-key="shift" type="button" aria-label="${t(options.locale, "aria.dash")}">${t(options.locale, "mobile.dashShort")}</button>
+      <button class="mobile-button restart-button" data-action="restart" type="button" aria-label="${t(options.locale, "aria.restart")}">R</button>
     </div>
   `;
   document.body.appendChild(controls);
