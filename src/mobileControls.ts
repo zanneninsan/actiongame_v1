@@ -19,6 +19,7 @@ const MOBILE_CONTROLS_HINT_STORAGE_KEY = "actiongame_mobile_controls_hint_seen";
 const MOBILE_CONTROLS_LAYOUT_STORAGE_KEY = "actiongame_mobile_controls_layout_v1";
 const MOBILE_CONTROLS_HINT_MS = 4200;
 const MOBILE_LAYOUT_EDGE_PADDING = 8;
+const MOBILE_INPUT_KEYS: MobileInputKey[] = ["w", "a", "s", "d", "shift"];
 
 type MobileControlLayoutId =
   | "pad-jump"
@@ -99,7 +100,14 @@ export const createMobileControls = (options: MobileControlsOptions) => {
     });
   }
 
-  const pressedCounts = new Map<MobileInputKey, number>();
+  const touchInput = bindTouchDrivenMobileControls(controls, options, () => isLayoutEditing);
+  cleanup.push(touchInput.cleanup);
+
+  const pointerPressedCounts = new Map<MobileInputKey, number>();
+  const clearPointerInput = () => {
+    pointerPressedCounts.clear();
+    MOBILE_INPUT_KEYS.forEach((key) => options.onInputChange(key, false));
+  };
   controls.querySelectorAll<HTMLButtonElement>("[data-key]").forEach((button) => {
     const key = button.dataset.key as MobileInputKey;
     cleanup.push(
@@ -107,8 +115,8 @@ export const createMobileControls = (options: MobileControlsOptions) => {
         if (isLayoutEditing) {
           return;
         }
-        const nextCount = Math.max(0, (pressedCounts.get(key) ?? 0) + (pressed ? 1 : -1));
-        pressedCounts.set(key, nextCount);
+        const nextCount = Math.max(0, (pointerPressedCounts.get(key) ?? 0) + (pressed ? 1 : -1));
+        pointerPressedCounts.set(key, nextCount);
         options.onInputChange(key, nextCount > 0);
         if (key === "w" && pressed) {
           options.onJumpQueued();
@@ -156,6 +164,8 @@ export const createMobileControls = (options: MobileControlsOptions) => {
   if (editButton) {
     const toggleLayoutEditing = () => {
       isLayoutEditing = !isLayoutEditing;
+      touchInput.clearInput();
+      clearPointerInput();
       controls.classList.toggle("is-layout-editing", isLayoutEditing);
       controls.classList.remove("is-first-run-highlight");
       if (isLayoutEditing) {
@@ -258,6 +268,153 @@ const bindMobileLayoutDragging = (controls: HTMLDivElement) => {
   return () => cleanup.forEach((remove) => remove());
 };
 
+const bindTouchDrivenMobileControls = (
+  controls: HTMLDivElement,
+  options: MobileControlsOptions,
+  isLayoutEditing: () => boolean,
+) => {
+  const keyButtons = Array.from(controls.querySelectorAll<HTMLButtonElement>("[data-key]")).map((button) => ({
+    button,
+    key: button.dataset.key as MobileInputKey,
+  }));
+  const actionButtons = Array.from(controls.querySelectorAll<HTMLButtonElement>("[data-action]")).map((button) => ({
+    action: button.dataset.action,
+    button,
+  }));
+  const pressedKeys = new Set<MobileInputKey>();
+  const activeActionTouches = new Map<number, string>();
+
+  const setKeyPressed = (key: MobileInputKey, pressed: boolean) => {
+    const wasPressed = pressedKeys.has(key);
+    if (wasPressed === pressed) {
+      return;
+    }
+    if (pressed) {
+      pressedKeys.add(key);
+      if (key === "w") {
+        options.onJumpQueued();
+      }
+    } else {
+      pressedKeys.delete(key);
+    }
+    options.onInputChange(key, pressed);
+  };
+
+  const clearInput = () => {
+    keyButtons.forEach(({ button }) => button.classList.remove("is-pressed"));
+    actionButtons.forEach(({ button }) => button.classList.remove("is-pressed"));
+    MOBILE_INPUT_KEYS.forEach((key) => setKeyPressed(key, false));
+    activeActionTouches.clear();
+  };
+
+  const findButtonAt = <T extends { button: HTMLButtonElement }>(buttons: T[], touch: Touch) =>
+    buttons.find(({ button }) => isPointInsideRect(touch.clientX, touch.clientY, button.getBoundingClientRect()));
+
+  const rebuildFromTouches = (touches: TouchList) => {
+    if (isLayoutEditing()) {
+      clearInput();
+      return;
+    }
+
+    const nextKeys = new Set<MobileInputKey>();
+    const pressedButtons = new Set<HTMLButtonElement>();
+    const activeTouchIds = new Set<number>();
+
+    Array.from(touches).forEach((touch) => {
+      activeTouchIds.add(touch.identifier);
+      const keyHit = findButtonAt(keyButtons, touch);
+      if (keyHit) {
+        nextKeys.add(keyHit.key);
+        pressedButtons.add(keyHit.button);
+      }
+
+      const actionHit = findButtonAt(actionButtons, touch);
+      if (!actionHit?.action) {
+        activeActionTouches.delete(touch.identifier);
+        return;
+      }
+
+      pressedButtons.add(actionHit.button);
+      if (activeActionTouches.get(touch.identifier) === actionHit.action) {
+        return;
+      }
+
+      activeActionTouches.set(touch.identifier, actionHit.action);
+      if (actionHit.action === "restart") {
+        options.onRestart();
+      } else if (actionHit.action === "fullscreen") {
+        options.onToggleFullscreen();
+      }
+    });
+
+    Array.from(activeActionTouches.keys()).forEach((touchId) => {
+      if (!activeTouchIds.has(touchId)) {
+        activeActionTouches.delete(touchId);
+      }
+    });
+
+    keyButtons.forEach(({ button }) => button.classList.toggle("is-pressed", pressedButtons.has(button)));
+    actionButtons.forEach(({ button }) => button.classList.toggle("is-pressed", pressedButtons.has(button)));
+    MOBILE_INPUT_KEYS.forEach((key) => setKeyPressed(key, nextKeys.has(key)));
+  };
+
+  const handleTouch = (event: TouchEvent) => {
+    if (isToolbarTouchEvent(event)) {
+      return;
+    }
+    controls.classList.remove("is-first-run-highlight");
+    event.preventDefault();
+    rebuildFromTouches(event.touches);
+  };
+  const clearOnVisibilityChange = () => {
+    if (document.visibilityState === "hidden") {
+      clearInput();
+    }
+  };
+
+  controls.addEventListener("touchstart", handleTouch, { passive: false });
+  document.addEventListener("touchmove", handleTouch, { passive: false, capture: true });
+  document.addEventListener("touchend", handleTouch, { passive: false, capture: true });
+  document.addEventListener("touchcancel", handleTouch, { passive: false, capture: true });
+  window.addEventListener("blur", clearInput);
+  window.addEventListener("pagehide", clearInput);
+  window.addEventListener("orientationchange", clearInput);
+  window.addEventListener("resize", clearInput);
+  window.addEventListener("fullscreenchange", clearInput);
+  window.addEventListener("webkitfullscreenchange", clearInput);
+  window.addEventListener("MSFullscreenChange", clearInput);
+  window.addEventListener("contextmenu", clearInput);
+  document.addEventListener("visibilitychange", clearOnVisibilityChange);
+
+  return {
+    cleanup: () => {
+      clearInput();
+      controls.removeEventListener("touchstart", handleTouch);
+      document.removeEventListener("touchmove", handleTouch, { capture: true });
+      document.removeEventListener("touchend", handleTouch, { capture: true });
+      document.removeEventListener("touchcancel", handleTouch, { capture: true });
+      window.removeEventListener("blur", clearInput);
+      window.removeEventListener("pagehide", clearInput);
+      window.removeEventListener("orientationchange", clearInput);
+      window.removeEventListener("resize", clearInput);
+      window.removeEventListener("fullscreenchange", clearInput);
+      window.removeEventListener("webkitfullscreenchange", clearInput);
+      window.removeEventListener("MSFullscreenChange", clearInput);
+      window.removeEventListener("contextmenu", clearInput);
+      document.removeEventListener("visibilitychange", clearOnVisibilityChange);
+    },
+    clearInput,
+  };
+};
+
+const isPointInsideRect = (x: number, y: number, rect: DOMRect) =>
+  x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+
+const isToolbarTouchEvent = (event: TouchEvent) => {
+  const touches = Array.from(event.changedTouches);
+  return touches.length > 0 && touches.every((touch) => touch.target instanceof Element && Boolean(touch.target.closest(".mobile-layout-toolbar")));
+};
+
 const captureMobileControlsLayout = (controls: HTMLDivElement): MobileControlLayout => {
   const controlsRect = controls.getBoundingClientRect();
   const layout: MobileControlLayout = {};
@@ -350,6 +507,9 @@ const bindMobileButton = (button: HTMLButtonElement, onPressedChange: (pressed: 
     }
   };
   const press = (event: PointerEvent) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
     event.preventDefault();
     try {
       button.setPointerCapture(event.pointerId);
@@ -360,6 +520,9 @@ const bindMobileButton = (button: HTMLButtonElement, onPressedChange: (pressed: 
     setPressed(true);
   };
   const release = (event: PointerEvent) => {
+    if (event.pointerType === "touch") {
+      return;
+    }
     const hasPointer = activePointers.has(event.pointerId) || button.hasPointerCapture(event.pointerId);
     if (!hasPointer) {
       return;
