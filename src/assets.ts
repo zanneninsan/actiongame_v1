@@ -92,12 +92,14 @@ export type StageStoryDialogueLine = {
 export type StageStoryDialogue = {
   triggerX?: number;
   stepDelayMs?: number;
+  durationMs?: number;
   lines: StageStoryDialogueLine[];
 };
 export type StageDefinition = {
   name: StageName;
   backgrounds?: StageBackgroundSelection;
   storyDialogue?: StageStoryDialogue;
+  storyDialogues?: StageStoryDialogue[];
   worldWidth: number;
   worldTop?: number;
   worldBottom?: number;

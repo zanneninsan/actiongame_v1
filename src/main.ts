@@ -94,7 +94,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.304";
+const DEBUG_VERSION = "v0.1.305";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -384,7 +384,7 @@ class PrototypeScene extends Phaser.Scene {
   };
   private storyDialogue?: StoryDialogueController;
   private storyDialogueQueue: QueuedStoryDialogue[] = [];
-  private hasAdvancedStoryDialogueAtX = false;
+  private triggeredStoryDialogueIndexes = new Set<number>();
   private stageMidpointProgress?: StageMidpointProgress;
   private hasShownStageMidpointDialogue = false;
   private storyDialogueAdvanceEvents: Phaser.Time.TimerEvent[] = [];
@@ -992,7 +992,7 @@ class PrototypeScene extends Phaser.Scene {
     this.clearDanmakuTutorialDialogueTimer();
     this.storyDialogue?.remove();
     this.storyDialogue = undefined;
-    this.hasAdvancedStoryDialogueAtX = false;
+    this.triggeredStoryDialogueIndexes.clear();
     this.hasShownAquaMascotStompDialogue = false;
     this.hasShownStaminaEmptyDialogue = false;
     this.hasShownGoalInViewDialogue = false;
@@ -1071,21 +1071,31 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private updateStoryDialogueProgress() {
-    const storyDialogue = this.editorStage.storyDialogue;
-    if (!storyDialogue?.lines.length) {
+    const storyDialogues = [
+      ...(this.editorStage.storyDialogue ? [this.editorStage.storyDialogue] : []),
+      ...(this.editorStage.storyDialogues ?? []),
+    ];
+    if (storyDialogues.length === 0) {
       return;
     }
 
-    const triggerX = storyDialogue.triggerX ?? STORY_DIALOGUE_ADVANCE_X;
-    if (this.hasAdvancedStoryDialogueAtX || this.player.x <= triggerX) {
-      return;
-    }
+    storyDialogues.forEach((storyDialogue, index) => {
+      if (!storyDialogue.lines.length || this.triggeredStoryDialogueIndexes.has(index)) {
+        return;
+      }
 
-    this.hasAdvancedStoryDialogueAtX = true;
-    const stepDelayMs = (storyDialogue.stepDelayMs ?? STORY_DIALOGUE_STEP_DELAY_MS) * STORY_DIALOGUE_TRIGGER_DURATION_SCALE;
-    this.enqueueStoryDialogue({
-      lines: resolveStoryDialogueLines(storyDialogue, this.locale),
-      stepDelayMs,
+      const triggerX = storyDialogue.triggerX ?? STORY_DIALOGUE_ADVANCE_X;
+      if (this.player.x <= triggerX) {
+        return;
+      }
+
+      this.triggeredStoryDialogueIndexes.add(index);
+      const stepDelayMs = (storyDialogue.stepDelayMs ?? STORY_DIALOGUE_STEP_DELAY_MS) * STORY_DIALOGUE_TRIGGER_DURATION_SCALE;
+      this.enqueueStoryDialogue({
+        lines: resolveStoryDialogueLines(storyDialogue, this.locale),
+        stepDelayMs,
+        durationMs: storyDialogue.durationMs,
+      });
     });
   }
 

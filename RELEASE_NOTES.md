@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.305
+### English
+- Rebuilt the tutorial stage into a guided sequence for movement, moving jumps, super dash, multi-jumps, crouch stamina recovery, drop-through platforms, and the goal.
+- Added support for multiple stage message triggers so tutorial instructions can appear at each practice section.
+### Japanese
+- チュートリアルステージを、左右移動、移動ジャンプ、スーパーダッシュ、多段ジャンプ、しゃがみスタミナ回復、しゃがみすり抜け、ゴールの順に練習できる構成へ作り直しました。
+- ステージ内の複数地点でメッセージUIを出せるようにし、各練習区間で説明が表示されるようにしました。
+
 ## v0.1.304
 ### English
 - Changed the maker splash logo so it stays on screen until tapped, with an automatic advance after eight seconds.
