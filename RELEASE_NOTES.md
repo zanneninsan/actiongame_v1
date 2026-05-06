@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.334
+### English
+- Repositioned bonus blocks in other stages so players can pass underneath them and hit them with normal jumps more naturally.
+### Japanese
+- 他ステージのボーナスブロックも、下を通り抜けられて通常ジャンプで叩きやすい位置に散らして配置し直しました。
+
 ## v0.1.333
 ### English
 - Moved Nightmare stage bonus blocks away from cramped platform and shooter positions, and documented safe bonus block placement rules.

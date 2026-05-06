@@ -1223,37 +1223,37 @@ export const NEO_SHIBUYA_STAGE: StageDefinition = {
   "bonusBlocks": [
     {
       "type": "question",
-      "x": 1640,
-      "y": 300,
+      "x": 1740,
+      "y": 484,
       "reward": "powerJump"
     },
     {
       "type": "hidden",
-      "x": 5200,
-      "y": 240,
+      "x": 5280,
+      "y": 448,
       "reward": "star"
     },
     {
       "type": "hidden",
-      "x": 5620,
-      "y": 120,
+      "x": 5740,
+      "y": 428,
       "reward": "dashRing"
     },
     {
       "type": "question",
-      "x": 8420,
-      "y": 332,
+      "x": 8200,
+      "y": 496,
       "reward": "powerSpeed"
     },
     {
       "type": "breakable",
-      "x": 8560,
-      "y": 332
+      "x": 8580,
+      "y": 472
     },
     {
       "type": "breakable",
-      "x": 8624,
-      "y": 332
+      "x": 8644,
+      "y": 472
     }
   ],
   "checkpoints": [
@@ -1479,11 +1479,11 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     { type: "energyDrink", x: 8680, y: 492 },
   ],
   bonusBlocks: [
-    { type: "question", x: 1180, y: 300, reward: "powerJump" },
-    { type: "question", x: 3740, y: 360, reward: "powerSpeed" },
-    { type: "hidden", x: 6280, y: 252, reward: "star" },
-    { type: "breakable", x: 6408, y: 252 },
-    { type: "breakable", x: 6472, y: 252 },
+    { type: "question", x: 1180, y: 464, reward: "powerJump" },
+    { type: "question", x: 3660, y: 440, reward: "powerSpeed" },
+    { type: "hidden", x: 6160, y: 424, reward: "star" },
+    { type: "breakable", x: 6640, y: 452 },
+    { type: "breakable", x: 6704, y: 452 },
   ],
   checkpoints: [
     { x: 4020, y: 606 },
