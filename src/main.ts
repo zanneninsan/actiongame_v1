@@ -93,7 +93,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.285";
+const DEBUG_VERSION = "v0.1.286";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -373,7 +373,7 @@ class PrototypeScene extends Phaser.Scene {
     this.refreshMobileFullscreenRecovery();
   };
   private readonly handleScreenshotShortcut = (event: KeyboardEvent) => {
-    if (event.key !== "F2" && event.key !== "PrintScreen") {
+    if (event.key.toLowerCase() !== "p" && event.key !== "PrintScreen") {
       return;
     }
     event.preventDefault();

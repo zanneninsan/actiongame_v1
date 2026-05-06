@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.286
+### English
+- Changed the PC screenshot shortcut from F2 to P because browser or OS shortcuts can intercept function keys.
+### Japanese
+- PC版のスクリーンショットショートカットをF2キーからPキーに変更し、ブラウザやOS側にキー入力を取られにくくしました。
+
 ## v0.1.285
 ### English
 - Kept the screenshot button beside the function menu on compact phone layouts, so captures are available without opening the drawer.
