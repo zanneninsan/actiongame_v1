@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.314
+### English
+- Added multilingual text to the first-run sound confirmation and filled in missing Chinese and Korean left-side story messages.
+### Japanese
+- 初回の音量確認に日英中韓の併記を追加し、左上メッセージUIに残っていた中国語・韓国語未対応のステージ会話を補いました。
+
 ## v0.1.313
 ### English
 - Strengthened Chinese font fallbacks for danmaku comments and the left-side story message UI.

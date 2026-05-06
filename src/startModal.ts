@@ -86,12 +86,13 @@ export class StartModal {
     overlay.innerHTML = `
       <div class="title-sound-gate${this.soundGateDismissed ? " is-dismissed" : ""}" role="dialog" aria-modal="true" aria-label="Sound setting">
         <div class="title-sound-gate-panel">
-          <p class="title-sound-gate-title">${this.options.locale === "ja" ? "音を鳴らしますか？" : "Play with sound?"}</p>
-          <p class="title-sound-gate-body">${
-            this.options.locale === "ja"
-              ? "タイトル画面で音楽が流れます。あとからトップ画面でも変更できます。"
-              : "Music will play on the title screen. You can change this again on the start menu."
-          }</p>
+          <p class="title-sound-gate-title">音を鳴らしますか？ / Play sound? / 播放声音吗？ / 소리를 켤까요?</p>
+          <p class="title-sound-gate-body">
+            タイトル画面で音楽が流れます。あとからトップ画面でも変更できます。<br />
+            Music will play on the title screen. You can change this again on the start menu.<br />
+            标题画面会播放音乐。之后也可以在开始菜单中更改。<br />
+            타이틀 화면에서 음악이 재생됩니다. 나중에 시작 메뉴에서도 변경할 수 있습니다.
+          </p>
           <div class="title-sound-gate-actions">
             <button type="button" class="title-sound-on">${t(this.options.locale, "start.soundOn")}</button>
             <button type="button" class="title-sound-off">${t(this.options.locale, "start.soundOff")}</button>

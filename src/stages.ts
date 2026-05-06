@@ -17,22 +17,30 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
       {
         "characterName": {
           "ja": "残念院さん",
-          "en": "Zannenin"
+          "en": "Zannenin",
+          "zh": "残念院小姐",
+          "ko": "잔넨인 씨"
         },
         "message": {
           "ja": "人が多いですね……ここが渋谷。",
-          "en": "So many people... this must be Shibuya."
+          "en": "So many people... this must be Shibuya.",
+          "zh": "人好多...这里一定是涩谷。",
+          "ko": "사람이 많네요... 여기가 시부야인가 봐요."
         },
         "portraitPath": "assets/ui/message_faces/message_face_head_icon_05_shy.webp"
       },
       {
         "characterName": {
           "ja": "残念院さん",
-          "en": "Zannenin"
+          "en": "Zannenin",
+          "zh": "残念院小姐",
+          "ko": "잔넨인 씨"
         },
         "message": {
           "ja": "先へ進みましょう。何か手がかりが見つかるはずです。",
-          "en": "Let's keep moving. We should be able to find a clue ahead."
+          "en": "Let's keep moving. We should be able to find a clue ahead.",
+          "zh": "继续往前走吧。前面应该能找到线索。",
+          "ko": "계속 앞으로 가요. 앞쪽에서 단서를 찾을 수 있을 거예요."
         },
         "portraitPath": "assets/ui/message_faces/message_face_head_icon_02_smile.webp"
       }
@@ -620,22 +628,30 @@ export const NEO_SHIBUYA_STAGE: StageDefinition = {
       {
         "characterName": {
           "ja": "残念院さん",
-          "en": "Zannenin"
+          "en": "Zannenin",
+          "zh": "残念院小姐",
+          "ko": "잔넨인 씨"
         },
         "message": {
           "ja": "見覚えのある街なのに、少し様子が違いますね。",
-          "en": "This city feels familiar, but something is different."
+          "en": "This city feels familiar, but something is different.",
+          "zh": "这座城市很熟悉，但样子有点不一样。",
+          "ko": "익숙한 거리인데, 분위기가 조금 다르네요."
         },
         "portraitPath": "assets/ui/message_faces/message_face_head_icon_05_shy.webp"
       },
       {
         "characterName": {
           "ja": "残念院さん",
-          "en": "Zannenin"
+          "en": "Zannenin",
+          "zh": "残念院小姐",
+          "ko": "잔넨인 씨"
         },
         "message": {
           "ja": "新しい仕掛けに注意しながら、奥まで進みましょう。",
-          "en": "Watch the new tricks and keep pressing deeper in."
+          "en": "Watch the new tricks and keep pressing deeper in.",
+          "zh": "小心新的机关，继续往深处前进吧。",
+          "ko": "새로운 장치를 조심하면서 안쪽까지 나아가요."
         },
         "portraitPath": "assets/ui/message_faces/message_face_head_icon_02_smile.webp"
       }
@@ -1338,10 +1354,14 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
         characterName: {
           ja: "残念院さん",
           en: "Zannenin",
+          zh: "残念院小姐",
+          ko: "잔넨인 씨",
         },
         message: {
           ja: "足場の間が広いですね。勢いを落とさずに渡りましょう。",
           en: "These gaps are wide. Keep your speed and cross cleanly.",
+          zh: "这些落差很宽。保持速度，一口气越过去吧。",
+          ko: "발판 사이가 넓네요. 속도를 유지해서 깔끔하게 건너요.",
         },
         portraitPath: "assets/ui/message_faces/message_face_head_icon_02_smile.webp",
       },
@@ -1349,10 +1369,14 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
         characterName: {
           ja: "残念院さん",
           en: "Zannenin",
+          zh: "残念院小姐",
+          ko: "잔넨인 씨",
         },
         message: {
           ja: "高い場所ほど焦りは禁物です。着地点を見て進みます。",
           en: "The higher we go, the calmer we move. Watch the landing first.",
+          zh: "越到高处越不能慌。先看好落点再前进。",
+          ko: "높은 곳일수록 침착해야 해요. 착지 지점을 보고 나아가요.",
         },
         portraitPath: "assets/ui/message_faces/message_face_head_icon_05_shy.webp",
       },
@@ -1494,10 +1518,14 @@ export const SKY_SHAFT_CLIMB_STAGE: StageDefinition = {
         characterName: {
           ja: "残念院さん",
           en: "Zannenin",
+          zh: "残念院小姐",
+          ko: "잔넨인 씨",
         },
         message: {
           ja: "上へ続く道です。落ち着いて、一段ずつ登りましょう。",
           en: "The route climbs upward. One platform at a time.",
+          zh: "路线往上延伸。冷静地一层一层爬上去吧。",
+          ko: "위로 이어지는 길이에요. 침착하게 한 칸씩 올라가요.",
         },
         portraitPath: "assets/ui/message_faces/message_face_head_icon_02_smile.webp",
       },
@@ -1505,10 +1533,14 @@ export const SKY_SHAFT_CLIMB_STAGE: StageDefinition = {
         characterName: {
           ja: "残念院さん",
           en: "Zannenin",
+          zh: "残念院小姐",
+          ko: "잔넨인 씨",
         },
         message: {
           ja: "動く足場は待つ勇気も大事です。無理に飛び込まないで。",
           en: "Moving platforms reward patience. Don't jump before the timing is yours.",
+          zh: "移动平台需要耐心。时机没到之前不要勉强跳。",
+          ko: "움직이는 발판은 기다리는 용기가 중요해요. 타이밍이 오기 전에 무리해서 뛰지 마세요.",
         },
         portraitPath: "assets/ui/message_faces/message_face_head_icon_05_shy.webp",
       },
@@ -1621,10 +1653,14 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
         characterName: {
           ja: "残念院さん",
           en: "Zannenin",
+          zh: "残念院小姐",
+          ko: "잔넨인 씨",
         },
         message: {
           ja: "左下で移動、右下でジャンプです。まずは少し進んでみましょう。",
           en: "Use the left buttons to move and the right buttons to jump. Try moving forward first.",
+          zh: "左下角移动，右下角跳跃。先试着往前走吧。",
+          ko: "왼쪽 아래로 이동하고 오른쪽 아래로 점프해요. 우선 조금 앞으로 가 봐요.",
         },
         portraitPath: "assets/ui/message_faces/message_face_head_icon_02_smile.webp",
       },
@@ -1632,10 +1668,14 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
         characterName: {
           ja: "残念院さん",
           en: "Zannenin",
+          zh: "残念院小姐",
+          ko: "잔넨인 씨",
         },
         message: {
           ja: "DASHを押しながら進むと速く走れます。短いステージなので気軽にどうぞ。",
           en: "Hold DASH while moving to run faster. This is a short practice stage, so take it easy.",
+          zh: "移动时按住DASH可以跑得更快。这是短练习关，轻松试试看吧。",
+          ko: "이동하면서 DASH를 누르면 더 빠르게 달릴 수 있어요. 짧은 연습 스테이지니까 편하게 해 보세요.",
         },
         portraitPath: "assets/ui/message_faces/message_face_head_icon_03_happy_open.png",
       },
