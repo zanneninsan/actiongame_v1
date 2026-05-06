@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.300
+### English
+- Made title music recover when browser autoplay blocks a later title-screen playback by retrying on the next user gesture and during the title loop.
+### Japanese
+- 2回目以降のタイトル画面でブラウザの自動再生制限により音楽が止まった場合でも、次の操作やタイトルループ中に再試行してBGMが戻るようにしました。
+
 ## v0.1.299
 ### English
 - Slowed the PRESS TO START prompt sheet animation while restoring its previous glow strength.
