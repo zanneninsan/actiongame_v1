@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.325
+### English
+- Paused mobile runs while touch button layout is being adjusted, delaying the initial countdown until first-run layout setup is complete.
+### Japanese
+- スマホのタッチボタン配置を調整している間はゲーム進行を止め、初回配置設定が終わってからカウントダウンを始めるようにしました。
+
 ## v0.1.324
 ### English
 - Moved mobile button layout controls out of normal play, showing a first-run setup panel and adding a mobile-only layout command to the in-game menu.

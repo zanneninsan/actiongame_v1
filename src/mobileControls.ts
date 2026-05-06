@@ -14,6 +14,8 @@ type MobileControlsOptions = {
   onJumpQueued: () => void;
   onRestart: () => void;
   onToggleFullscreen: () => void;
+  onLayoutEditStart?: () => void;
+  onLayoutEditFinish?: () => void;
 };
 
 const MOBILE_CONTROLS_HINT_STORAGE_KEY = "actiongame_mobile_controls_hint_seen";
@@ -83,6 +85,9 @@ export const createMobileControls = (options: MobileControlsOptions) => {
     }
   };
   const startLayoutEditing = () => {
+    if (!isLayoutEditing) {
+      options.onLayoutEditStart?.();
+    }
     isLayoutEditing = true;
     touchInput.clearInput();
     clearPointerInput();
@@ -99,6 +104,7 @@ export const createMobileControls = (options: MobileControlsOptions) => {
     saveMobileControlsLayout(captureMobileControlsLayout(controls));
     setMobileControlsLayoutSetupSeen();
     updateLayoutToolbar();
+    options.onLayoutEditFinish?.();
   };
   const storedLayout = readMobileControlsLayout();
   if (storedLayout) {
@@ -616,7 +622,7 @@ function setMobileControlsHintSeen() {
   }
 }
 
-function shouldShowMobileControlsLayoutSetup() {
+export function shouldShowMobileControlsLayoutSetup() {
   try {
     return window.localStorage.getItem(MOBILE_CONTROLS_LAYOUT_SETUP_STORAGE_KEY) !== "1";
   } catch {

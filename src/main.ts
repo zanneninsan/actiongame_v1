@@ -58,6 +58,7 @@ import {
 import {
   MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT,
   createMobileControls as createMobileControlElements,
+  shouldShowMobileControlsLayoutSetup,
   type MobileInputKey,
 } from "./mobileControls";
 import { DanmakuOverlay, type DanmakuMode } from "./danmaku";
@@ -96,7 +97,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.324";
+const DEBUG_VERSION = "v0.1.325";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -391,6 +392,8 @@ class PrototypeScene extends Phaser.Scene {
   private mobileFullscreenRecoveryOverlay?: HTMLDivElement;
   private mobileFullscreenWasActive = false;
   private mobileFullscreenRecoveryDismissed = false;
+  private mobileLayoutPaused = false;
+  private mobileLayoutShouldStartCountdown = false;
   private rewards?: RewardSystem;
   private startTime = 0;
   private editorTimerPausedMs = 0;
@@ -1402,12 +1405,16 @@ class PrototypeScene extends Phaser.Scene {
     this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
     this.updateControlHintText();
     this.createGlobalUI();
+    const shouldWaitForMobileLayoutSetup = this.controlMode === "mobile" && shouldShowMobileControlsLayoutSetup();
+    this.mobileLayoutShouldStartCountdown = shouldWaitForMobileLayoutSetup;
     if (this.controlMode === "mobile") {
       this.mobileFullscreenWasActive = hasFullscreenElement();
       this.mobileFullscreenRecoveryDismissed = false;
       this.createMobileControls();
     }
-    this.startCountdown();
+    if (!shouldWaitForMobileLayoutSetup) {
+      this.startCountdown();
+    }
   }
 
   private startCountdown() {
@@ -2207,6 +2214,8 @@ class PrototypeScene extends Phaser.Scene {
       onToggleFullscreen: () => {
         void this.toggleMobileFullscreen();
       },
+      onLayoutEditStart: () => this.pauseForMobileLayoutEdit(),
+      onLayoutEditFinish: () => this.resumeFromMobileLayoutEdit(),
     });
     this.refreshMobileFullscreenRecovery();
   }
@@ -2216,6 +2225,52 @@ class PrototypeScene extends Phaser.Scene {
     this.mobileControlCleanup = [];
     document.getElementById("mobile-controls")?.remove();
     this.removeMobileFullscreenRecovery();
+  }
+
+  private pauseForMobileLayoutEdit() {
+    if (this.mobileLayoutPaused) {
+      return;
+    }
+
+    this.mobileLayoutPaused = true;
+    this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
+    this.mobileJumpQueued = false;
+    if (this.countdownOverlay) {
+      this.countdownOverlay.clear();
+      this.countdownOverlay = undefined;
+      this.mobileLayoutShouldStartCountdown = true;
+    }
+    if (this.isRunActive) {
+      this.editorTimerPauseStartedAt ||= this.time.now;
+    }
+    this.physics.pause();
+    this.anims.pauseAll();
+    this.tweens.pauseAll();
+  }
+
+  private resumeFromMobileLayoutEdit() {
+    if (!this.mobileLayoutPaused) {
+      return;
+    }
+
+    this.mobileLayoutPaused = false;
+    this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
+    this.mobileJumpQueued = false;
+    this.anims.resumeAll();
+    this.tweens.resumeAll();
+    if (this.mobileLayoutShouldStartCountdown) {
+      this.mobileLayoutShouldStartCountdown = false;
+      this.startCountdown();
+      return;
+    }
+    if (this.isRunActive && this.editorTimerPauseStartedAt !== 0) {
+      this.editorTimerPausedMs += Math.max(0, this.time.now - this.editorTimerPauseStartedAt);
+      this.editorTimerPauseStartedAt = this.stageEditor?.isEnabled ? this.time.now : 0;
+    }
+    if (this.isRunActive && !this.stageEditor?.isEnabled && !this.hasWon) {
+      this.physics.resume();
+    }
+    this.updateTimerText();
   }
 
   private async toggleMobileFullscreen() {
