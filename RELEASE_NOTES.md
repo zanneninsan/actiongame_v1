@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.283
+### English
+- Made the account test-data clear action also remove local app settings and Firebase sign-in persistence while keeping scores intact.
+### Japanese
+- アカウント画面のテストデータ削除で、スコアを残したままローカルのアプリ設定とFirebaseログイン保持も削除するようにしました。
+
 ## v0.1.282
 ### English
 - Updated the OGP/Twitter card image to the newer game logo artwork and removed the previous source image.

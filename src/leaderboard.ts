@@ -8,6 +8,7 @@ import {
   setPersistence,
   signInAnonymously,
   signInWithPopup,
+  signOut,
   unlink,
   type Auth,
   type User,
@@ -222,6 +223,16 @@ export async function clearLeaderboardUserSettings() {
 
   await deleteDoc(doc(services.firestore, "users", user.uid, "settings", USER_SETTINGS_DOC));
   return { ok: true as const, identity: createLeaderboardIdentity(user) };
+}
+
+export async function signOutLeaderboardAuth() {
+  const services = await getFirebaseServices();
+  if (!services) {
+    return false;
+  }
+
+  await signOut(services.auth);
+  return true;
 }
 
 export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) {
