@@ -3,7 +3,9 @@ import type { StageDefinition } from "./assets";
 export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
   "name": {
     "jp": "シブヤシティ",
-    "en": "Shibu-ya city"
+    "en": "Shibu-ya city",
+    "zh": "涩谷城",
+    "ko": "시부야 시티"
   },
   "backgrounds": {
     "rearKey": "rear-starry-sky",
@@ -604,7 +606,9 @@ export const ORIGINAL_DOWNTOWN_STAGE: StageDefinition = {
 export const NEO_SHIBUYA_STAGE: StageDefinition = {
   "name": {
     "jp": "作成中ネオシブヤシティ",
-    "en": "WIP Neo Shibuya City"
+    "en": "WIP Neo Shibuya City",
+    "zh": "开发中 新涩谷城",
+    "ko": "제작 중 네오 시부야 시티"
   },
   "backgrounds": {
     "rearKey": "rear-starry-sky",
@@ -1317,8 +1321,10 @@ export const NEON_CANAL_STAGE: StageDefinition = ORIGINAL_DOWNTOWN_STAGE;
 
 export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
   name: {
-    jp: "スカイブリッジ・スプリント",
-    en: "Skybridge Sprint",
+    jp: "作成中 スカイブリッジ・スプリント",
+    en: "WIP Skybridge Sprint",
+    zh: "开发中 空桥冲刺",
+    ko: "제작 중 스카이브리지 스프린트",
   },
   backgrounds: {
     rearKey: "rear-620c2900-ce9f-46e9-974e-b40916d5aa0c",
@@ -1473,6 +1479,8 @@ export const SKY_SHAFT_CLIMB_STAGE: StageDefinition = {
   name: {
     jp: "スカイシャフト・クライム",
     en: "Sky Shaft Climb",
+    zh: "天空竖井攀登",
+    ko: "스카이 샤프트 클라임",
   },
   backgrounds: {
     rearKey: "rear-620c2900-ce9f-46e9-974e-b40916d5aa0c",
@@ -1596,8 +1604,10 @@ export const SKY_SHAFT_CLIMB_STAGE: StageDefinition = {
 
 export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
   name: {
-    jp: "タッチ操作チュートリアル",
-    en: "Touch Controls Tutorial",
+    jp: "作成中 タッチ操作チュートリアル",
+    en: "WIP Touch Controls Tutorial",
+    zh: "开发中 触控教学",
+    ko: "제작 중 터치 조작 튜토리얼",
   },
   backgrounds: {
     rearKey: "rear-starry-sky",
@@ -1689,8 +1699,10 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
 
 export const RANKING_CHECK_STAGE: StageDefinition = {
   name: {
-    jp: "ランキング確認",
-    en: "Ranking Check",
+    jp: "作成中 ランキング確認",
+    en: "WIP Ranking Check",
+    zh: "开发中 排行榜检查",
+    ko: "제작 중 랭킹 체크",
   },
   backgrounds: {
     rearKey: "rear-starry-sky",
