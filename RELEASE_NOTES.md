@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.333
+### English
+- Moved Nightmare stage bonus blocks away from cramped platform and shooter positions, and documented safe bonus block placement rules.
+### Japanese
+- ナイトメアステージのボーナスブロックを、狭い足場上やシューター周辺から離し、ボーナスブロック配置時の安全な余白ルールを文書化しました。
+
 ## v0.1.332
 ### English
 - Added the Nightmare longrun stage from the selected commit.

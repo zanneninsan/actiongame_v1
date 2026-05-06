@@ -75,6 +75,8 @@ For the No1-No20 feature/backlog handoff, also read `docs/NO1_20_HANDOFF.md`.
   - Reversible, lossless source and intermediate raster assets. Runtime assets should not depend on files here.
 - `docs/ASSET_PROCESSING.md`
   - Asset processing rules: final runtime rasters should be WebP, reversible intermediates should be preserved, and transparency cleanup should bias toward preserving subject pixels.
+- `docs/STAGE_DESIGN.md`
+  - Stage layout notes, including bonus block clearance rules.
 - `RELEASE_NOTES.md`
   - Version notes. Update when making user-visible changes.
 
@@ -144,6 +146,7 @@ When the user says `ship-main` or asks for the usual main shipping flow:
 ### Stage Layout
 
 Start with `src/stages.ts`.
+Follow `docs/STAGE_DESIGN.md` for layout safety rules. In particular, bonus blocks must have pass-through space underneath; do not place floor or platform tiles directly below question, hidden, or breakable blocks.
 
 - `ACTIVE_STAGE` currently resolves from `STAGES.neonCanal`.
 - `StageDefinition` supports:
