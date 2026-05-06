@@ -29,7 +29,7 @@ type LeaderboardAccountPrompt = {
 export type LeaderboardGhostSaveStatus = "saved" | "missing" | "notEligible" | "notRecorded" | "unknown";
 
 const LEADERBOARD_FETCH_RETRY_MS = 800;
-const GAME_SHARE_URL = "https://zannenin-sisters-leaderboard.web.app/";
+const GAME_SHARE_URL = "https://zannenin-sisters-leaderboard.web.app/?ogp=v0.1.306";
 const GAME_SHARE_HASHTAG = "#\u30b9\u30fc\u30d1\u30fc\u6b8b\u5ff5\u9662\u3055\u3093\u30e9\u30f3\u30c9";
 
 export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
@@ -146,12 +146,13 @@ function buildShareText(options: LeaderboardPanelOptions, locale: Locale, rankLa
 }
 
 function appendShareFooter(text: string) {
-  return `${text}\n\n${GAME_SHARE_HASHTAG}\n\n${GAME_SHARE_URL}`;
+  return `${text}\n\n${GAME_SHARE_HASHTAG}`;
 }
 
 function openXShare(text: string) {
   const params = new URLSearchParams({
     text,
+    url: GAME_SHARE_URL,
   });
   window.open(`https://twitter.com/intent/tweet?${params.toString()}`, "_blank", "noopener,noreferrer");
 }

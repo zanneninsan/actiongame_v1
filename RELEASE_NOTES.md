@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.306
+### English
+- Updated X sharing to pass the game URL through the Web Intent URL parameter and added cache-busting query strings for the shared URL and OGP image.
+### Japanese
+- X投稿時にゲームURLをWeb IntentのURLパラメータとして渡すようにし、共有URLとOGP画像にキャッシュ対策のクエリ文字列を付けました。
+
 ## v0.1.305
 ### English
 - Made leaderboard Functions accept safe new stage IDs without requiring a Functions allowlist update for every added stage.
