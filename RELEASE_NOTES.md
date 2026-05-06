@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.282
+### English
+- Updated the OGP/Twitter card image to the newer game logo artwork and removed the previous source image.
+### Japanese
+- OGP/Twitterカード画像を新しいゲームロゴ画像に差し替え、前の元画像をソース管理から削除しました。
+
 ## v0.1.281
 ### English
 - Added a 1200x630 title illustration as the site's OGP/Twitter card image.
