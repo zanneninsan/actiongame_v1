@@ -194,22 +194,6 @@ canvas {
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
 }
 
-.start-dialog h1 {
-  margin: 0;
-  width: min(100%, calc(100% - 28px));
-  justify-self: center;
-  min-height: 52px;
-  display: grid;
-  place-items: center;
-  padding: 0 22px;
-  background: url("../public/assets/ui/fantasy/title_plate_safe.webp") center / 100% 100% no-repeat;
-  font-size: clamp(17px, 3vw, 23px);
-  font-weight: 800;
-  line-height: 1.1;
-  text-align: center;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 10px rgba(245, 199, 106, 0.22);
-}
-
 .start-primary-panel,
 .start-choice-panel {
   display: grid;
@@ -594,7 +578,7 @@ canvas {
     max-height: none;
     margin: 0 auto;
     aspect-ratio: auto;
-    grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+    grid-template-rows: minmax(0, 1fr) auto auto auto;
     align-content: stretch;
     gap: 10px;
     padding: 18px 14px 12px;
@@ -633,15 +617,6 @@ canvas {
 
   .start-orientation-actions button {
     min-height: 46px;
-  }
-
-  .start-dialog h1 {
-    width: 100%;
-    min-height: 44px;
-    padding: 0 14px;
-    font-size: clamp(17px, 5.2vw, 20px);
-    line-height: 1.05;
-    overflow-wrap: anywhere;
   }
 
   .start-primary-panel {
@@ -759,11 +734,6 @@ canvas {
     grid-template-rows: auto auto auto auto;
     gap: 6px;
     padding: 8px 14px;
-  }
-
-  .start-dialog h1 {
-    min-height: 34px;
-    font-size: 18px;
   }
 
   .start-primary-panel {

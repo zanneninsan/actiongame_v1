@@ -78,7 +78,6 @@ export class StartModal {
         </div>
       </div>
       <form class="start-dialog">
-        <h1>${t(this.options.locale, "start.title")}</h1>
         <div class="start-primary-panel">
           <label class="start-field">
             <span>${t(this.options.locale, "start.playerName")}</span>

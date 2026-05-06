@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.287
+### English
+- Removed the repeated game title from the start modal now that the dedicated title splash appears first.
+### Japanese
+- 専用のタイトル画面を先に表示するようになったため、トップモーダル内で重複していたゲームタイトル表示を削除しました。
+
 ## v0.1.286
 ### English
 - Restored the start modal's game-start button to its previous text button style while keeping the title splash prompt artwork.
