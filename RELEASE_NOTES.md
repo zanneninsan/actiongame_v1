@@ -2,11 +2,21 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
-## v0.1.290
+## v0.1.291
 ### English
 - Added a Phaser-level P screenshot shortcut so PC capture works even when browser-level key events are intercepted, and paused gameplay while the screenshot preview is open.
 ### Japanese
 - PC版のPキー撮影をPhaser側にも登録してキー入力が取られにくいようにし、スクリーンショットのプレビュー表示中はゲーム進行を一時停止するようにしました。
+
+## v0.1.290
+### English
+- Added a skippable maker-style splash before the title screen.
+- Added the title splash flow with a fading logo, blinking PRESS TO START prompt, still/video loop, and soft blackout transition into the start modal.
+- Removed the duplicated title text from the start modal and restored its game-start button to the normal text style.
+### Japanese
+- タイトル画面のさらに手前に、タップでスキップできるメーカー風スプラッシュロゴを追加しました。
+- タイトルロゴのフェード表示、点滅するPRESS TO START、静止画と動画のループ、トップモーダルへ進む時の暗転演出を追加しました。
+- トップモーダル内で重複していたタイトル表示を削除し、ゲーム開始ボタンは通常のテキストボタン表示に戻しました。
 
 ## v0.1.289
 ### English
