@@ -97,7 +97,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.329";
+const DEBUG_VERSION = "v0.1.330";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -3678,6 +3678,9 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.hasWon = true;
+    this.removeMobileControls();
+    this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
+    this.mobileJumpQueued = false;
     const remaining = this.getRemainingMilliseconds();
     const timeBonus = this.roundScoreValue((remaining / 1000) * TIME_BONUS_PER_SECOND);
     const itemScore = this.roundScoreValue(this.rewards?.getItemScore() ?? 0);

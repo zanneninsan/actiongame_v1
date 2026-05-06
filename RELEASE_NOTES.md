@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.330
+### English
+- Removed mobile virtual controls after clearing a stage so the clear-screen ghost export, menu, and screenshot buttons can receive taps reliably.
+### Japanese
+- ステージクリア後はモバイル仮想操作を外し、クリア画面のゴーストJSON出力、メニュー、スクリーンショットボタンを確実にタップできるようにしました。
+
 ## v0.1.329
 ### English
 - Made the mobile joystick keep tracking the starting finger even when it slides outside the joystick ring, reducing accidental input resets.
