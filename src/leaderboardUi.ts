@@ -70,16 +70,17 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
   const accountPrompt = modal.querySelector<HTMLElement>(".leaderboard-account-prompt")!;
   const shareButton = modal.querySelector<HTMLButtonElement>("#leaderboard-share-x")!;
   const closeButton = modal.querySelector<HTMLButtonElement>("#leaderboard-close")!;
+  let currentRankLabel = formatCurrentScoreRank(options.currentScore, locale);
   const close = () => {
     modal.remove();
     document.body.classList.remove("is-leaderboard-modal-open");
   };
-  renderCurrentScore(currentScore, options.currentScore, locale);
+  renderCurrentScore(currentScore, options.currentScore, locale, currentRankLabel);
   renderAccountPrompt(accountPrompt, options.accountPrompt, locale);
   renderShareButton(shareButton, options, locale);
 
   shareButton.addEventListener("click", () => {
-    openXShare(buildShareText(options, locale));
+    openXShare(buildShareText(options, locale, currentRankLabel));
   });
   closeButton.addEventListener("click", close);
   modal.addEventListener("pointerdown", (event) => {
@@ -103,6 +104,8 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
         return;
       }
 
+      currentRankLabel = formatCurrentScoreRank(options.currentScore, locale, entries);
+      renderCurrentScore(currentScore, options.currentScore, locale, currentRankLabel);
       status.textContent = options.statusMessage ?? t(locale, "leaderboard.topScores");
       list.replaceChildren(
         ...entries.map((entry, index) =>
@@ -126,18 +129,17 @@ function renderShareButton(button: HTMLButtonElement, options: LeaderboardPanelO
   button.setAttribute("aria-label", t(locale, "leaderboard.shareX"));
 }
 
-function buildShareText(options: LeaderboardPanelOptions, locale: Locale) {
+function buildShareText(options: LeaderboardPanelOptions, locale: Locale, rankLabel: string) {
   const currentScore = options.currentScore;
   if (!currentScore) {
     return `${t(locale, "leaderboard.shareGeneric")}\n${GAME_SHARE_URL}\n#スーパー残念院さんランド`;
   }
 
-  const rank = currentScore.scoreUpdated && currentScore.rank ? `RANK ${currentScore.rank}` : "RANK -";
   const bestStatus = currentScore.scoreUpdated ? t(locale, "leaderboard.bestUpdated") : t(locale, "leaderboard.bestNotUpdated");
   const scoreLine = t(locale, "leaderboard.shareScore")
     .replace("{stage}", options.stageName)
     .replace("{score}", currentScore.score.toFixed(2))
-    .replace("{rank}", rank)
+    .replace("{rank}", rankLabel)
     .replace("{status}", bestStatus);
   return `${scoreLine}\n${GAME_SHARE_URL}\n#スーパー残念院さんランド`;
 }
@@ -224,7 +226,7 @@ function isCurrentScoreEntry(
   );
 }
 
-function renderCurrentScore(container: HTMLElement, currentScore: LeaderboardCurrentScore | undefined, locale: Locale) {
+function renderCurrentScore(container: HTMLElement, currentScore: LeaderboardCurrentScore | undefined, locale: Locale, rankLabel: string) {
   if (!currentScore) {
     container.hidden = true;
     container.replaceChildren();
@@ -234,13 +236,36 @@ function renderCurrentScore(container: HTMLElement, currentScore: LeaderboardCur
   container.hidden = false;
   container.innerHTML = `
     <span class="leaderboard-current-label">${escapeHtml(t(locale, "leaderboard.currentScore"))}</span>
-    <span class="leaderboard-current-rank">RANK ${currentScore.scoreUpdated && currentScore.rank ? currentScore.rank : "-"}</span>
+    <span class="leaderboard-current-rank">${escapeHtml(t(locale, "leaderboard.rankLabel"))} ${escapeHtml(rankLabel)}</span>
     <span class="leaderboard-current-value">${currentScore.score.toFixed(2)}</span>
     <span class="leaderboard-current-status">${escapeHtml(
       currentScore.scoreUpdated ? t(locale, "leaderboard.bestUpdated") : t(locale, "leaderboard.bestNotUpdated"),
     )}</span>
     ${currentScore.ghostStatus ? `<span class="leaderboard-current-ghost">${escapeHtml(getGhostStatusMessage(locale, currentScore.ghostStatus))}</span>` : ""}
   `;
+}
+
+function formatCurrentScoreRank(currentScore: LeaderboardCurrentScore | undefined, locale: Locale, entries?: LeaderboardEntry[]) {
+  if (!currentScore) {
+    return "-";
+  }
+  if (currentScore.scoreUpdated && currentScore.rank) {
+    return formatRankNumber(locale, currentScore.rank);
+  }
+  if (!entries) {
+    return t(locale, "leaderboard.rankPending");
+  }
+
+  const betterScoreCount = entries.filter((entry) => entry.score > currentScore.score + 0.005).length;
+  const equivalentRank = betterScoreCount + 1;
+  if (entries.length >= 100 && equivalentRank > 100) {
+    return t(locale, "leaderboard.rankBeyondTop").replace("{rank}", String(entries.length + 1));
+  }
+  return t(locale, "leaderboard.rankEquivalent").replace("{rank}", formatRankNumber(locale, equivalentRank));
+}
+
+function formatRankNumber(locale: Locale, rank: number) {
+  return locale === "ja" ? `${rank}位` : `#${rank}`;
 }
 
 function getGhostStatusMessage(locale: Locale, status: LeaderboardGhostSaveStatus) {

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.279
+### English
+- Show an equivalent leaderboard placement for the current score even when the best score is not updated, and use placement wording in share text.
+### Japanese
+- ベスト未更新でランキングに記録されない今回スコアにも順位相当を表示し、シェア文でもランクではなく順位として伝えるようにしました。
+
 ## v0.1.278
 ### English
 - Made X share text show stage, score, rank, and best-update status as clear labeled lines.
