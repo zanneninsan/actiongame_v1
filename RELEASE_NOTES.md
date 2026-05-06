@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.284
+### English
+- Added a pixel-art PRESS TO START sprite-sheet prompt to the start screen, matching the gold-and-black title logo style with a blinking animation.
+### Japanese
+- タイトルロゴに合わせた金色と黒基調のドット絵風PRESS TO STARTスプライトシートを追加し、スタート画面で点滅表示するようにしました。
+
 ## v0.1.283
 ### English
 - Made the danmaku options tutorial strictly once per account, so test-data clearing no longer resets its seen flag.

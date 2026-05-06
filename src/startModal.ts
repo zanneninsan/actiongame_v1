@@ -381,10 +381,13 @@ export class StartModal {
     };
 
     const refreshAccount = () => {
-      accountStatus.textContent = this.getAccountStatusText();
-      startButton.textContent = this.options.accountStatus?.isGoogleLinked
+      const startButtonLabel = this.options.accountStatus?.isGoogleLinked
         ? t(this.options.locale, "start.start")
         : t(this.options.locale, "start.anonymousPlay");
+      accountStatus.textContent = this.getAccountStatusText();
+      startButton.setAttribute("aria-label", startButtonLabel);
+      startButton.title = startButtonLabel;
+      startButton.innerHTML = `<span class="start-button-accessible-label">${escapeHtml(startButtonLabel)}</span>`;
       googleLoginButton.textContent = this.options.accountStatus?.isGoogleLinked
         ? t(this.options.locale, "start.googleLoggedIn")
         : t(this.options.locale, "start.googleLogin");
