@@ -95,7 +95,7 @@ export class StartModal {
           </div>
         </div>
       </div>
-      <button class="maker-splash-screen${this.makerSplashDismissed ? " is-dismissed" : ""}" type="button" aria-label="${escapeHtml(
+      <button class="maker-splash-screen${this.soundGateDismissed ? " is-ready" : ""}${this.makerSplashDismissed ? " is-dismissed" : ""}" type="button" aria-label="${escapeHtml(
         t(this.options.locale, "start.start"),
       )}">
         <img class="maker-splash-logo" src="./assets/ui/fantasy/maker_splash_logo.webp" alt="満足教 Presents" />
@@ -266,6 +266,7 @@ export class StartModal {
       if (this.makerSplashDismissed || this.makerSplashTimer !== undefined) {
         return;
       }
+      makerSplash.classList.add("is-ready");
       this.makerSplashTimer = window.setTimeout(revealTitleScreen, 3100);
     };
     const revealTitleScreen = () => {

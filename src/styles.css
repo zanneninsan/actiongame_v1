@@ -141,7 +141,13 @@ canvas {
   border: 0;
   background: #000;
   cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
   touch-action: manipulation;
+}
+
+.maker-splash-screen.is-ready {
+  pointer-events: auto;
   animation: maker-splash-sequence 3100ms ease-in-out forwards;
 }
 

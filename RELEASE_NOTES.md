@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.295
+### English
+- Delayed the maker splash animation until after the sound confirmation is dismissed, preserving the intended sound check -> maker logo -> title -> start modal order.
+### Japanese
+- 音量確認が閉じるまで企業風ロゴのアニメーションを開始しないようにし、音量チェック、企業風ロゴ、タイトル画面、トップモーダルの順番を保つようにしました。
+
 ## v0.1.294
 ### English
 - Skipped the splash/logo sequence when returning to the title from gameplay, opening the start modal directly.
