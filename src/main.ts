@@ -88,10 +88,11 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.277";
+const DEBUG_VERSION = "v0.1.278";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
+const GOAL_IN_VIEW_DIALOGUE_DURATION_MS = 3400;
 const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
   message: "ひゃっ...ぷいりちゃん、ごめんなさいっ",
@@ -106,6 +107,11 @@ const STAMINA_EMPTY_DIALOGUE: StoryDialogueLine = {
   characterName: "残念院さん",
   message: "ハァ・・・ハァ・・・ハァッ・・・💦",
   portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_07_sad.png`,
+};
+const GOAL_IN_VIEW_DIALOGUE: StoryDialogueLine = {
+  characterName: "残念院さん",
+  message: "あの青と白のゲートは、もしやゴールでは？",
+  portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_03_happy_open.png`,
 };
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
@@ -361,6 +367,7 @@ class PrototypeScene extends Phaser.Scene {
   private hasScoreMilestoneDanmakuPlayed = false;
   private hasShownAquaMascotStompDialogue = false;
   private hasShownStaminaEmptyDialogue = false;
+  private hasShownGoalInViewDialogue = false;
   private crouchDanmakuStartedAt = 0;
   private hasCrouchDanmakuPlayed = false;
   private jumpChainCount = 0;
@@ -723,6 +730,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.updateStoryDialogueProgress();
     this.updateStageMidpointProgress();
+    this.updateGoalInViewDialogue();
     this.refreshDropThroughDecorationPlatform();
     this.oneWayGateController?.update();
     if (this.stageEditor?.isEnabled) {
@@ -951,6 +959,7 @@ class PrototypeScene extends Phaser.Scene {
     this.hasAdvancedStoryDialogueAtX = false;
     this.hasShownAquaMascotStompDialogue = false;
     this.hasShownStaminaEmptyDialogue = false;
+    this.hasShownGoalInViewDialogue = false;
     this.countdownOverlay?.clear();
     this.countdownOverlay = undefined;
     this.missText?.destroy();
@@ -1009,6 +1018,7 @@ class PrototypeScene extends Phaser.Scene {
     this.collisionDebugGraphics = undefined;
     this.stageMidpointProgress = undefined;
     this.hasShownStageMidpointDialogue = false;
+    this.hasShownGoalInViewDialogue = false;
     this.itemsGroup = undefined;
     this.bonusBlocksGroup = undefined;
     this.checkpointController = undefined;
@@ -1067,6 +1077,22 @@ class PrototypeScene extends Phaser.Scene {
     this.enqueueStoryDialogue({
       lines: [STAGE_MIDPOINT_DIALOGUE],
       durationMs: STAGE_MIDPOINT_DIALOGUE_DURATION_MS,
+    });
+  }
+
+  private updateGoalInViewDialogue() {
+    if (this.hasShownGoalInViewDialogue || !this.goal || this.stageEditor?.isEnabled || this.hasWon) {
+      return;
+    }
+
+    if (!Phaser.Geom.Rectangle.Overlaps(this.cameras.main.worldView, this.goal.getBounds())) {
+      return;
+    }
+
+    this.hasShownGoalInViewDialogue = true;
+    this.enqueueStoryDialogue({
+      lines: [GOAL_IN_VIEW_DIALOGUE],
+      durationMs: GOAL_IN_VIEW_DIALOGUE_DURATION_MS,
     });
   }
 
@@ -1301,6 +1327,7 @@ class PrototypeScene extends Phaser.Scene {
     this.stageConstants = resolveStageConstants(this.editorStage);
     this.stageMidpointProgress = this.resolveStageMidpointProgress();
     this.hasShownStageMidpointDialogue = false;
+    this.hasShownGoalInViewDialogue = false;
     this.applyStageBackgroundDefaults();
     this.physics.world.setBounds(
       0,

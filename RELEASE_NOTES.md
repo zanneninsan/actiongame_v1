@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.278
+### English
+- Added a one-time 3.4-second story message with an excited portrait when the goal gate first enters the camera view.
+### Japanese
+- ゴールゲートが初めて視界に入った時、ワクワクした表情でゴールに気づくメッセージを3.4秒だけ表示するようにしました。
+
 ## v0.1.277
 ### English
 - Fixed the stage-midpoint story message so its midpoint is recalculated after the selected stage is applied at run start.
