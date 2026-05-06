@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.286
+### English
+- Restored the start modal's game-start button to its previous text button style while keeping the title splash prompt artwork.
+### Japanese
+- タイトル画面のPRESS TO START表示は残しつつ、トップモーダル内のゲーム開始ボタンを以前のテキストボタン表示に戻しました。
+
 ## v0.1.285
 ### English
 - Added a front title splash that fades in the title logo before the start modal, then reveals the modal when the title is tapped.

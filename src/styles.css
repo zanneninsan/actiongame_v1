@@ -332,24 +332,12 @@ canvas {
 .start-button {
   width: min(100%, calc(100% - 34px));
   justify-self: center;
-  height: 64px;
-  background: url("../public/assets/ui/fantasy/press_start_prompt_sheet.webp") 0 0 / 400% 100% no-repeat;
+  height: 48px;
+  background-image: url("../public/assets/ui/fantasy/button_primary_selected_safe.webp");
   color: #ffffff;
-  font-size: 0;
+  font-size: 18px;
   filter: brightness(1.34) saturate(1.22) drop-shadow(0 0 12px rgba(253, 230, 138, 0.42));
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.98), 0 0 8px rgba(255, 247, 214, 0.55);
-  animation: press-start-blink 1080ms steps(4) infinite;
-  image-rendering: pixelated;
-}
-
-.start-button-accessible-label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  clip-path: inset(50%);
-  white-space: nowrap;
 }
 
 .start-account-panel {
@@ -749,7 +737,8 @@ canvas {
   }
 
   .start-button {
-    height: 64px;
+    height: 52px;
+    font-size: 21px;
   }
 
   .start-account-status {
@@ -837,7 +826,8 @@ canvas {
   }
 
   .start-button {
-    height: 46px;
+    height: 38px;
+    font-size: 17px;
   }
 }
 
@@ -845,10 +835,6 @@ canvas {
   .start-title-logo,
   .start-title-prompt {
     opacity: 1;
-    animation: none;
-  }
-
-  .start-button {
     animation: none;
   }
 }
