@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.320
+### English
+- Localized the in-game checkpoint and one-way gate floating text so it follows the current language setting.
+### Japanese
+- ゲーム中のチェックポイント到達表示と一方通行ゲート表示が、現在の言語設定に合わせて表示されるようにしました。
+
 ## v0.1.319
 ### English
 - Added Chinese and Korean translations for the stage editor controls, tool labels, import/export statuses, and editor hint text.

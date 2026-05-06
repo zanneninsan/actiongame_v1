@@ -28,6 +28,7 @@ export class CheckpointController {
     private readonly getStage: () => StageDefinition,
     private readonly canActivate: () => boolean,
     private readonly showFloatingText: (x: number, y: number, text: string) => void,
+    private readonly getCheckpointLabel: () => string,
   ) {}
 
   create() {
@@ -70,7 +71,7 @@ export class CheckpointController {
       x: flag.getData("checkpointX") as number,
       y: flag.getData("checkpointY") as number,
     });
-    this.showFloatingText(flag.x, flag.y - 72, "CHECK");
+    this.showFloatingText(flag.x, flag.y - 72, this.getCheckpointLabel());
   }
 }
 
@@ -84,6 +85,7 @@ export class OneWayGateController {
     private readonly getStage: () => StageDefinition,
     private readonly canUpdate: () => boolean,
     private readonly showFloatingText: (x: number, y: number, text: string) => void,
+    private readonly getOneWayLabel: () => string,
   ) {}
 
   create() {
@@ -123,7 +125,7 @@ export class OneWayGateController {
       wall.setDisplaySize(24, height);
       wall.setVisible(false);
       wall.refreshBody();
-      this.showFloatingText(gate.x, gate.y - height / 2, "ONE WAY");
+      this.showFloatingText(gate.x, gate.y - height / 2, this.getOneWayLabel());
     });
   }
 
