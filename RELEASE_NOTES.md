@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.276
+### English
+- Replaced the PWA and favicon artwork with a cropped face icon from the new character image, including multi-size PNG outputs and a foreground 満 mark.
+### Japanese
+- 新しいキャラクター画像から顔部分を切り抜いたPWA/ファビコン用アイコンに差し替え、複数サイズのPNGと手前の「満」マークを追加しました。
+
 ## v0.1.275
 ### English
 - Added a one-time 3.5-second story message when stamina first reaches zero during a stage.
