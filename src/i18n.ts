@@ -1,9 +1,11 @@
-export type Locale = "en" | "ja";
+export type Locale = "en" | "ja" | "zh" | "ko";
 
 export const DEFAULT_LOCALE: Locale = "en";
 export const LOCALE_STORAGE_KEY = "actiongame_locale";
 export const LOCALE_OPTIONS: Array<{ locale: Locale; label: string }> = [
   { locale: "en", label: "English" },
+  { locale: "zh", label: "中文" },
+  { locale: "ko", label: "한국어" },
   { locale: "ja", label: "日本語" },
 ];
 
@@ -466,13 +468,75 @@ const translations = {
 
 type TranslationKey = keyof (typeof translations)[typeof DEFAULT_LOCALE];
 
-export const isLocale = (value: string): value is Locale => value === "en" || value === "ja";
+const localeTranslations: Record<Locale, Partial<Record<TranslationKey, string>>> = {
+  en: translations.en,
+  ja: translations.ja,
+  zh: {
+    "start.language": "语言 / Language",
+    "start.stage": "关卡",
+    "start.start": "开始",
+    "start.modePc": "电脑",
+    "start.modeMobile": "手机",
+    "start.soundOn": "声音开",
+    "start.soundOff": "声音关",
+    "options.language": "语言 / Language",
+    "options.close": "关闭",
+    "countdown.go": "开始!!",
+    "hud.player": "玩家",
+    "hud.score": "分数",
+    "hud.time": "时间",
+    "hud.bonus": "奖励",
+    "hud.stamina": "体力",
+    "hud.itemScore": "道具分",
+    "hud.clear": "通关!",
+    "hud.timeBonus": "时间奖励",
+    "menu.backToMenu": "返回菜单",
+    "leaderboard.title": "排行榜",
+    "leaderboard.close": "关闭",
+    "account.close": "关闭",
+  },
+  ko: {
+    "start.language": "언어 / Language",
+    "start.stage": "스테이지",
+    "start.start": "시작",
+    "start.modePc": "PC",
+    "start.modeMobile": "모바일",
+    "start.soundOn": "사운드 켜기",
+    "start.soundOff": "사운드 끄기",
+    "options.language": "언어 / Language",
+    "options.close": "닫기",
+    "countdown.go": "시작!!",
+    "hud.player": "플레이어",
+    "hud.score": "점수",
+    "hud.time": "시간",
+    "hud.bonus": "보너스",
+    "hud.stamina": "스태미나",
+    "hud.itemScore": "아이템 점수",
+    "hud.clear": "클리어!",
+    "hud.timeBonus": "시간 보너스",
+    "menu.backToMenu": "메뉴로",
+    "leaderboard.title": "랭킹",
+    "leaderboard.close": "닫기",
+    "account.close": "닫기",
+  },
+};
+
+export const isLocale = (value: string): value is Locale => value === "en" || value === "ja" || value === "zh" || value === "ko";
 
 export const getBrowserLocale = (): Locale => {
-  if (typeof navigator !== "undefined" && navigator.language.toLowerCase().startsWith("ja")) {
-    return "ja";
+  if (typeof navigator !== "undefined") {
+    const browserLocale = navigator.language.toLowerCase();
+    if (browserLocale.startsWith("ja")) {
+      return "ja";
+    }
+    if (browserLocale.startsWith("zh")) {
+      return "zh";
+    }
+    if (browserLocale.startsWith("ko")) {
+      return "ko";
+    }
   }
   return DEFAULT_LOCALE;
 };
 
-export const t = (locale: Locale, key: TranslationKey) => translations[locale][key] ?? translations[DEFAULT_LOCALE][key];
+export const t = (locale: Locale, key: TranslationKey) => localeTranslations[locale][key] ?? translations[DEFAULT_LOCALE][key];
