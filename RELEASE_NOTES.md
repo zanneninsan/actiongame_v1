@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.280
+### English
+- Fixed leaderboard result actions so share and close buttons align cleanly on desktop and compact mobile layouts.
+### Japanese
+- ランキング結果画面のシェアと閉じるボタンがPCとスマホで崩れないよう、下部レイアウトを整理しました。
+
 ## v0.1.279
 ### English
 - Show an equivalent leaderboard placement for the current score even when the best score is not updated, and use placement wording in share text.

@@ -30,6 +30,7 @@ export type LeaderboardGhostSaveStatus = "saved" | "missing" | "notEligible" | "
 
 const LEADERBOARD_FETCH_RETRY_MS = 800;
 const GAME_SHARE_URL = "https://zannenin-sisters-leaderboard.web.app/";
+const GAME_SHARE_HASHTAG = "#\u30b9\u30fc\u30d1\u30fc\u6b8b\u5ff5\u9662\u3055\u3093\u30e9\u30f3\u30c9";
 
 export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
   document.getElementById("leaderboard-modal")?.remove();
@@ -132,7 +133,7 @@ function renderShareButton(button: HTMLButtonElement, options: LeaderboardPanelO
 function buildShareText(options: LeaderboardPanelOptions, locale: Locale, rankLabel: string) {
   const currentScore = options.currentScore;
   if (!currentScore) {
-    return `${t(locale, "leaderboard.shareGeneric")}\n${GAME_SHARE_URL}\n#スーパー残念院さんランド`;
+    return `${t(locale, "leaderboard.shareGeneric")}\n${GAME_SHARE_URL}\n${GAME_SHARE_HASHTAG}`;
   }
 
   const bestStatus = currentScore.scoreUpdated ? t(locale, "leaderboard.bestUpdated") : t(locale, "leaderboard.bestNotUpdated");
@@ -141,7 +142,7 @@ function buildShareText(options: LeaderboardPanelOptions, locale: Locale, rankLa
     .replace("{score}", currentScore.score.toFixed(2))
     .replace("{rank}", rankLabel)
     .replace("{status}", bestStatus);
-  return `${scoreLine}\n${GAME_SHARE_URL}\n#スーパー残念院さんランド`;
+  return `${scoreLine}\n${GAME_SHARE_URL}\n${GAME_SHARE_HASHTAG}`;
 }
 
 function openXShare(text: string) {
@@ -265,7 +266,7 @@ function formatCurrentScoreRank(currentScore: LeaderboardCurrentScore | undefine
 }
 
 function formatRankNumber(locale: Locale, rank: number) {
-  return locale === "ja" ? `${rank}位` : `#${rank}`;
+  return locale === "ja" ? `${rank}\u4f4d` : `#${rank}`;
 }
 
 function getGhostStatusMessage(locale: Locale, status: LeaderboardGhostSaveStatus) {
@@ -285,12 +286,15 @@ function getGhostStatusMessage(locale: Locale, status: LeaderboardGhostSaveStatu
 }
 
 function renderAccountPrompt(container: HTMLElement, accountPrompt: LeaderboardAccountPrompt | undefined, locale: Locale) {
+  const footer = container.closest(".leaderboard-footer");
   if (!accountPrompt?.show) {
+    footer?.classList.add("is-account-hidden");
     container.hidden = true;
     container.replaceChildren();
     return;
   }
 
+  footer?.classList.remove("is-account-hidden");
   container.hidden = false;
   container.innerHTML = `
     <div class="leaderboard-account-copy">

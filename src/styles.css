@@ -1998,6 +1998,16 @@ body.is-account-modal-open #mobile-controls {
   margin: 0 6px;
 }
 
+.leaderboard-footer.is-account-hidden {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
+
+.leaderboard-footer.is-account-hidden .leaderboard-actions {
+  width: min(100%, 680px);
+  grid-template-columns: 1fr 1fr;
+}
+
 .leaderboard-footer .leaderboard-account-prompt {
   margin: 0;
 }
@@ -2152,11 +2162,15 @@ body.is-account-modal-open #mobile-controls {
   }
 
   .leaderboard-current-score {
-    grid-template-columns: minmax(0, 1fr) 86px;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     gap: 4px 8px;
     min-height: auto;
     padding: 8px;
     font-size: 11px;
+  }
+
+  .leaderboard-current-ghost {
+    grid-column: 1 / -1;
   }
 
   .leaderboard-current-value,
@@ -2190,6 +2204,10 @@ body.is-account-modal-open #mobile-controls {
     grid-template-columns: 1fr;
     gap: 6px;
     margin: 0;
+  }
+
+  .leaderboard-footer.is-account-hidden .leaderboard-actions {
+    width: 100%;
   }
 
   .leaderboard-actions {
@@ -2273,6 +2291,14 @@ body.is-account-modal-open #mobile-controls {
   .leaderboard-footer {
     grid-template-columns: minmax(0, 1fr) 240px;
     gap: 6px;
+  }
+
+  .leaderboard-footer.is-account-hidden {
+    grid-template-columns: 1fr;
+  }
+
+  .leaderboard-footer.is-account-hidden .leaderboard-actions {
+    width: min(100%, 560px);
   }
 
   .leaderboard-account-prompt {
