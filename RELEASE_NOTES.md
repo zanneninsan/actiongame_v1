@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.326
+### English
+- Fixed mobile touch handling so modal close buttons, the screenshot button, and the top-right menu keep receiving taps while virtual controls are active.
+### Japanese
+- モバイル操作中でも、モーダルの閉じるボタン、スクリーンショットボタン、右上メニューのタップが効くように修正しました。
+
 ## v0.1.325
 ### English
 - Paused mobile runs while touch button layout is being adjusted, delaying the initial countdown until first-run layout setup is complete.
