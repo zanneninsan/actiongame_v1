@@ -38,12 +38,12 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
       options.locale,
       "aria.globalMenu",
     )}" aria-controls="global-ui-drawer" aria-expanded="false">&#9776;</button>
+    <button id="screenshot-toggle" class="ui-button screenshot-quick-toggle" type="button" aria-label="${t(options.locale, "aria.screenshot")}">📷</button>
     <div id="global-ui-drawer" class="global-ui-drawer">
       <span id="player-position-label" hidden>POS --,--</span>
       <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(options.locale, "aria.toggleCollision")}">HIT</button>
       <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch rear background">RB1</button>
       <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="Switch midground background">MG1</button>
-      <button id="screenshot-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.screenshot")}">📷</button>
       <button id="leaderboard-toggle" class="ui-button" type="button" aria-label="Open leaderboard">&#127942;</button>
       <button id="account-toggle" class="ui-button account-toggle" type="button" aria-label="${t(
         options.locale,

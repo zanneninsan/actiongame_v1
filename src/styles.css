@@ -1202,6 +1202,10 @@ body.is-screenshot-modal-open #mobile-controls {
   font-weight: 900;
 }
 
+.screenshot-quick-toggle {
+  font-size: 19px;
+}
+
 .ui-button:hover {
   filter: brightness(1.16);
 }

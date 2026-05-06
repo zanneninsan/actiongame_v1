@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.285
+### English
+- Kept the screenshot button beside the function menu on compact phone layouts, so captures are available without opening the drawer.
+### Japanese
+- スマホなどのコンパクト表示でも、スクリーンショットボタンを機能メニューの隣に常時表示し、メニューを開かずに撮影できるようにしました。
+
 ## v0.1.284
 ### English
 - Added game-canvas screenshot capture with F2/PrintScreen, a global screenshot button, and a clear-screen preview/download flow.
