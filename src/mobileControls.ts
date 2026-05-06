@@ -302,6 +302,7 @@ const bindTouchDrivenMobileControls = (
   const pressedKeys = new Set<MobileInputKey>();
   const activeActionTouches = new Map<number, string>();
   const activeControlTouchIds = new Set<number>();
+  const activeJoystickTouchIds = new Set<number>();
 
   const setKeyPressed = (key: MobileInputKey, pressed: boolean) => {
     const wasPressed = pressedKeys.has(key);
@@ -328,6 +329,7 @@ const bindTouchDrivenMobileControls = (
     MOBILE_INPUT_KEYS.forEach((key) => setKeyPressed(key, false));
     activeActionTouches.clear();
     activeControlTouchIds.clear();
+    activeJoystickTouchIds.clear();
   };
 
   const findButtonAt = <T extends { button: HTMLButtonElement }>(buttons: T[], touch: Touch) =>
@@ -346,8 +348,15 @@ const bindTouchDrivenMobileControls = (
 
     touches.forEach((touch) => {
       activeTouchIds.add(touch.identifier);
+      const isJoystickTouch = activeJoystickTouchIds.has(touch.identifier);
+      if (isJoystickTouch) {
+        joystickTouch ??= touch;
+        return;
+      }
       if (joystick && isPointInsideRect(touch.clientX, touch.clientY, joystick.getBoundingClientRect())) {
         joystickTouch ??= touch;
+        activeJoystickTouchIds.add(touch.identifier);
+        return;
       }
       const keyHit = findButtonAt(keyButtons, touch);
       if (keyHit) {
@@ -379,6 +388,11 @@ const bindTouchDrivenMobileControls = (
         activeActionTouches.delete(touchId);
       }
     });
+    Array.from(activeJoystickTouchIds).forEach((touchId) => {
+      if (!activeTouchIds.has(touchId)) {
+        activeJoystickTouchIds.delete(touchId);
+      }
+    });
 
     if (joystick && joystickTouch) {
       applyJoystickTouch(joystick, joystickKnob, joystickTouch, nextKeys);
@@ -401,7 +415,12 @@ const bindTouchDrivenMobileControls = (
     if (startedControlTouches.length <= 0) {
       return;
     }
-    startedControlTouches.forEach((touch) => activeControlTouchIds.add(touch.identifier));
+    startedControlTouches.forEach((touch) => {
+      activeControlTouchIds.add(touch.identifier);
+      if (isJoystickTouch(touch)) {
+        activeJoystickTouchIds.add(touch.identifier);
+      }
+    });
     controls.classList.remove("is-first-run-highlight");
     event.preventDefault();
     rebuildFromTouches(getActiveControlTouches(event.touches, activeControlTouchIds));
@@ -418,6 +437,7 @@ const bindTouchDrivenMobileControls = (
     Array.from(activeControlTouchIds).forEach((touchId) => {
       if (!activeTouches.some((touch) => touch.identifier === touchId)) {
         activeControlTouchIds.delete(touchId);
+        activeJoystickTouchIds.delete(touchId);
       }
     });
   };
@@ -473,6 +493,9 @@ const isToolbarTouchEvent = (event: TouchEvent) => {
 const isControlButtonTouch = (touch: Touch) =>
   touch.target instanceof Element &&
   Boolean(touch.target.closest("#mobile-controls .mobile-button") || touch.target.closest("#mobile-controls [data-joystick='movement']"));
+
+const isJoystickTouch = (touch: Touch) =>
+  touch.target instanceof Element && Boolean(touch.target.closest("#mobile-controls [data-joystick='movement']"));
 
 const getActiveControlTouches = (touches: TouchList, activeControlTouchIds: Set<number>) =>
   Array.from(touches).filter((touch) => activeControlTouchIds.has(touch.identifier));

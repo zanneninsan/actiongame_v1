@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.329
+### English
+- Made the mobile joystick keep tracking the starting finger even when it slides outside the joystick ring, reducing accidental input resets.
+### Japanese
+- スマホのジョイスティックで、開始した指が円の外へ少しはみ出しても追跡を続けるようにし、意図せず入力が戻りにくくしました。
+
 ## v0.1.328
 ### English
 - Made the mobile jump and dash action buttons slightly larger for easier tapping.
