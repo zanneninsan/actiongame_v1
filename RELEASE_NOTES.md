@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.331
+### English
+- Changed the return-to-title home button to a friendlier house emoji.
+### Japanese
+- タイトルに戻るホームボタンを、より親しみやすい家の絵文字に変更しました。
+
 ## v0.1.330
 ### English
 - Removed mobile virtual controls after clearing a stage so the clear-screen ghost export, menu, and screenshot buttons can receive taps reliably.
