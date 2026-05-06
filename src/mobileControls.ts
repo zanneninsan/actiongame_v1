@@ -23,14 +23,12 @@ const MOBILE_CONTROLS_LAYOUT_STORAGE_KEY = "actiongame_mobile_controls_layout_v1
 const MOBILE_CONTROLS_LAYOUT_SETUP_STORAGE_KEY = "actiongame_mobile_controls_layout_setup_seen";
 const MOBILE_CONTROLS_HINT_MS = 4200;
 const MOBILE_LAYOUT_EDGE_PADDING = 8;
+const MOBILE_JOYSTICK_ACTIVATION_RATIO = 0.28;
+const MOBILE_JOYSTICK_DIAGONAL_RATIO = 0.38;
 const MOBILE_INPUT_KEYS: MobileInputKey[] = ["w", "a", "s", "d", "shift"];
 
 type MobileControlLayoutId =
-  | "pad-jump"
-  | "pad-dash"
-  | "pad-left"
-  | "pad-down"
-  | "pad-right"
+  | "joystick"
   | "fullscreen"
   | "action-jump"
   | "action-dash"
@@ -58,12 +56,11 @@ export const createMobileControls = (options: MobileControlsOptions) => {
         <button class="mobile-layout-button" data-layout-action="reset" type="button">${t(options.locale, "mobile.layoutReset")}</button>
       </div>
     </div>
-    <div class="mobile-pad">
-      <button class="mobile-button pad-up" data-layout-id="pad-jump" data-key="w" type="button" aria-label="${t(options.locale, "aria.jump")}">&uarr;</button>
-      <button class="mobile-button dash-button pad-dash-left" data-layout-id="pad-dash" data-key="shift" type="button" aria-label="${t(options.locale, "aria.dash")}">${t(options.locale, "mobile.dashShort")}</button>
-      <button class="mobile-button pad-left" data-layout-id="pad-left" data-key="a" type="button" aria-label="${t(options.locale, "aria.moveLeft")}">&larr;</button>
-      <button class="mobile-button pad-down" data-layout-id="pad-down" data-key="s" type="button" aria-label="${t(options.locale, "aria.down")}">&darr;</button>
-      <button class="mobile-button pad-right" data-layout-id="pad-right" data-key="d" type="button" aria-label="${t(options.locale, "aria.moveRight")}">&rarr;</button>
+    <div class="mobile-pad" data-layout-id="joystick" data-joystick="movement" role="group" aria-label="${t(options.locale, "aria.mobileJoystick")}">
+      <div class="mobile-joystick-ring">
+        <div class="mobile-joystick-cross" aria-hidden="true"></div>
+        <div class="mobile-joystick-knob" aria-hidden="true"></div>
+      </div>
     </div>
     <div class="mobile-actions">
       <button class="mobile-button fullscreen-button" data-layout-id="fullscreen" data-action="fullscreen" type="button" aria-label="${t(options.locale, "aria.fullscreen")}">${t(options.locale, "mobile.fullscreenShort")}</button>
@@ -133,7 +130,7 @@ export const createMobileControls = (options: MobileControlsOptions) => {
     pointerPressedCounts.clear();
     MOBILE_INPUT_KEYS.forEach((key) => options.onInputChange(key, false));
   };
-  controls.querySelectorAll<HTMLButtonElement>("[data-key]").forEach((button) => {
+  controls.querySelectorAll<HTMLButtonElement>(".mobile-button[data-key]").forEach((button) => {
     const key = button.dataset.key as MobileInputKey;
     cleanup.push(
       bindMobileButton(button, (pressed) => {
@@ -222,7 +219,7 @@ export const createMobileControls = (options: MobileControlsOptions) => {
 
 const bindMobileLayoutDragging = (controls: HTMLDivElement) => {
   const cleanup: Array<() => void> = [];
-  controls.querySelectorAll<HTMLButtonElement>("[data-layout-id]").forEach((button) => {
+  controls.querySelectorAll<HTMLElement>("[data-layout-id]").forEach((button) => {
     let pointerId: number | undefined;
     let pointerOffsetX = 0;
     let pointerOffsetY = 0;
@@ -292,7 +289,9 @@ const bindTouchDrivenMobileControls = (
   options: MobileControlsOptions,
   isLayoutEditing: () => boolean,
 ) => {
-  const keyButtons = Array.from(controls.querySelectorAll<HTMLButtonElement>("[data-key]")).map((button) => ({
+  const joystick = controls.querySelector<HTMLElement>("[data-joystick='movement']");
+  const joystickKnob = joystick?.querySelector<HTMLElement>(".mobile-joystick-knob");
+  const keyButtons = Array.from(controls.querySelectorAll<HTMLButtonElement>(".mobile-button[data-key]")).map((button) => ({
     button,
     key: button.dataset.key as MobileInputKey,
   }));
@@ -323,6 +322,9 @@ const bindTouchDrivenMobileControls = (
   const clearInput = () => {
     keyButtons.forEach(({ button }) => button.classList.remove("is-pressed"));
     actionButtons.forEach(({ button }) => button.classList.remove("is-pressed"));
+    joystick?.classList.remove("is-pressed");
+    joystickKnob?.style.removeProperty("--joystick-x");
+    joystickKnob?.style.removeProperty("--joystick-y");
     MOBILE_INPUT_KEYS.forEach((key) => setKeyPressed(key, false));
     activeActionTouches.clear();
     activeControlTouchIds.clear();
@@ -340,9 +342,13 @@ const bindTouchDrivenMobileControls = (
     const nextKeys = new Set<MobileInputKey>();
     const pressedButtons = new Set<HTMLButtonElement>();
     const activeTouchIds = new Set<number>();
+    let joystickTouch: Touch | undefined;
 
     touches.forEach((touch) => {
       activeTouchIds.add(touch.identifier);
+      if (joystick && isPointInsideRect(touch.clientX, touch.clientY, joystick.getBoundingClientRect())) {
+        joystickTouch ??= touch;
+      }
       const keyHit = findButtonAt(keyButtons, touch);
       if (keyHit) {
         nextKeys.add(keyHit.key);
@@ -373,6 +379,14 @@ const bindTouchDrivenMobileControls = (
         activeActionTouches.delete(touchId);
       }
     });
+
+    if (joystick && joystickTouch) {
+      applyJoystickTouch(joystick, joystickKnob, joystickTouch, nextKeys);
+    } else {
+      joystick?.classList.remove("is-pressed");
+      joystickKnob?.style.removeProperty("--joystick-x");
+      joystickKnob?.style.removeProperty("--joystick-y");
+    }
 
     keyButtons.forEach(({ button }) => button.classList.toggle("is-pressed", pressedButtons.has(button)));
     actionButtons.forEach(({ button }) => button.classList.toggle("is-pressed", pressedButtons.has(button)));
@@ -457,10 +471,39 @@ const isToolbarTouchEvent = (event: TouchEvent) => {
 };
 
 const isControlButtonTouch = (touch: Touch) =>
-  touch.target instanceof Element && Boolean(touch.target.closest("#mobile-controls .mobile-button"));
+  touch.target instanceof Element &&
+  Boolean(touch.target.closest("#mobile-controls .mobile-button") || touch.target.closest("#mobile-controls [data-joystick='movement']"));
 
 const getActiveControlTouches = (touches: TouchList, activeControlTouchIds: Set<number>) =>
   Array.from(touches).filter((touch) => activeControlTouchIds.has(touch.identifier));
+
+const applyJoystickTouch = (
+  joystick: HTMLElement,
+  joystickKnob: HTMLElement | null | undefined,
+  touch: Touch,
+  nextKeys: Set<MobileInputKey>,
+) => {
+  const rect = joystick.getBoundingClientRect();
+  const radius = Math.max(1, Math.min(rect.width, rect.height) / 2);
+  const centerX = rect.left + rect.width / 2;
+  const centerY = rect.top + rect.height / 2;
+  const rawX = (touch.clientX - centerX) / radius;
+  const rawY = (touch.clientY - centerY) / radius;
+  const distance = Math.hypot(rawX, rawY);
+  const clamp = distance > 1 ? 1 / distance : 1;
+  const x = rawX * clamp;
+  const y = rawY * clamp;
+  joystick.classList.add("is-pressed");
+  joystickKnob?.style.setProperty("--joystick-x", `${x * 46}%`);
+  joystickKnob?.style.setProperty("--joystick-y", `${y * 46}%`);
+
+  if (Math.abs(x) >= MOBILE_JOYSTICK_ACTIVATION_RATIO && Math.abs(x) >= Math.abs(y) * MOBILE_JOYSTICK_DIAGONAL_RATIO) {
+    nextKeys.add(x < 0 ? "a" : "d");
+  }
+  if (Math.abs(y) >= MOBILE_JOYSTICK_ACTIVATION_RATIO && Math.abs(y) >= Math.abs(x) * MOBILE_JOYSTICK_DIAGONAL_RATIO) {
+    nextKeys.add(y < 0 ? "w" : "s");
+  }
+};
 
 const captureMobileControlsLayout = (controls: HTMLDivElement): MobileControlLayout => {
   const controlsRect = controls.getBoundingClientRect();
