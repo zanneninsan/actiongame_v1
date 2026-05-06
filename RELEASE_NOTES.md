@@ -2,85 +2,87 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
-## v0.1.317
+## v0.1.318
 ### English
-- Clarified the tutorial multi-jump prompt to explain that pressing jump while airborne spends stamina for an air jump.
+- Merged the latest `origin/main` multilingual updates into the tutorial branch.
+- Localized the rebuilt tutorial's movement, jump, dash, multi-jump, crouch, drop-through, and goal prompts for Japanese, English, Chinese, and Korean.
+- Kept the recent tutorial flow refinements, including early prompt closing, the dash wall, clearer stamina explanations, and the air-jump multi-jump wording.
 ### Japanese
-- チュートリアルの多段ジャンプ説明を、空中でジャンプを押すとスタミナを消費して空中ジャンプできる内容に修正しました。
+- 最新の`origin/main`の多言語対応をチュートリアル作業ブランチへ取り込みました。
+- 作り直したチュートリアルの左右移動、移動ジャンプ、ダッシュ、多段ジャンプ、しゃがみ、すり抜け、ゴール説明を日本語・英語・中国語・韓国語に対応しました。
+- 説明の早期クローズ、ダッシュ壁、スタミナ説明の明確化、空中ジャンプとしての多段ジャンプ説明など、最近のチュートリアル調整を維持しました。
 
 ## v0.1.316
 ### English
-- Made the tutorial dash prompt close immediately after the player clears the dash wall.
+- Added Chinese and Korean translations for leaderboard results, Google account linking prompts, and the account/player ID panel.
 ### Japanese
-- チュートリアルでダッシュ壁を越えたら、ダッシュ説明がすぐ閉じるようにしました。
+- ランキング画面の結果表示、Google連携の案内、アカウント・プレイヤーID画面に残っていた中国語・韓国語未対応の文言を補いました。
 
 ## v0.1.315
 ### English
-- Moved the tutorial moving-jump prompt farther left so it appears before the player reaches the first gap edge.
+- Added Chinese and Korean translations for start modal account, anonymous play, ghost replay, orientation, and install prompts.
 ### Japanese
-- チュートリアルの移動ジャンプ説明を左へ移動し、最初の穴の直前で余裕を持って表示されるようにしました。
+- トップ画面の匿名プレイ、Googleログイン、ゴースト、横画面確認、ホーム画面追加などの文言に中国語・韓国語訳を追加しました。
 
 ## v0.1.314
 ### English
-- Made the tutorial's first movement and moving-jump prompts close immediately once the player clears the first gap.
+- Added multilingual text to the first-run sound confirmation and filled in missing Chinese and Korean left-side story messages.
 ### Japanese
-- チュートリアルで最初の穴を越えたら、左右移動と移動ジャンプの説明が終了時間を待たずに閉じるようにしました。
+- 初回の音量確認に日英中韓の併記を追加し、左上メッセージUIに残っていた中国語・韓国語未対応のステージ会話を補いました。
 
 ## v0.1.313
 ### English
-- Clarified the tutorial dash prompt to explain that dashing spends stamina and that stamina gradually recovers while not dashing or airborne.
+- Strengthened Chinese font fallbacks for danmaku comments and the left-side story message UI.
 ### Japanese
-- チュートリアルのダッシュ説明に、ダッシュでスタミナを消費することと、ダッシュ中・空中以外ではスタミナが少しずつ回復することを追記しました。
+- 中国語の弾幕コメントと左上メッセージUIが文字化けしにくいように、中国語フォントのフォールバック指定を強化しました。
 
 ## v0.1.312
 ### English
-- Removed the remaining question block from the tutorial stage to keep the practice flow unambiguous.
+- Fixed Korean danmaku text rendering by restoring localized comment strings and using CJK font fallbacks, and localized the fixed left-side story messages.
 ### Japanese
-- チュートリアルステージに残っていたはてなブロックを削除し、練習内容が紛らわしくならないようにしました。
+- 韓国語の弾幕コメントが文字化けしないようにローカライズ文字列とCJKフォント指定を修正し、左上の固定メッセージも多言語対応しました。
 
 ## v0.1.311
 ### English
-- Raised the tutorial dash wall far above the camera bounds so multi-jumps cannot bypass it.
+- Localized all danmaku-style comments, live chat names, and reaction bursts for English, Japanese, Chinese, and Korean.
 ### Japanese
-- チュートリアルのダッシュ壁をカメラ範囲の上まで大きく伸ばし、多段ジャンプで越えられないようにしました。
+- 弾幕風コメント、ライブチャット風のユーザー名、リアクション連投表示を英語・日本語・中国語・韓国語に対応しました。
 
 ## v0.1.310
 ### English
-- Extended the tutorial dash wall upward so it cannot be bypassed with multi-jumps.
+- Redirected removed card-only share URLs back to the main game page so old cleanup paths no longer serve the SPA fallback.
 ### Japanese
-- チュートリアルのダッシュ壁を上方向に伸ばし、多段ジャンプで飛び越えられないようにしました。
+- 削除したカード専用共有URLがSPAフォールバックで残らないように、本体ページへリダイレクトする設定を追加しました。
 
 ## v0.1.309
 ### English
-- Added a dark translucent dash wall to the tutorial dash section that knocks the player back unless they are actively dashing.
+- Simplified X sharing to use the main game URL with a cache-busting query string and removed the extra card-only share page workaround.
 ### Japanese
-- チュートリアルのダッシュ練習区間に暗い半透明の縦壁を追加し、ダッシュ中でない場合は後ろへ弾き飛ばされるようにしました。
+- X共有を本体URLにキャッシュ対策クエリを付ける方式へ整理し、カード専用共有ページの回避策を削除しました。
 
 ## v0.1.308
 ### English
-- Lengthened the tutorial dash practice runway and delayed the multi-jump prompt so the dash section has room to breathe.
+- Switched X share cards to a fresh 1200x600 JPEG image with a new physical URL and removed JavaScript redirects from the card-only share page.
 ### Japanese
-- チュートリアルのダッシュ練習区間を長い直線にし、多段ジャンプの案内を後ろへずらして、しっかり走れる余白を作りました。
+- Xカード用画像を新しい物理URLの1200x600 JPEGに変更し、カード専用共有ページからJavaScript遷移を外しました。
 
 ## v0.1.307
 ### English
-- Removed the question block from the tutorial moving-jump gap so the jump path is clear.
+- Added a dedicated static X share page with fresh OGP metadata, updated leaderboard sharing to use it, and added a real robots.txt for crawlers.
 ### Japanese
-- チュートリアルの移動ジャンプ区間からはてなボックスを外し、ジャンプの軌道を邪魔しないようにしました。
+- Xカード用の静的共有ページを追加し、ランキング共有でそのURLを使うようにしました。クローラー向けにrobots.txtも追加しました。
 
 ## v0.1.306
 ### English
-- Extended tutorial message display durations so each instruction stays readable while practicing the section.
+- Updated X sharing to pass the game URL through the Web Intent URL parameter and added cache-busting query strings for the shared URL and OGP image.
 ### Japanese
-- チュートリアル中の説明メッセージの表示時間を延ばし、各練習区間で読みながら操作しやすくしました。
+- X投稿時にゲームURLをWeb IntentのURLパラメータとして渡すようにし、共有URLとOGP画像にキャッシュ対策のクエリ文字列を付けました。
 
 ## v0.1.305
 ### English
-- Rebuilt the tutorial stage into a guided sequence for movement, moving jumps, super dash, multi-jumps, crouch stamina recovery, drop-through platforms, and the goal.
-- Added support for multiple stage message triggers so tutorial instructions can appear at each practice section.
+- Made leaderboard Functions accept safe new stage IDs without requiring a Functions allowlist update for every added stage.
 ### Japanese
-- チュートリアルステージを、左右移動、移動ジャンプ、スーパーダッシュ、多段ジャンプ、しゃがみスタミナ回復、しゃがみすり抜け、ゴールの順に練習できる構成へ作り直しました。
-- ステージ内の複数地点でメッセージUIを出せるようにし、各練習区間で説明が表示されるようにしました。
+- 新しいステージを追加するたびにFunctions側の許可リストを更新しなくても、安全な形式のステージIDならランキング登録できるようにしました。
 
 ## v0.1.304
 ### English

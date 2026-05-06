@@ -35,9 +35,15 @@ test("accepts enemy defeat bonus in the score before time bonus", () => {
   assert.equal(payload.expectedScore, 4350);
 });
 
-test("rejects unknown stages", () => {
+test("accepts safe future stage ids without a Functions allowlist update", () => {
+  const payload = cleanLeaderboardPayload({...basePayload, stageId: "futureStage_01"});
+
+  assert.equal(payload.stageId, "futureStage_01");
+});
+
+test("rejects malformed stage ids", () => {
   assertHttpsError(
-    () => cleanLeaderboardPayload({...basePayload, stageId: "futureStage"}),
+    () => cleanLeaderboardPayload({...basePayload, stageId: "../future stage"}),
     "invalid-argument",
   );
 });

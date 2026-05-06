@@ -29,7 +29,7 @@ type LeaderboardAccountPrompt = {
 export type LeaderboardGhostSaveStatus = "saved" | "missing" | "notEligible" | "notRecorded" | "unknown";
 
 const LEADERBOARD_FETCH_RETRY_MS = 800;
-const GAME_SHARE_URL = "https://zannenin-sisters-leaderboard.web.app/";
+const GAME_SHARE_URL = "https://zannenin-sisters-leaderboard.web.app/?share=v0.1.309";
 const GAME_SHARE_HASHTAG = "#\u30b9\u30fc\u30d1\u30fc\u6b8b\u5ff5\u9662\u3055\u3093\u30e9\u30f3\u30c9";
 
 export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
@@ -45,11 +45,11 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
       <p class="leaderboard-status">${escapeHtml(options.statusMessage ?? t(locale, "leaderboard.loading"))}</p>
       <div class="leaderboard-header">
         <span aria-hidden="true"></span>
-        <span>RANK</span>
-        <span>NAME</span>
-        <span>ID</span>
-        <span>SCORE</span>
-        <span>DATE</span>
+        <span>${escapeHtml(t(locale, "leaderboard.headerRank"))}</span>
+        <span>${escapeHtml(t(locale, "leaderboard.headerName"))}</span>
+        <span>${escapeHtml(t(locale, "leaderboard.headerId"))}</span>
+        <span>${escapeHtml(t(locale, "leaderboard.headerScore"))}</span>
+        <span>${escapeHtml(t(locale, "leaderboard.headerDate"))}</span>
       </div>
       <ol class="leaderboard-list"></ol>
       <div class="leaderboard-current-score" hidden></div>
@@ -110,7 +110,7 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
       status.textContent = options.statusMessage ?? t(locale, "leaderboard.topScores");
       list.replaceChildren(
         ...entries.map((entry, index) =>
-          createEntryRow(entry, index + 1, options.currentSubmissionId, options.currentPlayerId, options.currentScore),
+          createEntryRow(entry, index + 1, locale, options.currentSubmissionId, options.currentPlayerId, options.currentScore),
         ),
       );
       list.querySelector(".leaderboard-entry.is-current-score")?.scrollIntoView({ block: "center" });
@@ -146,12 +146,13 @@ function buildShareText(options: LeaderboardPanelOptions, locale: Locale, rankLa
 }
 
 function appendShareFooter(text: string) {
-  return `${text}\n\n${GAME_SHARE_HASHTAG}\n\n${GAME_SHARE_URL}`;
+  return `${text}\n\n${GAME_SHARE_HASHTAG}`;
 }
 
 function openXShare(text: string) {
   const params = new URLSearchParams({
     text,
+    url: GAME_SHARE_URL,
   });
   window.open(`https://twitter.com/intent/tweet?${params.toString()}`, "_blank", "noopener,noreferrer");
 }
@@ -191,6 +192,7 @@ function wait(milliseconds: number) {
 function createEntryRow(
   entry: LeaderboardEntry,
   rank: number,
+  locale: Locale,
   currentSubmissionId?: string,
   currentPlayerId?: string,
   currentScore?: LeaderboardCurrentScore,
@@ -203,7 +205,7 @@ function createEntryRow(
     row.classList.add("is-current-score");
   }
   row.innerHTML = `
-    <span class="leaderboard-new-marker">${isCurrentScore ? "NEW" : ""}</span>
+    <span class="leaderboard-new-marker">${isCurrentScore ? escapeHtml(t(locale, "leaderboard.newMarker")) : ""}</span>
     <span class="leaderboard-rank">${rank}</span>
     <span class="leaderboard-name">${escapeHtml(entry.playerName)}</span>
     <span class="leaderboard-player-id">${escapeHtml(formatPlayerId(playerId))}</span>

@@ -8,13 +8,14 @@ export const MAX_GHOST_FRAMES = 9_000;
 const MAX_SCORE_DRIFT = 0.01;
 const TIMER_DRIFT_MS = 1000;
 const LEADERBOARD_ANTI_CHEAT_ENABLED = false;
+const DEFAULT_STAGE_SCORE_LIMIT: StageScoreLimit = {maxScoreBeforeTimeBonus: 100_000, minElapsedMs: 0};
 
 type StageScoreLimit = {
   maxScoreBeforeTimeBonus: number;
   minElapsedMs: number;
 };
 
-const STAGE_SCORE_LIMITS: Record<string, StageScoreLimit> = {
+const KNOWN_STAGE_SCORE_LIMITS: Record<string, StageScoreLimit> = {
   originalDowntown: {maxScoreBeforeTimeBonus: 4350, minElapsedMs: 1000},
   neonCanal: {maxScoreBeforeTimeBonus: 4350, minElapsedMs: 1000},
   neoShibuyaCity: {maxScoreBeforeTimeBonus: 5000, minElapsedMs: 1000},
@@ -75,10 +76,10 @@ export function cleanLeaderboardPayload(data: unknown): CleanLeaderboardPayload 
   }
 
   const stageId = cleanStageId(payload.stageId);
-  const stageLimit = stageId ? STAGE_SCORE_LIMITS[stageId] : undefined;
-  if (!stageId || !stageLimit) {
+  if (!stageId) {
     throw new HttpsError("invalid-argument", "Stage id is invalid.");
   }
+  const stageLimit = KNOWN_STAGE_SCORE_LIMITS[stageId] ?? DEFAULT_STAGE_SCORE_LIMIT;
 
   const itemScore = readFiniteNumber(payload.itemScore);
   const remainingMs = readFiniteNumber(payload.remainingMs);

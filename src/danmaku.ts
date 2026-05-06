@@ -1,123 +1,71 @@
 import Phaser from "phaser";
+import type { Locale } from "./i18n";
 
-const SCORE_MILESTONE_COMMENTS = [
-  "ｷﾀ━━━━(ﾟ∀ﾟ)━━━━!!",
-  "ｷﾀ━━━━(ﾟ∀ﾟ)━━━━!!",
-  "スコア1000おめでとう！",
-  "Score1000!!",
-  "1000超えきた！１１１",
-  "おめでとう！！",
-  "1000点突破！",
-  "888888888888",
-  "888888888888",
-  "いいペース",
-  "スコア伸びてる",
-  "ナイス回収",
-  "これは熱い",
-  "まだまだいける",
-  "勢いある",
-  "うまい",
-  "ここから本番",
-];
+type DanmakuCommentSet = {
+  scoreMilestone: readonly string[];
+  crouchHold: readonly string[];
+  jumpChain: readonly string[];
+  afkIdle: readonly string[];
+  miss: readonly string[];
+  timeUp: readonly string[];
+};
 
-const CROUCH_HOLD_COMMENTS = [
-  "え、見え・・・",
-  "カメラ仕事した",
-  "一時停止不可避",
-  "スカート「解せぬ」",
-  "今日も生きていける",
-  "公式が病気",
-  "ファンサありがとう",
-  "今の見た？",
-  "ありがとうございます",
-  "神カメラ",
-  "ここリプレイ",
-  "助かる",
-];
+type LiveChatUser = {
+  icon: string;
+  name: string;
+};
 
-const JUMP_CHAIN_COMMENTS = [
-  "カービィかよ？",
-  "空飛んでません？",
-  "滞空時間おかしい",
-  "ジャンプしすぎｗ",
-  "もう飛行タイプ",
-  "地面いらない説",
-  "ふわふわしてる",
-  "落ちる気ある？",
-  "空中散歩",
-  "羽ついてる？",
-  "無限ジャンプ助かる",
-  "これは浮いてる",
-];
+const DANMAKU_COMMENTS: Record<Locale, DanmakuCommentSet> = {
+  en: {
+    scoreMilestone: ["Nice 1000!", "Score 1000!!", "Big score energy", "888888888888", "Clean pace", "The run is heating up", "Keep it rolling", "Bonus route spotted", "That was sharp", "Still going strong"],
+    crouchHold: ["Camera, please behave", "Pause frame detected", "The crouch tech", "Respectful camera angle", "Replay that moment", "Officially suspicious", "Fans are watching", "Careful there", "That was close", "Saving clip..."],
+    jumpChain: ["Air time!", "Is this a platformer or flight sim?", "Too many jumps!", "Floating nicely", "Please land eventually", "Sky route unlocked", "Jump chain continues", "Gravity is optional", "Feather feet", "That rhythm is good"],
+    afkIdle: ["BRB moment?", "Did the stream freeze?", "Standing very still", "Tactical thinking time", "Controller disconnected?", "Snack break?", "We wait together", "Still there?", "The suspense", "AFK but stylish"],
+    miss: ["Ah!", "Down she goes", "That was painful", "Footing betrayed her", "Reset magic time", "Next one is the run", "Nobody saw that", "Ground check failed", "So close", "One more try!"],
+    timeUp: ["Time is gone", "The clock was watching", "0.00 seconds...", "No overtime today", "So close to the bell", "Time attack is cruel", "Run it back", "The clock wins", "Almost made it", "TIME UP", "Next run will be cleaner", "One more attempt"],
+  },
+  ja: {
+    scoreMilestone: ["スコア1000おめでとう！", "1000突破！！", "888888888888", "いいペース", "スコア伸びてる", "これは熱い", "まだまだいける", "勢いある", "ナイス回収", "ここから本番"],
+    crouchHold: ["え、見え・・・", "カメラ仕事して", "一時停止不可避", "スカート、解せぬ", "今日も生きていける", "公式が病気", "ファンサありがとう", "今の見た？", "ありがとうございます", "神カメラ"],
+    jumpChain: ["カービィかよ！", "空飛んでません？", "滞空時間おかしい", "ジャンプしすぎ！", "もう飛行タイプ", "地面いらない説", "ふわふわしてる", "落ちる気ある？", "空中散歩", "翼ついてる？"],
+    afkIdle: ["あれ、トイレかな？", "お、寝落ちか・・・？", "回線切断した・・・？", "止まった！", "急に静かになった", "今のうちに休憩タイム", "操作忘れてる説", "離席中かな", "配信止まってない？", "まだそこにいる？"],
+    miss: ["あっ", "落ちたぁ！", "これはミス", "足場さん！？", "そこ穴です", "今のは痛い", "リスタート不可避", "ドンマイ", "地面仕事して", "次はいける"],
+    timeUp: ["時間がない！", "カウント見てた？", "0.00秒です", "延長はありません", "タイマーくん無慈悲", "あと一歩だった", "急ぎ足りない", "時は止まらない", "間に合わなかった", "次は巻いていこう", "残り時間、消滅", "TIME UP"],
+  },
+  zh: {
+    scoreMilestone: ["1000分达成！", "漂亮！", "888888888", "节奏很好", "分数涨起来了", "这一波很热", "继续冲", "回收得好"],
+    crouchHold: ["镜头注意一点", "这里暂停一下", "这个下蹲很会", "观众看见了", "谢谢福利", "有点危险", "请重播", "官方懂的"],
+    jumpChain: ["飞起来了！", "这还是跳跃吗？", "滞空太久了", "跳得真高", "地面不需要了", "空中散步", "重力失效", "节奏不错"],
+    afkIdle: ["人呢？", "去休息了吗？", "画面静止了", "战术思考中", "手柄断线？", "等一下也行", "还在吗？", "暂停配信？"],
+    miss: ["啊！", "掉下去了", "这是失误", "脚下没了", "好痛", "重新来过吧", "下次可以", "差一点"],
+    timeUp: ["没时间了！", "倒计时看到了吗？", "0.00秒", "没有加时", "时间太残酷", "就差一步", "再来一次", "TIME UP"],
+  },
+  ko: {
+    scoreMilestone: ["1000점 달성!", "좋다!", "888888888", "페이스 좋아요", "점수 오르는 중", "뜨거운 전개", "계속 가자", "회수 좋았다"],
+    crouchHold: ["카메라 조심해", "잠깐 멈춤", "이건 앉기 기술", "시청자 봤다", "팬서비스 감사합니다", "아슬아슬", "리플레이 각", "공식이 안다"],
+    jumpChain: ["날고 있어!", "점프가 너무 많아", "체공 시간 이상해", "높이 뛴다", "땅이 필요 없네", "공중 산책", "중력 어디 갔어", "리듬 좋다"],
+    afkIdle: ["어디 갔지?", "잠깐 쉬는 중?", "화면 멈췄나?", "전략 회의 중", "컨트롤러 끊겼나?", "기다리는 중", "아직 있어?", "잠시 자리 비움?"],
+    miss: ["앗!", "떨어졌다", "이건 실수", "발판이 배신했다", "아프다", "다시 가자", "다음엔 된다", "아까웠다"],
+    timeUp: ["시간이 없어!", "카운트 봤어?", "0.00초", "연장은 없습니다", "타이머가 냉정해", "한 걸음 부족", "다시 달리자", "TIME UP"],
+  },
+};
 
-const AFK_IDLE_COMMENTS = [
-  "あれ、トイレかな？",
-  "お、寝落ちか・・・・？",
-  "回線切断した・・・・？",
-  "止まった？",
-  "急に静かになった",
-  "今のうちに休憩タイム",
-  "操作忘れてる説",
-  "離席中かな",
-  "配信止まってない？",
-  "まだそこにいる？",
-];
+const LIVE_CHAT_USERS: Record<Locale, readonly LiveChatUser[]> = {
+  en: [{ icon: "*", name: "zannen_fan" }, { icon: "#", name: "SisterWatcher" }, { icon: "+", name: "stage_maker" }, { icon: ">", name: "neon_runner" }, { icon: "!", name: "first_timer" }],
+  ja: [{ icon: "*", name: "残念院推し" }, { icon: "#", name: "シスター見守り隊" }, { icon: "+", name: "ステージ職人" }, { icon: ">", name: "ネオン走者" }, { icon: "!", name: "初見さん" }],
+  zh: [{ icon: "*", name: "残念院粉丝" }, { icon: "#", name: "姐妹守望者" }, { icon: "+", name: "关卡工匠" }, { icon: ">", name: "霓虹跑者" }, { icon: "!", name: "初见观众" }],
+  ko: [{ icon: "*", name: "잔넨인팬" }, { icon: "#", name: "시스터감시단" }, { icon: "+", name: "스테이지장인" }, { icon: ">", name: "네온러너" }, { icon: "!", name: "첫시청자" }],
+};
 
-const MISS_COMMENTS = [
-  "あっ",
-  "落ちたｗ",
-  "これはミス",
-  "足場さん！？",
-  "そこ穴です",
-  "今のは痛い",
-  "リスタート不可避",
-  "ドンマイ",
-  "地面仕事して",
-  "吸い込まれた",
-  "次はいける",
-  "見なかったことにしよう",
-];
+const LIVE_CHAT_EMOJI_BOMBS: Record<Locale, readonly string[]> = {
+  en: ["!!!!!", "8888888888", "NICE NICE NICE", "SO GOOD!!", "LET'S GO!!"],
+  ja: ["！！！！！", "8888888888", "ナイスナイス", "すごい！！", "いけいけ！！"],
+  zh: ["！！！！！", "8888888888", "漂亮漂亮", "太强了！！", "冲啊！！"],
+  ko: ["!!!!!", "8888888888", "좋다 좋다", "엄청나다!!", "가자!!"],
+};
 
-const TIME_UP_SCENE_COMMENTS = [
-  "時間がないぞ",
-  "カウント見てた？",
-  "0.00秒です",
-  "延長はありません",
-  "タイマーくん無慈悲",
-  "あと一歩だった",
-  "急ぎ足りない",
-  "時は止まらない",
-  "間に合わなかった",
-  "次は巻いていこう",
-  "残り時間、消滅",
-  "TIME UP",
-  "締め切りです",
-  "無念のタイムアウト",
-  "ここで鐘が鳴る",
-  "もう一回走ろう",
-];
-
-const LIVE_CHAT_USERS = [
-  { icon: "◆", name: "zannen_fan" },
-  { icon: "●", name: "SisterWatcher" },
-  { icon: "★", name: "残念院推し" },
-  { icon: "■", name: "stage_maker" },
-  { icon: "▲", name: "neon_runner" },
-  { icon: "✦", name: "初見さん" },
-];
-
-const LIVE_CHAT_EMOJI_BOMBS = [
-  "🔥🔥🔥🔥🔥",
-  "👏👏👏👏👏👏👏",
-  "😂😂😂😂😂",
-  "💥💥💥💥💥",
-  "✨✨✨✨✨",
-  "8888888888 👏👏👏",
-  "草草草草草 😂",
-  "ナイス！🔥👏✨",
-  "これは熱い 🔥🔥🔥",
-  "💎💎💎 神回 💎💎💎",
-];
+const DANMAKU_FONT_FAMILY =
+  '"Microsoft YaHei", "Microsoft JhengHei", SimHei, SimSun, "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "Noto Sans CJK KR", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", "Yu Gothic", Meiryo, sans-serif';
 
 type ActiveComment = Phaser.GameObjects.Text & {
   destroyTimer?: Phaser.Time.TimerEvent;
@@ -137,7 +85,7 @@ export class DanmakuOverlay {
   private nextLiveChatUser = 0;
   private mode: DanmakuMode = "classic";
 
-  constructor(scene: Phaser.Scene, width: number, height: number) {
+  constructor(scene: Phaser.Scene, width: number, height: number, private readonly getLocale: () => Locale = () => "en") {
     this.scene = scene;
     this.width = width;
     this.height = height;
@@ -151,7 +99,7 @@ export class DanmakuOverlay {
   }
 
   emitScoreMilestone() {
-    this.emitBurst(SCORE_MILESTONE_COMMENTS, 20, 75, {
+    this.emitBurst(this.getComments().scoreMilestone, 20, 75, {
       color: "#ffffff",
       stroke: "#0f766e",
       fontSize: 27,
@@ -160,7 +108,7 @@ export class DanmakuOverlay {
   }
 
   emitCrouchHold() {
-    this.emitBurst(CROUCH_HOLD_COMMENTS, 18, 80, {
+    this.emitBurst(this.getComments().crouchHold, 18, 80, {
       color: "#fff7ed",
       stroke: "#7c2d12",
       fontSize: 26,
@@ -169,7 +117,7 @@ export class DanmakuOverlay {
   }
 
   emitJumpChain() {
-    this.emitBurst(JUMP_CHAIN_COMMENTS, 18, 80, {
+    this.emitBurst(this.getComments().jumpChain, 18, 80, {
       color: "#e0f2fe",
       stroke: "#075985",
       fontSize: 26,
@@ -178,7 +126,7 @@ export class DanmakuOverlay {
   }
 
   emitAfkIdle() {
-    this.emitBurst(AFK_IDLE_COMMENTS, 16, 92, {
+    this.emitBurst(this.getComments().afkIdle, 16, 92, {
       color: "#fef3c7",
       stroke: "#713f12",
       fontSize: 25,
@@ -194,11 +142,11 @@ export class DanmakuOverlay {
       duration: 3800,
     };
     if (this.mode === "liveChat") {
-      this.emitBurst(MISS_COMMENTS, 16, 85, style);
+      this.emitBurst(this.getComments().miss, 16, 85, style);
       return;
     }
 
-    this.emitDeathReaction(MISS_COMMENTS);
+    this.emitDeathReaction(this.getComments().miss);
   }
 
   emitTimeUp() {
@@ -209,11 +157,11 @@ export class DanmakuOverlay {
       duration: 3800,
     };
     if (this.mode === "liveChat") {
-      this.emitBurst(TIME_UP_SCENE_COMMENTS, 16, 85, style);
+      this.emitBurst(this.getComments().timeUp, 16, 85, style);
       return;
     }
 
-    this.emitDeathReaction(TIME_UP_SCENE_COMMENTS);
+    this.emitDeathReaction(this.getComments().timeUp);
   }
 
   clear() {
@@ -265,7 +213,7 @@ export class DanmakuOverlay {
     const y = this.getLaneY();
     const comment = this.scene.add
       .text(this.width + 48, y, message, {
-        fontFamily: "monospace",
+        fontFamily: DANMAKU_FONT_FAMILY,
         fontSize: `${style.fontSize}px`,
         color: style.color,
         stroke: style.stroke,
@@ -309,7 +257,7 @@ export class DanmakuOverlay {
   private emitDeathReactionComment(message: string, row: number) {
     const comment = this.scene.add
       .text(this.width / 2 + Phaser.Math.Between(-18, 18), this.height / 2 + row * 72, message, {
-        fontFamily: "monospace",
+        fontFamily: DANMAKU_FONT_FAMILY,
         fontSize: `${Phaser.Math.Between(38, 48)}px`,
         fontStyle: "bold",
         color: "#ff1744",
@@ -368,7 +316,7 @@ export class DanmakuOverlay {
 
     const comment = this.scene.add
       .text(x, bottomY, `${user.icon} ${user.name}：${displayMessage}`, {
-        fontFamily: "monospace",
+        fontFamily: DANMAKU_FONT_FAMILY,
         fontSize: `${style.fontSize}px`,
         color: style.color,
         stroke: style.stroke,
@@ -397,19 +345,33 @@ export class DanmakuOverlay {
   }
 
   private resolveLiveChatMessage(message: string) {
+    const emojiBombs = this.getEmojiBombs();
     if (Phaser.Math.Between(1, 100) <= 24) {
-      return LIVE_CHAT_EMOJI_BOMBS[Phaser.Math.Between(0, LIVE_CHAT_EMOJI_BOMBS.length - 1)];
+      return emojiBombs[Phaser.Math.Between(0, emojiBombs.length - 1)];
     }
     if (Phaser.Math.Between(1, 100) <= 18) {
-      return `${message} ${LIVE_CHAT_EMOJI_BOMBS[Phaser.Math.Between(0, LIVE_CHAT_EMOJI_BOMBS.length - 1)]}`;
+      return `${message} ${emojiBombs[Phaser.Math.Between(0, emojiBombs.length - 1)]}`;
     }
     return message;
   }
 
   private getNextLiveChatUser() {
-    const user = LIVE_CHAT_USERS[this.nextLiveChatUser % LIVE_CHAT_USERS.length];
+    const users = this.getLiveChatUsers();
+    const user = users[this.nextLiveChatUser % users.length];
     this.nextLiveChatUser += Phaser.Math.Between(1, 2);
     return user;
+  }
+
+  private getComments() {
+    return DANMAKU_COMMENTS[this.getLocale()] ?? DANMAKU_COMMENTS.en;
+  }
+
+  private getLiveChatUsers() {
+    return LIVE_CHAT_USERS[this.getLocale()] ?? LIVE_CHAT_USERS.en;
+  }
+
+  private getEmojiBombs() {
+    return LIVE_CHAT_EMOJI_BOMBS[this.getLocale()] ?? LIVE_CHAT_EMOJI_BOMBS.en;
   }
 
   private layoutLiveChatComments(bottomY = this.height - 86, topY = 96, animate = true) {
@@ -468,7 +430,7 @@ export class DanmakuOverlay {
     const y = this.height / 2 + Math.sin(angle) * radius * 0.62;
     const comment = this.scene.add
       .text(x, y, message, {
-        fontFamily: "monospace",
+        fontFamily: DANMAKU_FONT_FAMILY,
         fontSize: `${style.fontSize + Phaser.Math.Between(-3, 4)}px`,
         color: style.color,
         stroke: style.stroke,
