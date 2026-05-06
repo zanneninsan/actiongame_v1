@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.290
+### English
+- Added a Phaser-level P screenshot shortcut so PC capture works even when browser-level key events are intercepted, and paused gameplay while the screenshot preview is open.
+### Japanese
+- PC版のPキー撮影をPhaser側にも登録してキー入力が取られにくいようにし、スクリーンショットのプレビュー表示中はゲーム進行を一時停止するようにしました。
+
 ## v0.1.289
 ### English
 - Restored OGP/Twitter Card metadata and the OGP image asset in the app build, and changed X sharing to pass the game URL through the tweet intent URL parameter.

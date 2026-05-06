@@ -94,7 +94,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.289";
+const DEBUG_VERSION = "v0.1.290";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -316,6 +316,7 @@ class PrototypeScene extends Phaser.Scene {
   private clearScreenshotButton?: Phaser.GameObjects.Text;
   private lastScreenshot?: CapturedGameScreenshot;
   private screenshotCapturePending = false;
+  private screenshotPreviewOpen = false;
   private dashLingerUntil = -Infinity;
   private countdownOverlay?: StartCountdownOverlay;
   private finalScoreText?: Phaser.GameObjects.Text;
@@ -719,8 +720,12 @@ class PrototypeScene extends Phaser.Scene {
     this.input.keyboard!.on("keydown-R", () => this.handleRestartKey());
     this.input.keyboard!.off("keydown-W");
     this.input.keyboard!.off("keydown-SPACE");
+    this.input.keyboard!.off("keydown-P");
+    this.input.keyboard!.off("keydown-PRINT_SCREEN");
     this.input.keyboard!.on("keydown-W", () => this.noteJumpInput());
     this.input.keyboard!.on("keydown-SPACE", () => this.noteJumpInput());
+    this.input.keyboard!.on("keydown-P", () => this.captureGameScreenshot({ preview: false }));
+    this.input.keyboard!.on("keydown-PRINT_SCREEN", () => this.captureGameScreenshot({ preview: false }));
     this.createStageEditor();
     this.createGlobalUI();
 
@@ -1006,6 +1011,7 @@ class PrototypeScene extends Phaser.Scene {
     this.clearScreenshotButton?.destroy();
     this.clearScreenshotButton = undefined;
     this.screenshotCapturePending = false;
+    this.screenshotPreviewOpen = false;
     this.ghostRecordingFrames = [];
     this.ghostRecordingActive = false;
     this.ghostRecordingDisabled = false;
@@ -2227,6 +2233,51 @@ class PrototypeScene extends Phaser.Scene {
     removeScreenshotPreview();
   }
 
+  private pauseForScreenshotPreview() {
+    if (this.screenshotPreviewOpen) {
+      return;
+    }
+
+    this.screenshotPreviewOpen = true;
+    if (this.isRunActive) {
+      this.editorTimerPauseStartedAt ||= this.time.now;
+    }
+    this.physics.pause();
+    this.anims.pauseAll();
+    this.tweens.pauseAll();
+  }
+
+  private resumeFromScreenshotPreview() {
+    if (!this.screenshotPreviewOpen) {
+      return;
+    }
+
+    this.screenshotPreviewOpen = false;
+    if (this.isRunActive && this.editorTimerPauseStartedAt !== 0) {
+      this.editorTimerPausedMs += Math.max(0, this.time.now - this.editorTimerPauseStartedAt);
+      this.editorTimerPauseStartedAt = this.stageEditor?.isEnabled ? this.time.now : 0;
+    }
+    this.anims.resumeAll();
+    this.tweens.resumeAll();
+    if (this.isRunActive && !this.stageEditor?.isEnabled && !this.hasWon) {
+      this.physics.resume();
+    }
+    this.updateTimerText();
+  }
+
+  private showStoredScreenshotPreview() {
+    if (!this.lastScreenshot) {
+      return;
+    }
+
+    this.pauseForScreenshotPreview();
+    showScreenshotPreview({
+      screenshot: this.lastScreenshot,
+      locale: this.locale,
+      onClose: () => this.resumeFromScreenshotPreview(),
+    });
+  }
+
   private moveGoalTo(x: number, y: number) {
     if (!this.goal) {
       return;
@@ -2586,7 +2637,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private showScreenshotPreviewOrCapture() {
     if (this.lastScreenshot) {
-      showScreenshotPreview({ screenshot: this.lastScreenshot, locale: this.locale });
+      this.showStoredScreenshotPreview();
       return;
     }
     this.captureGameScreenshot({ preview: true });
@@ -2636,7 +2687,7 @@ class PrototypeScene extends Phaser.Scene {
         stageId: this.currentStageId,
       };
       if (preview) {
-        showScreenshotPreview({ screenshot: this.lastScreenshot, locale: this.locale });
+        this.showStoredScreenshotPreview();
       }
     };
 

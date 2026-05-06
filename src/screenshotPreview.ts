@@ -9,9 +9,14 @@ export type CapturedGameScreenshot = {
 type ScreenshotPreviewOptions = {
   screenshot: CapturedGameScreenshot;
   locale: Locale;
+  onClose?: () => void;
 };
 
 const MODAL_ID = "screenshot-modal";
+
+type ScreenshotModalElement = HTMLDivElement & {
+  cleanup?: () => void;
+};
 
 const formatTimestamp = (timestamp: number, locale: Locale) =>
   new Intl.DateTimeFormat(locale === "ja" ? "ja-JP" : "en-US", {
@@ -33,14 +38,16 @@ const downloadScreenshot = (screenshot: CapturedGameScreenshot) => {
 };
 
 export const removeScreenshotPreview = () => {
-  document.getElementById(MODAL_ID)?.remove();
+  const modal = document.getElementById(MODAL_ID) as ScreenshotModalElement | null;
+  modal?.cleanup?.();
+  modal?.remove();
   document.body.classList.remove("is-screenshot-modal-open");
 };
 
-export const showScreenshotPreview = ({ screenshot, locale }: ScreenshotPreviewOptions) => {
+export const showScreenshotPreview = ({ screenshot, locale, onClose }: ScreenshotPreviewOptions) => {
   removeScreenshotPreview();
 
-  const modal = document.createElement("div");
+  const modal = document.createElement("div") as ScreenshotModalElement;
   modal.id = MODAL_ID;
   modal.innerHTML = `
     <div class="screenshot-dialog" role="dialog" aria-modal="true" aria-labelledby="screenshot-title">
@@ -57,6 +64,14 @@ export const showScreenshotPreview = ({ screenshot, locale }: ScreenshotPreviewO
     </div>
   `;
 
+  let didClose = false;
+  modal.cleanup = () => {
+    if (didClose) {
+      return;
+    }
+    didClose = true;
+    onClose?.();
+  };
   const close = () => removeScreenshotPreview();
   const dialog = modal.querySelector(".screenshot-dialog") as HTMLDivElement;
   const closeButton = modal.querySelector("#screenshot-close") as HTMLButtonElement;
