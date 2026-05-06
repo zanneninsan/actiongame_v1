@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.281
+### English
+- Made the danmaku options tutorial strictly once per account, so test-data clearing no longer resets its seen flag.
+### Japanese
+- 弾幕設定案内メッセージをアカウントごとに完全に一度きりにし、テストデータ削除でも表示済み状態が戻らないようにしました。
+
 ## v0.1.280
 ### English
 - Added a once-per-account story message that appears after the first non-MISS danmaku finishes, explaining that comment display can be hidden or restyled from Options.

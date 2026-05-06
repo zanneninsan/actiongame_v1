@@ -88,7 +88,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.280";
+const DEBUG_VERSION = "v0.1.281";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -1141,16 +1141,6 @@ class PrototypeScene extends Phaser.Scene {
       console.warn("Could not save danmaku tutorial flag.", error);
     }
     this.setCookieValue(storageKey, "1");
-  }
-
-  private clearDanmakuTutorialDialogueSeen(playerId = this.leaderboardPlayerId) {
-    const storageKey = this.getDanmakuTutorialSeenStorageKey(playerId);
-    try {
-      window.localStorage.removeItem(storageKey);
-    } catch (error) {
-      console.warn("Could not clear danmaku tutorial flag.", error);
-    }
-    this.setCookieValue(storageKey, "0");
   }
 
   private scheduleDanmakuTutorialDialogue() {
@@ -2886,7 +2876,6 @@ class PrototypeScene extends Phaser.Scene {
       this.leaderboardSettingsSaveTimer = undefined;
     }
     this.leaderboardSettingsSyncLoadedForPlayerId = result.identity.playerId;
-    this.clearDanmakuTutorialDialogueSeen(result.identity.playerId);
     this.applyLeaderboardIdentity(result.identity);
     return result.identity;
   }
