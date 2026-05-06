@@ -88,7 +88,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.275";
+const DEBUG_VERSION = "v0.1.276";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -1299,6 +1299,8 @@ class PrototypeScene extends Phaser.Scene {
     this.restartEditorStage = undefined;
     this.restartStageEditorEnabled = false;
     this.stageConstants = resolveStageConstants(this.editorStage);
+    this.stageMidpointProgress = this.resolveStageMidpointProgress();
+    this.hasShownStageMidpointDialogue = false;
     this.applyStageBackgroundDefaults();
     this.physics.world.setBounds(
       0,

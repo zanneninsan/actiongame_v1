@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.276
+### English
+- Fixed the stage-midpoint story message so its midpoint is recalculated after the selected stage is applied at run start.
+### Japanese
+- プレイ開始時に選択されたステージを反映した後で中間点を計算し直し、中間地点メッセージが正しく表示されるようにしました。
+
 ## v0.1.275
 ### English
 - Added a one-time 3.5-second story message when stamina first reaches zero during a stage.
