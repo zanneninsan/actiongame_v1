@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.316
+### English
+- Made the tutorial dash prompt close immediately after the player clears the dash wall.
+### Japanese
+- チュートリアルでダッシュ壁を越えたら、ダッシュ説明がすぐ閉じるようにしました。
+
 ## v0.1.315
 ### English
 - Moved the tutorial moving-jump prompt farther left so it appears before the player reaches the first gap edge.

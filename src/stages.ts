@@ -1654,6 +1654,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     },
     {
       triggerX: 1110,
+      closeAtX: 1740,
       stepDelayMs: 4600,
       durationMs: 13000,
       lines: [
