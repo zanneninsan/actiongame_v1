@@ -17,6 +17,7 @@ import { cloneStage } from "./stages";
 import { type ResolvedStageConstants } from "./stageConstants";
 import { StageEditorPanel, type EditorTool } from "./stageEditorPanel";
 import { t, type Locale } from "./i18n";
+import { submitStageProposal as submitStageProposalToFirebase } from "./leaderboard";
 
 type EditorSelection =
   | { kind: "platform"; index: number }
@@ -95,6 +96,9 @@ export class StageEditor {
         this.panel?.setImportStatus(t(this.options.getLocale(), "editor.status.exported"));
       },
       onImport: (json) => this.importStage(json),
+      getStageName: () => this.getEditableStageName(),
+      onStageNameChange: (name) => this.updateStageName(name),
+      onSubmitProposal: () => void this.submitStageProposal(),
       getRemainingTimeSeconds: () => this.options.getRemainingTimeSeconds(),
       onRemainingTimeChange: (seconds) => this.options.setRemainingTimeSeconds(seconds),
     });
@@ -338,6 +342,12 @@ export class StageEditor {
       oneWayGates: [],
       enemies: [],
     };
+    plainStage.name = {
+      jp: "空のステージ",
+      en: "空のステージ",
+      zh: "空のステージ",
+      ko: "空のステージ",
+    };
 
     this.options.setStage(plainStage);
     this.selected = undefined;
@@ -350,6 +360,56 @@ export class StageEditor {
     this.recordChange(previousStage);
     this.refreshExport();
     this.panel?.setImportStatus(t(this.options.getLocale(), "editor.status.plainStageCreated"));
+  }
+
+  private updateStageName(name: string) {
+    if (!this.enabled) {
+      return;
+    }
+
+    const normalizedName = this.normalizeStageName(name);
+    const previousStage = cloneStage(this.stage);
+    this.applyJapaneseStageName(normalizedName);
+    this.recordChange(previousStage);
+    this.refreshExport();
+  }
+
+  private async submitStageProposal() {
+    if (!this.enabled) {
+      return;
+    }
+
+    const stageNameJa = this.normalizeStageName(this.panel?.stageName ?? this.getEditableStageName());
+    if (!stageNameJa) {
+      this.panel?.setImportStatus(t(this.options.getLocale(), "editor.status.stageNameRequired"), true);
+      return;
+    }
+
+    const previousStage = cloneStage(this.stage);
+    this.applyJapaneseStageName(stageNameJa);
+    this.recordChange(previousStage);
+    this.refreshExport();
+    this.panel?.setStageName(stageNameJa);
+    this.panel?.setImportStatus(t(this.options.getLocale(), "editor.status.proposalSubmitting"));
+
+    try {
+      const result = await submitStageProposalToFirebase({
+        stageNameJa,
+        stage: cloneStage(this.stage),
+      });
+      if (result.ok) {
+        this.panel?.setImportStatus(t(this.options.getLocale(), "editor.status.proposalSubmitted"));
+        return;
+      }
+      this.panel?.setImportStatus(this.getProposalFailureMessage(result.reason), true);
+    } catch (error) {
+      const code = typeof error === "object" && error && "code" in error ? String((error as { code?: unknown }).code) : "";
+      if (code === "functions/already-exists") {
+        this.panel?.setImportStatus(t(this.options.getLocale(), "editor.status.proposalDuplicate"), true);
+        return;
+      }
+      this.panel?.setImportStatus(t(this.options.getLocale(), "editor.status.proposalFailed"), true);
+    }
   }
 
   private handlePointerMove(pointer: Phaser.Input.Pointer) {
@@ -737,6 +797,34 @@ export class StageEditor {
     this.refreshHistoryControls();
   }
 
+  private getEditableStageName() {
+    const name = this.stage.name;
+    return typeof name === "string" ? name : name.jp;
+  }
+
+  private normalizeStageName(name: string) {
+    return name.normalize("NFKC").trim().slice(0, 40);
+  }
+
+  private applyJapaneseStageName(name: string) {
+    this.stage.name = {
+      jp: name,
+      en: name,
+      zh: name,
+      ko: name,
+    };
+  }
+
+  private getProposalFailureMessage(reason: string) {
+    if (reason === "duplicate-name") {
+      return t(this.options.getLocale(), "editor.status.proposalDuplicate");
+    }
+    if (reason === "not-configured") {
+      return t(this.options.getLocale(), "editor.status.proposalNotConfigured");
+    }
+    return t(this.options.getLocale(), "editor.status.proposalFailed");
+  }
+
   private rebuildStageObjects() {
     this.options.rebuildStageObjects();
     this.refreshSelectionMarker();
@@ -933,6 +1021,7 @@ export class StageEditor {
 
   private refreshExport() {
     this.panel?.setExport(JSON.stringify(this.stage, null, 2));
+    this.panel?.setStageName(this.getEditableStageName());
   }
 
   private getExportFilename() {

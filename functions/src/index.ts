@@ -1,3 +1,4 @@
+import {createHash} from "node:crypto";
 import {initializeApp} from "firebase-admin/app";
 import {FieldValue, getFirestore, type Firestore} from "firebase-admin/firestore";
 import {setGlobalOptions} from "firebase-functions";
@@ -8,6 +9,9 @@ initializeApp();
 setGlobalOptions({maxInstances: 10});
 
 const TOP_GHOST_RANK_LIMIT = 10;
+const STAGE_PROPOSAL_COLLECTION = "stageProposals";
+const MAX_STAGE_NAME_LENGTH = 40;
+const MAX_STAGE_PROPOSAL_JSON_BYTES = 650_000;
 
 export const submitScore = onCall({region: "asia-northeast1", cors: true, invoker: "public"}, async (request) => {
   if (!request.auth) {
@@ -72,6 +76,48 @@ export const submitScore = onCall({region: "asia-northeast1", cors: true, invoke
     await saveTopRankGhostSafely(firestore, payload, uid, rank) :
     false;
   return {ok: true, status: "accepted", submissionId: payload.submissionId, scoreUpdated, rank, ghostSaved};
+});
+
+export const submitStageProposal = onCall({region: "asia-northeast1", cors: true, invoker: "public"}, async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Anonymous auth is required.");
+  }
+
+  const payload = cleanStageProposalPayload(request.data);
+  const firestore = getFirestore();
+  const uid = request.auth.uid;
+  const proposalId = createStageNameKey(payload.stageNameJa);
+  const proposalRef = firestore.collection(STAGE_PROPOSAL_COLLECTION).doc(proposalId);
+
+  try {
+    let duplicateName = false;
+    await firestore.runTransaction(async (transaction) => {
+      const currentProposal = await transaction.get(proposalRef);
+      if (currentProposal.exists) {
+        duplicateName = true;
+        return;
+      }
+
+      transaction.set(proposalRef, {
+        uid,
+        stageNameJa: payload.stageNameJa,
+        stageNameKey: proposalId,
+        stage: payload.stage,
+        status: "pending",
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+    });
+
+    if (duplicateName) {
+      return {ok: false, reason: "duplicate-name"};
+    }
+  } catch (error) {
+    console.error("Stage proposal transaction failed.", {error, uid, stageNameJa: payload.stageNameJa});
+    throw new HttpsError("unavailable", "Stage proposal could not be saved.");
+  }
+
+  return {ok: true, status: "pending", proposalId};
 });
 
 async function saveTopRankGhostSafely(
@@ -178,4 +224,44 @@ async function getLeaderboardRank(firestore: Firestore, stageId: string, score: 
     .count()
     .get();
   return higherScores.data().count + 1;
+}
+
+function cleanStageProposalPayload(data: unknown) {
+  if (!isRecord(data)) {
+    throw new HttpsError("invalid-argument", "Stage proposal payload is invalid.");
+  }
+
+  const stageNameJa = cleanStageProposalName(data.stageNameJa);
+  if (!stageNameJa) {
+    throw new HttpsError("invalid-argument", "Stage name is required.");
+  }
+  if (!isRecord(data.stage)) {
+    throw new HttpsError("invalid-argument", "Stage JSON is invalid.");
+  }
+
+  const stageJson = JSON.stringify(data.stage);
+  if (Buffer.byteLength(stageJson, "utf8") > MAX_STAGE_PROPOSAL_JSON_BYTES) {
+    throw new HttpsError("resource-exhausted", "Stage JSON is too large.");
+  }
+
+  const stage = JSON.parse(stageJson) as Record<string, unknown>;
+  stage.name = {
+    jp: stageNameJa,
+    en: stageNameJa,
+    zh: stageNameJa,
+    ko: stageNameJa,
+  };
+  return {stageNameJa, stage};
+}
+
+function cleanStageProposalName(value: unknown) {
+  return typeof value === "string" ? value.normalize("NFKC").trim().slice(0, MAX_STAGE_NAME_LENGTH) : "";
+}
+
+function createStageNameKey(stageNameJa: string) {
+  return createHash("sha256").update(stageNameJa, "utf8").digest("hex");
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }

@@ -131,6 +131,8 @@ const translations = {
     "editor.toggle": "EDITOR",
     "editor.toggleOn": "EDITOR ON",
     "editor.movePanel": "MOVE PANEL",
+    "editor.stageName": "Stage Name",
+    "editor.stageNamePlaceholder": "Japanese stage name",
     "editor.tool": "Tool",
     "editor.tool.select": "Select",
     "editor.tool.move": "Move Selected",
@@ -179,6 +181,7 @@ const translations = {
     "editor.exportJson": "EXPORT JSON",
     "editor.applyJson": "APPLY JSON",
     "editor.loadFile": "LOAD FILE",
+    "editor.submitProposal": "SUBMIT STAGE",
     "editor.status.readError": "Could not read JSON file.",
     "editor.status.emptyJson": "Paste JSON or load a JSON file first.",
     "editor.status.invalidShape": "Invalid stage JSON shape.",
@@ -187,6 +190,12 @@ const translations = {
     "editor.status.imported": "Imported JSON.",
     "editor.status.timeUpdated": "Updated remaining time.",
     "editor.status.plainStageCreated": "Created an empty stage.",
+    "editor.status.stageNameRequired": "Enter a stage name before submitting.",
+    "editor.status.proposalSubmitting": "Submitting stage proposal...",
+    "editor.status.proposalSubmitted": "Stage proposal submitted. It will be reviewed manually.",
+    "editor.status.proposalDuplicate": "A stage with this Japanese name has already been submitted.",
+    "editor.status.proposalFailed": "Stage proposal could not be submitted.",
+    "editor.status.proposalNotConfigured": "Firebase setup is not ready. Stage proposal was not submitted.",
     "leaderboard.title": "LEADERBOARD",
     "leaderboard.loading": "Loading...",
     "leaderboard.empty": "No scores yet.",
@@ -1047,4 +1056,19 @@ export const getBrowserLocale = (): Locale => {
   return DEFAULT_LOCALE;
 };
 
-export const t = (locale: Locale, key: TranslationKey) => localeTranslations[locale][key] ?? translations[DEFAULT_LOCALE][key];
+const japaneseRuntimeOverrides: Partial<Record<TranslationKey, string>> = {
+  "editor.stageName": "ステージ名",
+  "editor.stageNamePlaceholder": "日本語のステージ名",
+  "editor.submitProposal": "採用申請",
+  "editor.status.stageNameRequired": "申請前にステージ名を入力してください。",
+  "editor.status.proposalSubmitting": "採用申請を送信中...",
+  "editor.status.proposalSubmitted": "採用申請を送信しました。内容は手動で確認されます。",
+  "editor.status.proposalDuplicate": "同じ日本語ステージ名の申請がすでにあります。",
+  "editor.status.proposalFailed": "採用申請を送信できませんでした。",
+  "editor.status.proposalNotConfigured": "Firebase設定が未完了のため、採用申請を送信できませんでした。",
+};
+
+export const t = (locale: Locale, key: TranslationKey) =>
+  (locale === "ja" ? japaneseRuntimeOverrides[key] : undefined) ??
+  localeTranslations[locale][key] ??
+  translations[DEFAULT_LOCALE][key];

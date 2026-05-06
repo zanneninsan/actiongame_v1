@@ -75,6 +75,19 @@ export type LeaderboardSubmitResult =
     }
   | { ok: false; reason: string };
 
+export type StageProposalSubmitPayload = {
+  stageNameJa: string;
+  stage: unknown;
+};
+
+export type StageProposalSubmitResult =
+  | {
+      ok: true;
+      proposalId: string;
+      status: "pending";
+    }
+  | { ok: false; reason: string };
+
 export type LeaderboardIdentity = {
   playerId: string;
   isAnonymous: boolean;
@@ -105,6 +118,7 @@ type FirebaseServices = {
 const LEADERBOARD_COLLECTION = "leaderboardScores";
 const USER_SETTINGS_DOC = "app";
 const SUBMIT_SCORE_FUNCTION = "submitScore";
+const SUBMIT_STAGE_PROPOSAL_FUNCTION = "submitStageProposal";
 const DEFAULT_LEADERBOARD_LIMIT = 100;
 let servicesPromise: Promise<FirebaseServices | undefined> | undefined;
 let appCheckInitialized = false;
@@ -259,6 +273,28 @@ export async function submitLeaderboardScore(payload: LeaderboardSubmitPayload) 
     score: roundScore(payload.score),
     itemScore: roundScore(payload.itemScore),
     timeBonus: roundScore(payload.timeBonus),
+  }).then((result) => result.data);
+}
+
+export async function submitStageProposal(payload: StageProposalSubmitPayload) {
+  const services = await getFirebaseServices();
+  if (!services) {
+    return { ok: false as const, reason: "not-configured" };
+  }
+
+  const stageNameJa = sanitizeStageProposalName(payload.stageNameJa);
+  if (!stageNameJa) {
+    throw new Error("Stage name is required.");
+  }
+
+  await ensureAnonymousAuth(services.auth);
+  const submitProposal = httpsCallable<StageProposalSubmitPayload, StageProposalSubmitResult>(
+    services.functions,
+    SUBMIT_STAGE_PROPOSAL_FUNCTION,
+  );
+  return submitProposal({
+    stageNameJa,
+    stage: payload.stage,
   }).then((result) => result.data);
 }
 
@@ -527,6 +563,10 @@ async function ensureAnonymousAuth(auth: Auth) {
 
 function sanitizePlayerName(playerName: string) {
   return playerName.trim().slice(0, 16) || "PLAYER";
+}
+
+function sanitizeStageProposalName(name: string) {
+  return name.normalize("NFKC").trim().slice(0, 40);
 }
 
 function sanitizePlayerId(playerId: unknown) {

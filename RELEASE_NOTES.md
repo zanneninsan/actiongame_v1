@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.339
+### English
+- Added a Japanese stage-name field to the stage editor and a Firebase-backed stage adoption proposal button with duplicate-name protection.
+### Japanese
+- ステージエディタに日本語ステージ名の入力欄と採用申請ボタンを追加し、Firebase上で同じ日本語名の重複申請を防ぐようにしました。
+
 ## v0.1.338
 ### English
 - Moved the larger minimap below the top-right controls and hide it while the global menu is open.

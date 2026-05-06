@@ -34,6 +34,9 @@ type StageEditorPanelOptions = {
   onCreatePlainStage: () => void;
   onExport: () => void;
   onImport: (json: string) => void;
+  getStageName: () => string;
+  onStageNameChange: (name: string) => void;
+  onSubmitProposal: () => void;
   getRemainingTimeSeconds: () => number;
   onRemainingTimeChange: (seconds: number) => void;
 };
@@ -52,6 +55,7 @@ export class StageEditorPanel {
   private enemyAiTypeSelect?: HTMLSelectElement;
   private lampTypeSelect?: HTMLSelectElement;
   private decorationSelect?: HTMLSelectElement;
+  private stageNameInput?: HTMLInputElement;
   private remainingTimeInput?: HTMLInputElement;
   private undoButton?: HTMLButtonElement;
   private redoButton?: HTMLButtonElement;
@@ -105,6 +109,10 @@ export class StageEditorPanel {
     return this.decorationSelect?.value ?? STAGE_OBJECT_ASSETS[0].key;
   }
 
+  get stageName() {
+    return this.stageNameInput?.value ?? "";
+  }
+
   show() {
     this.remove();
     this.enabled = Boolean(this.options.initialEnabled);
@@ -117,6 +125,12 @@ export class StageEditorPanel {
       </div>
       <div class="editor-body">
         <button class="editor-drag-handle" type="button" aria-label="${t(this.options.locale, "editor.movePanel")}">${t(this.options.locale, "editor.movePanel")}</button>
+        <div class="editor-row">
+          <label>${t(this.options.locale, "editor.stageName")}</label>
+          <input data-editor-stage-name type="text" maxlength="40" value="${escapeAttribute(
+            this.options.getStageName(),
+          )}" placeholder="${escapeAttribute(t(this.options.locale, "editor.stageNamePlaceholder"))}" />
+        </div>
         <div class="editor-row">
           <label>${t(this.options.locale, "editor.tool")}</label>
           <select data-editor-tool>
@@ -220,6 +234,9 @@ export class StageEditorPanel {
           <button data-editor-import type="button">${t(this.options.locale, "editor.applyJson")}</button>
           <button data-editor-load-file type="button">${t(this.options.locale, "editor.loadFile")}</button>
         </div>
+        <div class="editor-submit-row">
+          <button data-editor-submit-proposal type="button">${t(this.options.locale, "editor.submitProposal")}</button>
+        </div>
         <textarea data-editor-export spellcheck="false"></textarea>
         <input data-editor-import-file type="file" accept="application/json,.json" />
         <p data-editor-import-status class="editor-import-status" aria-live="polite"></p>
@@ -239,6 +256,7 @@ export class StageEditorPanel {
     this.enemyAiTypeSelect = panel.querySelector<HTMLSelectElement>("[data-enemy-ai-type]")!;
     this.lampTypeSelect = panel.querySelector<HTMLSelectElement>("[data-lamp-type]")!;
     this.decorationSelect = panel.querySelector<HTMLSelectElement>("[data-decoration-key]")!;
+    this.stageNameInput = panel.querySelector<HTMLInputElement>("[data-editor-stage-name]")!;
     this.remainingTimeInput = panel.querySelector<HTMLInputElement>("[data-editor-remaining-time]")!;
     this.undoButton = panel.querySelector<HTMLButtonElement>("[data-editor-undo]")!;
     this.redoButton = panel.querySelector<HTMLButtonElement>("[data-editor-redo]")!;
@@ -250,6 +268,7 @@ export class StageEditorPanel {
     const exportButton = panel.querySelector<HTMLButtonElement>(".editor-export-button")!;
     const importButton = panel.querySelector<HTMLButtonElement>("[data-editor-import]")!;
     const loadFileButton = panel.querySelector<HTMLButtonElement>("[data-editor-load-file]")!;
+    const submitProposalButton = panel.querySelector<HTMLButtonElement>("[data-editor-submit-proposal]")!;
     const applyTimeButton = panel.querySelector<HTMLButtonElement>("[data-editor-apply-time]")!;
     const plainStageButton = panel.querySelector<HTMLButtonElement>("[data-editor-plain-stage]")!;
     const toolFieldRows = Array.from(panel.querySelectorAll<HTMLElement>("[data-editor-fields]"));
@@ -279,6 +298,9 @@ export class StageEditorPanel {
     };
     const importFromTextarea = () => {
       this.options.onImport(this.exportTextarea?.value ?? "");
+    };
+    const updateStageName = () => {
+      this.options.onStageNameChange(this.stageNameInput?.value ?? "");
     };
     const openImportFile = () => {
       this.importFileInput?.click();
@@ -310,26 +332,34 @@ export class StageEditorPanel {
           }
         });
     };
+    const submitProposal = () => {
+      updateStageName();
+      this.options.onSubmitProposal();
+    };
 
     toggleButton.addEventListener("click", toggleEditor);
     toolSelect.addEventListener("change", setTool);
+    this.stageNameInput.addEventListener("change", updateStageName);
     this.undoButton.addEventListener("click", this.options.onUndo);
     this.redoButton.addEventListener("click", this.options.onRedo);
     plainStageButton.addEventListener("click", this.options.onCreatePlainStage);
     exportButton.addEventListener("click", this.options.onExport);
     importButton.addEventListener("click", importFromTextarea);
     loadFileButton.addEventListener("click", openImportFile);
+    submitProposalButton.addEventListener("click", submitProposal);
     applyTimeButton.addEventListener("click", applyRemainingTime);
     this.importFileInput.addEventListener("change", importSelectedFile);
     this.cleanup.push(() => {
       toggleButton.removeEventListener("click", toggleEditor);
       toolSelect.removeEventListener("change", setTool);
+      this.stageNameInput?.removeEventListener("change", updateStageName);
       this.undoButton?.removeEventListener("click", this.options.onUndo);
       this.redoButton?.removeEventListener("click", this.options.onRedo);
       plainStageButton.removeEventListener("click", this.options.onCreatePlainStage);
       exportButton.removeEventListener("click", this.options.onExport);
       importButton.removeEventListener("click", importFromTextarea);
       loadFileButton.removeEventListener("click", openImportFile);
+      submitProposalButton.removeEventListener("click", submitProposal);
       applyTimeButton.removeEventListener("click", applyRemainingTime);
       this.importFileInput?.removeEventListener("change", importSelectedFile);
     });
@@ -340,6 +370,12 @@ export class StageEditorPanel {
   setExport(value: string) {
     if (this.exportTextarea) {
       this.exportTextarea.value = value;
+    }
+  }
+
+  setStageName(value: string) {
+    if (this.stageNameInput && this.stageNameInput.value !== value) {
+      this.stageNameInput.value = value;
     }
   }
 
@@ -395,6 +431,7 @@ export class StageEditorPanel {
     this.enemyAiTypeSelect = undefined;
     this.lampTypeSelect = undefined;
     this.decorationSelect = undefined;
+    this.stageNameInput = undefined;
     this.remainingTimeInput = undefined;
     this.undoButton = undefined;
     this.redoButton = undefined;
@@ -469,4 +506,12 @@ export class StageEditorPanel {
       handle.removeEventListener("pointercancel", stopDrag);
     });
   }
+}
+
+function escapeAttribute(value: string) {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
