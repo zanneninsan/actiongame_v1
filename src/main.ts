@@ -94,7 +94,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.293";
+const DEBUG_VERSION = "v0.1.294";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -353,6 +353,7 @@ class PrototypeScene extends Phaser.Scene {
   private danmakuEnabled = true;
   private danmakuMode: DanmakuMode = "classic";
   private startModal?: StartModal;
+  private skipSplashIntroOnNextStartModal = false;
   private controlHint = t(this.locale, "hint.pc");
   private editorStage = cloneStage(STAGES[DEFAULT_STAGE_ID]);
   private stageConstants: ResolvedStageConstants = resolveStageConstants(STAGES[DEFAULT_STAGE_ID]);
@@ -1264,6 +1265,7 @@ class PrototypeScene extends Phaser.Scene {
     document.getElementById("account-modal")?.remove();
     document.body.classList.remove("is-account-modal-open");
     this.setupComplete = false;
+    this.skipSplashIntroOnNextStartModal = true;
     this.restartStageEditorEnabled = false;
     this.restartEditorStage = undefined;
     this.isRestarting = true;
@@ -1344,6 +1346,7 @@ class PrototypeScene extends Phaser.Scene {
       stageOptions: this.getStageOptions(),
       locale: this.locale,
       soundOn: !this.soundMuted && (this.bgmVolumePercent > 0 || this.seVolumePercent > 0),
+      skipSplashIntro: this.skipSplashIntroOnNextStartModal,
       accountStatus: this.getStartAccountStatus(),
       onLocaleChange: (locale) => this.setLocale(locale),
       onSoundOnChange: (soundOn) => this.setSoundEnabled(soundOn),
@@ -1364,6 +1367,7 @@ class PrototypeScene extends Phaser.Scene {
         this.startRun();
       },
     });
+    this.skipSplashIntroOnNextStartModal = false;
     this.startModal.show();
   }
 

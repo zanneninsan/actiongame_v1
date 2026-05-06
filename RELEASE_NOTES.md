@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.294
+### English
+- Skipped the splash/logo sequence when returning to the title from gameplay, opening the start modal directly.
+### Japanese
+- ゲーム中からタイトルへ戻る時は、スプラッシュやタイトルロゴ演出を挟まず、トップモーダルへ直接戻るようにしました。
+
 ## v0.1.293
 ### English
 - Changed X share text so the hashtag appears after a blank line below the Best line, followed by another blank line and the game URL.

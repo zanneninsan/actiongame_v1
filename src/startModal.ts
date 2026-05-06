@@ -33,6 +33,7 @@ type StartModalOptions = {
   stageId: string;
   stageOptions: StageOption[];
   soundOn: boolean;
+  skipSplashIntro?: boolean;
   locale: Locale;
   accountStatus?: StartAccountStatus;
   onLocaleChange: (locale: Locale) => void;
@@ -71,6 +72,11 @@ export class StartModal {
     const overlay = document.createElement("div");
     overlay.id = "start-modal";
     this.soundGateDismissed = getStorageValue(TITLE_SOUND_CONFIRM_STORAGE_KEY) === "1";
+    if (this.options.skipSplashIntro) {
+      this.soundGateDismissed = true;
+      this.makerSplashDismissed = true;
+      this.titleScreenDismissed = true;
+    }
     if (this.titleScreenDismissed) {
       overlay.classList.add("is-title-cleared");
     }
