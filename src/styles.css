@@ -1138,6 +1138,7 @@ body.is-screenshot-modal-open #mobile-controls {
   pointer-events: none;
   touch-action: none;
   --mobile-button-size: clamp(48px, 12vmin, 68px);
+  --mobile-action-button-size: calc(var(--mobile-button-size) * 1.16);
   --mobile-button-gap: clamp(7px, 1.8vmin, 12px);
   --mobile-edge-gap: clamp(10px, 3vmin, 20px);
 }
@@ -1244,6 +1245,20 @@ body.is-screenshot-modal-open #mobile-controls {
 .dash-button {
   font-size: calc(var(--mobile-button-size) * 0.22);
   letter-spacing: 0;
+}
+
+.action-jump-button,
+.mobile-actions > .dash-button {
+  width: var(--mobile-action-button-size);
+  height: var(--mobile-action-button-size);
+}
+
+.action-jump-button {
+  font-size: calc(var(--mobile-action-button-size) * 0.45);
+}
+
+.mobile-actions > .dash-button {
+  font-size: calc(var(--mobile-action-button-size) * 0.22);
 }
 
 .fullscreen-button {
@@ -1812,6 +1827,7 @@ body.is-screenshot-modal-open #mobile-controls {
 @media (max-height: 560px) and (orientation: landscape) {
   #mobile-controls {
     --mobile-button-size: clamp(42px, 10.5vmin, 56px);
+    --mobile-action-button-size: calc(var(--mobile-button-size) * 1.16);
     --mobile-button-gap: clamp(5px, 1.4vmin, 9px);
     --mobile-edge-gap: clamp(7px, 2vmin, 14px);
   }

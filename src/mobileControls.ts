@@ -64,7 +64,7 @@ export const createMobileControls = (options: MobileControlsOptions) => {
     </div>
     <div class="mobile-actions">
       <button class="mobile-button fullscreen-button" data-layout-id="fullscreen" data-action="fullscreen" type="button" aria-label="${t(options.locale, "aria.fullscreen")}">${t(options.locale, "mobile.fullscreenShort")}</button>
-      <button class="mobile-button" data-layout-id="action-jump" data-key="w" type="button" aria-label="${t(options.locale, "aria.jump")}">&uarr;</button>
+      <button class="mobile-button action-jump-button" data-layout-id="action-jump" data-key="w" type="button" aria-label="${t(options.locale, "aria.jump")}">&uarr;</button>
       <button class="mobile-button dash-button" data-layout-id="action-dash" data-key="shift" type="button" aria-label="${t(options.locale, "aria.dash")}">${t(options.locale, "mobile.dashShort")}</button>
       <button class="mobile-button restart-button" data-layout-id="restart" data-action="restart" type="button" aria-label="${t(options.locale, "aria.restart")}">R</button>
     </div>
