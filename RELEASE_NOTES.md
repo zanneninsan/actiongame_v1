@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.285
+### English
+- Added a front title splash that fades in the title logo before the start modal, then reveals the modal when the title is tapped.
+### Japanese
+- スタート用トップモーダルの手前にタイトル画面を追加し、タイトルロゴをフェードイン表示して、タップするとモーダルへ進むようにしました。
+
 ## v0.1.284
 ### English
 - Added a pixel-art PRESS TO START sprite-sheet prompt to the start screen, matching the gold-and-black title logo style with a blinking animation.

@@ -46,6 +46,7 @@ type OrientationPromptMode = "initial" | "startConfirm";
 export class StartModal {
   private readonly options: StartModalOptions;
   private overlay?: HTMLDivElement;
+  private titleScreenDismissed = false;
   private orientationPromptDismissed = false;
   private orientationPromptSatisfied = false;
   private removeOrientationPromptListeners?: () => void;
@@ -60,6 +61,12 @@ export class StartModal {
     const overlay = document.createElement("div");
     overlay.id = "start-modal";
     overlay.innerHTML = `
+      <button class="start-title-screen${this.titleScreenDismissed ? " is-dismissed" : ""}" type="button" aria-label="${escapeHtml(
+        t(this.options.locale, "start.start"),
+      )}">
+        <img class="start-title-logo" src="./assets/ui/fantasy/title_splash_logo.webp" alt="${escapeHtml(t(this.options.locale, "start.title"))}" />
+        <span class="start-title-prompt" aria-hidden="true"></span>
+      </button>
       <div class="start-orientation-prompt" hidden>
         <div class="start-orientation-dialog" role="dialog" aria-modal="true">
           <p class="start-orientation-message"></p>
@@ -145,6 +152,7 @@ export class StartModal {
     document.body.classList.add("is-start-modal-open");
     this.overlay = overlay;
 
+    const titleScreen = overlay.querySelector<HTMLButtonElement>(".start-title-screen")!;
     const form = overlay.querySelector("form")!;
     const input = overlay.querySelector<HTMLInputElement>("input[name='playerName']")!;
     const localeSelect = overlay.querySelector<HTMLSelectElement>("select[name='locale']")!;
@@ -174,6 +182,15 @@ export class StartModal {
     let localGhostFileLoaded = false;
     let orientationPromptMode: OrientationPromptMode = "initial";
     let pendingStartSettings: StartSettings | undefined;
+
+    const dismissTitleScreen = () => {
+      this.titleScreenDismissed = true;
+      titleScreen.classList.add("is-dismissed");
+      window.setTimeout(() => {
+        input.focus();
+      }, 120);
+    };
+    titleScreen.addEventListener("click", dismissTitleScreen);
 
     input.addEventListener("keydown", (event) => event.stopPropagation());
     input.addEventListener("keyup", (event) => event.stopPropagation());
