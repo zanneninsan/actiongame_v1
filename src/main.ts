@@ -12,7 +12,7 @@ import {
 import { DEFAULT_STAGE_ID, PLAYABLE_STAGE_IDS, STAGES, cloneStage, type StageId } from "./stages";
 import { RainbowWinPipeline } from "./rainbowPipeline";
 import { StartCountdownOverlay } from "./countdown";
-import { StartModal, type ControlMode, type StageOption, type StartAccountStatus } from "./startModal";
+import { StartModal, TITLE_SOUND_CONFIRM_STORAGE_KEY, type ControlMode, type StageOption, type StartAccountStatus } from "./startModal";
 import { StageEditor } from "./stageEditor";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
 import {
@@ -94,7 +94,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.300";
+const DEBUG_VERSION = "v0.1.301";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -1455,7 +1455,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private clearLeaderboardLocalTestData() {
-    for (const key of [LEADERBOARD_PLAYER_ID_STORAGE_KEY, LOCALE_STORAGE_KEY]) {
+    for (const key of [LEADERBOARD_PLAYER_ID_STORAGE_KEY, LOCALE_STORAGE_KEY, TITLE_SOUND_CONFIRM_STORAGE_KEY]) {
       try {
         window.localStorage.removeItem(key);
       } catch {

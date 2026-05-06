@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.301
+### English
+- Made the account test-data clear action also reset the first-run title sound confirmation flag.
+### Japanese
+- テストデータ削除時に、初回タイトル音量チェックの確認済みフラグも削除し、次回起動で音量チェックが再表示されるようにしました。
+
 ## v0.1.300
 ### English
 - Made title music recover when browser autoplay blocks a later title-screen playback by retrying on the next user gesture and during the title loop.

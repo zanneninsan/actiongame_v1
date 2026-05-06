@@ -4,7 +4,7 @@ import { hasFullscreenElement, isLandscapeViewport, isLikelySmartphone } from ".
 
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
 const PWA_INSTALL_DISMISSED_KEY = "actiongame_pwa_install_dismissed";
-const TITLE_SOUND_CONFIRM_STORAGE_KEY = "actiongame_title_sound_confirmed";
+export const TITLE_SOUND_CONFIRM_STORAGE_KEY = "actiongame_title_sound_confirmed";
 const TITLE_MUSIC_VOLUME = 0.72;
 const TITLE_MUSIC_FADE_SECONDS = 3;
 const TITLE_MUSIC_REPLAY_GAP_MS = 5000;
