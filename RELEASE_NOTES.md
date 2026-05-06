@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.279
+### English
+- Replaced the separate danmaku visibility checkbox with a single comment display-style selector that includes Hidden, while keeping Nico-style as the default.
+### Japanese
+- オプションの弾幕表示チェックボックスをなくし、コメント(弾幕)表示形式のセレクトボックスに「表示なし」を追加しました。デフォルトはニコ動風のままです。
+
 ## v0.1.278
 ### English
 - Added a one-time 3.4-second story message with an excited portrait when the goal gate first enters the camera view.

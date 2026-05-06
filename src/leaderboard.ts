@@ -557,7 +557,7 @@ function sanitizeUserSettings(data: unknown): LeaderboardUserSettings {
   if (typeof source.danmakuEnabled === "boolean") {
     settings.danmakuEnabled = source.danmakuEnabled;
   }
-  if (source.danmakuMode === "classic" || source.danmakuMode === "liveChat") {
+  if (source.danmakuMode === "classic" || source.danmakuMode === "liveChat" || source.danmakuMode === "none") {
     settings.danmakuMode = source.danmakuMode;
   }
   return settings;

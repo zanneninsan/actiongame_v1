@@ -88,7 +88,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.278";
+const DEBUG_VERSION = "v0.1.279";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -474,8 +474,8 @@ class PrototypeScene extends Phaser.Scene {
     this.bgmVolumePercent = savedVolumeSettings.bgm;
     this.seVolumePercent = savedVolumeSettings.se;
     this.soundMuted = this.getCookieValue("actiongame_muted") === "1";
-    this.danmakuEnabled = this.getCookieValue("actiongame_danmaku_disabled") !== "1";
     this.danmakuMode = this.getSavedDanmakuMode();
+    this.danmakuEnabled = this.danmakuMode !== "none";
     this.applySoundSettings();
     document.removeEventListener("fullscreenchange", this.handleFullscreenChange);
     document.addEventListener("fullscreenchange", this.handleFullscreenChange);
@@ -1472,13 +1472,17 @@ class PrototypeScene extends Phaser.Scene {
       if (typeof settings.soundMuted === "boolean") {
         this.soundMuted = settings.soundMuted;
       }
-      if (typeof settings.danmakuEnabled === "boolean") {
-        this.danmakuEnabled = settings.danmakuEnabled;
-        this.setCookieValue("actiongame_danmaku_disabled", settings.danmakuEnabled ? "0" : "1");
-      }
-      if (settings.danmakuMode === "classic" || settings.danmakuMode === "liveChat") {
+      if (settings.danmakuMode === "classic" || settings.danmakuMode === "liveChat" || settings.danmakuMode === "none") {
         this.danmakuMode = settings.danmakuMode;
+        this.danmakuEnabled = this.danmakuMode !== "none";
         this.setCookieValue("actiongame_danmaku_mode", settings.danmakuMode);
+        this.setCookieValue("actiongame_danmaku_disabled", this.danmakuEnabled ? "0" : "1");
+        this.danmaku?.setMode(this.danmakuMode);
+      } else if (typeof settings.danmakuEnabled === "boolean") {
+        this.danmakuEnabled = settings.danmakuEnabled;
+        this.danmakuMode = settings.danmakuEnabled && this.danmakuMode === "none" ? "classic" : this.danmakuMode;
+        this.setCookieValue("actiongame_danmaku_disabled", settings.danmakuEnabled ? "0" : "1");
+        this.setCookieValue("actiongame_danmaku_mode", this.danmakuMode);
         this.danmaku?.setMode(this.danmakuMode);
       }
       this.applySoundSettings();
@@ -1625,7 +1629,11 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private getSavedDanmakuMode(): DanmakuMode {
-    return this.getCookieValue("actiongame_danmaku_mode") === "liveChat" ? "liveChat" : "classic";
+    const savedMode = this.getCookieValue("actiongame_danmaku_mode");
+    if (savedMode === "none" || this.getCookieValue("actiongame_danmaku_disabled") === "1") {
+      return "none";
+    }
+    return savedMode === "liveChat" ? "liveChat" : "classic";
   }
 
   private saveVolumeSettings(bgmVolume: number, seVolume: number, isMuted: boolean) {
@@ -1676,8 +1684,13 @@ class PrototypeScene extends Phaser.Scene {
 
   private setDanmakuMode(mode: DanmakuMode) {
     this.danmakuMode = mode;
+    this.danmakuEnabled = mode !== "none";
     this.setCookieValue("actiongame_danmaku_mode", mode);
+    this.setCookieValue("actiongame_danmaku_disabled", this.danmakuEnabled ? "0" : "1");
     this.danmaku?.setMode(mode);
+    if (!this.danmakuEnabled) {
+      this.danmaku?.clear();
+    }
     this.scheduleLeaderboardUserSettingsSave();
   }
 
@@ -2083,7 +2096,6 @@ class PrototypeScene extends Phaser.Scene {
         this.soundMuted = muted;
         this.applySoundSettings();
       },
-      onDanmakuChange: (enabled) => this.setDanmakuEnabled(enabled),
       onDanmakuModeChange: (mode) => this.setDanmakuMode(mode),
       onLocaleChange: (locale) => {
         this.setLocale(locale);
