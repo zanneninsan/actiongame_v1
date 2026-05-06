@@ -2,11 +2,17 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
-## v0.1.303
+## v0.1.304
 ### English
 - Changed the maker splash logo so it stays on screen until tapped, with an automatic advance after eight seconds.
 ### Japanese
 - 満足教Presentsのロゴが勝手にすぐ消えず、タップで進み、8秒間操作がない場合だけ自動で進むようにしました。
+
+## v0.1.303
+### English
+- Updated the leaderboard Functions stage allowlist so current playable stages, including the default Original Downtown stage, can submit scores.
+### Japanese
+- ランキングFunctions側のステージ許可リストを更新し、デフォルトのOriginal Downtownを含む現在のプレイ可能ステージでスコア登録できるようにしました。
 
 ## v0.1.302
 ### English

@@ -42,6 +42,14 @@ test("rejects unknown stages", () => {
   );
 });
 
+test("accepts current playable stage ids", () => {
+  for (const stageId of ["originalDowntown", "neoShibuyaCity", "mobileTouchTutorial", "skybridgeSprint", "skyShaftClimb", "rankingCheck"]) {
+    const payload = cleanLeaderboardPayload({...basePayload, stageId});
+
+    assert.equal(payload.stageId, stageId);
+  }
+});
+
 test("accepts score before time bonus above the selected stage limit while anti-cheat is disabled", () => {
   const payload = cleanLeaderboardPayload({
     ...basePayload,
