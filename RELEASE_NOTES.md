@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.321
+### English
+- Added Chinese and Korean coverage for the player spec page, high-priority player UI, stage editor controls, and in-game checkpoint / one-way gate callouts.
+### Japanese
+- ゲーム仕様ページ、プレイヤーがよく見るUI、ステージエディタの操作表示、ゲーム中のチェックポイント・一方通行ゲート表示に中国語・韓国語対応を追加しました。
+
 ## v0.1.320
 ### English
 - Added Safari-focused mobile zoom guards to reduce accidental page zoom during touch controls and kept compact form fields above iOS auto-zoom font sizes.

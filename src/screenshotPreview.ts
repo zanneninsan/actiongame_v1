@@ -18,8 +18,15 @@ type ScreenshotModalElement = HTMLDivElement & {
   cleanup?: () => void;
 };
 
+const DATE_TIME_LOCALE: Record<Locale, string> = {
+  en: "en-US",
+  ja: "ja-JP",
+  zh: "zh-CN",
+  ko: "ko-KR",
+};
+
 const formatTimestamp = (timestamp: number, locale: Locale) =>
-  new Intl.DateTimeFormat(locale === "ja" ? "ja-JP" : "en-US", {
+  new Intl.DateTimeFormat(DATE_TIME_LOCALE[locale], {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
