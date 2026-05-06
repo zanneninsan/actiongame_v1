@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.299
+### English
+- Slowed the PRESS TO START prompt sheet animation while restoring its previous glow strength.
+- Fixed the mobile start confirmation overlay so anonymous mobile play can continue from the start modal.
+### Japanese
+- PRESS TO STARTの横スライド演出をゆっくりにしつつ、発光の強さは前の状態に戻しました。
+- スマホモードで匿名プレイを押した時の確認表示がトップモーダルより前に出るようにし、開始へ進めるようにしました。
+
 ## v0.1.298
 ### English
 - Made the PRESS TO START prompt calmer by reducing its size, glow, opacity, and blink speed on the title screen.
