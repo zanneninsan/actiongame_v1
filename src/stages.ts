@@ -1653,7 +1653,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     {
       triggerX: 1110,
       stepDelayMs: 4600,
-      durationMs: 10000,
+      durationMs: 13000,
       lines: [
         {
           characterName: {
@@ -1661,8 +1661,8 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
             en: "Zannenin",
           },
           message: {
-            ja: "ここはスーパーダッシュの練習です。DASHを押しながら一気に抜けると、長い足場を気持ちよく走れます。",
-            en: "This is super dash practice. Hold DASH while moving to burst through the long straightaway.",
+            ja: "ここはスーパーダッシュの練習です。DASHを押しながら進むとスタミナを消費して加速します。スタミナはダッシュ中と空中以外なら少しずつ回復します。",
+            en: "This is super dash practice. Hold DASH while moving to spend stamina and accelerate. Stamina gradually recovers when you are not dashing or airborne.",
           },
           portraitPath: "assets/ui/message_faces/message_face_head_icon_04_wink.webp",
         },

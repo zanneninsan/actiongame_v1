@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.313
+### English
+- Clarified the tutorial dash prompt to explain that dashing spends stamina and that stamina gradually recovers while not dashing or airborne.
+### Japanese
+- チュートリアルのダッシュ説明に、ダッシュでスタミナを消費することと、ダッシュ中・空中以外ではスタミナが少しずつ回復することを追記しました。
+
 ## v0.1.312
 ### English
 - Removed the remaining question block from the tutorial stage to keep the practice flow unambiguous.
