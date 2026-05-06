@@ -217,6 +217,12 @@ canvas {
   animation: start-title-logo-fade 960ms ease-out forwards;
 }
 
+.start-title-screen.is-ready.has-played-video .start-title-logo {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  animation: none;
+}
+
 .start-title-video {
   opacity: 0;
   filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.74));

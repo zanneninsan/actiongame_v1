@@ -301,6 +301,9 @@ export class StartModal {
       if (this.titleScreenDismissed) {
         return;
       }
+      if (titleVideoHasPlayed) {
+        titleScreen.classList.add("has-played-video");
+      }
       titleScreen.classList.remove("is-playing-video");
       titleVideo.load();
       const stillDurationMs = titleVideoHasPlayed ? TITLE_REPEAT_STILL_MS : TITLE_INITIAL_STILL_MS;

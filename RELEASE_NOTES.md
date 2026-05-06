@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.297
+### English
+- Prevented the title logo fade-in from replaying after the first title video playback, so later still-image holds appear immediately.
+### Japanese
+- タイトル動画の初回再生後に静止画へ戻る時、タイトルロゴのフェードインが再発生しないようにし、2回目以降の静止画はすぐ表示されるようにしました。
+
 ## v0.1.296
 ### English
 - Adjusted the title logo loop so the first still image appears after the fade for three seconds before video playback, then repeats with ten-second still holds and no additional fade-in.
