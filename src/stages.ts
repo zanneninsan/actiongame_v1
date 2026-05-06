@@ -1801,6 +1801,9 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     { x: 3260, y: 568 },
   ],
   oneWayGates: [],
+  dashWalls: [
+    { x: 1700, y: 542, width: 40, height: 260 },
+  ],
   enemies: [],
 };
 
@@ -1931,5 +1934,6 @@ export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   bonusBlocks: (stage.bonusBlocks ?? []).map((block) => ({ ...block })),
   checkpoints: (stage.checkpoints ?? []).map((checkpoint) => ({ ...checkpoint })),
   oneWayGates: (stage.oneWayGates ?? []).map((gate) => ({ ...gate })),
+  dashWalls: (stage.dashWalls ?? []).map((wall) => ({ ...wall })),
   enemies: (stage.enemies ?? []).map((enemy) => ({ ...enemy })),
 });

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.309
+### English
+- Added a dark translucent dash wall to the tutorial dash section that knocks the player back unless they are actively dashing.
+### Japanese
+- チュートリアルのダッシュ練習区間に暗い半透明の縦壁を追加し、ダッシュ中でない場合は後ろへ弾き飛ばされるようにしました。
+
 ## v0.1.308
 ### English
 - Lengthened the tutorial dash practice runway and delayed the multi-jump prompt so the dash section has room to breathe.

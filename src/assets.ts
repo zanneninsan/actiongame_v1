@@ -79,6 +79,7 @@ export type EnemyPlacement = {
 export type BonusBlockPlacement = { type: "hidden" | "question" | "breakable"; x: number; y: number; reward?: ItemType };
 export type CheckpointPlacement = { x: number; y: number };
 export type OneWayGatePlacement = { x: number; y: number; height?: number };
+export type DashWallPlacement = { x: number; y: number; width?: number; height?: number; knockbackX?: number; knockbackY?: number };
 export type StageLocale = "ja" | "en" | "zh" | "ko";
 export type StageLocalizedName = { jp: string; en: string; zh?: string; ko?: string };
 export type StageName = string | StageLocalizedName;
@@ -115,6 +116,7 @@ export type StageDefinition = {
   bonusBlocks?: BonusBlockPlacement[];
   checkpoints?: CheckpointPlacement[];
   oneWayGates?: OneWayGatePlacement[];
+  dashWalls?: DashWallPlacement[];
   enemies?: EnemyPlacement[];
 };
 

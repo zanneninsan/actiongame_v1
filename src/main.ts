@@ -7,6 +7,7 @@ import {
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
   resolveStageName,
+  type DashWallPlacement,
   type StageDefinition,
 } from "./assets";
 import { DEFAULT_STAGE_ID, PLAYABLE_STAGE_IDS, STAGES, cloneStage, type StageId } from "./stages";
@@ -94,7 +95,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.308";
+const DEBUG_VERSION = "v0.1.309";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -227,6 +228,11 @@ const SHOW_CLEAR_RANK_AND_MISSIONS = false;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
+const DASH_WALL_DEFAULT_WIDTH = 34;
+const DASH_WALL_DEFAULT_HEIGHT = 260;
+const DASH_WALL_DEFAULT_KNOCKBACK_X = -560;
+const DASH_WALL_DEFAULT_KNOCKBACK_Y = -170;
+const DASH_WALL_BOUNCE_COOLDOWN_MS = 420;
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
   webkitRequestFullscreen?: () => Promise<void> | void;
@@ -285,6 +291,7 @@ class PrototypeScene extends Phaser.Scene {
   private movingPlatforms!: Phaser.Physics.Arcade.Group;
   private movingPlatformInstances: MovingPlatformInstance[] = [];
   private decorationPlatforms!: Phaser.Physics.Arcade.StaticGroup;
+  private dashWalls?: Phaser.Physics.Arcade.StaticGroup;
   private itemsGroup?: Phaser.Physics.Arcade.StaticGroup;
   private bonusBlocksGroup?: Phaser.Physics.Arcade.StaticGroup;
   private checkpointController?: CheckpointController;
@@ -318,6 +325,8 @@ class PrototypeScene extends Phaser.Scene {
   private screenshotCapturePending = false;
   private screenshotPreviewOpen = false;
   private dashLingerUntil = -Infinity;
+  private isDashActive = false;
+  private lastDashWallBounceAt = -Infinity;
   private countdownOverlay?: StartCountdownOverlay;
   private finalScoreText?: Phaser.GameObjects.Text;
   private missText?: Phaser.GameObjects.Text;
@@ -572,6 +581,7 @@ class PrototypeScene extends Phaser.Scene {
     this.physics.add.collider(this.player, this.movingPlatforms);
     this.physics.add.collider(this.player, this.decorationPlatforms, undefined, this.canLandOnDecorationPlatform, this);
     this.physics.add.overlap(this.player, goal, () => this.win());
+    this.dashWalls = this.createDashWalls(this.editorStage.dashWalls ?? []);
     this.itemsGroup = createItems({
       scene: this,
       player: this.player,
@@ -801,6 +811,8 @@ class PrototypeScene extends Phaser.Scene {
 
     const isCrouchInputActive = down && onFloor;
     const isShiftSpeedActive = this.updateStamina(onFloor, wantsDash, isCrouchInputActive, deltaMs);
+    this.isDashActive = isShiftSpeedActive;
+    this.updateDashWallOverlap();
     const speedMultiplier = (isShiftSpeedActive ? DASH_SPEED_MULTIPLIER : 1) * (this.rewards?.getSpeedMultiplier() ?? 1);
     const jumpMultiplier = this.rewards?.getJumpMultiplier() ?? 1;
     this.updateDecorationPlatformDrop(down, onFloor);
@@ -1018,6 +1030,8 @@ class PrototypeScene extends Phaser.Scene {
     this.ghostRecordingDisabled = false;
     this.lastGhostRecordAt = -Infinity;
     this.dashLingerUntil = -Infinity;
+    this.isDashActive = false;
+    this.lastDashWallBounceAt = -Infinity;
     this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
     this.rewards?.reset();
@@ -1026,6 +1040,7 @@ class PrototypeScene extends Phaser.Scene {
     this.editorTimerPauseStartedAt = 0;
     this.stamina = MAX_STAMINA;
     this.dashLingerUntil = -Infinity;
+    this.isDashActive = false;
     this.hasUsedStageEditorThisRun = false;
     this.isRunActive = false;
     this.hasWon = false;
@@ -1063,6 +1078,7 @@ class PrototypeScene extends Phaser.Scene {
     this.bonusBlocksGroup = undefined;
     this.checkpointController = undefined;
     this.oneWayGateController = undefined;
+    this.dashWalls = undefined;
     this.enemiesGroup = undefined;
     this.goal = undefined;
     this.finalScoreText?.destroy();
@@ -1834,6 +1850,46 @@ class PrototypeScene extends Phaser.Scene {
     return object;
   }
 
+  private createDashWalls(walls: readonly DashWallPlacement[]) {
+    const group = this.physics.add.staticGroup();
+    walls.forEach((wall) => {
+      const width = wall.width ?? DASH_WALL_DEFAULT_WIDTH;
+      const height = wall.height ?? DASH_WALL_DEFAULT_HEIGHT;
+      const hitbox = group.create(wall.x, wall.y, "platform-hitbox") as Phaser.Physics.Arcade.Image;
+      hitbox.setDisplaySize(width, height);
+      hitbox.setVisible(false);
+      hitbox.setData("knockbackX", wall.knockbackX ?? DASH_WALL_DEFAULT_KNOCKBACK_X);
+      hitbox.setData("knockbackY", wall.knockbackY ?? DASH_WALL_DEFAULT_KNOCKBACK_Y);
+      hitbox.refreshBody();
+
+      const visual = this.add.graphics().setDepth(0.12).setBlendMode(Phaser.BlendModes.MULTIPLY);
+      visual.fillStyle(0x020617, 0.48);
+      visual.fillRect(wall.x - width / 2, wall.y - height / 2, width, height);
+      visual.lineStyle(2, 0x38bdf8, 0.28);
+      visual.strokeRect(wall.x - width / 2, wall.y - height / 2, width, height);
+      this.trackStageObject(visual);
+    });
+    return group;
+  }
+
+  private updateDashWallOverlap() {
+    if (!this.dashWalls || this.stageEditor?.isEnabled || !this.isRunActive) {
+      return;
+    }
+
+    this.physics.overlap(this.player, this.dashWalls, (_, wallObject) => {
+      if (this.isDashActive || this.time.now - this.lastDashWallBounceAt < DASH_WALL_BOUNCE_COOLDOWN_MS) {
+        return;
+      }
+
+      const wall = wallObject as Phaser.Physics.Arcade.Image;
+      this.lastDashWallBounceAt = this.time.now;
+      this.player.setVelocity(wall.getData("knockbackX") as number, wall.getData("knockbackY") as number);
+      this.player.setX(Math.min(this.player.x, wall.x - (wall.displayWidth ?? DASH_WALL_DEFAULT_WIDTH) / 2 - 26));
+      this.rewards?.showFloatingText(wall.x, wall.y - wall.displayHeight / 2 - 24, "DASH!");
+    });
+  }
+
   private rebuildEditableStageObjects() {
     this.stageConstants = resolveStageConstants(this.editorStage);
     this.stageRenderObjects.forEach((object) => object.destroy());
@@ -1844,6 +1900,7 @@ class PrototypeScene extends Phaser.Scene {
     this.clearDynamicGroup(this.movingPlatforms);
     this.movingPlatformInstances = [];
     this.clearStaticGroup(this.decorationPlatforms);
+    this.clearStaticGroup(this.dashWalls);
     this.clearStaticGroup(this.itemsGroup);
     this.clearStaticGroup(this.bonusBlocksGroup);
     this.clearDynamicGroup(this.enemiesGroup);
@@ -1858,6 +1915,7 @@ class PrototypeScene extends Phaser.Scene {
       decorationPlatforms: this.decorationPlatforms,
       trackStageObject: (object) => this.trackStageObject(object),
     });
+    this.dashWalls = this.createDashWalls(this.editorStage.dashWalls ?? []);
     populateItems({
       scene: this,
       itemsGroup: this.itemsGroup,
