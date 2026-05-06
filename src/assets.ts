@@ -92,6 +92,7 @@ export type StageStoryDialogueLine = {
 };
 export type StageStoryDialogue = {
   triggerX?: number;
+  closeAtX?: number;
   stepDelayMs?: number;
   durationMs?: number;
   lines: StageStoryDialogueLine[];

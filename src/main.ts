@@ -95,7 +95,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.313";
+const DEBUG_VERSION = "v0.1.314";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -245,6 +245,7 @@ type FullscreenDocument = Document & {
 };
 type QueuedStoryDialogue = {
   lines: StoryDialogueLine[];
+  closeAtX?: number;
   stepDelayMs?: number;
   durationMs?: number;
 };
@@ -398,6 +399,7 @@ class PrototypeScene extends Phaser.Scene {
   private hasShownStageMidpointDialogue = false;
   private storyDialogueAdvanceEvents: Phaser.Time.TimerEvent[] = [];
   private storyDialogueRemoveEvent?: Phaser.Time.TimerEvent;
+  private currentStoryDialogueCloseAtX?: number;
   private danmakuTutorialDialogueEvent?: Phaser.Time.TimerEvent;
   private stageRenderObjects: Phaser.GameObjects.GameObject[] = [];
   private hasWon = false;
@@ -1109,10 +1111,12 @@ class PrototypeScene extends Phaser.Scene {
       const stepDelayMs = (storyDialogue.stepDelayMs ?? STORY_DIALOGUE_STEP_DELAY_MS) * STORY_DIALOGUE_TRIGGER_DURATION_SCALE;
       this.enqueueStoryDialogue({
         lines: resolveStoryDialogueLines(storyDialogue, this.locale),
+        closeAtX: storyDialogue.closeAtX,
         stepDelayMs,
         durationMs: storyDialogue.durationMs,
       });
     });
+    this.updateStoryDialogueAutoClose();
   }
 
   private resolveStageMidpointProgress(): StageMidpointProgress {
@@ -1167,6 +1171,7 @@ class PrototypeScene extends Phaser.Scene {
     this.storyDialogueRemoveEvent?.remove(false);
     this.storyDialogueAdvanceEvents.length = 0;
     this.storyDialogueRemoveEvent = undefined;
+    this.currentStoryDialogueCloseAtX = undefined;
     this.storyDialogueQueue.length = 0;
   }
 
@@ -1247,7 +1252,10 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    const nextDialogue = this.storyDialogueQueue.shift();
+    let nextDialogue = this.storyDialogueQueue.shift();
+    while (nextDialogue && nextDialogue.closeAtX !== undefined && this.player.x >= nextDialogue.closeAtX) {
+      nextDialogue = this.storyDialogueQueue.shift();
+    }
     if (!nextDialogue) {
       return;
     }
@@ -1256,6 +1264,7 @@ class PrototypeScene extends Phaser.Scene {
       lines: nextDialogue.lines,
       locale: this.locale,
     });
+    this.currentStoryDialogueCloseAtX = nextDialogue.closeAtX;
     const stepDelayMs = nextDialogue.stepDelayMs ?? STORY_DIALOGUE_STEP_DELAY_MS;
     for (let lineIndex = 1; lineIndex < nextDialogue.lines.length; lineIndex += 1) {
       const advanceEvent = this.time.delayedCall(stepDelayMs * lineIndex, () => {
@@ -1266,12 +1275,27 @@ class PrototypeScene extends Phaser.Scene {
     }
     const durationMs = nextDialogue.durationMs ?? stepDelayMs * Math.max(nextDialogue.lines.length, 1);
     this.storyDialogueRemoveEvent = this.time.delayedCall(durationMs, () => {
-      this.storyDialogue?.remove({ animate: true });
-      this.storyDialogue = undefined;
-      this.storyDialogueRemoveEvent = undefined;
-      this.storyDialogueAdvanceEvents.length = 0;
-      this.showNextQueuedStoryDialogue();
+      this.closeCurrentStoryDialogue({ animate: true });
     });
+  }
+
+  private updateStoryDialogueAutoClose() {
+    if (!this.storyDialogue || this.currentStoryDialogueCloseAtX === undefined || this.player.x < this.currentStoryDialogueCloseAtX) {
+      return;
+    }
+
+    this.closeCurrentStoryDialogue({ animate: true });
+  }
+
+  private closeCurrentStoryDialogue(options?: { animate?: boolean }) {
+    this.storyDialogueAdvanceEvents.forEach((event) => event.remove(false));
+    this.storyDialogueRemoveEvent?.remove(false);
+    this.storyDialogue?.remove(options);
+    this.storyDialogue = undefined;
+    this.storyDialogueRemoveEvent = undefined;
+    this.storyDialogueAdvanceEvents.length = 0;
+    this.currentStoryDialogueCloseAtX = undefined;
+    this.showNextQueuedStoryDialogue();
   }
 
   private restartStage() {

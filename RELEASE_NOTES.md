@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.314
+### English
+- Made the tutorial's first movement and moving-jump prompts close immediately once the player clears the first gap.
+### Japanese
+- チュートリアルで最初の穴を越えたら、左右移動と移動ジャンプの説明が終了時間を待たずに閉じるようにしました。
+
 ## v0.1.313
 ### English
 - Clarified the tutorial dash prompt to explain that dashing spends stamina and that stamina gradually recovers while not dashing or airborne.

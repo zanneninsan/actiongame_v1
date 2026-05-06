@@ -1616,6 +1616,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
   storyDialogues: [
     {
       triggerX: 130,
+      closeAtX: 704,
       stepDelayMs: 4200,
       durationMs: 9500,
       lines: [
@@ -1634,6 +1635,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     },
     {
       triggerX: 560,
+      closeAtX: 704,
       stepDelayMs: 4400,
       durationMs: 9500,
       lines: [
@@ -1893,6 +1895,7 @@ export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   storyDialogue: stage.storyDialogue
     ? {
         triggerX: stage.storyDialogue.triggerX,
+        closeAtX: stage.storyDialogue.closeAtX,
         stepDelayMs: stage.storyDialogue.stepDelayMs,
         durationMs: stage.storyDialogue.durationMs,
         lines: stage.storyDialogue.lines.map((line) => ({
@@ -1904,6 +1907,7 @@ export const cloneStage = (stage: StageDefinition): StageDefinition => ({
     : undefined,
   storyDialogues: stage.storyDialogues?.map((storyDialogue) => ({
     triggerX: storyDialogue.triggerX,
+    closeAtX: storyDialogue.closeAtX,
     stepDelayMs: storyDialogue.stepDelayMs,
     durationMs: storyDialogue.durationMs,
     lines: storyDialogue.lines.map((line) => ({
