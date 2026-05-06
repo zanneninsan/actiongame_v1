@@ -40,6 +40,97 @@ canvas {
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
 }
 
+#start-modal::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  background: #000;
+  opacity: 1;
+  pointer-events: none;
+}
+
+#start-modal.is-title-cleared::before {
+  opacity: 0;
+}
+
+#start-modal.is-revealing-start-dialog::before {
+  animation: start-splash-mask-release 820ms ease-in-out forwards;
+}
+
+.title-sound-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  padding: clamp(18px, 4vmin, 44px);
+  background: #000;
+}
+
+.title-sound-gate.is-dismissed {
+  display: none;
+}
+
+.title-sound-gate-panel {
+  box-sizing: border-box;
+  width: min(520px, calc(100vw - 36px));
+  display: grid;
+  gap: 16px;
+  padding: 28px clamp(22px, 5vw, 34px) 26px;
+  border: 2px solid rgba(245, 199, 106, 0.86);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(10, 8, 4, 0.97), rgba(0, 0, 0, 0.98)),
+    url("../public/assets/ui/fantasy/options_modal_window.webp") center / cover no-repeat;
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.68), inset 0 0 22px rgba(245, 199, 106, 0.08);
+  color: #f8fafc;
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.title-sound-gate-title {
+  margin: 0;
+  color: #fef3c7;
+  font-size: clamp(20px, 4.8vw, 28px);
+  font-weight: 900;
+  line-height: 1.25;
+}
+
+.title-sound-gate-body {
+  margin: 0;
+  color: #dbeafe;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.title-sound-gate-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.title-sound-gate-actions button {
+  min-width: 0;
+  min-height: 48px;
+  border: 0;
+  padding: 0 14px;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #f8fafc;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.title-sound-on {
+  background-image: url("../public/assets/ui/fantasy/button_primary_selected_safe.webp");
+  color: #fff7d6;
+  filter: brightness(1.18) saturate(1.2) drop-shadow(0 0 10px rgba(253, 230, 138, 0.36));
+}
+
 .maker-splash-screen {
   position: fixed;
   inset: 0;
@@ -50,7 +141,13 @@ canvas {
   border: 0;
   background: #000;
   cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
   touch-action: manipulation;
+}
+
+.maker-splash-screen.is-ready {
+  pointer-events: auto;
   animation: maker-splash-sequence 3100ms ease-in-out forwards;
 }
 
@@ -120,6 +217,12 @@ canvas {
   animation: start-title-logo-fade 960ms ease-out forwards;
 }
 
+.start-title-screen.is-ready.has-played-video .start-title-logo {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  animation: none;
+}
+
 .start-title-video {
   opacity: 0;
   filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.74));
@@ -145,18 +248,18 @@ canvas {
 .start-title-prompt {
   grid-row: 2;
   grid-column: 1;
-  width: min(66vw, 384px);
+  width: min(58vw, 320px);
   aspect-ratio: 384 / 64;
   opacity: 0;
   background: url("../public/assets/ui/fantasy/press_start_prompt_sheet.webp") 0 0 / 400% 100% no-repeat;
-  filter: drop-shadow(0 0 12px rgba(253, 230, 138, 0.35));
+  filter: drop-shadow(0 0 7px rgba(253, 230, 138, 0.22));
   image-rendering: pixelated;
 }
 
 .start-title-screen.is-ready .start-title-prompt {
   animation:
-    start-title-prompt-fade 520ms ease-out 820ms forwards,
-    press-start-blink 1080ms steps(4) 1340ms infinite;
+    start-title-prompt-fade 720ms ease-out 980ms forwards,
+    press-start-blink 2200ms steps(4) 1700ms infinite;
 }
 
 @keyframes maker-splash-sequence {
@@ -188,7 +291,7 @@ canvas {
 
 @keyframes start-title-prompt-fade {
   to {
-    opacity: 1;
+    opacity: 0.72;
   }
 }
 
@@ -286,6 +389,7 @@ canvas {
 .start-dialog {
   box-sizing: border-box;
   position: relative;
+  z-index: 2;
   width: min(620px, calc(100vw - 72px), calc((100dvh - 48px) * 1.125));
   max-height: calc(100dvh - 48px);
   aspect-ratio: 720 / 640;
@@ -313,6 +417,17 @@ canvas {
     opacity: 1;
     transform: translateY(0) scale(1);
     filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58)) brightness(1);
+  }
+}
+
+@keyframes start-splash-mask-release {
+  0%,
+  48% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
   }
 }
 
@@ -680,6 +795,30 @@ canvas {
     overflow: hidden;
   }
 
+  .title-sound-gate {
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
+
+  .title-sound-gate-panel {
+    gap: 13px;
+    padding: 22px 16px 20px;
+  }
+
+  .title-sound-gate-body {
+    font-size: 13px;
+  }
+
+  .title-sound-gate-actions {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .title-sound-gate-actions button {
+    min-height: 46px;
+    font-size: 15px;
+  }
+
   .maker-splash-screen {
     padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
       max(12px, env(safe-area-inset-left));
@@ -702,7 +841,7 @@ canvas {
   }
 
   .start-title-prompt {
-    width: min(76vw, 360px);
+    width: min(66vw, 300px);
   }
 
   .start-dialog {
@@ -946,6 +1085,7 @@ canvas {
   }
 
   .start-title-screen.is-exiting,
+  #start-modal.is-revealing-start-dialog::before,
   #start-modal.is-revealing-start-dialog .start-dialog {
     animation: none;
   }

@@ -4,6 +4,12 @@ import { hasFullscreenElement, isLandscapeViewport, isLikelySmartphone } from ".
 
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
 const PWA_INSTALL_DISMISSED_KEY = "actiongame_pwa_install_dismissed";
+const TITLE_SOUND_CONFIRM_STORAGE_KEY = "actiongame_title_sound_confirmed";
+const TITLE_MUSIC_VOLUME = 0.72;
+const TITLE_MUSIC_FADE_SECONDS = 3;
+const TITLE_MUSIC_REPLAY_GAP_MS = 5000;
+const TITLE_INITIAL_STILL_MS = 3000;
+const TITLE_REPEAT_STILL_MS = 10000;
 
 export type ControlMode = "pc" | "mobile";
 export type StageOption = { id: string; label: Record<Locale, string> };
@@ -29,6 +35,7 @@ type StartModalOptions = {
   stageId: string;
   stageOptions: StageOption[];
   soundOn: boolean;
+  skipSplashIntro?: boolean;
   locale: Locale;
   accountStatus?: StartAccountStatus;
   onLocaleChange: (locale: Locale) => void;
@@ -49,6 +56,8 @@ export class StartModal {
   private makerSplashTimer?: number;
   private titleDismissTimer?: number;
   private titleLoopTimer?: number;
+  private titleMusicGapTimer?: number;
+  private soundGateDismissed = false;
   private makerSplashDismissed = false;
   private titleScreenDismissed = false;
   private orientationPromptDismissed = false;
@@ -64,8 +73,31 @@ export class StartModal {
 
     const overlay = document.createElement("div");
     overlay.id = "start-modal";
+    this.soundGateDismissed = getStorageValue(TITLE_SOUND_CONFIRM_STORAGE_KEY) === "1";
+    if (this.options.skipSplashIntro) {
+      this.soundGateDismissed = true;
+      this.makerSplashDismissed = true;
+      this.titleScreenDismissed = true;
+    }
+    if (this.titleScreenDismissed) {
+      overlay.classList.add("is-title-cleared");
+    }
     overlay.innerHTML = `
-      <button class="maker-splash-screen${this.makerSplashDismissed ? " is-dismissed" : ""}" type="button" aria-label="${escapeHtml(
+      <div class="title-sound-gate${this.soundGateDismissed ? " is-dismissed" : ""}" role="dialog" aria-modal="true" aria-label="Sound setting">
+        <div class="title-sound-gate-panel">
+          <p class="title-sound-gate-title">${this.options.locale === "ja" ? "音を鳴らしますか？" : "Play with sound?"}</p>
+          <p class="title-sound-gate-body">${
+            this.options.locale === "ja"
+              ? "タイトル画面で音楽が流れます。あとからトップ画面でも変更できます。"
+              : "Music will play on the title screen. You can change this again on the start menu."
+          }</p>
+          <div class="title-sound-gate-actions">
+            <button type="button" class="title-sound-on">${t(this.options.locale, "start.soundOn")}</button>
+            <button type="button" class="title-sound-off">${t(this.options.locale, "start.soundOff")}</button>
+          </div>
+        </div>
+      </div>
+      <button class="maker-splash-screen${this.soundGateDismissed ? " is-ready" : ""}${this.makerSplashDismissed ? " is-dismissed" : ""}" type="button" aria-label="${escapeHtml(
         t(this.options.locale, "start.start"),
       )}">
         <img class="maker-splash-logo" src="./assets/ui/fantasy/maker_splash_logo.webp" alt="満足教 Presents" />
@@ -75,6 +107,7 @@ export class StartModal {
       )}">
         <img class="start-title-logo" src="./assets/ui/fantasy/title_splash_logo.webp" alt="${escapeHtml(t(this.options.locale, "start.title"))}" />
         <video class="start-title-video" src="./assets/ui/fantasy/title_splash_loop.mp4" preload="auto" muted playsinline></video>
+        <audio class="start-title-music" src="./assets/audio/title_opening.mp3" preload="auto"></audio>
         <span class="start-title-prompt" aria-hidden="true"></span>
       </button>
       <div class="start-orientation-prompt" hidden>
@@ -161,9 +194,13 @@ export class StartModal {
     document.body.classList.add("is-start-modal-open");
     this.overlay = overlay;
 
+    const soundGate = overlay.querySelector<HTMLDivElement>(".title-sound-gate")!;
+    const soundGateOn = overlay.querySelector<HTMLButtonElement>(".title-sound-on")!;
+    const soundGateOff = overlay.querySelector<HTMLButtonElement>(".title-sound-off")!;
     const makerSplash = overlay.querySelector<HTMLButtonElement>(".maker-splash-screen")!;
     const titleScreen = overlay.querySelector<HTMLButtonElement>(".start-title-screen")!;
     const titleVideo = overlay.querySelector<HTMLVideoElement>(".start-title-video")!;
+    const titleMusic = overlay.querySelector<HTMLAudioElement>(".start-title-music")!;
     const form = overlay.querySelector("form")!;
     const input = overlay.querySelector<HTMLInputElement>("input[name='playerName']")!;
     const localeSelect = overlay.querySelector<HTMLSelectElement>("select[name='locale']")!;
@@ -193,7 +230,48 @@ export class StartModal {
     let localGhostFileLoaded = false;
     let orientationPromptMode: OrientationPromptMode = "initial";
     let pendingStartSettings: StartSettings | undefined;
+    let titleMusicEnabled = soundOn;
+    let titleVideoHasPlayed = false;
 
+    const stopTitleMusic = () => {
+      if (this.titleMusicGapTimer !== undefined) {
+        window.clearTimeout(this.titleMusicGapTimer);
+        this.titleMusicGapTimer = undefined;
+      }
+      titleMusic.pause();
+      titleMusic.currentTime = 0;
+      titleMusic.volume = 0;
+    };
+    const playTitleMusic = () => {
+      if (!titleMusicEnabled || this.titleScreenDismissed) {
+        return;
+      }
+      if (this.titleMusicGapTimer !== undefined) {
+        window.clearTimeout(this.titleMusicGapTimer);
+        this.titleMusicGapTimer = undefined;
+      }
+      titleMusic.currentTime = 0;
+      titleMusic.volume = TITLE_MUSIC_VOLUME;
+      void titleMusic.play().catch(() => {
+        stopTitleMusic();
+      });
+    };
+    const scheduleTitleMusicReplay = () => {
+      if (!titleMusicEnabled || this.titleScreenDismissed) {
+        return;
+      }
+      if (this.titleMusicGapTimer !== undefined) {
+        window.clearTimeout(this.titleMusicGapTimer);
+      }
+      this.titleMusicGapTimer = window.setTimeout(playTitleMusic, TITLE_MUSIC_REPLAY_GAP_MS);
+    };
+    const startMakerSplash = () => {
+      if (this.makerSplashDismissed || this.makerSplashTimer !== undefined) {
+        return;
+      }
+      makerSplash.classList.add("is-ready");
+      this.makerSplashTimer = window.setTimeout(revealTitleScreen, 3100);
+    };
     const revealTitleScreen = () => {
       if (this.makerSplashDismissed) {
         return;
@@ -207,6 +285,7 @@ export class StartModal {
       titleScreen.classList.add("is-ready");
       if (!this.titleScreenDismissed) {
         scheduleTitleVideo();
+        playTitleMusic();
       }
     };
     const stopTitleLoop = () => {
@@ -222,19 +301,24 @@ export class StartModal {
       if (this.titleScreenDismissed) {
         return;
       }
+      if (titleVideoHasPlayed) {
+        titleScreen.classList.add("has-played-video");
+      }
       titleScreen.classList.remove("is-playing-video");
       titleVideo.load();
+      const stillDurationMs = titleVideoHasPlayed ? TITLE_REPEAT_STILL_MS : TITLE_INITIAL_STILL_MS;
       this.titleLoopTimer = window.setTimeout(() => {
         if (this.titleScreenDismissed) {
           return;
         }
         titleVideo.currentTime = 0;
+        titleVideoHasPlayed = true;
         titleScreen.classList.add("is-playing-video");
         void titleVideo.play().catch(() => {
           titleScreen.classList.remove("is-playing-video");
           scheduleTitleVideo();
         });
-      }, 3000);
+      }, stillDurationMs);
     };
     const dismissTitleScreen = () => {
       if (this.titleScreenDismissed) {
@@ -242,7 +326,8 @@ export class StartModal {
       }
       this.titleScreenDismissed = true;
       stopTitleLoop();
-      overlay.classList.add("is-revealing-start-dialog");
+      stopTitleMusic();
+      overlay.classList.add("is-revealing-start-dialog", "is-title-cleared");
       titleScreen.classList.add("is-exiting");
       this.titleDismissTimer = window.setTimeout(() => {
         titleScreen.classList.add("is-dismissed");
@@ -250,13 +335,39 @@ export class StartModal {
         input.focus();
       }, 820);
     };
+    const dismissSoundGate = (nextSoundOn: boolean) => {
+      this.soundGateDismissed = true;
+      setStorageValue(TITLE_SOUND_CONFIRM_STORAGE_KEY, "1");
+      soundOn = nextSoundOn;
+      titleMusicEnabled = nextSoundOn;
+      this.options.soundOn = nextSoundOn;
+      this.options.onSoundOnChange(nextSoundOn);
+      soundGate.classList.add("is-dismissed");
+      startMakerSplash();
+    };
     titleScreen.addEventListener("click", dismissTitleScreen);
     titleVideo.addEventListener("ended", scheduleTitleVideo);
+    titleMusic.addEventListener("ended", scheduleTitleMusicReplay);
+    titleMusic.addEventListener("timeupdate", () => {
+      if (!titleMusicEnabled || !Number.isFinite(titleMusic.duration) || titleMusic.duration <= 0) {
+        return;
+      }
+      const remaining = titleMusic.duration - titleMusic.currentTime;
+      titleMusic.volume =
+        remaining <= TITLE_MUSIC_FADE_SECONDS
+          ? Math.max(0, Math.min(TITLE_MUSIC_VOLUME, (remaining / TITLE_MUSIC_FADE_SECONDS) * TITLE_MUSIC_VOLUME))
+          : TITLE_MUSIC_VOLUME;
+    });
+    soundGateOn.addEventListener("click", () => dismissSoundGate(true));
+    soundGateOff.addEventListener("click", () => dismissSoundGate(false));
     makerSplash.addEventListener("click", revealTitleScreen);
-    if (!this.makerSplashDismissed) {
-      this.makerSplashTimer = window.setTimeout(revealTitleScreen, 3100);
+    if (!this.soundGateDismissed) {
+      soundGateOn.focus();
+    } else if (!this.makerSplashDismissed) {
+      startMakerSplash();
     } else if (!this.titleScreenDismissed) {
       scheduleTitleVideo();
+      playTitleMusic();
     }
 
     input.addEventListener("keydown", (event) => event.stopPropagation());
@@ -487,6 +598,7 @@ export class StartModal {
     soundButtons.forEach((button) => {
       button.addEventListener("click", () => {
         soundOn = button.dataset.sound === "on";
+        titleMusicEnabled = soundOn;
         this.options.onSoundOnChange(soundOn);
         refreshSound();
       });
@@ -632,7 +744,12 @@ export class StartModal {
       window.clearTimeout(this.titleLoopTimer);
       this.titleLoopTimer = undefined;
     }
+    if (this.titleMusicGapTimer !== undefined) {
+      window.clearTimeout(this.titleMusicGapTimer);
+      this.titleMusicGapTimer = undefined;
+    }
     this.overlay?.querySelector<HTMLVideoElement>(".start-title-video")?.pause();
+    this.overlay?.querySelector<HTMLAudioElement>(".start-title-music")?.pause();
     this.overlay?.remove();
     this.overlay = undefined;
     this.refreshAccountUi = undefined;

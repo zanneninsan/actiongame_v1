@@ -2,11 +2,57 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.298
+### English
+- Made the PRESS TO START prompt calmer by reducing its size, glow, opacity, and blink speed on the title screen.
+### Japanese
+- タイトル画面のPRESS TO START表示を少し小さくし、発光、不透明度、点滅速度を抑えて落ち着いた見た目にしました。
+
+## v0.1.297
+### English
+- Prevented the title logo fade-in from replaying after the first title video playback, so later still-image holds appear immediately.
+### Japanese
+- タイトル動画の初回再生後に静止画へ戻る時、タイトルロゴのフェードインが再発生しないようにし、2回目以降の静止画はすぐ表示されるようにしました。
+
+## v0.1.296
+### English
+- Adjusted the title logo loop so the first still image appears after the fade for three seconds before video playback, then repeats with ten-second still holds and no additional fade-in.
+### Japanese
+- タイトルロゴのループを調整し、初回はフェードイン後に静止画を3秒表示して動画を再生し、その後はフェードインなしで静止画10秒、動画再生を繰り返すようにしました。
+
+## v0.1.295
+### English
+- Delayed the maker splash animation until after the sound confirmation is dismissed, preserving the intended sound check -> maker logo -> title -> start modal order.
+### Japanese
+- 音量確認が閉じるまで企業風ロゴのアニメーションを開始しないようにし、音量チェック、企業風ロゴ、タイトル画面、トップモーダルの順番を保つようにしました。
+
+## v0.1.294
+### English
+- Skipped the splash/logo sequence when returning to the title from gameplay, opening the start modal directly.
+### Japanese
+- ゲーム中からタイトルへ戻る時は、スプラッシュやタイトルロゴ演出を挟まず、トップモーダルへ直接戻るようにしました。
+
+## v0.1.293
+### English
+- Changed X share text so the hashtag appears after a blank line below the Best line, followed by another blank line and the game URL.
+### Japanese
+- Xシェア文で、ベスト行の下に空行を入れてハッシュタグを表示し、さらに空行を入れてゲームURLを表示するようにしました。
+
+## v0.1.292
+### English
+- Added a first-run sound on/off confirmation before the splash logos.
+- Added title-screen music playback with a three-second ending fade and a five-second gap before replaying.
+### Japanese
+- スプラッシュロゴの前に、初回向けの音量オン/オフ確認を追加しました。
+- タイトル画面で音楽を再生し、曲の終わり約3秒でフェードアウトして、約5秒空けてから再び流れるようにしました。
+
 ## v0.1.291
 ### English
 - Added a Phaser-level P screenshot shortcut so PC capture works even when browser-level key events are intercepted, and paused gameplay while the screenshot preview is open.
+- Added an opaque black mask behind the splash logos so the game canvas cannot briefly show through during title transitions.
 ### Japanese
 - PC版のPキー撮影をPhaser側にも登録してキー入力が取られにくいようにし、スクリーンショットのプレビュー表示中はゲーム進行を一時停止するようにしました。
+- スプラッシュロゴの背面に不透明な黒マスクを追加し、タイトル遷移中にゲーム画面が一瞬透けて見えないようにしました。
 
 ## v0.1.290
 ### English
