@@ -8,6 +8,8 @@ const TITLE_SOUND_CONFIRM_STORAGE_KEY = "actiongame_title_sound_confirmed";
 const TITLE_MUSIC_VOLUME = 0.72;
 const TITLE_MUSIC_FADE_SECONDS = 3;
 const TITLE_MUSIC_REPLAY_GAP_MS = 5000;
+const TITLE_INITIAL_STILL_MS = 3000;
+const TITLE_REPEAT_STILL_MS = 10000;
 
 export type ControlMode = "pc" | "mobile";
 export type StageOption = { id: string; label: Record<Locale, string> };
@@ -229,6 +231,7 @@ export class StartModal {
     let orientationPromptMode: OrientationPromptMode = "initial";
     let pendingStartSettings: StartSettings | undefined;
     let titleMusicEnabled = soundOn;
+    let titleVideoHasPlayed = false;
 
     const stopTitleMusic = () => {
       if (this.titleMusicGapTimer !== undefined) {
@@ -300,17 +303,19 @@ export class StartModal {
       }
       titleScreen.classList.remove("is-playing-video");
       titleVideo.load();
+      const stillDurationMs = titleVideoHasPlayed ? TITLE_REPEAT_STILL_MS : TITLE_INITIAL_STILL_MS;
       this.titleLoopTimer = window.setTimeout(() => {
         if (this.titleScreenDismissed) {
           return;
         }
         titleVideo.currentTime = 0;
+        titleVideoHasPlayed = true;
         titleScreen.classList.add("is-playing-video");
         void titleVideo.play().catch(() => {
           titleScreen.classList.remove("is-playing-video");
           scheduleTitleVideo();
         });
-      }, 3000);
+      }, stillDurationMs);
     };
     const dismissTitleScreen = () => {
       if (this.titleScreenDismissed) {

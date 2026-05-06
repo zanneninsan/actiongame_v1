@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.296
+### English
+- Adjusted the title logo loop so the first still image appears after the fade for three seconds before video playback, then repeats with ten-second still holds and no additional fade-in.
+### Japanese
+- タイトルロゴのループを調整し、初回はフェードイン後に静止画を3秒表示して動画を再生し、その後はフェードインなしで静止画10秒、動画再生を繰り返すようにしました。
+
 ## v0.1.295
 ### English
 - Delayed the maker splash animation until after the sound confirmation is dismissed, preserving the intended sound check -> maker logo -> title -> start modal order.
