@@ -1617,6 +1617,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     {
       triggerX: 130,
       stepDelayMs: 4200,
+      durationMs: 9500,
       lines: [
         {
           characterName: {
@@ -1634,6 +1635,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     {
       triggerX: 560,
       stepDelayMs: 4400,
+      durationMs: 9500,
       lines: [
         {
           characterName: {
@@ -1651,6 +1653,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     {
       triggerX: 1110,
       stepDelayMs: 4600,
+      durationMs: 10000,
       lines: [
         {
           characterName: {
@@ -1668,6 +1671,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     {
       triggerX: 1880,
       stepDelayMs: 5200,
+      durationMs: 10500,
       lines: [
         {
           characterName: {
@@ -1685,6 +1689,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     {
       triggerX: 2920,
       stepDelayMs: 5200,
+      durationMs: 10500,
       lines: [
         {
           characterName: {
@@ -1702,6 +1707,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     {
       triggerX: 3300,
       stepDelayMs: 5600,
+      durationMs: 11000,
       lines: [
         {
           characterName: {
@@ -1719,6 +1725,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     {
       triggerX: 4070,
       stepDelayMs: 4200,
+      durationMs: 9000,
       lines: [
         {
           characterName: {

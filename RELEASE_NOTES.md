@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.306
+### English
+- Extended tutorial message display durations so each instruction stays readable while practicing the section.
+### Japanese
+- チュートリアル中の説明メッセージの表示時間を延ばし、各練習区間で読みながら操作しやすくしました。
+
 ## v0.1.305
 ### English
 - Rebuilt the tutorial stage into a guided sequence for movement, moving jumps, super dash, multi-jumps, crouch stamina recovery, drop-through platforms, and the goal.
