@@ -2,6 +2,16 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.318
+### English
+- Merged the latest `origin/main` multilingual updates into the tutorial branch.
+- Localized the rebuilt tutorial's movement, jump, dash, multi-jump, crouch, drop-through, and goal prompts for Japanese, English, Chinese, and Korean.
+- Kept the recent tutorial flow refinements, including early prompt closing, the dash wall, clearer stamina explanations, and the air-jump multi-jump wording.
+### Japanese
+- 最新の`origin/main`の多言語対応をチュートリアル作業ブランチへ取り込みました。
+- 作り直したチュートリアルの左右移動、移動ジャンプ、ダッシュ、多段ジャンプ、しゃがみ、すり抜け、ゴール説明を日本語・英語・中国語・韓国語に対応しました。
+- 説明の早期クローズ、ダッシュ壁、スタミナ説明の明確化、空中ジャンプとしての多段ジャンプ説明など、最近のチュートリアル調整を維持しました。
+
 ## v0.1.316
 ### English
 - Added Chinese and Korean translations for leaderboard results, Google account linking prompts, and the account/player ID panel.

@@ -1645,43 +1645,166 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     rearKey: "rear-starry-sky",
     midgroundKey: "midground-city-loop-strip",
   },
-  storyDialogue: {
-    triggerX: 260,
-    stepDelayMs: 1800,
-    lines: [
-      {
-        characterName: {
-          ja: "残念院さん",
-          en: "Zannenin",
-          zh: "残念院小姐",
-          ko: "잔넨인 씨",
+  storyDialogues: [
+    {
+      triggerX: 130,
+      closeAtX: 400,
+      stepDelayMs: 4200,
+      durationMs: 9500,
+      lines: [
+        {
+          characterName: {
+            ja: "残念院さん",
+            en: "Zannenin",
+            zh: "残念院小姐",
+            ko: "잔넨인 씨",
+          },
+          message: {
+            ja: "まずは左右移動です。少し右へ進んでから、左にも戻って足元の感覚をつかみましょう。",
+            en: "First, practice left and right movement. Move right, then step back left to feel the controls.",
+            zh: "首先练习左右移动。先稍微向右走，再往左回来，熟悉脚下的感觉吧。",
+            ko: "먼저 좌우 이동 연습이에요. 조금 오른쪽으로 간 뒤 왼쪽으로도 돌아와서 발밑 감각을 익혀 봐요.",
+          },
+          portraitPath: "assets/ui/message_faces/message_face_head_icon_02_smile.webp",
         },
-        message: {
-          ja: "左下で移動、右下でジャンプです。まずは少し進んでみましょう。",
-          en: "Use the left buttons to move and the right buttons to jump. Try moving forward first.",
-          zh: "左下角移动，右下角跳跃。先试着往前走吧。",
-          ko: "왼쪽 아래로 이동하고 오른쪽 아래로 점프해요. 우선 조금 앞으로 가 봐요.",
+      ],
+    },
+    {
+      triggerX: 400,
+      closeAtX: 704,
+      stepDelayMs: 4400,
+      durationMs: 9500,
+      lines: [
+        {
+          characterName: {
+            ja: "残念院さん",
+            en: "Zannenin",
+            zh: "残念院小姐",
+            ko: "잔넨인 씨",
+          },
+          message: {
+            ja: "次は移動ジャンプです。走りながらジャンプして、穴の向こうへ渡ります。",
+            en: "Next is a moving jump. Keep moving as you jump across the gap.",
+            zh: "接下来是移动跳跃。一边跑一边跳，越过前面的缺口吧。",
+            ko: "다음은 이동 점프예요. 달리면서 점프해서 구멍 너머로 건너가요.",
+          },
+          portraitPath: "assets/ui/message_faces/message_face_head_icon_03_happy_open.png",
         },
-        portraitPath: "assets/ui/message_faces/message_face_head_icon_02_smile.webp",
-      },
-      {
-        characterName: {
-          ja: "残念院さん",
-          en: "Zannenin",
-          zh: "残念院小姐",
-          ko: "잔넨인 씨",
+      ],
+    },
+    {
+      triggerX: 1110,
+      closeAtX: 1740,
+      stepDelayMs: 4600,
+      durationMs: 13000,
+      lines: [
+        {
+          characterName: {
+            ja: "残念院さん",
+            en: "Zannenin",
+            zh: "残念院小姐",
+            ko: "잔넨인 씨",
+          },
+          message: {
+            ja: "ここはスーパーダッシュの練習です。DASHを押しながら進むとスタミナを消費して加速します。スタミナはダッシュ中と空中以外なら少しずつ回復します。",
+            en: "This is super dash practice. Hold DASH while moving to spend stamina and accelerate. Stamina gradually recovers when you are not dashing or airborne.",
+            zh: "这里是超级冲刺练习。移动时按住DASH会消耗体力并加速。不在冲刺或空中时，体力会逐渐恢复。",
+            ko: "여기는 슈퍼 대시 연습이에요. 이동하면서 DASH를 누르면 스태미나를 쓰고 가속해요. 대시 중이거나 공중에 있을 때가 아니면 스태미나는 조금씩 회복돼요.",
+          },
+          portraitPath: "assets/ui/message_faces/message_face_head_icon_04_wink.webp",
         },
-        message: {
-          ja: "DASHを押しながら進むと速く走れます。短いステージなので気軽にどうぞ。",
-          en: "Hold DASH while moving to run faster. This is a short practice stage, so take it easy.",
-          zh: "移动时按住DASH可以跑得更快。这是短练习关，轻松试试看吧。",
-          ko: "이동하면서 DASH를 누르면 더 빠르게 달릴 수 있어요. 짧은 연습 스테이지니까 편하게 해 보세요.",
+      ],
+    },
+    {
+      triggerX: 2200,
+      stepDelayMs: 5200,
+      durationMs: 10500,
+      lines: [
+        {
+          characterName: {
+            ja: "残念院さん",
+            en: "Zannenin",
+            zh: "残念院小姐",
+            ko: "잔넨인 씨",
+          },
+          message: {
+            ja: "多段ジャンプです。空中でJUMPを押すと、スタミナを消費して空中ジャンプできます。落ちる前にもう一度ジャンプして進みましょう。",
+            en: "Time for multi-jumps. Press JUMP while airborne to spend stamina and jump again in the air. Jump again before you fall.",
+            zh: "这是多段跳。在空中按JUMP会消耗体力，再次进行空中跳跃。掉下去之前再跳一次前进吧。",
+            ko: "다단 점프예요. 공중에서 JUMP를 누르면 스태미나를 써서 공중 점프를 할 수 있어요. 떨어지기 전에 한 번 더 점프해서 나아가요.",
+          },
+          portraitPath: "assets/ui/message_faces/message_face_head_icon_05_shy.webp",
         },
-        portraitPath: "assets/ui/message_faces/message_face_head_icon_03_happy_open.png",
-      },
-    ],
-  },
-  worldWidth: 2600,
+      ],
+    },
+    {
+      triggerX: 2920,
+      stepDelayMs: 5200,
+      durationMs: 10500,
+      lines: [
+        {
+          characterName: {
+            ja: "残念院さん",
+            en: "Zannenin",
+            zh: "残念院小姐",
+            ko: "잔넨인 씨",
+          },
+          message: {
+            ja: "しゃがむとスタミナ回復が早くなります。次の練習前に、少ししゃがんでゲージを戻しましょう。",
+            en: "Crouching recovers stamina faster. Crouch for a moment before the next practice.",
+            zh: "蹲下时体力恢复会更快。下一项练习前，先蹲一会儿把能量条回满吧。",
+            ko: "웅크리면 스태미나 회복이 빨라져요. 다음 연습 전에 잠깐 웅크려서 게이지를 채워 봐요.",
+          },
+          portraitPath: "assets/ui/message_faces/message_face_head_icon_02_smile.webp",
+        },
+      ],
+    },
+    {
+      triggerX: 3300,
+      stepDelayMs: 5600,
+      durationMs: 11000,
+      lines: [
+        {
+          characterName: {
+            ja: "残念院さん",
+            en: "Zannenin",
+            zh: "残念院小姐",
+            ko: "잔넨인 씨",
+          },
+          message: {
+            ja: "屋根の上に乗ったら、しゃがみ続けてください。半透明の足場は下へすり抜けられます。",
+            en: "Stand on the roof, then keep crouching. Thin top platforms can be dropped through.",
+            zh: "站到屋顶上后，请继续蹲下。半透明的平台可以向下穿过去。",
+            ko: "지붕 위에 올라가면 계속 웅크리고 있어 주세요. 반투명 발판은 아래로 통과할 수 있어요.",
+          },
+          portraitPath: "assets/ui/message_faces/message_face_head_icon_03_happy_open.png",
+        },
+      ],
+    },
+    {
+      triggerX: 4070,
+      stepDelayMs: 4200,
+      durationMs: 9000,
+      lines: [
+        {
+          characterName: {
+            ja: "残念院さん",
+            en: "Zannenin",
+            zh: "残念院小姐",
+            ko: "잔넨인 씨",
+          },
+          message: {
+            ja: "最後はゴールです。旗まで進めばチュートリアル完了です。",
+            en: "Last step: reach the goal flag to finish the tutorial.",
+            zh: "最后就是终点。前进到旗帜那里，教学就完成了。",
+            ko: "마지막은 골이에요. 깃발까지 가면 튜토리얼 완료예요.",
+          },
+          portraitPath: "assets/ui/message_faces/message_face_head_icon_04_wink.webp",
+        },
+      ],
+    },
+  ],
+  worldWidth: 4700,
   worldTop: -360,
   worldBottom: 720,
   groundTopY: 672,
@@ -1690,51 +1813,59 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
     y: 552,
   },
   goal: {
-    x: 2380,
+    x: 4480,
     y: 568,
   },
   platforms: [
-    { x: 0, y: 672, units: 11 },
-    { x: 480, y: 672, units: 7 },
-    { x: 864, y: 672, units: 8 },
-    { x: 1376, y: 672, units: 10 },
-    { x: 1920, y: 672, units: 12 },
-    { x: 520, y: 552, units: 4 },
-    { x: 900, y: 480, units: 3 },
-    { x: 1216, y: 420, units: 3 },
-    { x: 1600, y: 548, units: 4 },
-    { x: 1920, y: 500, units: 4 },
+    { x: 0, y: 672, units: 9 },
+    { x: 704, y: 672, units: 6 },
+    { x: 1184, y: 672, units: 17 },
+    { x: 2304, y: 560, units: 2 },
+    { x: 2536, y: 472, units: 2 },
+    { x: 2784, y: 384, units: 2 },
+    { x: 3056, y: 528, units: 3 },
+    { x: 3296, y: 672, units: 7 },
+    { x: 3936, y: 672, units: 10 },
   ],
   streetLamps: [
-    { x: 280, key: "street-lamp-single", scale: 0.62 },
-    { x: 1840, key: "street-lamp-double", scale: 0.58 },
+    { x: 260, key: "street-lamp-single", scale: 0.62 },
+    { x: 1470, key: "street-lamp-double", scale: 0.58 },
+    { x: 4020, key: "street-lamp-single", scale: 0.62 },
   ],
   decorations: [
-    { x: 420, y: 672, key: "stage-props-traffic-cone", scale: 0.48 },
-    { x: 760, y: 672, key: "stage-props-roadwork-sign", scale: 0.42 },
-    { x: 1360, y: 672, key: "stage-props-planter-box", scale: 0.48 },
-    { x: 2100, y: 672, key: "stage-structures-chainlink-fence", scale: 0.54 },
+    { x: 360, y: 672, key: "stage-props-traffic-cone", scale: 0.48 },
+    { x: 620, y: 672, key: "stage-props-roadwork-sign", scale: 0.42 },
+    { x: 1130, y: 672, key: "stage-props-sidewalk-sign", scale: 0.42 },
+    { x: 1660, y: 672, key: "stage-props-planter-box", scale: 0.48 },
+    { x: 3040, y: 672, key: "stage-props-vending-machine", scale: 0.48 },
+    { x: 3600, y: 672, key: "stage-structures-bus-shelter", scale: 0.62 },
+    { x: 4320, y: 672, key: "stage-structures-chainlink-fence", scale: 0.54 },
   ],
   items: [
-    { type: "coin", x: 260, y: 610 },
-    { type: "coin", x: 330, y: 610 },
-    { type: "energyDrink", x: 620, y: 496 },
-    { type: "bubbleTea", x: 980, y: 424 },
-    { type: "dashRing", x: 1280, y: 364 },
-    { type: "coin", x: 1540, y: 610 },
-    { type: "coin", x: 1640, y: 610 },
-    { type: "shoppingBag", x: 2000, y: 444 },
+    { type: "coin", x: 220, y: 610 },
+    { type: "coin", x: 420, y: 610 },
+    { type: "coin", x: 760, y: 610 },
+    { type: "energyDrink", x: 980, y: 610 },
+    { type: "dashRing", x: 1320, y: 610 },
+    { type: "coin", x: 1520, y: 610 },
+    { type: "coin", x: 1700, y: 610 },
+    { type: "bubbleTea", x: 2368, y: 504 },
+    { type: "coin", x: 2600, y: 416 },
+    { type: "energyDrink", x: 2848, y: 328 },
+    { type: "coin", x: 3140, y: 472 },
+    { type: "shoppingBag", x: 3600, y: 430 },
+    { type: "coin", x: 4140, y: 610 },
   ],
-  bonusBlocks: [
-    { type: "question", x: 710, y: 404, reward: "coin" },
-  ],
+  bonusBlocks: [],
   checkpoints: [
-    { x: 1500, y: 568 },
+    { x: 2060, y: 568 },
+    { x: 3260, y: 568 },
   ],
   oneWayGates: [],
-  enemies: [
-    { type: "coneGolem", aiType: "stationary", x: 1760, y: 590, patrolLeft: 1760, patrolRight: 1760, speed: 0 },
+  dashWalls: [
+    { x: 1700, y: -864, width: 40, height: 3072 },
   ],
+  enemies: [],
 };
 
 export const RANKING_CHECK_STAGE: StageDefinition = {
@@ -1825,7 +1956,9 @@ export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   storyDialogue: stage.storyDialogue
     ? {
         triggerX: stage.storyDialogue.triggerX,
+        closeAtX: stage.storyDialogue.closeAtX,
         stepDelayMs: stage.storyDialogue.stepDelayMs,
+        durationMs: stage.storyDialogue.durationMs,
         lines: stage.storyDialogue.lines.map((line) => ({
           characterName: { ...line.characterName },
           message: { ...line.message },
@@ -1833,6 +1966,17 @@ export const cloneStage = (stage: StageDefinition): StageDefinition => ({
         })),
       }
     : undefined,
+  storyDialogues: stage.storyDialogues?.map((storyDialogue) => ({
+    triggerX: storyDialogue.triggerX,
+    closeAtX: storyDialogue.closeAtX,
+    stepDelayMs: storyDialogue.stepDelayMs,
+    durationMs: storyDialogue.durationMs,
+    lines: storyDialogue.lines.map((line) => ({
+      characterName: { ...line.characterName },
+      message: { ...line.message },
+      portraitPath: line.portraitPath,
+    })),
+  })),
   worldWidth: stage.worldWidth,
   worldTop: stage.worldTop,
   worldBottom: stage.worldBottom,
@@ -1853,5 +1997,6 @@ export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   bonusBlocks: (stage.bonusBlocks ?? []).map((block) => ({ ...block })),
   checkpoints: (stage.checkpoints ?? []).map((checkpoint) => ({ ...checkpoint })),
   oneWayGates: (stage.oneWayGates ?? []).map((gate) => ({ ...gate })),
+  dashWalls: (stage.dashWalls ?? []).map((wall) => ({ ...wall })),
   enemies: (stage.enemies ?? []).map((enemy) => ({ ...enemy })),
 });
