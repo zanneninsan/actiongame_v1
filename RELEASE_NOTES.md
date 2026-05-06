@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.311
+### English
+- Localized all danmaku-style comments, live chat names, and reaction bursts for English, Japanese, Chinese, and Korean.
+### Japanese
+- 弾幕風コメント、ライブチャット風のユーザー名、リアクション連投表示を英語・日本語・中国語・韓国語に対応しました。
+
 ## v0.1.310
 ### English
 - Redirected removed card-only share URLs back to the main game page so old cleanup paths no longer serve the SPA fallback.
