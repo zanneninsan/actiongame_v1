@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.308
+### English
+- Switched X share cards to a fresh 1200x600 JPEG image with a new physical URL and removed JavaScript redirects from the card-only share page.
+### Japanese
+- Xカード用画像を新しい物理URLの1200x600 JPEGに変更し、カード専用共有ページからJavaScript遷移を外しました。
+
 ## v0.1.307
 ### English
 - Added a dedicated static X share page with fresh OGP metadata, updated leaderboard sharing to use it, and added a real robots.txt for crawlers.
