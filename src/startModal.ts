@@ -64,6 +64,9 @@ export class StartModal {
 
     const overlay = document.createElement("div");
     overlay.id = "start-modal";
+    if (this.titleScreenDismissed) {
+      overlay.classList.add("is-title-cleared");
+    }
     overlay.innerHTML = `
       <button class="maker-splash-screen${this.makerSplashDismissed ? " is-dismissed" : ""}" type="button" aria-label="${escapeHtml(
         t(this.options.locale, "start.start"),
@@ -242,7 +245,7 @@ export class StartModal {
       }
       this.titleScreenDismissed = true;
       stopTitleLoop();
-      overlay.classList.add("is-revealing-start-dialog");
+      overlay.classList.add("is-revealing-start-dialog", "is-title-cleared");
       titleScreen.classList.add("is-exiting");
       this.titleDismissTimer = window.setTimeout(() => {
         titleScreen.classList.add("is-dismissed");

@@ -40,6 +40,24 @@ canvas {
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
 }
 
+#start-modal::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  background: #000;
+  opacity: 1;
+  pointer-events: none;
+}
+
+#start-modal.is-title-cleared::before {
+  opacity: 0;
+}
+
+#start-modal.is-revealing-start-dialog::before {
+  animation: start-splash-mask-release 820ms ease-in-out forwards;
+}
+
 .maker-splash-screen {
   position: fixed;
   inset: 0;
@@ -286,6 +304,7 @@ canvas {
 .start-dialog {
   box-sizing: border-box;
   position: relative;
+  z-index: 2;
   width: min(620px, calc(100vw - 72px), calc((100dvh - 48px) * 1.125));
   max-height: calc(100dvh - 48px);
   aspect-ratio: 720 / 640;
@@ -313,6 +332,17 @@ canvas {
     opacity: 1;
     transform: translateY(0) scale(1);
     filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58)) brightness(1);
+  }
+}
+
+@keyframes start-splash-mask-release {
+  0%,
+  48% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
   }
 }
 
@@ -946,6 +976,7 @@ canvas {
   }
 
   .start-title-screen.is-exiting,
+  #start-modal.is-revealing-start-dialog::before,
   #start-modal.is-revealing-start-dialog .start-dialog {
     animation: none;
   }

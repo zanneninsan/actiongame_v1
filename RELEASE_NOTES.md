@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.291
+### English
+- Added an opaque black mask behind the splash logos so the game canvas cannot briefly show through during title transitions.
+### Japanese
+- スプラッシュロゴの背面に不透明な黒マスクを追加し、タイトル遷移中にゲーム画面が一瞬透けて見えないようにしました。
+
 ## v0.1.290
 ### English
 - Added a skippable maker-style splash before the title screen.
