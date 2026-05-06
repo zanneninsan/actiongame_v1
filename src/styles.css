@@ -252,14 +252,14 @@ canvas {
   aspect-ratio: 384 / 64;
   opacity: 0;
   background: url("../public/assets/ui/fantasy/press_start_prompt_sheet.webp") 0 0 / 400% 100% no-repeat;
-  filter: drop-shadow(0 0 7px rgba(253, 230, 138, 0.22));
+  filter: drop-shadow(0 0 12px rgba(253, 230, 138, 0.35));
   image-rendering: pixelated;
 }
 
 .start-title-screen.is-ready .start-title-prompt {
   animation:
     start-title-prompt-fade 720ms ease-out 980ms forwards,
-    press-start-blink 2200ms steps(4) 1700ms infinite;
+    press-start-blink 4200ms steps(4) 1700ms infinite;
 }
 
 @keyframes maker-splash-sequence {
@@ -314,6 +314,10 @@ canvas {
   place-items: center;
   padding: 20px;
   background: rgba(2, 6, 23, 0.62);
+}
+
+#start-modal.is-title-cleared .start-orientation-prompt {
+  z-index: 7;
 }
 
 .start-orientation-prompt[hidden] {
