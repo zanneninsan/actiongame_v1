@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.312
+### English
+- Fixed Korean danmaku text rendering by restoring localized comment strings and using CJK font fallbacks, and localized the fixed left-side story messages.
+### Japanese
+- 韓国語の弾幕コメントが文字化けしないようにローカライズ文字列とCJKフォント指定を修正し、左上の固定メッセージも多言語対応しました。
+
 ## v0.1.311
 ### English
 - Localized all danmaku-style comments, live chat names, and reaction bursts for English, Japanese, Chinese, and Korean.

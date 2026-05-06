@@ -63,7 +63,7 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
     aspectRatio: `${1 / FRAME_ASPECT_RATIO}`,
     zIndex: "11",
     color: "#f8fafc",
-    fontFamily: `"Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif`,
+    fontFamily: `"Noto Sans CJK KR", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", "Microsoft YaHei", "Noto Sans CJK SC", "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif`,
     pointerEvents: "auto",
     userSelect: "none",
     filter: "drop-shadow(0 16px 22px rgba(0, 0, 0, 0.58))",

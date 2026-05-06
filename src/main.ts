@@ -94,38 +94,90 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.311";
+const DEBUG_VERSION = "v0.1.312";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
 const GOAL_IN_VIEW_DIALOGUE_DURATION_MS = 3400;
 const DANMAKU_TUTORIAL_DIALOGUE_DELAY_MS = 6800;
 const DANMAKU_TUTORIAL_DIALOGUE_DURATION_MS = 8000;
-const AQUA_MASCOT_STOMP_DIALOGUE: StoryDialogueLine = {
-  characterName: "残念院さん",
-  message: "ひゃっ...ぷいりちゃん、ごめんなさいっ",
-  portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_07_sad.png`,
+type FixedStoryDialogueKey = "aquaMascotStomp" | "stageMidpoint" | "staminaEmpty" | "goalInView" | "danmakuTutorial";
+
+type LocalizedStoryDialogueLine = {
+  characterName: Record<Locale, string>;
+  message: Record<Locale, string>;
+  portraitUrl: string;
 };
-const STAGE_MIDPOINT_DIALOGUE: StoryDialogueLine = {
-  characterName: "残念院さん",
-  message: "そろそろ中間まで来ましたね...少々疲れました...",
-  portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_05_shy.webp`,
+
+const ZANNENIN_SAN_NAME = {
+  en: "Zannenin-san",
+  ja: "残念院さん",
+  zh: "残念院小姐",
+  ko: "잔넨인 씨",
+} satisfies Record<Locale, string>;
+
+const FIXED_STORY_DIALOGUES: Record<FixedStoryDialogueKey, LocalizedStoryDialogueLine> = {
+  aquaMascotStomp: {
+    characterName: ZANNENIN_SAN_NAME,
+    message: {
+      en: "Eep... Puili-chan, I am so sorry!",
+      ja: "ひゃっ...ぷいりちゃん、ごめんなさいっ",
+      zh: "呀...噗伊莉，对不起！",
+      ko: "꺅... 푸이리야, 미안해!",
+    },
+    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_07_sad.png`,
+  },
+  stageMidpoint: {
+    characterName: ZANNENIN_SAN_NAME,
+    message: {
+      en: "We should be near the halfway point... I am getting a little tired...",
+      ja: "そろそろ中間まで来ましたね...少々疲れました...",
+      zh: "差不多到中段了呢...有点累了...",
+      ko: "슬슬 중간 지점까지 온 것 같네요... 조금 지쳤어요...",
+    },
+    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_05_shy.webp`,
+  },
+  staminaEmpty: {
+    characterName: ZANNENIN_SAN_NAME,
+    message: {
+      en: "Hah... hah... hah...",
+      ja: "ハァ・・・ハァ・・・ハァッ・・・",
+      zh: "哈...哈...哈...",
+      ko: "하아... 하아... 하아...",
+    },
+    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_07_sad.png`,
+  },
+  goalInView: {
+    characterName: ZANNENIN_SAN_NAME,
+    message: {
+      en: "That blue and white gate... could it be the goal?",
+      ja: "あの青と白のゲートは、もしやゴールでは？",
+      zh: "那个蓝白色的门...难道就是终点？",
+      ko: "저 파란색과 흰색 게이트... 혹시 골인가요?",
+    },
+    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_03_happy_open.png`,
+  },
+  danmakuTutorial: {
+    characterName: ZANNENIN_SAN_NAME,
+    message: {
+      en: "Those sudden danmaku comments startled me! I think you can toggle them or change their style from Options.",
+      ja: "突然の弾幕・・・びっくりしました！設定から、オンオフやスタイルの切り替えが出来そうな気がします！",
+      zh: "突然出现弹幕...吓了我一跳！好像可以在设置里开关，或者切换显示风格！",
+      ko: "갑자기 탄막 댓글이 나와서 깜짝 놀랐어요! 설정에서 켜고 끄거나 표시 스타일을 바꿀 수 있을 것 같아요!",
+    },
+    portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_06_surprised.png`,
+  },
 };
-const STAMINA_EMPTY_DIALOGUE: StoryDialogueLine = {
-  characterName: "残念院さん",
-  message: "ハァ・・・ハァ・・・ハァッ・・・💦",
-  portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_07_sad.png`,
+
+const resolveFixedStoryDialogue = (key: FixedStoryDialogueKey, locale: Locale): StoryDialogueLine => {
+  const dialogue = FIXED_STORY_DIALOGUES[key];
+  return {
+    characterName: dialogue.characterName[locale] ?? dialogue.characterName.en,
+    message: dialogue.message[locale] ?? dialogue.message.en,
+    portraitUrl: dialogue.portraitUrl,
+  };
 };
-const GOAL_IN_VIEW_DIALOGUE: StoryDialogueLine = {
-  characterName: "残念院さん",
-  message: "あの青と白のゲートは、もしやゴールでは？",
-  portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_03_happy_open.png`,
-};
-const DANMAKU_TUTORIAL_DIALOGUE: StoryDialogueLine = {
-  characterName: "残念院さん",
-  message: "突然の弾幕・・・びっくりしました！設定から、オンオフやスタイルの切り替えが出来そうな気がします！",
-  portraitUrl: `${ASSET_BASE}assets/ui/message_faces/message_face_head_icon_06_surprised.png`,
-};
+
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const DANMAKU_TUTORIAL_SEEN_STORAGE_KEY_PREFIX = "actiongame_danmaku_tutorial_seen";
@@ -1115,7 +1167,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.hasShownStageMidpointDialogue = true;
     this.enqueueStoryDialogue({
-      lines: [STAGE_MIDPOINT_DIALOGUE],
+      lines: [resolveFixedStoryDialogue("stageMidpoint", this.locale)],
       durationMs: STAGE_MIDPOINT_DIALOGUE_DURATION_MS,
     });
   }
@@ -1131,7 +1183,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.hasShownGoalInViewDialogue = true;
     this.enqueueStoryDialogue({
-      lines: [GOAL_IN_VIEW_DIALOGUE],
+      lines: [resolveFixedStoryDialogue("goalInView", this.locale)],
       durationMs: GOAL_IN_VIEW_DIALOGUE_DURATION_MS,
     });
   }
@@ -1186,7 +1238,7 @@ class PrototypeScene extends Phaser.Scene {
       this.markDanmakuTutorialDialogueSeen();
       this.scheduleLeaderboardUserSettingsSave();
       this.enqueueStoryDialogue({
-        lines: [DANMAKU_TUTORIAL_DIALOGUE],
+        lines: [resolveFixedStoryDialogue("danmakuTutorial", this.locale)],
         durationMs: DANMAKU_TUTORIAL_DIALOGUE_DURATION_MS,
       });
     });
@@ -1199,7 +1251,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.hasShownAquaMascotStompDialogue = true;
     this.enqueueStoryDialogue({
-      lines: [AQUA_MASCOT_STOMP_DIALOGUE],
+      lines: [resolveFixedStoryDialogue("aquaMascotStomp", this.locale)],
       durationMs: AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS,
     });
   }
@@ -2401,7 +2453,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.hasShownStaminaEmptyDialogue = true;
     this.enqueueStoryDialogue({
-      lines: [STAMINA_EMPTY_DIALOGUE],
+      lines: [resolveFixedStoryDialogue("staminaEmpty", this.locale)],
       durationMs: STAMINA_EMPTY_DIALOGUE_DURATION_MS,
     });
   }
