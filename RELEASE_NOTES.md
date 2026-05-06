@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.293
+### English
+- Changed X share text so the hashtag appears after a blank line below the Best line, followed by another blank line and the game URL.
+### Japanese
+- Xシェア文で、ベスト行の下に空行を入れてハッシュタグを表示し、さらに空行を入れてゲームURLを表示するようにしました。
+
 ## v0.1.292
 ### English
 - Added a first-run sound on/off confirmation before the splash logos.
