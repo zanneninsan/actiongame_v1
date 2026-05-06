@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.337
+### English
+- Enlarged the gameplay minimap and made its markers easier to read.
+### Japanese
+- プレイ中のミニマップを大きくし、足場や各種マーカーを見やすくしました。
+
 ## v0.1.336
 ### English
 - Added a lightweight right-side minimap that shows about five screens around the player with simplified platforms, pickups, enemies, the goal, and the current camera.

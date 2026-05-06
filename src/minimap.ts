@@ -2,10 +2,10 @@ import Phaser from "phaser";
 import type { StageDefinition } from "./assets";
 
 const PLATFORM_UNIT_WIDTH = 64;
-const MAP_WIDTH = 238;
-const MAP_HEIGHT = 82;
-const MAP_PADDING = 8;
-const MAP_X = 1018;
+const MAP_WIDTH = 330;
+const MAP_HEIGHT = 116;
+const MAP_PADDING = 10;
+const MAP_X = 926;
 const MAP_Y = 20;
 const MAP_VIEW_MULTIPLIER = 5;
 const MAP_UPDATE_INTERVAL_MS = 120;
@@ -81,17 +81,17 @@ export class MinimapOverlay {
       }
       const drawX = Phaser.Math.Clamp(toMapX(x), innerX, innerX + innerWidth);
       const drawRight = Phaser.Math.Clamp(toMapX(x + width), innerX, innerX + innerWidth);
-      const drawY = Phaser.Math.Clamp(toMapY(platform.y), innerY, innerY + innerHeight - 2);
-      this.graphics.fillRect(drawX, drawY, Math.max(1, drawRight - drawX), 2);
+      const drawY = Phaser.Math.Clamp(toMapY(platform.y), innerY, innerY + innerHeight - 3);
+      this.graphics.fillRect(drawX, drawY, Math.max(1.5, drawRight - drawX), 3);
     });
 
-    this.drawDots(stage.items, viewLeft, viewRight, toMapX, toMapY, 0xfde68a, 1.2);
-    this.drawDots(stage.bonusBlocks ?? [], viewLeft, viewRight, toMapX, toMapY, 0xc084fc, 1.4);
-    this.drawDots(stage.enemies ?? [], viewLeft, viewRight, toMapX, toMapY, 0xfb7185, 1.5);
+    this.drawDots(stage.items, viewLeft, viewRight, toMapX, toMapY, 0xfde68a, 1.8);
+    this.drawDots(stage.bonusBlocks ?? [], viewLeft, viewRight, toMapX, toMapY, 0xc084fc, 2);
+    this.drawDots(stage.enemies ?? [], viewLeft, viewRight, toMapX, toMapY, 0xfb7185, 2.2);
 
     if (stage.goal.x >= viewLeft && stage.goal.x <= viewRight) {
       this.graphics.fillStyle(0x22c55e, 0.95);
-      this.graphics.fillRect(toMapX(stage.goal.x) - 1.5, toMapY(stage.goal.y) - 6, 3, 12);
+      this.graphics.fillRect(toMapX(stage.goal.x) - 2, toMapY(stage.goal.y) - 8, 4, 16);
     }
 
     const cameraLeft = Phaser.Math.Clamp(toMapX(camera.worldView.x), innerX, innerX + innerWidth);
@@ -100,9 +100,9 @@ export class MinimapOverlay {
     this.graphics.strokeRect(cameraLeft, innerY + 2, Math.max(2, cameraRight - cameraLeft), innerHeight - 4);
 
     this.graphics.fillStyle(0xffffff, 1);
-    this.graphics.fillCircle(toMapX(player.x), toMapY(player.y), 2.8);
+    this.graphics.fillCircle(toMapX(player.x), toMapY(player.y), 3.8);
     this.graphics.lineStyle(1, 0x0f172a, 0.95);
-    this.graphics.strokeCircle(toMapX(player.x), toMapY(player.y), 3.4);
+    this.graphics.strokeCircle(toMapX(player.x), toMapY(player.y), 4.6);
   }
 
   private drawDots(
