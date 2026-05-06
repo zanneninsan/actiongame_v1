@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.322
+### English
+- Added a device-local mobile button layout editor so the lower-left movement pad and lower-right action buttons can be dragged, saved, and reset on each smartphone.
+### Japanese
+- スマホモードで、左下の移動パッドと右下のアクションボタンをドラッグして配置変更・保存・リセットできるようにしました。配置は端末ごとの保存にしています。
+
 ## v0.1.321
 ### English
 - Added Chinese and Korean coverage for the player spec page, high-priority player UI, stage editor controls, and in-game checkpoint / one-way gate callouts.
