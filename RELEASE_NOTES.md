@@ -2,6 +2,18 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.324
+### English
+- Moved mobile button layout controls out of normal play, showing a first-run setup panel and adding a mobile-only layout command to the in-game menu.
+### Japanese
+- スマホボタン配置の操作UIを通常プレイ画面から外し、初回だけ配置設定パネルを表示するようにしました。以後はゲーム内メニューから配置調整を開けます。
+
+## v0.1.323
+### English
+- Reworked smartphone touch controls to rebuild held inputs from the current finger positions, clearing all input on browser interruptions so buttons are less likely to remain stuck.
+### Japanese
+- スマホ操作を、現在触れている指の位置から入力状態を作り直す方式へ変更しました。ブラウザ操作などで中断された時も入力を全解除し、ボタンが押しっぱなしになりにくくしました。
+
 ## v0.1.322
 ### English
 - Added a device-local mobile button layout editor so the lower-left movement pad and lower-right action buttons can be dragged, saved, and reset on each smartphone.

@@ -1142,18 +1142,16 @@ body.is-screenshot-modal-open #mobile-controls {
   --mobile-edge-gap: clamp(10px, 3vmin, 20px);
 }
 
-.mobile-layout-toolbar {
+.mobile-layout-panel {
   position: absolute;
   top: calc(10px + env(safe-area-inset-top));
   left: 50%;
   z-index: 2;
-  display: flex;
-  max-width: min(92vw, 520px);
+  display: none;
+  width: min(92vw, 460px);
   transform: translateX(-50%);
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 7px 8px;
+  gap: 7px;
+  padding: 9px 10px;
   border: 1px solid rgba(253, 230, 138, 0.56);
   border-radius: 8px;
   background: rgba(3, 7, 18, 0.72);
@@ -1168,8 +1166,23 @@ body.is-screenshot-modal-open #mobile-controls {
   touch-action: none;
 }
 
+.mobile-layout-panel strong {
+  color: #fde68a;
+  font-size: clamp(11px, 2.6vmin, 13px);
+}
+
+#mobile-controls.is-layout-setup-open .mobile-layout-panel {
+  display: grid;
+}
+
 .mobile-layout-status {
-  min-width: min(32vw, 150px);
+  color: #dbeafe;
+}
+
+.mobile-layout-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
 }
 
 .mobile-layout-button {

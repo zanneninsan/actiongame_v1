@@ -56,6 +56,7 @@ import {
   setPlayerPositionDebugUI,
 } from "./globalUi";
 import {
+  MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT,
   createMobileControls as createMobileControlElements,
   type MobileInputKey,
 } from "./mobileControls";
@@ -95,7 +96,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.322";
+const DEBUG_VERSION = "v0.1.324";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -1400,6 +1401,7 @@ class PrototypeScene extends Phaser.Scene {
     this.updatePlayerNameText();
     this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
     this.updateControlHintText();
+    this.createGlobalUI();
     if (this.controlMode === "mobile") {
       this.mobileFullscreenWasActive = hasFullscreenElement();
       this.mobileFullscreenRecoveryDismissed = false;
@@ -2378,6 +2380,8 @@ class PrototypeScene extends Phaser.Scene {
       onAccountOpen: () => this.showAccount(),
       onReturnToTitle: () => this.returnToTitle(),
       onScreenshotOpen: () => this.captureGameScreenshot({ preview: true }),
+      mobileLayoutAvailable: this.controlMode === "mobile" && this.setupComplete && !this.startModal,
+      onMobileLayoutOpen: () => window.dispatchEvent(new Event(MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT)),
     });
   }
 
