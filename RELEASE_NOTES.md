@@ -16,14 +16,18 @@ Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
 ## v0.1.277
 ### English
+- Fixed the stage-midpoint story message so its midpoint is recalculated after the selected stage is applied at run start.
 - Compressed the leaderboard result layout for landscape phone screens and added an X share button for the submitted score.
 ### Japanese
+- プレイ開始時に選択されたステージを反映した後で中間点を計算し直し、中間地点メッセージが正しく表示されるようにしました。
 - スマホ横表示でランキング結果画面が潰れにくいように下部レイアウトを圧縮し、今回のスコアをXでシェアできるボタンを追加しました。
 
 ## v0.1.276
 ### English
+- Replaced the PWA and favicon artwork with a cropped face icon from the new character image, including multi-size PNG outputs and a foreground 満 mark.
 - Renamed the start-screen advanced panel to "Replay ghost options" so it matches the ghost-only controls inside.
 ### Japanese
+- 新しいキャラクター画像から顔部分を切り抜いたPWA/ファビコン用アイコンに差し替え、複数サイズのPNGと手前の「満」マークを追加しました。
 - トップ画面の詳細パネル名を「リプレイゴースト設定」に変更し、中にあるゴースト関連の操作内容と合うようにしました。
 
 ## v0.1.275

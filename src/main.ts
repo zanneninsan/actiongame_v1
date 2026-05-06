@@ -1299,6 +1299,8 @@ class PrototypeScene extends Phaser.Scene {
     this.restartEditorStage = undefined;
     this.restartStageEditorEnabled = false;
     this.stageConstants = resolveStageConstants(this.editorStage);
+    this.stageMidpointProgress = this.resolveStageMidpointProgress();
+    this.hasShownStageMidpointDialogue = false;
     this.applyStageBackgroundDefaults();
     this.physics.world.setBounds(
       0,
