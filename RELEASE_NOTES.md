@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.317
+### English
+- Clarified the tutorial multi-jump prompt to explain that pressing jump while airborne spends stamina for an air jump.
+### Japanese
+- チュートリアルの多段ジャンプ説明を、空中でジャンプを押すとスタミナを消費して空中ジャンプできる内容に修正しました。
+
 ## v0.1.316
 ### English
 - Made the tutorial dash prompt close immediately after the player clears the dash wall.

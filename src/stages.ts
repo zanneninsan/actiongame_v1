@@ -1682,8 +1682,8 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
             en: "Zannenin",
           },
           message: {
-            ja: "多段ジャンプです。空中でもジャンプできますが、スタミナを使います。上の足場を順番に渡りましょう。",
-            en: "Time for multi-jumps. You can jump in the air, but it spends stamina. Climb the platforms in order.",
+            ja: "多段ジャンプです。空中でJUMPを押すと、スタミナを消費して空中ジャンプできます。落ちる前にもう一度ジャンプして進みましょう。",
+            en: "Time for multi-jumps. Press JUMP while airborne to spend stamina and jump again in the air. Jump again before you fall.",
           },
           portraitPath: "assets/ui/message_faces/message_face_head_icon_05_shy.webp",
         },
