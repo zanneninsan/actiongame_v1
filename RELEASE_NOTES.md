@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.307
+### English
+- Removed the question block from the tutorial moving-jump gap so the jump path is clear.
+### Japanese
+- チュートリアルの移動ジャンプ区間からはてなボックスを外し、ジャンプの軌道を邪魔しないようにしました。
+
 ## v0.1.306
 ### English
 - Extended tutorial message display durations so each instruction stays readable while practicing the section.
