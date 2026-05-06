@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.307
+### English
+- Added a dedicated static X share page with fresh OGP metadata, updated leaderboard sharing to use it, and added a real robots.txt for crawlers.
+### Japanese
+- Xカード用の静的共有ページを追加し、ランキング共有でそのURLを使うようにしました。クローラー向けにrobots.txtも追加しました。
+
 ## v0.1.306
 ### English
 - Updated X sharing to pass the game URL through the Web Intent URL parameter and added cache-busting query strings for the shared URL and OGP image.
