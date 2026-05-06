@@ -1,6 +1,7 @@
 import { t, type Locale } from "./i18n";
 
 export type MobileInputKey = "w" | "a" | "s" | "d" | "shift";
+export const MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT = "actiongame:mobile-controls-layout-request";
 
 type FullscreenDocument = Document & {
   msFullscreenElement?: Element | null;
@@ -17,6 +18,7 @@ type MobileControlsOptions = {
 
 const MOBILE_CONTROLS_HINT_STORAGE_KEY = "actiongame_mobile_controls_hint_seen";
 const MOBILE_CONTROLS_LAYOUT_STORAGE_KEY = "actiongame_mobile_controls_layout_v1";
+const MOBILE_CONTROLS_LAYOUT_SETUP_STORAGE_KEY = "actiongame_mobile_controls_layout_setup_seen";
 const MOBILE_CONTROLS_HINT_MS = 4200;
 const MOBILE_LAYOUT_EDGE_PADDING = 8;
 const MOBILE_INPUT_KEYS: MobileInputKey[] = ["w", "a", "s", "d", "shift"];
@@ -46,10 +48,13 @@ export const createMobileControls = (options: MobileControlsOptions) => {
   const controls = document.createElement("div");
   controls.id = "mobile-controls";
   controls.innerHTML = `
-    <div class="mobile-layout-toolbar" aria-live="polite">
+    <div class="mobile-layout-panel" aria-live="polite">
+      <strong>${t(options.locale, "mobile.layoutTitle")}</strong>
       <span class="mobile-layout-status">${t(options.locale, "mobile.layoutReady")}</span>
-      <button class="mobile-layout-button" data-layout-action="edit" type="button">${t(options.locale, "mobile.layoutEdit")}</button>
-      <button class="mobile-layout-button" data-layout-action="reset" type="button">${t(options.locale, "mobile.layoutReset")}</button>
+      <div class="mobile-layout-actions">
+        <button class="mobile-layout-button is-active" data-layout-action="done" type="button">${t(options.locale, "mobile.layoutDone")}</button>
+        <button class="mobile-layout-button" data-layout-action="reset" type="button">${t(options.locale, "mobile.layoutReset")}</button>
+      </div>
     </div>
     <div class="mobile-pad">
       <button class="mobile-button pad-up" data-layout-id="pad-jump" data-key="w" type="button" aria-label="${t(options.locale, "aria.jump")}">&uarr;</button>
@@ -70,16 +75,30 @@ export const createMobileControls = (options: MobileControlsOptions) => {
 
   let isLayoutEditing = false;
   const status = controls.querySelector<HTMLSpanElement>(".mobile-layout-status");
-  const editButton = controls.querySelector<HTMLButtonElement>("[data-layout-action='edit']");
+  const doneButton = controls.querySelector<HTMLButtonElement>("[data-layout-action='done']");
   const resetButton = controls.querySelector<HTMLButtonElement>("[data-layout-action='reset']");
   const updateLayoutToolbar = () => {
     if (status) {
       status.textContent = isLayoutEditing ? t(options.locale, "mobile.layoutEditing") : t(options.locale, "mobile.layoutReady");
     }
-    if (editButton) {
-      editButton.textContent = isLayoutEditing ? t(options.locale, "mobile.layoutDone") : t(options.locale, "mobile.layoutEdit");
-      editButton.classList.toggle("is-active", isLayoutEditing);
-    }
+  };
+  const startLayoutEditing = () => {
+    isLayoutEditing = true;
+    touchInput.clearInput();
+    clearPointerInput();
+    controls.classList.add("is-layout-editing", "is-layout-setup-open");
+    controls.classList.remove("is-first-run-highlight");
+    applyMobileControlsLayout(controls, captureMobileControlsLayout(controls));
+    updateLayoutToolbar();
+  };
+  const finishLayoutEditing = () => {
+    isLayoutEditing = false;
+    touchInput.clearInput();
+    clearPointerInput();
+    controls.classList.remove("is-layout-editing", "is-layout-setup-open");
+    saveMobileControlsLayout(captureMobileControlsLayout(controls));
+    setMobileControlsLayoutSetupSeen();
+    updateLayoutToolbar();
   };
   const storedLayout = readMobileControlsLayout();
   if (storedLayout) {
@@ -161,40 +180,34 @@ export const createMobileControls = (options: MobileControlsOptions) => {
     );
   }
 
-  if (editButton) {
-    const toggleLayoutEditing = () => {
-      isLayoutEditing = !isLayoutEditing;
-      touchInput.clearInput();
-      clearPointerInput();
-      controls.classList.toggle("is-layout-editing", isLayoutEditing);
-      controls.classList.remove("is-first-run-highlight");
-      if (isLayoutEditing) {
-        applyMobileControlsLayout(controls, captureMobileControlsLayout(controls));
-      } else {
-        saveMobileControlsLayout(captureMobileControlsLayout(controls));
-      }
-      updateLayoutToolbar();
-    };
-    editButton.addEventListener("click", toggleLayoutEditing);
-    cleanup.push(() => editButton.removeEventListener("click", toggleLayoutEditing));
+  if (doneButton) {
+    doneButton.addEventListener("click", finishLayoutEditing);
+    cleanup.push(() => doneButton.removeEventListener("click", finishLayoutEditing));
   }
 
   if (resetButton) {
     const resetLayout = () => {
-      isLayoutEditing = false;
+      isLayoutEditing = true;
       controls.classList.remove("is-layout-editing", "is-layout-customized");
       clearMobileControlsLayout();
       controls.querySelectorAll<HTMLElement>("[data-layout-id]").forEach((button) => {
         button.style.left = "";
         button.style.top = "";
       });
+      startLayoutEditing();
       updateLayoutToolbar();
     };
     resetButton.addEventListener("click", resetLayout);
     cleanup.push(() => resetButton.removeEventListener("click", resetLayout));
   }
 
+  const openLayoutFromMenu = () => startLayoutEditing();
+  window.addEventListener(MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT, openLayoutFromMenu);
+  cleanup.push(() => window.removeEventListener(MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT, openLayoutFromMenu));
   cleanup.push(bindMobileLayoutDragging(controls));
+  if (shouldShowMobileControlsLayoutSetup()) {
+    window.setTimeout(startLayoutEditing, 0);
+  }
   updateLayoutToolbar();
 
   cleanup.push(() => document.getElementById("mobile-controls")?.remove());
@@ -412,7 +425,7 @@ const isPointInsideRect = (x: number, y: number, rect: DOMRect) =>
 
 const isToolbarTouchEvent = (event: TouchEvent) => {
   const touches = Array.from(event.changedTouches);
-  return touches.length > 0 && touches.every((touch) => touch.target instanceof Element && Boolean(touch.target.closest(".mobile-layout-toolbar")));
+  return touches.length > 0 && touches.every((touch) => touch.target instanceof Element && Boolean(touch.target.closest(".mobile-layout-panel")));
 };
 
 const captureMobileControlsLayout = (controls: HTMLDivElement): MobileControlLayout => {
@@ -600,5 +613,21 @@ function setMobileControlsHintSeen() {
     window.localStorage.setItem(MOBILE_CONTROLS_HINT_STORAGE_KEY, "1");
   } catch {
     // If storage is blocked, the short highlight can safely appear again.
+  }
+}
+
+function shouldShowMobileControlsLayoutSetup() {
+  try {
+    return window.localStorage.getItem(MOBILE_CONTROLS_LAYOUT_SETUP_STORAGE_KEY) !== "1";
+  } catch {
+    return true;
+  }
+}
+
+function setMobileControlsLayoutSetupSeen() {
+  try {
+    window.localStorage.setItem(MOBILE_CONTROLS_LAYOUT_SETUP_STORAGE_KEY, "1");
+  } catch {
+    // If storage is blocked, the layout setup can safely appear again.
   }
 }

@@ -25,6 +25,8 @@ type GlobalUiOptions = {
   onAccountOpen: () => void;
   onReturnToTitle: () => void;
   onScreenshotOpen: () => void;
+  mobileLayoutAvailable: boolean;
+  onMobileLayoutOpen: () => void;
 };
 
 export const createGlobalUI = (options: GlobalUiOptions) => {
@@ -57,6 +59,10 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
         options.locale,
         "aria.returnToTitle",
       )}">${t(options.locale, "global.titleShort")}</button>
+      <button id="mobile-layout-toggle" class="ui-button mobile-layout-toggle" type="button" aria-label="${t(
+        options.locale,
+        "aria.mobileLayout",
+      )}"${options.mobileLayoutAvailable ? "" : " hidden"}>${t(options.locale, "global.mobileLayoutShort")}</button>
       <button id="bgm-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.toggleSound")}">&#128266;</button>
       <button id="options-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.options")}">&#9881;&#65039;</button>
     </div>
@@ -108,6 +114,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const accountToggle = document.getElementById("account-toggle") as HTMLButtonElement;
   const playerSpecToggle = document.getElementById("player-spec-toggle") as HTMLButtonElement;
   const titleToggle = document.getElementById("title-toggle") as HTMLButtonElement;
+  const mobileLayoutToggle = document.getElementById("mobile-layout-toggle") as HTMLButtonElement;
   const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
   const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
   const bgmVolumeSlider = document.getElementById("bgm-volume-slider") as HTMLInputElement;
@@ -166,6 +173,10 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   });
   titleToggle.addEventListener("click", () => {
     options.onReturnToTitle();
+    closeGlobalMenu();
+  });
+  mobileLayoutToggle.addEventListener("click", () => {
+    options.onMobileLayoutOpen();
     closeGlobalMenu();
   });
 
