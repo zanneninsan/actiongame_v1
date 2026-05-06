@@ -232,17 +232,45 @@ export class StartModal {
     let pendingStartSettings: StartSettings | undefined;
     let titleMusicEnabled = soundOn;
     let titleVideoHasPlayed = false;
+    let removeTitleMusicGestureRetry: (() => void) | undefined;
 
     const stopTitleMusic = () => {
       if (this.titleMusicGapTimer !== undefined) {
         window.clearTimeout(this.titleMusicGapTimer);
         this.titleMusicGapTimer = undefined;
       }
+      removeTitleMusicGestureRetry?.();
+      removeTitleMusicGestureRetry = undefined;
       titleMusic.pause();
       titleMusic.currentTime = 0;
       titleMusic.volume = 0;
     };
-    const playTitleMusic = () => {
+    const scheduleTitleMusicReplay = () => {
+      if (!titleMusicEnabled || this.titleScreenDismissed) {
+        return;
+      }
+      if (this.titleMusicGapTimer !== undefined) {
+        window.clearTimeout(this.titleMusicGapTimer);
+      }
+      this.titleMusicGapTimer = window.setTimeout(() => playTitleMusic(false), TITLE_MUSIC_REPLAY_GAP_MS);
+    };
+    const queueTitleMusicGestureRetry = () => {
+      if (removeTitleMusicGestureRetry || !titleMusicEnabled || this.titleScreenDismissed) {
+        return;
+      }
+      const retry = () => {
+        removeTitleMusicGestureRetry?.();
+        removeTitleMusicGestureRetry = undefined;
+        playTitleMusic(false);
+      };
+      window.addEventListener("pointerdown", retry, { capture: true, once: true });
+      window.addEventListener("keydown", retry, { capture: true, once: true });
+      removeTitleMusicGestureRetry = () => {
+        window.removeEventListener("pointerdown", retry, { capture: true });
+        window.removeEventListener("keydown", retry, { capture: true });
+      };
+    };
+    const playTitleMusic = (allowGestureRetry = true) => {
       if (!titleMusicEnabled || this.titleScreenDismissed) {
         return;
       }
@@ -253,17 +281,17 @@ export class StartModal {
       titleMusic.currentTime = 0;
       titleMusic.volume = TITLE_MUSIC_VOLUME;
       void titleMusic.play().catch(() => {
-        stopTitleMusic();
+        titleMusic.pause();
+        titleMusic.currentTime = 0;
+        titleMusic.volume = 0;
+        if (!titleMusicEnabled || this.titleScreenDismissed) {
+          return;
+        }
+        if (allowGestureRetry) {
+          queueTitleMusicGestureRetry();
+        }
+        scheduleTitleMusicReplay();
       });
-    };
-    const scheduleTitleMusicReplay = () => {
-      if (!titleMusicEnabled || this.titleScreenDismissed) {
-        return;
-      }
-      if (this.titleMusicGapTimer !== undefined) {
-        window.clearTimeout(this.titleMusicGapTimer);
-      }
-      this.titleMusicGapTimer = window.setTimeout(playTitleMusic, TITLE_MUSIC_REPLAY_GAP_MS);
     };
     const startMakerSplash = () => {
       if (this.makerSplashDismissed || this.makerSplashTimer !== undefined) {
