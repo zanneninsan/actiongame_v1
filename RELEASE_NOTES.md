@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.308
+### English
+- Lengthened the tutorial dash practice runway and delayed the multi-jump prompt so the dash section has room to breathe.
+### Japanese
+- チュートリアルのダッシュ練習区間を長い直線にし、多段ジャンプの案内を後ろへずらして、しっかり走れる余白を作りました。
+
 ## v0.1.307
 ### English
 - Removed the question block from the tutorial moving-jump gap so the jump path is clear.

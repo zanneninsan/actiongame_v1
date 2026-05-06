@@ -1669,7 +1669,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
       ],
     },
     {
-      triggerX: 1880,
+      triggerX: 2200,
       stepDelayMs: 5200,
       durationMs: 10500,
       lines: [
@@ -1756,8 +1756,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
   platforms: [
     { x: 0, y: 672, units: 9 },
     { x: 704, y: 672, units: 6 },
-    { x: 1184, y: 672, units: 10 },
-    { x: 2048, y: 672, units: 5 },
+    { x: 1184, y: 672, units: 17 },
     { x: 2304, y: 560, units: 2 },
     { x: 2536, y: 472, units: 2 },
     { x: 2784, y: 384, units: 2 },
