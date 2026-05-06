@@ -116,5 +116,22 @@ export default defineConfig({
   plugins: [backgroundAssetsPlugin()],
   build: {
     chunkSizeWarningLimit: 1800,
+    rolldownOptions: {
+      output: {
+        manualChunks(id) {
+          const normalizedId = id.replace(/\\/g, "/");
+          if (normalizedId.includes("/node_modules/phaser/")) {
+            return "vendor-phaser";
+          }
+          if (normalizedId.includes("/node_modules/@firebase/") || normalizedId.includes("/node_modules/firebase/")) {
+            return "vendor-firebase";
+          }
+          if (normalizedId.includes("/node_modules/")) {
+            return "vendor";
+          }
+          return undefined;
+        },
+      },
+    },
   },
 });
