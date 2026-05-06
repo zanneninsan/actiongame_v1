@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.310
+### English
+- Redirected removed card-only share URLs back to the main game page so old cleanup paths no longer serve the SPA fallback.
+### Japanese
+- 削除したカード専用共有URLがSPAフォールバックで残らないように、本体ページへリダイレクトする設定を追加しました。
+
 ## v0.1.309
 ### English
 - Simplified X sharing to use the main game URL with a cache-busting query string and removed the extra card-only share page workaround.
