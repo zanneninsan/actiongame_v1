@@ -46,6 +46,7 @@ type OrientationPromptMode = "initial" | "startConfirm";
 export class StartModal {
   private readonly options: StartModalOptions;
   private overlay?: HTMLDivElement;
+  private titleLoopTimer?: number;
   private titleScreenDismissed = false;
   private orientationPromptDismissed = false;
   private orientationPromptSatisfied = false;
@@ -65,6 +66,7 @@ export class StartModal {
         t(this.options.locale, "start.start"),
       )}">
         <img class="start-title-logo" src="./assets/ui/fantasy/title_splash_logo.webp" alt="${escapeHtml(t(this.options.locale, "start.title"))}" />
+        <video class="start-title-video" src="./assets/ui/fantasy/title_splash_loop.mp4" preload="auto" muted playsinline></video>
         <span class="start-title-prompt" aria-hidden="true"></span>
       </button>
       <div class="start-orientation-prompt" hidden>
@@ -152,6 +154,7 @@ export class StartModal {
     this.overlay = overlay;
 
     const titleScreen = overlay.querySelector<HTMLButtonElement>(".start-title-screen")!;
+    const titleVideo = overlay.querySelector<HTMLVideoElement>(".start-title-video")!;
     const form = overlay.querySelector("form")!;
     const input = overlay.querySelector<HTMLInputElement>("input[name='playerName']")!;
     const localeSelect = overlay.querySelector<HTMLSelectElement>("select[name='locale']")!;
@@ -182,14 +185,46 @@ export class StartModal {
     let orientationPromptMode: OrientationPromptMode = "initial";
     let pendingStartSettings: StartSettings | undefined;
 
+    const stopTitleLoop = () => {
+      if (this.titleLoopTimer !== undefined) {
+        window.clearTimeout(this.titleLoopTimer);
+        this.titleLoopTimer = undefined;
+      }
+      titleVideo.pause();
+      titleVideo.currentTime = 0;
+      titleScreen.classList.remove("is-playing-video");
+    };
+    const scheduleTitleVideo = () => {
+      if (this.titleScreenDismissed) {
+        return;
+      }
+      titleScreen.classList.remove("is-playing-video");
+      titleVideo.load();
+      this.titleLoopTimer = window.setTimeout(() => {
+        if (this.titleScreenDismissed) {
+          return;
+        }
+        titleVideo.currentTime = 0;
+        titleScreen.classList.add("is-playing-video");
+        void titleVideo.play().catch(() => {
+          titleScreen.classList.remove("is-playing-video");
+          scheduleTitleVideo();
+        });
+      }, 3000);
+    };
     const dismissTitleScreen = () => {
       this.titleScreenDismissed = true;
+      stopTitleLoop();
       titleScreen.classList.add("is-dismissed");
       window.setTimeout(() => {
         input.focus();
       }, 120);
     };
     titleScreen.addEventListener("click", dismissTitleScreen);
+    titleVideo.addEventListener("ended", scheduleTitleVideo);
+    if (!this.titleScreenDismissed) {
+      scheduleTitleVideo();
+    }
 
     input.addEventListener("keydown", (event) => event.stopPropagation());
     input.addEventListener("keyup", (event) => event.stopPropagation());
@@ -552,6 +587,11 @@ export class StartModal {
   }
 
   remove() {
+    if (this.titleLoopTimer !== undefined) {
+      window.clearTimeout(this.titleLoopTimer);
+      this.titleLoopTimer = undefined;
+    }
+    this.overlay?.querySelector<HTMLVideoElement>(".start-title-video")?.pause();
     this.overlay?.remove();
     this.overlay = undefined;
     this.refreshAccountUi = undefined;

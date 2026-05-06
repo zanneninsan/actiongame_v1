@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.288
+### English
+- Made the title splash alternate between the still logo and the supplied video, preloading the video during each three-second still interval.
+### Japanese
+- タイトル画面で静止ロゴを3秒表示したあと動画を再生し、再生終了後に静止ロゴへ戻るループにしました。静止画表示中に動画を事前読み込みします。
+
 ## v0.1.287
 ### English
 - Removed the repeated game title from the start modal now that the dedicated title splash appears first.
