@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.280
+### English
+- Added a once-per-account story message that appears after the first non-MISS danmaku finishes, explaining that comment display can be hidden or restyled from Options.
+### Japanese
+- MISS以外の弾幕が初めて流れた後に、オプションからコメント表示のオンオフやスタイル変更ができることを案内するメッセージを、アカウントごとに一度だけ表示するようにしました。
+
 ## v0.1.279
 ### English
 - Replaced the separate danmaku visibility checkbox with a single comment display-style selector that includes Hidden, while keeping Nico-style as the default.
