@@ -1616,7 +1616,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
   storyDialogues: [
     {
       triggerX: 130,
-      closeAtX: 704,
+      closeAtX: 400,
       stepDelayMs: 4200,
       durationMs: 9500,
       lines: [
@@ -1634,7 +1634,7 @@ export const MOBILE_TOUCH_TUTORIAL_STAGE: StageDefinition = {
       ],
     },
     {
-      triggerX: 560,
+      triggerX: 400,
       closeAtX: 704,
       stepDelayMs: 4400,
       durationMs: 9500,

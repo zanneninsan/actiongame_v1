@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.315
+### English
+- Moved the tutorial moving-jump prompt farther left so it appears before the player reaches the first gap edge.
+### Japanese
+- チュートリアルの移動ジャンプ説明を左へ移動し、最初の穴の直前で余裕を持って表示されるようにしました。
+
 ## v0.1.314
 ### English
 - Made the tutorial's first movement and moving-jump prompts close immediately once the player clears the first gap.
