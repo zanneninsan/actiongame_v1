@@ -8,12 +8,13 @@ const SPRING_PLATFORM_BIG_JUMP_MULTIPLIER = 1.28;
 const SPRING_BIG_JUMP_EFFECT_DEPTH = 125;
 const FRAGILE_PLATFORM_DELAY_MS = 360;
 const FRAGILE_PLATFORM_RESPAWN_MS = 2800;
+const CHECKPOINTS_ENABLED = false;
 const reachedCheckpoints = new Map<StageId, { x: number; y: number }>();
 
 type PlayerSprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 
 export const movePlayerToCheckpointStart = (stageId: StageId, stage: StageDefinition, player: PlayerSprite) => {
-  const checkpoint = reachedCheckpoints.get(stageId);
+  const checkpoint = CHECKPOINTS_ENABLED ? reachedCheckpoints.get(stageId) : undefined;
   const start = checkpoint ?? stage.playerStart;
   player.setPosition(start.x, start.y);
 };
@@ -33,6 +34,10 @@ export class CheckpointController {
 
   create() {
     this.group = this.scene.physics.add.staticGroup();
+    if (!CHECKPOINTS_ENABLED) {
+      return this.group;
+    }
+
     this.populate();
     this.scene.physics.add.overlap(this.player, this.group, (_, checkpointObject) => {
       this.activate(checkpointObject as Phaser.Physics.Arcade.Image);
@@ -41,7 +46,7 @@ export class CheckpointController {
   }
 
   populate(group = this.group) {
-    if (!group) {
+    if (!CHECKPOINTS_ENABLED || !group) {
       return;
     }
 
@@ -57,11 +62,15 @@ export class CheckpointController {
 
   rebuild() {
     this.group?.clear(true, true);
+    if (!CHECKPOINTS_ENABLED) {
+      return;
+    }
+
     this.populate();
   }
 
   private activate(flag: Phaser.Physics.Arcade.Image) {
-    if (!this.canActivate() || flag.getData("activated")) {
+    if (!CHECKPOINTS_ENABLED || !this.canActivate() || flag.getData("activated")) {
       return;
     }
 

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.335
+### English
+- Temporarily disabled checkpoint visuals, activation, and checkpoint respawns while keeping the stage data and controller ready to re-enable later.
+### Japanese
+- チェックポイントの見た目、発動、チェックポイント復帰を一時的に無効化しつつ、あとで戻せるようにステージデータと制御処理は残しました。
+
 ## v0.1.334
 ### English
 - Repositioned bonus blocks in other stages so players can pass underneath them and hit them with normal jumps more naturally.
