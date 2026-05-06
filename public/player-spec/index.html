@@ -250,6 +250,8 @@
         <div class="language-switch" aria-label="Language">
           <button type="button" data-lang="ja">日本語</button>
           <button type="button" data-lang="en">English</button>
+          <button type="button" data-lang="zh">中文</button>
+          <button type="button" data-lang="ko">한국어</button>
         </div>
         <nav aria-label="Page sections">
           <a href="#score" data-i18n="navScore"></a>
@@ -357,7 +359,7 @@
     </div>
 
     <script>
-      const SPEC_VERSION = "v0.1.253";
+      const SPEC_VERSION = "v0.1.318";
       const STORAGE_KEY = "actiongame_locale";
 
       const specText = {
@@ -621,6 +623,262 @@
             },
           },
         },
+        zh: {
+          metaTitle: "游戏说明 - 超级残念院さん乐园",
+          kicker: "核心玩家参考",
+          title: "超级残念院さん乐园 游戏说明",
+          lead: "面向玩家的分数、踩踏连击、强化道具和通关评价参考。这是游戏外可随时查看的说明页，不是游戏内教程。",
+          navScore: "分数",
+          navControls: "操作/体力",
+          navCombo: "踩踏连击",
+          navPowerups: "强化道具",
+          navRank: "通关评价",
+          navMissions: "任务总结",
+          navBack: "返回游戏",
+          statusTitle: "状态",
+          updatedLabel: "根据代码状态最后更新:",
+          calloutStompTitle: "踩踏敌人:",
+          calloutStompBody: "踩踏敌人会追加奖励分。",
+          calloutComboTitle: "快速踩踏奖励:",
+          calloutComboBody: "连续快速踩踏敌人时，获得的分数会提高。",
+          scoreTitle: "分数来源",
+          itemsTitle: "道具",
+          enemyTitle: "敌人踩踏分",
+          enemyBody: "踩踏敌人的分数会作为奖励分追加。没有单独设置踩踏分的敌人，基础踩踏分为10。",
+          controlsTitle: "操作和体力",
+          controlsLead: "移动、跳跃、冲刺和下蹲的基本规则。",
+          comboTitle: "踩踏连击",
+          comboLead: "在短时间内连续踩踏敌人时，踩踏分数倍率会提高。",
+          comboConditionTitle: "连击条件",
+          scoreFormulaTitle: "分数公式",
+          scoreFormula: "踩踏分 = 敌人的基础踩踏分 * 当前踩踏连击数",
+          popupTitle: "画面弹出提示",
+          powerupsTitle: "强化道具",
+          rankTitle: "通关评价",
+          rankLead: "通关评价由三种奖励计算。",
+          rankThresholdTitle: "评价阈值",
+          missionsTitle: "任务总结",
+          missionsLead: "通关时的任务总结目前会显示以下内容:",
+          footer: "本页面是超级残念院さん乐园网站的一部分，用作准确的游玩规则参考，不是游戏内教程。",
+          comboRules: [
+            "下一次踩踏敌人发生在上一次踩踏后的1400毫秒内时，会开始或继续连击。",
+            "两次踩踏敌人的间隔超过1400毫秒时，下一次踩踏会从连击1重新开始。",
+            "落到地面后，当前连击数会重置为0。",
+            "踩踏敌人会让玩家向上弹起，因此落地前可以继续踩踏下一个敌人。",
+            "同一帧内多个敌人与玩家重叠时，有效的踩踏目标会优先于受伤判定。",
+          ],
+          popupRules: [
+            "连击1只显示获得的分数，例如 +10。",
+            "连击2以上会显示获得的分数和连击数，例如 +20 x2。",
+          ],
+          missions: [
+            ["受伤状态", "NO DMG OK 或 DMG n"],
+            ["收集金币数", "COIN n"],
+            ["快速通关状态", "FAST OK 或 FAST --"],
+          ],
+          controlsRules: [
+            "键盘操作中，A/D移动，W或空格跳跃，Shift冲刺，S或下方向键下蹲。",
+            "冲刺和空中跳跃会消耗体力。体力会在地面上恢复，下蹲时恢复速度变为2倍。",
+            "在巴士站顶棚、路灯等装饰平台上，按住下蹲可以向下穿过平台。",
+          ],
+          tables: {
+            items: {
+              heads: ["道具", "分数", "说明"],
+              numeric: [1],
+              rows: [
+                ["能量饮料", "100", "分数道具。"],
+                ["购物袋", "250", "分数道具。"],
+                ["珍珠奶茶", "150", "分数道具。"],
+                ["金币", "25", "也会增加任务总结中显示的金币数。"],
+                ["速度强化", "0", "临时提升移动速度倍率。"],
+                ["跳跃强化", "0", "临时提升跳跃速度倍率。"],
+                ["星星", "0", "提供临时星星无敌。"],
+                ["冲刺环", "0", "提供短时间的前方冲刺加速。"],
+              ],
+            },
+            enemies: {
+              heads: ["敌人", "基础踩踏分"],
+              numeric: [1],
+              rows: [
+                ["Knife Punk", "10"],
+                ["Aqua Mascot", "10"],
+                ["Horned Cyborg", "20"],
+                ["Cone Golem", "15"],
+                ["Rabbit Traveler", "20"],
+                ["Neon Idol", "30"],
+                ["Heart Cannon", "25"],
+              ],
+            },
+            comboExamples: {
+              heads: ["流程", "敌人基础分", "连击数", "获得分数"],
+              numeric: [1, 2, 3],
+              rows: [
+                ["第一次踩踏", "10", "1", "10"],
+                ["第二次快速踩踏", "10", "2", "20"],
+                ["第三次快速踩踏", "20", "3", "60"],
+                ["落地后踩踏", "10", "1", "10"],
+              ],
+            },
+            powerups: {
+              heads: ["强化", "持续时间", "效果"],
+              numeric: [1],
+              rows: [
+                ["速度", "9000 ms", "玩家速度变为1.28倍。"],
+                ["跳跃", "9000 ms", "跳跃速度变为1.18倍。"],
+                ["星星", "9000 ms", "设置星星无敌计时。"],
+                ["冲刺环", "900 ms", "将面向方向的水平速度设为720，冲刺期间也会应用速度倍率。"],
+              ],
+            },
+            rankBonuses: {
+              heads: ["奖励", "条件", "评价分"],
+              numeric: [2],
+              rows: [
+                ["无伤", "受到伤害为0。", "1"],
+                ["快速通关", "剩余时间至少为关卡总时间的55%。", "1"],
+                ["分数奖励", "最终分数至少4200。", "1"],
+                ["部分分数奖励", "最终分数至少2600且低于4200。", "0.5"],
+              ],
+            },
+            rankThresholds: {
+              heads: ["评价", "所需评价分"],
+              numeric: [1],
+              rows: [
+                ["S", "2.5以上"],
+                ["A", "1.5以上"],
+                ["B", "0.5以上"],
+                ["C", "低于0.5"],
+              ],
+            },
+          },
+        },
+        ko: {
+          metaTitle: "게임 설명 - 슈퍼 잔넨인상 랜드",
+          kicker: "핵심 플레이어 참고",
+          title: "슈퍼 잔넨인상 랜드 게임 설명",
+          lead: "점수 획득원, 밟기 콤보, 파워업, 클리어 랭크를 확인하는 플레이어용 참고 페이지입니다. 게임 안 튜토리얼이 아니라, 게임 밖에서 읽는 규칙 설명입니다.",
+          navScore: "점수",
+          navControls: "조작/스태미나",
+          navCombo: "밟기 콤보",
+          navPowerups: "파워업",
+          navRank: "클리어 랭크",
+          navMissions: "미션 요약",
+          navBack: "게임으로 돌아가기",
+          statusTitle: "상태",
+          updatedLabel: "코드 상태 기준 마지막 업데이트:",
+          calloutStompTitle: "적 밟기:",
+          calloutStompBody: "적을 밟으면 보너스 점수가 추가됩니다.",
+          calloutComboTitle: "빠른 밟기 보너스:",
+          calloutComboBody: "짧은 시간 안에 연속으로 적을 밟으면 획득 점수가 증가합니다.",
+          scoreTitle: "점수 획득원",
+          itemsTitle: "아이템",
+          enemyTitle: "적 밟기 점수",
+          enemyBody: "적 밟기 점수는 보너스 점수로 더해집니다. 별도 밟기 점수가 없는 적의 기본 밟기 점수는 10점입니다.",
+          controlsTitle: "조작과 스태미나",
+          controlsLead: "이동, 점프, 대시, 숙이기의 기본 규칙입니다.",
+          comboTitle: "밟기 콤보",
+          comboLead: "짧은 시간 안에 적을 연속으로 밟으면 밟기 점수 배율이 올라갑니다.",
+          comboConditionTitle: "콤보 조건",
+          scoreFormulaTitle: "점수 공식",
+          scoreFormula: "밟기 점수 = 적 기본 밟기 점수 * 현재 밟기 콤보 수",
+          popupTitle: "화면 팝업",
+          powerupsTitle: "파워업",
+          rankTitle: "클리어 랭크",
+          rankLead: "클리어 랭크는 세 가지 보너스로 계산됩니다.",
+          rankThresholdTitle: "랭크 기준",
+          missionsTitle: "미션 요약",
+          missionsLead: "클리어 시 미션 요약에는 현재 다음 내용이 표시됩니다:",
+          footer: "이 페이지는 슈퍼 잔넨인상 랜드 사이트의 일부이며, 게임 안 튜토리얼이 아니라 정확한 플레이 규칙 참고용 페이지입니다.",
+          comboRules: [
+            "다음 적 밟기가 이전 적 밟기 후 1400ms 안에 발생하면 콤보가 시작되거나 이어집니다.",
+            "적 밟기 사이가 1400ms를 넘으면 다음 밟기는 콤보 1부터 다시 시작됩니다.",
+            "바닥에 착지하면 현재 콤보 수는 0으로 초기화됩니다.",
+            "적을 밟으면 플레이어가 위로 튀어 오르므로, 착지 전에 다음 밟기로 콤보를 이어갈 수 있습니다.",
+            "같은 프레임에서 여러 적이 플레이어와 겹치면, 유효한 밟기 대상이 대미지보다 우선됩니다.",
+          ],
+          popupRules: [
+            "콤보 1에서는 +10처럼 획득 점수만 표시됩니다.",
+            "콤보 2 이상에서는 +20 x2처럼 획득 점수와 콤보 수가 함께 표시됩니다.",
+          ],
+          missions: [
+            ["대미지 상태", "NO DMG OK 또는 DMG n"],
+            ["수집한 코인 수", "COIN n"],
+            ["빠른 클리어 상태", "FAST OK 또는 FAST --"],
+          ],
+          controlsRules: [
+            "키보드에서는 A/D로 이동, W 또는 Space로 점프, Shift로 대시, S 또는 아래 방향키로 숙입니다.",
+            "대시와 공중 점프는 스태미나를 소비합니다. 스태미나는 지상에서 회복되며, 숙이는 동안 회복 속도가 2배가 됩니다.",
+            "버스 정류장 지붕이나 가로등 같은 장식 발판에서는 숙이기를 누르고 있으면 아래로 통과할 수 있습니다.",
+          ],
+          tables: {
+            items: {
+              heads: ["아이템", "점수", "메모"],
+              numeric: [1],
+              rows: [
+                ["에너지 드링크", "100", "점수 아이템입니다."],
+                ["쇼핑백", "250", "점수 아이템입니다."],
+                ["버블티", "150", "점수 아이템입니다."],
+                ["코인", "25", "미션 요약에 표시되는 코인 수도 증가합니다."],
+                ["속도 파워업", "0", "일시적으로 이동 속도 배율을 부여합니다."],
+                ["점프 파워업", "0", "일시적으로 점프 속도 배율을 부여합니다."],
+                ["스타", "0", "일시적인 스타 무적을 부여합니다."],
+                ["대시 링", "0", "짧은 시간 동안 앞쪽으로 대시 부스트를 부여합니다."],
+              ],
+            },
+            enemies: {
+              heads: ["적", "기본 밟기 점수"],
+              numeric: [1],
+              rows: [
+                ["Knife Punk", "10"],
+                ["Aqua Mascot", "10"],
+                ["Horned Cyborg", "20"],
+                ["Cone Golem", "15"],
+                ["Rabbit Traveler", "20"],
+                ["Neon Idol", "30"],
+                ["Heart Cannon", "25"],
+              ],
+            },
+            comboExamples: {
+              heads: ["순서", "적 기본 점수", "콤보 수", "획득 점수"],
+              numeric: [1, 2, 3],
+              rows: [
+                ["첫 번째 밟기", "10", "1", "10"],
+                ["두 번째 빠른 밟기", "10", "2", "20"],
+                ["세 번째 빠른 밟기", "20", "3", "60"],
+                ["착지 후 밟기", "10", "1", "10"],
+              ],
+            },
+            powerups: {
+              heads: ["파워업", "지속 시간", "효과"],
+              numeric: [1],
+              rows: [
+                ["속도", "9000 ms", "플레이어 속도를 1.28배로 만듭니다."],
+                ["점프", "9000 ms", "점프 속도를 1.18배로 만듭니다."],
+                ["스타", "9000 ms", "스타 무적 타이머를 설정합니다."],
+                ["대시 링", "900 ms", "바라보는 방향의 수평 속도를 720으로 설정하고, 부스트 중에는 속도 배율도 적용합니다."],
+              ],
+            },
+            rankBonuses: {
+              heads: ["보너스", "조건", "랭크 점수"],
+              numeric: [2],
+              rows: [
+                ["노 대미지", "받은 대미지가 0입니다.", "1"],
+                ["빠른 클리어", "남은 시간이 전체 스테이지 시간의 55% 이상입니다.", "1"],
+                ["점수 보너스", "최종 점수가 4200 이상입니다.", "1"],
+                ["부분 점수 보너스", "최종 점수가 2600 이상 4200 미만입니다.", "0.5"],
+              ],
+            },
+            rankThresholds: {
+              heads: ["랭크", "필요 랭크 점수"],
+              numeric: [1],
+              rows: [
+                ["S", "2.5 이상"],
+                ["A", "1.5 이상"],
+                ["B", "0.5 이상"],
+                ["C", "0.5 미만"],
+              ],
+            },
+          },
+        },
       };
 
       function clearChildren(element) {
@@ -676,17 +934,25 @@
       }
 
       function normalizeLocale(value) {
-        return value && value.toLowerCase().startsWith("en") ? "en" : "ja";
+        const normalized = value ? value.toLowerCase() : "";
+        if (normalized.startsWith("zh")) return "zh";
+        if (normalized.startsWith("ko")) return "ko";
+        if (normalized.startsWith("ja")) return "ja";
+        return "en";
+      }
+
+      function isSupportedLocale(value) {
+        return value === "ja" || value === "en" || value === "zh" || value === "ko";
       }
 
       function getInitialLocale() {
         const params = new URLSearchParams(window.location.search);
         const queryLocale = params.get("lang");
-        if (queryLocale === "ja" || queryLocale === "en") return queryLocale;
+        if (isSupportedLocale(queryLocale)) return queryLocale;
 
         try {
           const storedLocale = window.localStorage.getItem(STORAGE_KEY);
-          if (storedLocale === "ja" || storedLocale === "en") return storedLocale;
+          if (isSupportedLocale(storedLocale)) return storedLocale;
         } catch {
           // Local storage can be blocked in some embedded browsers.
         }
@@ -727,7 +993,7 @@
       document.querySelectorAll("[data-lang]").forEach((button) => {
         button.addEventListener("click", () => {
           const locale = button.getAttribute("data-lang");
-          if (locale === "ja" || locale === "en") {
+          if (isSupportedLocale(locale)) {
             setLanguage(locale);
           }
         });

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.318
+### English
+- Added Chinese and Korean support to the player-facing game spec page, including language buttons, URL/local-storage locale detection, navigation labels, tables, and gameplay rule text.
+### Japanese
+- ゲーム仕様ページに中国語・韓国語を追加し、言語ボタン、URLと保存設定からの言語判定、ナビゲーション、表、遊び方の説明文を多言語対応しました。
+
 ## v0.1.317
 ### English
 - Added Chinese and Korean translations for high-priority player-facing UI such as options, screenshots, mobile controls, fullscreen recovery, global buttons, miss text, and big-jump effects.
