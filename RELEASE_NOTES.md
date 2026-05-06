@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.336
+### English
+- Added a lightweight right-side minimap that shows about five screens around the player with simplified platforms, pickups, enemies, the goal, and the current camera.
+### Japanese
+- 右上に軽量なミニマップを追加し、プレイヤー周辺約5画面ぶんの足場、アイテム、敵、ゴール、現在の表示範囲を省略表示するようにしました。
+
 ## v0.1.335
 ### English
 - Temporarily disabled checkpoint visuals, activation, and checkpoint respawns while keeping the stage data and controller ready to re-enable later.

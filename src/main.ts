@@ -62,6 +62,7 @@ import {
   type MobileInputKey,
 } from "./mobileControls";
 import { DanmakuOverlay, type DanmakuMode } from "./danmaku";
+import { MinimapOverlay } from "./minimap";
 import {
   clearLeaderboardUserSettings,
   fetchLeaderboardEntries,
@@ -97,7 +98,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.335";
+const DEBUG_VERSION = "v0.1.336";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -386,6 +387,7 @@ class PrototypeScene extends Phaser.Scene {
   private finalScoreText?: Phaser.GameObjects.Text;
   private missText?: Phaser.GameObjects.Text;
   private danmaku?: DanmakuOverlay;
+  private minimap?: MinimapOverlay;
   private mobileInput: Record<MobileInputKey, boolean> = { w: false, a: false, s: false, d: false, shift: false };
   private mobileJumpQueued = false;
   private mobileControlCleanup: Array<() => void> = [];
@@ -784,6 +786,12 @@ class PrototypeScene extends Phaser.Scene {
     window.removeEventListener("keydown", this.handleScreenshotShortcut);
     window.addEventListener("keydown", this.handleScreenshotShortcut);
     this.updateControlHintText();
+    this.minimap = new MinimapOverlay(
+      this,
+      () => this.editorStage,
+      () => this.player,
+      () => this.cameras.main,
+    );
     this.danmaku = new DanmakuOverlay(this, GAME_WIDTH, GAME_HEIGHT, () => this.locale);
     this.danmaku.setMode(this.danmakuMode);
 
@@ -816,6 +824,7 @@ class PrototypeScene extends Phaser.Scene {
     this.updateTimerText();
     this.updateGhostReplay();
     this.updateOverheadStaminaBar();
+    this.minimap?.update(_time, this.isRunActive && !this.hasWon);
     const movingPlatformsActive = this.isRunActive && !this.stageEditor?.isEnabled;
     updateMovingPlatforms(this.movingPlatformInstances, movingPlatformsActive, deltaMs);
     if (!this.isRunActive) {
