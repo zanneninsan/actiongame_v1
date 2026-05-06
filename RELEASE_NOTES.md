@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.278
+### English
+- Made X share text show stage, score, rank, and best-update status as clear labeled lines.
+### Japanese
+- Xシェア文でステージ、スコア、ランク、ベスト更新状態がわかりやすく並ぶようにしました。
+
 ## v0.1.277
 ### English
 - Compressed the leaderboard result layout for landscape phone screens and added an X share button for the submitted score.
