@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.289
+### English
+- Added a skippable maker-style splash logo before the title splash, with the title splash animation starting after it clears.
+### Japanese
+- タイトル画面のさらに手前に、タップでスキップできるメーカー風スプラッシュロゴを追加し、表示後にタイトル画面の演出が始まるようにしました。
+
 ## v0.1.288
 ### English
 - Made the title splash alternate between the still logo and the supplied video, preloading the video during each three-second still interval.

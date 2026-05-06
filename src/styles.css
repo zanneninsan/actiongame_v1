@@ -40,6 +40,33 @@ canvas {
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
 }
 
+.maker-splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 5vmin, 56px);
+  border: 0;
+  background: #000;
+  cursor: pointer;
+  touch-action: manipulation;
+  animation: maker-splash-sequence 3100ms ease-in-out forwards;
+}
+
+.maker-splash-screen.is-dismissed {
+  display: none;
+}
+
+.maker-splash-logo {
+  width: min(78vw, 840px, calc((100dvh - 80px) * 1.333));
+  max-height: min(76dvh, 630px);
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(229, 178, 38, 0.16));
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
 .start-title-screen {
   position: fixed;
   inset: 0;
@@ -52,7 +79,14 @@ canvas {
   border: 0;
   background: #000;
   cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
   touch-action: manipulation;
+}
+
+.start-title-screen.is-ready {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .start-title-screen.is-dismissed {
@@ -74,8 +108,11 @@ canvas {
 .start-title-logo {
   opacity: 0;
   filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.74));
-  animation: start-title-logo-fade 960ms ease-out forwards;
   image-rendering: pixelated;
+}
+
+.start-title-screen.is-ready .start-title-logo {
+  animation: start-title-logo-fade 960ms ease-out forwards;
 }
 
 .start-title-video {
@@ -100,10 +137,28 @@ canvas {
   opacity: 0;
   background: url("../public/assets/ui/fantasy/press_start_prompt_sheet.webp") 0 0 / 400% 100% no-repeat;
   filter: drop-shadow(0 0 12px rgba(253, 230, 138, 0.35));
+  image-rendering: pixelated;
+}
+
+.start-title-screen.is-ready .start-title-prompt {
   animation:
     start-title-prompt-fade 520ms ease-out 820ms forwards,
     press-start-blink 1080ms steps(4) 1340ms infinite;
-  image-rendering: pixelated;
+}
+
+@keyframes maker-splash-sequence {
+  0% {
+    opacity: 0;
+  }
+
+  22%,
+  76% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
 }
 
 @keyframes start-title-logo-fade {
@@ -583,6 +638,16 @@ canvas {
     overflow: hidden;
   }
 
+  .maker-splash-screen {
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
+
+  .maker-splash-logo {
+    width: min(88vw, calc((100dvh - 64px) * 1.333));
+    max-height: 76dvh;
+  }
+
   .start-title-screen {
     padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
       max(10px, env(safe-area-inset-left));
@@ -828,6 +893,10 @@ canvas {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .maker-splash-screen {
+    animation: none;
+  }
+
   .start-title-logo,
   .start-title-prompt {
     opacity: 1;

@@ -46,7 +46,9 @@ type OrientationPromptMode = "initial" | "startConfirm";
 export class StartModal {
   private readonly options: StartModalOptions;
   private overlay?: HTMLDivElement;
+  private makerSplashTimer?: number;
   private titleLoopTimer?: number;
+  private makerSplashDismissed = false;
   private titleScreenDismissed = false;
   private orientationPromptDismissed = false;
   private orientationPromptSatisfied = false;
@@ -62,7 +64,12 @@ export class StartModal {
     const overlay = document.createElement("div");
     overlay.id = "start-modal";
     overlay.innerHTML = `
-      <button class="start-title-screen${this.titleScreenDismissed ? " is-dismissed" : ""}" type="button" aria-label="${escapeHtml(
+      <button class="maker-splash-screen${this.makerSplashDismissed ? " is-dismissed" : ""}" type="button" aria-label="${escapeHtml(
+        t(this.options.locale, "start.start"),
+      )}">
+        <img class="maker-splash-logo" src="./assets/ui/fantasy/maker_splash_logo.webp" alt="満足教 Presents" />
+      </button>
+      <button class="start-title-screen${this.makerSplashDismissed ? " is-ready" : ""}${this.titleScreenDismissed ? " is-dismissed" : ""}" type="button" aria-label="${escapeHtml(
         t(this.options.locale, "start.start"),
       )}">
         <img class="start-title-logo" src="./assets/ui/fantasy/title_splash_logo.webp" alt="${escapeHtml(t(this.options.locale, "start.title"))}" />
@@ -153,6 +160,7 @@ export class StartModal {
     document.body.classList.add("is-start-modal-open");
     this.overlay = overlay;
 
+    const makerSplash = overlay.querySelector<HTMLButtonElement>(".maker-splash-screen")!;
     const titleScreen = overlay.querySelector<HTMLButtonElement>(".start-title-screen")!;
     const titleVideo = overlay.querySelector<HTMLVideoElement>(".start-title-video")!;
     const form = overlay.querySelector("form")!;
@@ -185,6 +193,21 @@ export class StartModal {
     let orientationPromptMode: OrientationPromptMode = "initial";
     let pendingStartSettings: StartSettings | undefined;
 
+    const revealTitleScreen = () => {
+      if (this.makerSplashDismissed) {
+        return;
+      }
+      this.makerSplashDismissed = true;
+      if (this.makerSplashTimer !== undefined) {
+        window.clearTimeout(this.makerSplashTimer);
+        this.makerSplashTimer = undefined;
+      }
+      makerSplash.classList.add("is-dismissed");
+      titleScreen.classList.add("is-ready");
+      if (!this.titleScreenDismissed) {
+        scheduleTitleVideo();
+      }
+    };
     const stopTitleLoop = () => {
       if (this.titleLoopTimer !== undefined) {
         window.clearTimeout(this.titleLoopTimer);
@@ -222,7 +245,10 @@ export class StartModal {
     };
     titleScreen.addEventListener("click", dismissTitleScreen);
     titleVideo.addEventListener("ended", scheduleTitleVideo);
-    if (!this.titleScreenDismissed) {
+    makerSplash.addEventListener("click", revealTitleScreen);
+    if (!this.makerSplashDismissed) {
+      this.makerSplashTimer = window.setTimeout(revealTitleScreen, 3100);
+    } else if (!this.titleScreenDismissed) {
       scheduleTitleVideo();
     }
 
@@ -587,6 +613,10 @@ export class StartModal {
   }
 
   remove() {
+    if (this.makerSplashTimer !== undefined) {
+      window.clearTimeout(this.makerSplashTimer);
+      this.makerSplashTimer = undefined;
+    }
     if (this.titleLoopTimer !== undefined) {
       window.clearTimeout(this.titleLoopTimer);
       this.titleLoopTimer = undefined;
