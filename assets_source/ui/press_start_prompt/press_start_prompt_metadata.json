@@ -1,0 +1,15 @@
+{
+  "text": "PRESS TO START",
+  "runtime": "public/assets/ui/fantasy/press_start_prompt_sheet.webp",
+  "sourceSheet": "assets_source/ui/press_start_prompt/press_start_prompt_sheet.png",
+  "frameWidth": 384,
+  "frameHeight": 64,
+  "frames": 4,
+  "animation": "blink, 1.08s loop, frame order left to right",
+  "styleNotes": [
+    "gold gradient text",
+    "black plaque shadow",
+    "cream and amber pixel outlines",
+    "small star sparkles matching the title logo"
+  ]
+}

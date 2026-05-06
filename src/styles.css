@@ -40,6 +40,169 @@ canvas {
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
 }
 
+.maker-splash-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 5vmin, 56px);
+  border: 0;
+  background: #000;
+  cursor: pointer;
+  touch-action: manipulation;
+  animation: maker-splash-sequence 3100ms ease-in-out forwards;
+}
+
+.maker-splash-screen.is-dismissed {
+  display: none;
+}
+
+.maker-splash-logo {
+  width: min(78vw, 840px, calc((100dvh - 80px) * 1.333));
+  max-height: min(76dvh, 630px);
+  object-fit: contain;
+  filter: drop-shadow(0 0 20px rgba(229, 178, 38, 0.16));
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.start-title-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  place-items: center;
+  gap: clamp(10px, 2.4vmin, 24px);
+  padding: clamp(16px, 4vmin, 42px);
+  border: 0;
+  background: #000;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  touch-action: manipulation;
+}
+
+.start-title-screen.is-ready {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.start-title-screen.is-exiting {
+  pointer-events: none;
+  animation: title-splash-to-modal 820ms ease-in-out forwards;
+}
+
+.start-title-screen.is-dismissed {
+  display: none;
+}
+
+.start-title-logo,
+.start-title-video {
+  grid-row: 1;
+  grid-column: 1;
+  width: min(92vw, 1498px, calc((100dvh - 130px) * 2.04));
+  max-height: min(78dvh, 735px);
+  object-fit: contain;
+  align-self: center;
+  justify-self: center;
+  pointer-events: none;
+}
+
+.start-title-logo {
+  opacity: 0;
+  filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.74));
+  image-rendering: pixelated;
+}
+
+.start-title-screen.is-ready .start-title-logo {
+  animation: start-title-logo-fade 960ms ease-out forwards;
+}
+
+.start-title-video {
+  opacity: 0;
+  filter: drop-shadow(0 18px 32px rgba(0, 0, 0, 0.74));
+}
+
+.start-title-screen.is-playing-video .start-title-logo {
+  opacity: 0;
+  animation: none;
+}
+
+.start-title-screen.is-playing-video .start-title-video {
+  opacity: 1;
+}
+
+.start-title-screen.is-exiting .start-title-logo,
+.start-title-screen.is-exiting .start-title-video,
+.start-title-screen.is-exiting .start-title-prompt {
+  opacity: 0;
+  transition: opacity 260ms ease-out, transform 340ms ease-out;
+  transform: translateY(8px) scale(0.985);
+}
+
+.start-title-prompt {
+  grid-row: 2;
+  grid-column: 1;
+  width: min(66vw, 384px);
+  aspect-ratio: 384 / 64;
+  opacity: 0;
+  background: url("../public/assets/ui/fantasy/press_start_prompt_sheet.webp") 0 0 / 400% 100% no-repeat;
+  filter: drop-shadow(0 0 12px rgba(253, 230, 138, 0.35));
+  image-rendering: pixelated;
+}
+
+.start-title-screen.is-ready .start-title-prompt {
+  animation:
+    start-title-prompt-fade 520ms ease-out 820ms forwards,
+    press-start-blink 1080ms steps(4) 1340ms infinite;
+}
+
+@keyframes maker-splash-sequence {
+  0% {
+    opacity: 0;
+  }
+
+  22%,
+  76% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes start-title-logo-fade {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes start-title-prompt-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes title-splash-to-modal {
+  0%,
+  38% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+  }
+}
+
 .start-orientation-prompt {
   position: fixed;
   inset: 0;
@@ -135,20 +298,22 @@ canvas {
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
 }
 
-.start-dialog h1 {
-  margin: 0;
-  width: min(100%, calc(100% - 28px));
-  justify-self: center;
-  min-height: 52px;
-  display: grid;
-  place-items: center;
-  padding: 0 22px;
-  background: url("../public/assets/ui/fantasy/title_plate_safe.webp") center / 100% 100% no-repeat;
-  font-size: clamp(17px, 3vw, 23px);
-  font-weight: 800;
-  line-height: 1.1;
-  text-align: center;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95), 0 0 10px rgba(245, 199, 106, 0.22);
+#start-modal.is-revealing-start-dialog .start-dialog {
+  animation: start-dialog-soft-reveal 720ms ease-out 180ms both;
+}
+
+@keyframes start-dialog-soft-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.985);
+    filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.42)) brightness(0.76);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58)) brightness(1);
+  }
 }
 
 .start-primary-panel,
@@ -309,6 +474,12 @@ canvas {
 
 .start-account-actions .start-button {
   width: 100%;
+}
+
+@keyframes press-start-blink {
+  to {
+    background-position-x: 100%;
+  }
 }
 
 .start-google-login {
@@ -509,13 +680,38 @@ canvas {
     overflow: hidden;
   }
 
+  .maker-splash-screen {
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+      max(12px, env(safe-area-inset-left));
+  }
+
+  .maker-splash-logo {
+    width: min(88vw, calc((100dvh - 64px) * 1.333));
+    max-height: 76dvh;
+  }
+
+  .start-title-screen {
+    padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
+      max(10px, env(safe-area-inset-left));
+  }
+
+  .start-title-logo,
+  .start-title-video {
+    width: min(96vw, calc((100dvh - 96px) * 2.04));
+    max-height: 74dvh;
+  }
+
+  .start-title-prompt {
+    width: min(76vw, 360px);
+  }
+
   .start-dialog {
     width: min(100%, 480px);
     height: calc(100dvh - max(8px, env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom)));
     max-height: none;
     margin: 0 auto;
     aspect-ratio: auto;
-    grid-template-rows: auto minmax(0, 1fr) auto auto auto;
+    grid-template-rows: minmax(0, 1fr) auto auto auto;
     align-content: stretch;
     gap: 10px;
     padding: 18px 14px 12px;
@@ -554,15 +750,6 @@ canvas {
 
   .start-orientation-actions button {
     min-height: 46px;
-  }
-
-  .start-dialog h1 {
-    width: 100%;
-    min-height: 44px;
-    padding: 0 14px;
-    font-size: clamp(17px, 5.2vw, 20px);
-    line-height: 1.05;
-    overflow-wrap: anywhere;
   }
 
   .start-primary-panel {
@@ -682,11 +869,6 @@ canvas {
     padding: 8px 14px;
   }
 
-  .start-dialog h1 {
-    min-height: 34px;
-    font-size: 18px;
-  }
-
   .start-primary-panel {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
@@ -749,6 +931,23 @@ canvas {
   .start-button {
     height: 38px;
     font-size: 17px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .maker-splash-screen {
+    animation: none;
+  }
+
+  .start-title-logo,
+  .start-title-prompt {
+    opacity: 1;
+    animation: none;
+  }
+
+  .start-title-screen.is-exiting,
+  #start-modal.is-revealing-start-dialog .start-dialog {
+    animation: none;
   }
 }
 

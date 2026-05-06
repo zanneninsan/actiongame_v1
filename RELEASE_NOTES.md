@@ -2,6 +2,16 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.290
+### English
+- Added a skippable maker-style splash before the title screen.
+- Added the title splash flow with a fading logo, blinking PRESS TO START prompt, still/video loop, and soft blackout transition into the start modal.
+- Removed the duplicated title text from the start modal and restored its game-start button to the normal text style.
+### Japanese
+- タイトル画面のさらに手前に、タップでスキップできるメーカー風スプラッシュロゴを追加しました。
+- タイトルロゴのフェード表示、点滅するPRESS TO START、静止画と動画のループ、トップモーダルへ進む時の暗転演出を追加しました。
+- トップモーダル内で重複していたタイトル表示を削除し、ゲーム開始ボタンは通常のテキストボタン表示に戻しました。
+
 ## v0.1.289
 ### English
 - Restored OGP/Twitter Card metadata and the OGP image asset in the app build, and changed X sharing to pass the game URL through the tweet intent URL parameter.

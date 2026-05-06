@@ -46,6 +46,11 @@ type OrientationPromptMode = "initial" | "startConfirm";
 export class StartModal {
   private readonly options: StartModalOptions;
   private overlay?: HTMLDivElement;
+  private makerSplashTimer?: number;
+  private titleDismissTimer?: number;
+  private titleLoopTimer?: number;
+  private makerSplashDismissed = false;
+  private titleScreenDismissed = false;
   private orientationPromptDismissed = false;
   private orientationPromptSatisfied = false;
   private removeOrientationPromptListeners?: () => void;
@@ -60,6 +65,18 @@ export class StartModal {
     const overlay = document.createElement("div");
     overlay.id = "start-modal";
     overlay.innerHTML = `
+      <button class="maker-splash-screen${this.makerSplashDismissed ? " is-dismissed" : ""}" type="button" aria-label="${escapeHtml(
+        t(this.options.locale, "start.start"),
+      )}">
+        <img class="maker-splash-logo" src="./assets/ui/fantasy/maker_splash_logo.webp" alt="満足教 Presents" />
+      </button>
+      <button class="start-title-screen${this.makerSplashDismissed ? " is-ready" : ""}${this.titleScreenDismissed ? " is-dismissed" : ""}" type="button" aria-label="${escapeHtml(
+        t(this.options.locale, "start.start"),
+      )}">
+        <img class="start-title-logo" src="./assets/ui/fantasy/title_splash_logo.webp" alt="${escapeHtml(t(this.options.locale, "start.title"))}" />
+        <video class="start-title-video" src="./assets/ui/fantasy/title_splash_loop.mp4" preload="auto" muted playsinline></video>
+        <span class="start-title-prompt" aria-hidden="true"></span>
+      </button>
       <div class="start-orientation-prompt" hidden>
         <div class="start-orientation-dialog" role="dialog" aria-modal="true">
           <p class="start-orientation-message"></p>
@@ -71,7 +88,6 @@ export class StartModal {
         </div>
       </div>
       <form class="start-dialog">
-        <h1>${t(this.options.locale, "start.title")}</h1>
         <div class="start-primary-panel">
           <label class="start-field">
             <span>${t(this.options.locale, "start.playerName")}</span>
@@ -145,6 +161,9 @@ export class StartModal {
     document.body.classList.add("is-start-modal-open");
     this.overlay = overlay;
 
+    const makerSplash = overlay.querySelector<HTMLButtonElement>(".maker-splash-screen")!;
+    const titleScreen = overlay.querySelector<HTMLButtonElement>(".start-title-screen")!;
+    const titleVideo = overlay.querySelector<HTMLVideoElement>(".start-title-video")!;
     const form = overlay.querySelector("form")!;
     const input = overlay.querySelector<HTMLInputElement>("input[name='playerName']")!;
     const localeSelect = overlay.querySelector<HTMLSelectElement>("select[name='locale']")!;
@@ -174,6 +193,71 @@ export class StartModal {
     let localGhostFileLoaded = false;
     let orientationPromptMode: OrientationPromptMode = "initial";
     let pendingStartSettings: StartSettings | undefined;
+
+    const revealTitleScreen = () => {
+      if (this.makerSplashDismissed) {
+        return;
+      }
+      this.makerSplashDismissed = true;
+      if (this.makerSplashTimer !== undefined) {
+        window.clearTimeout(this.makerSplashTimer);
+        this.makerSplashTimer = undefined;
+      }
+      makerSplash.classList.add("is-dismissed");
+      titleScreen.classList.add("is-ready");
+      if (!this.titleScreenDismissed) {
+        scheduleTitleVideo();
+      }
+    };
+    const stopTitleLoop = () => {
+      if (this.titleLoopTimer !== undefined) {
+        window.clearTimeout(this.titleLoopTimer);
+        this.titleLoopTimer = undefined;
+      }
+      titleVideo.pause();
+      titleVideo.currentTime = 0;
+      titleScreen.classList.remove("is-playing-video");
+    };
+    const scheduleTitleVideo = () => {
+      if (this.titleScreenDismissed) {
+        return;
+      }
+      titleScreen.classList.remove("is-playing-video");
+      titleVideo.load();
+      this.titleLoopTimer = window.setTimeout(() => {
+        if (this.titleScreenDismissed) {
+          return;
+        }
+        titleVideo.currentTime = 0;
+        titleScreen.classList.add("is-playing-video");
+        void titleVideo.play().catch(() => {
+          titleScreen.classList.remove("is-playing-video");
+          scheduleTitleVideo();
+        });
+      }, 3000);
+    };
+    const dismissTitleScreen = () => {
+      if (this.titleScreenDismissed) {
+        return;
+      }
+      this.titleScreenDismissed = true;
+      stopTitleLoop();
+      overlay.classList.add("is-revealing-start-dialog");
+      titleScreen.classList.add("is-exiting");
+      this.titleDismissTimer = window.setTimeout(() => {
+        titleScreen.classList.add("is-dismissed");
+        this.titleDismissTimer = undefined;
+        input.focus();
+      }, 820);
+    };
+    titleScreen.addEventListener("click", dismissTitleScreen);
+    titleVideo.addEventListener("ended", scheduleTitleVideo);
+    makerSplash.addEventListener("click", revealTitleScreen);
+    if (!this.makerSplashDismissed) {
+      this.makerSplashTimer = window.setTimeout(revealTitleScreen, 3100);
+    } else if (!this.titleScreenDismissed) {
+      scheduleTitleVideo();
+    }
 
     input.addEventListener("keydown", (event) => event.stopPropagation());
     input.addEventListener("keyup", (event) => event.stopPropagation());
@@ -536,6 +620,19 @@ export class StartModal {
   }
 
   remove() {
+    if (this.makerSplashTimer !== undefined) {
+      window.clearTimeout(this.makerSplashTimer);
+      this.makerSplashTimer = undefined;
+    }
+    if (this.titleDismissTimer !== undefined) {
+      window.clearTimeout(this.titleDismissTimer);
+      this.titleDismissTimer = undefined;
+    }
+    if (this.titleLoopTimer !== undefined) {
+      window.clearTimeout(this.titleLoopTimer);
+      this.titleLoopTimer = undefined;
+    }
+    this.overlay?.querySelector<HTMLVideoElement>(".start-title-video")?.pause();
     this.overlay?.remove();
     this.overlay = undefined;
     this.refreshAccountUi = undefined;
