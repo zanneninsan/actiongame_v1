@@ -10,6 +10,7 @@ const TITLE_MUSIC_FADE_SECONDS = 3;
 const TITLE_MUSIC_REPLAY_GAP_MS = 5000;
 const TITLE_INITIAL_STILL_MS = 3000;
 const TITLE_REPEAT_STILL_MS = 10000;
+const MAKER_SPLASH_AUTO_ADVANCE_MS = 8000;
 
 export type ControlMode = "pc" | "mobile";
 export type StageOption = { id: string; label: Record<Locale, string> };
@@ -298,7 +299,7 @@ export class StartModal {
         return;
       }
       makerSplash.classList.add("is-ready");
-      this.makerSplashTimer = window.setTimeout(revealTitleScreen, 3100);
+      this.makerSplashTimer = window.setTimeout(revealTitleScreen, MAKER_SPLASH_AUTO_ADVANCE_MS);
     };
     const revealTitleScreen = () => {
       if (this.makerSplashDismissed) {

@@ -147,8 +147,9 @@ canvas {
 }
 
 .maker-splash-screen.is-ready {
+  opacity: 1;
   pointer-events: auto;
-  animation: maker-splash-sequence 3100ms ease-in-out forwards;
+  animation: maker-splash-fade-in 720ms ease-out forwards;
 }
 
 .maker-splash-screen.is-dismissed {
@@ -262,18 +263,13 @@ canvas {
     press-start-blink 5600ms linear 1700ms infinite;
 }
 
-@keyframes maker-splash-sequence {
-  0% {
+@keyframes maker-splash-fade-in {
+  from {
     opacity: 0;
   }
 
-  22%,
-  76% {
+  to {
     opacity: 1;
-  }
-
-  100% {
-    opacity: 0;
   }
 }
 
@@ -1094,7 +1090,8 @@ canvas {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .maker-splash-screen {
+  .maker-splash-screen.is-ready {
+    opacity: 1;
     animation: none;
   }
 
