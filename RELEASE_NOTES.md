@@ -2,6 +2,18 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.328
+### English
+- Made the mobile jump and dash action buttons slightly larger for easier tapping.
+### Japanese
+- スマホ操作のジャンプボタンとダッシュボタンを少し大きくし、タップしやすくしました。
+
+## v0.1.327
+### English
+- Replaced the lower-left mobile direction buttons with a virtual joystick, including upward jump input for the first trial version.
+### Japanese
+- スマホ操作の左下方向ボタンを仮想ジョイスティックに変更しました。まずは上方向入力でジャンプする形にしています。
+
 ## v0.1.326
 ### English
 - Fixed mobile touch handling so modal close buttons, the screenshot button, and the top-right menu keep receiving taps while virtual controls are active.
