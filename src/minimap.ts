@@ -6,7 +6,7 @@ const MAP_WIDTH = 330;
 const MAP_HEIGHT = 116;
 const MAP_PADDING = 10;
 const MAP_X = 926;
-const MAP_Y = 20;
+const MAP_Y = 74;
 const MAP_VIEW_MULTIPLIER = 5;
 const MAP_UPDATE_INTERVAL_MS = 120;
 
@@ -27,7 +27,8 @@ export class MinimapOverlay {
   }
 
   update(now: number, visible: boolean) {
-    if (!visible) {
+    const shouldShow = visible && !document.body.classList.contains("is-global-menu-open");
+    if (!shouldShow) {
       if (this.wasVisible) {
         this.graphics.clear();
         this.wasVisible = false;

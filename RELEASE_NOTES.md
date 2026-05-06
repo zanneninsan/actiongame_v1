@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.338
+### English
+- Moved the larger minimap below the top-right controls and hide it while the global menu is open.
+### Japanese
+- 大きくしたミニマップを右上の操作UIの下へ移動し、グローバルメニューを開いている間は隠すようにしました。
+
 ## v0.1.337
 ### English
 - Enlarged the gameplay minimap and made its markers easier to read.
