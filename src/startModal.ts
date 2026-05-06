@@ -47,6 +47,7 @@ export class StartModal {
   private readonly options: StartModalOptions;
   private overlay?: HTMLDivElement;
   private makerSplashTimer?: number;
+  private titleDismissTimer?: number;
   private titleLoopTimer?: number;
   private makerSplashDismissed = false;
   private titleScreenDismissed = false;
@@ -236,12 +237,18 @@ export class StartModal {
       }, 3000);
     };
     const dismissTitleScreen = () => {
+      if (this.titleScreenDismissed) {
+        return;
+      }
       this.titleScreenDismissed = true;
       stopTitleLoop();
-      titleScreen.classList.add("is-dismissed");
-      window.setTimeout(() => {
+      overlay.classList.add("is-revealing-start-dialog");
+      titleScreen.classList.add("is-exiting");
+      this.titleDismissTimer = window.setTimeout(() => {
+        titleScreen.classList.add("is-dismissed");
+        this.titleDismissTimer = undefined;
         input.focus();
-      }, 120);
+      }, 820);
     };
     titleScreen.addEventListener("click", dismissTitleScreen);
     titleVideo.addEventListener("ended", scheduleTitleVideo);
@@ -616,6 +623,10 @@ export class StartModal {
     if (this.makerSplashTimer !== undefined) {
       window.clearTimeout(this.makerSplashTimer);
       this.makerSplashTimer = undefined;
+    }
+    if (this.titleDismissTimer !== undefined) {
+      window.clearTimeout(this.titleDismissTimer);
+      this.titleDismissTimer = undefined;
     }
     if (this.titleLoopTimer !== undefined) {
       window.clearTimeout(this.titleLoopTimer);

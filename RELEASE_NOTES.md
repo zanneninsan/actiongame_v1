@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.290
+### English
+- Added a soft blackout transition when tapping the title splash, fading into the start modal instead of switching instantly.
+### Japanese
+- タイトル画面をタップした時に即座に切り替わらないよう、暗転を挟んでトップモーダルがふんわり表示される演出を追加しました。
+
 ## v0.1.289
 ### English
 - Added a skippable maker-style splash logo before the title splash, with the title splash animation starting after it clears.
