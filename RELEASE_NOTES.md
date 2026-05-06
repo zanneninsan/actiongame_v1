@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.287
+### English
+- Swapped the compact header controls so the menu button stays on the right and the screenshot button sits immediately to its left.
+### Japanese
+- コンパクト表示のヘッダー操作を入れ替え、メニューボタンを右端に置き、その左隣にスクリーンショットボタンを表示するようにしました。
+
 ## v0.1.286
 ### English
 - Changed the PC screenshot shortcut from F2 to P because browser or OS shortcuts can intercept function keys.

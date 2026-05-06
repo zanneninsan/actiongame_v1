@@ -34,11 +34,11 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   uiContainer.id = "global-ui";
   uiContainer.innerHTML = `
     <span id="version-label">${options.version}</span>
+    <button id="screenshot-toggle" class="ui-button screenshot-quick-toggle" type="button" aria-label="${t(options.locale, "aria.screenshot")}">📷</button>
     <button id="global-menu-toggle" class="ui-button global-menu-toggle" type="button" aria-label="${t(
       options.locale,
       "aria.globalMenu",
     )}" aria-controls="global-ui-drawer" aria-expanded="false">&#9776;</button>
-    <button id="screenshot-toggle" class="ui-button screenshot-quick-toggle" type="button" aria-label="${t(options.locale, "aria.screenshot")}">📷</button>
     <div id="global-ui-drawer" class="global-ui-drawer">
       <span id="player-position-label" hidden>POS --,--</span>
       <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(options.locale, "aria.toggleCollision")}">HIT</button>
