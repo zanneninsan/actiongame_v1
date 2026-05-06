@@ -83,13 +83,18 @@ import { showAccountPanel } from "./accountUi";
 import { initializePwaInstall } from "./pwaInstall";
 import { getScaledSeVolume, SE_VOLUME_REGISTRY_KEY } from "./audioSettings";
 import { hasFullscreenElement, isLikelySmartphone } from "./mobileViewport";
+import {
+  removeScreenshotPreview,
+  showScreenshotPreview,
+  type CapturedGameScreenshot,
+} from "./screenshotPreview";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.284";
+const DEBUG_VERSION = "v0.1.289";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -217,6 +222,7 @@ const GHOST_RECORD_INTERVAL_MS = 50;
 const GHOST_EXPORT_BUTTON_X = GAME_WIDTH - 168;
 const GHOST_EXPORT_BUTTON_Y = 118;
 const CLEAR_MENU_BUTTON_Y = GHOST_EXPORT_BUTTON_Y + 46;
+const CLEAR_SCREENSHOT_BUTTON_Y = CLEAR_MENU_BUTTON_Y + 46;
 const SHOW_CLEAR_RANK_AND_MISSIONS = false;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
@@ -307,6 +313,9 @@ class PrototypeScene extends Phaser.Scene {
   private lastGhostRecordAt = -Infinity;
   private ghostExportButton?: Phaser.GameObjects.Text;
   private clearMenuButton?: Phaser.GameObjects.Text;
+  private clearScreenshotButton?: Phaser.GameObjects.Text;
+  private lastScreenshot?: CapturedGameScreenshot;
+  private screenshotCapturePending = false;
   private dashLingerUntil = -Infinity;
   private countdownOverlay?: StartCountdownOverlay;
   private finalScoreText?: Phaser.GameObjects.Text;
@@ -363,6 +372,13 @@ class PrototypeScene extends Phaser.Scene {
     }
     this.scheduleGameLayoutRefresh();
     this.refreshMobileFullscreenRecovery();
+  };
+  private readonly handleScreenshotShortcut = (event: KeyboardEvent) => {
+    if (event.key.toLowerCase() !== "p" && event.key !== "PrintScreen") {
+      return;
+    }
+    event.preventDefault();
+    this.captureGameScreenshot({ preview: false });
   };
   private storyDialogue?: StoryDialogueController;
   private storyDialogueQueue: QueuedStoryDialogue[] = [];
@@ -693,6 +709,8 @@ class PrototypeScene extends Phaser.Scene {
     this.scale.on("resize", this.handleScaleResize, this);
     window.removeEventListener(GAME_LAYOUT_REFRESH_EVENT, this.handleGameLayoutRefresh);
     window.addEventListener(GAME_LAYOUT_REFRESH_EVENT, this.handleGameLayoutRefresh);
+    window.removeEventListener("keydown", this.handleScreenshotShortcut);
+    window.addEventListener("keydown", this.handleScreenshotShortcut);
     this.updateControlHintText();
     this.danmaku = new DanmakuOverlay(this, GAME_WIDTH, GAME_HEIGHT);
     this.danmaku.setMode(this.danmakuMode);
@@ -959,6 +977,7 @@ class PrototypeScene extends Phaser.Scene {
   private resetRunState() {
     this.scale.off("resize", this.handleScaleResize, this);
     window.removeEventListener(GAME_LAYOUT_REFRESH_EVENT, this.handleGameLayoutRefresh);
+    window.removeEventListener("keydown", this.handleScreenshotShortcut);
     this.removeStartModal();
     this.removeMobileControls();
     this.removeStageEditor();
@@ -984,6 +1003,9 @@ class PrototypeScene extends Phaser.Scene {
     this.ghostExportButton = undefined;
     this.clearMenuButton?.destroy();
     this.clearMenuButton = undefined;
+    this.clearScreenshotButton?.destroy();
+    this.clearScreenshotButton = undefined;
+    this.screenshotCapturePending = false;
     this.ghostRecordingFrames = [];
     this.ghostRecordingActive = false;
     this.ghostRecordingDisabled = false;
@@ -2196,11 +2218,13 @@ class PrototypeScene extends Phaser.Scene {
       onLeaderboardOpen: () => this.showLeaderboard(),
       onAccountOpen: () => this.showAccount(),
       onReturnToTitle: () => this.returnToTitle(),
+      onScreenshotOpen: () => this.captureGameScreenshot({ preview: true }),
     });
   }
 
   private removeGlobalUI() {
     removeGlobalUIElements();
+    removeScreenshotPreview();
   }
 
   private moveGoalTo(x: number, y: number) {
@@ -2558,6 +2582,75 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(210)
       .setInteractive({ useHandCursor: true })
       .on("pointerdown", () => this.downloadGhostReplayJson());
+  }
+
+  private showScreenshotPreviewOrCapture() {
+    if (this.lastScreenshot) {
+      showScreenshotPreview({ screenshot: this.lastScreenshot, locale: this.locale });
+      return;
+    }
+    this.captureGameScreenshot({ preview: true });
+  }
+
+  private showClearScreenshotButton() {
+    this.clearScreenshotButton?.destroy();
+    this.clearScreenshotButton = this.add
+      .text(GHOST_EXPORT_BUTTON_X, CLEAR_SCREENSHOT_BUTTON_Y, t(this.locale, "screenshot.view"), {
+        fontFamily: "monospace",
+        fontSize: "18px",
+        color: "#e0f2fe",
+        backgroundColor: "#0f172acc",
+        padding: { x: 14, y: 8 },
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(210)
+      .setInteractive({ useHandCursor: true })
+      .on("pointerdown", () => this.showScreenshotPreviewOrCapture());
+  }
+
+  private captureGameScreenshot({ preview }: { preview: boolean }) {
+    if (this.screenshotCapturePending) {
+      return;
+    }
+
+    this.screenshotCapturePending = true;
+    const capturedAt = Date.now();
+    const renderer = this.game.renderer as Phaser.Renderer.WebGL.WebGLRenderer & {
+      snapshot: (
+        callback: (image: HTMLImageElement | Phaser.Display.Color) => void,
+        type?: string,
+        encoderOptions?: number,
+      ) => void;
+    };
+    const finish = (dataUrl: string | undefined) => {
+      this.screenshotCapturePending = false;
+      if (!dataUrl) {
+        this.controlHintText?.setText(t(this.locale, "screenshot.captureFailed"));
+        return;
+      }
+
+      this.lastScreenshot = {
+        dataUrl,
+        capturedAt,
+        stageId: this.currentStageId,
+      };
+      if (preview) {
+        showScreenshotPreview({ screenshot: this.lastScreenshot, locale: this.locale });
+      }
+    };
+
+    try {
+      renderer.snapshot((image) => {
+        finish(image instanceof HTMLImageElement ? image.src : this.game.canvas?.toDataURL("image/png"));
+      }, "image/png");
+    } catch {
+      try {
+        finish(this.game.canvas?.toDataURL("image/png"));
+      } catch {
+        finish(undefined);
+      }
+    }
   }
 
   private showClearMenuButton() {
@@ -3357,6 +3450,7 @@ class PrototypeScene extends Phaser.Scene {
       .setDepth(200);
     this.showGhostExportButton();
     this.showClearMenuButton();
+    this.showClearScreenshotButton();
     this.submitWinScore(finalScore, itemScore, timeBonus, remaining);
   }
 

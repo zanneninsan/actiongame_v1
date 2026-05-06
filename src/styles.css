@@ -756,17 +756,20 @@ body.is-start-modal-open #global-ui,
 body.is-options-modal-open #global-ui,
 body.is-leaderboard-modal-open #global-ui,
 body.is-account-modal-open #global-ui,
+body.is-screenshot-modal-open #global-ui,
 body.is-start-modal-open #stage-editor,
 body.is-options-modal-open #stage-editor,
 body.is-leaderboard-modal-open #stage-editor,
 body.is-account-modal-open #stage-editor,
+body.is-screenshot-modal-open #stage-editor,
 body.is-start-modal-open #mobile-controls {
   visibility: hidden;
 }
 
 body.is-options-modal-open #mobile-controls,
 body.is-leaderboard-modal-open #mobile-controls,
-body.is-account-modal-open #mobile-controls {
+body.is-account-modal-open #mobile-controls,
+body.is-screenshot-modal-open #mobile-controls {
   visibility: hidden;
 }
 
@@ -1199,6 +1202,10 @@ body.is-account-modal-open #mobile-controls {
   font-weight: 900;
 }
 
+.screenshot-quick-toggle {
+  font-size: 19px;
+}
+
 .ui-button:hover {
   filter: brightness(1.16);
 }
@@ -1420,6 +1427,90 @@ body.is-account-modal-open #mobile-controls {
   background-image: url("../public/assets/ui/fantasy/button_primary_safe.webp");
   font-size: 16px;
   font-weight: 800;
+}
+
+#screenshot-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 28;
+  display: grid;
+  place-items: center;
+  padding: clamp(10px, 2.5vw, 24px);
+  overflow: auto;
+  background: rgba(4, 8, 18, 0.82);
+  color: #f8fafc;
+  font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+}
+
+.screenshot-dialog {
+  box-sizing: border-box;
+  width: min(960px, calc(100vw - clamp(20px, 5vw, 48px)));
+  max-height: calc(100dvh - clamp(20px, 5vw, 48px));
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: clamp(18px, 3vw, 28px);
+  background: rgba(7, 12, 28, 0.94);
+  border: 1px solid rgba(245, 199, 106, 0.42);
+  box-shadow: 0 24px 42px rgba(0, 0, 0, 0.58);
+}
+
+.screenshot-dialog-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 14px;
+}
+
+.screenshot-dialog h2 {
+  margin: 0;
+  font-size: clamp(18px, 3vw, 24px);
+  font-weight: 900;
+  color: #f5c76a;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.screenshot-close {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.screenshot-meta {
+  font-size: 12px;
+  color: #cbd5e1;
+}
+
+.screenshot-image {
+  width: 100%;
+  max-height: min(64dvh, 540px);
+  object-fit: contain;
+  background: #020617;
+  border: 1px solid rgba(148, 163, 184, 0.36);
+}
+
+.screenshot-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.screenshot-actions button {
+  min-width: 132px;
+  min-height: 42px;
+  border: 0;
+  padding: 8px 18px;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #f8fafc;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.screenshot-actions button:hover {
+  filter: brightness(1.12);
 }
 
 #account-modal {

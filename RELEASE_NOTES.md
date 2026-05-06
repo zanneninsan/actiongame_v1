@@ -2,6 +2,36 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.289
+### English
+- Restored OGP/Twitter Card metadata and the OGP image asset in the app build, and changed X sharing to pass the game URL through the tweet intent URL parameter.
+### Japanese
+- アプリのビルドにOGP/Twitter Card用のメタタグとOGP画像を含め直し、XシェアではゲームURLを本文ではなく投稿用URLパラメータとして渡すようにしました。
+
+## v0.1.288
+### English
+- Swapped the compact header controls so the menu button stays on the right and the screenshot button sits immediately to its left.
+### Japanese
+- コンパクト表示のヘッダー操作を入れ替え、メニューボタンを右端に置き、その左隣にスクリーンショットボタンを表示するようにしました。
+
+## v0.1.287
+### English
+- Changed the PC screenshot shortcut from F2 to P because browser or OS shortcuts can intercept function keys.
+### Japanese
+- PC版のスクリーンショットショートカットをF2キーからPキーに変更し、ブラウザやOS側にキー入力を取られにくくしました。
+
+## v0.1.286
+### English
+- Kept the screenshot button beside the function menu on compact phone layouts, so captures are available without opening the drawer.
+### Japanese
+- スマホなどのコンパクト表示でも、スクリーンショットボタンを機能メニューの隣に常時表示し、メニューを開かずに撮影できるようにしました。
+
+## v0.1.285
+### English
+- Added game-canvas screenshot capture with a keyboard shortcut, a global screenshot button, and a clear-screen preview/download flow.
+### Japanese
+- キーボードショートカットでゲーム画面だけを撮影し、機能メニューやクリア後のボタンからプレビューして保存できるようにしました。
+
 ## v0.1.284
 ### English
 - Made the account test-data clear action also remove local app settings and Firebase sign-in persistence while keeping scores intact.

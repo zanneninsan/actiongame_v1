@@ -30,7 +30,6 @@ export type LeaderboardGhostSaveStatus = "saved" | "missing" | "notEligible" | "
 
 const LEADERBOARD_FETCH_RETRY_MS = 800;
 const GAME_SHARE_URL = "https://zannenin-sisters-leaderboard.web.app/";
-const GAME_SHARE_HASHTAG = "#\u30b9\u30fc\u30d1\u30fc\u6b8b\u5ff5\u9662\u3055\u3093\u30e9\u30f3\u30c9";
 
 export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
   document.getElementById("leaderboard-modal")?.remove();
@@ -133,7 +132,7 @@ function renderShareButton(button: HTMLButtonElement, options: LeaderboardPanelO
 function buildShareText(options: LeaderboardPanelOptions, locale: Locale, rankLabel: string) {
   const currentScore = options.currentScore;
   if (!currentScore) {
-    return `${t(locale, "leaderboard.shareGeneric")}\n${GAME_SHARE_URL}\n${GAME_SHARE_HASHTAG}`;
+    return t(locale, "leaderboard.shareGeneric");
   }
 
   const bestStatus = currentScore.scoreUpdated ? t(locale, "leaderboard.bestUpdated") : t(locale, "leaderboard.bestNotUpdated");
@@ -142,11 +141,15 @@ function buildShareText(options: LeaderboardPanelOptions, locale: Locale, rankLa
     .replace("{score}", currentScore.score.toFixed(2))
     .replace("{rank}", rankLabel)
     .replace("{status}", bestStatus);
-  return `${scoreLine}\n${GAME_SHARE_URL}\n${GAME_SHARE_HASHTAG}`;
+  return scoreLine;
 }
 
 function openXShare(text: string) {
-  const params = new URLSearchParams({ text });
+  const params = new URLSearchParams({
+    text,
+    url: GAME_SHARE_URL,
+    hashtags: "スーパー残念院さんランド",
+  });
   window.open(`https://twitter.com/intent/tweet?${params.toString()}`, "_blank", "noopener,noreferrer");
 }
 

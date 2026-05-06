@@ -24,6 +24,7 @@ type GlobalUiOptions = {
   onLeaderboardOpen: () => void;
   onAccountOpen: () => void;
   onReturnToTitle: () => void;
+  onScreenshotOpen: () => void;
 };
 
 export const createGlobalUI = (options: GlobalUiOptions) => {
@@ -33,6 +34,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   uiContainer.id = "global-ui";
   uiContainer.innerHTML = `
     <span id="version-label">${options.version}</span>
+    <button id="screenshot-toggle" class="ui-button screenshot-quick-toggle" type="button" aria-label="${t(options.locale, "aria.screenshot")}">📷</button>
     <button id="global-menu-toggle" class="ui-button global-menu-toggle" type="button" aria-label="${t(
       options.locale,
       "aria.globalMenu",
@@ -101,6 +103,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const collisionDebugToggle = document.getElementById("collision-debug-toggle") as HTMLButtonElement;
   const rearDebugToggle = document.getElementById("rear-debug-toggle") as HTMLButtonElement;
   const midgroundDebugToggle = document.getElementById("midground-debug-toggle") as HTMLButtonElement;
+  const screenshotToggle = document.getElementById("screenshot-toggle") as HTMLButtonElement;
   const leaderboardToggle = document.getElementById("leaderboard-toggle") as HTMLButtonElement;
   const accountToggle = document.getElementById("account-toggle") as HTMLButtonElement;
   const playerSpecToggle = document.getElementById("player-spec-toggle") as HTMLButtonElement;
@@ -143,6 +146,10 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   });
   midgroundDebugToggle.addEventListener("click", () => {
     options.onMidgroundBackgroundToggle(midgroundDebugToggle);
+    closeGlobalMenu();
+  });
+  screenshotToggle.addEventListener("click", () => {
+    options.onScreenshotOpen();
     closeGlobalMenu();
   });
   leaderboardToggle.addEventListener("click", () => {
@@ -227,7 +234,14 @@ export const removeGlobalUI = () => {
   document.getElementById("global-ui")?.remove();
   document.getElementById("options-modal")?.remove();
   document.getElementById("account-modal")?.remove();
-  document.body.classList.remove("is-options-modal-open", "is-account-modal-open", "is-leaderboard-modal-open", "is-global-menu-open");
+  document.getElementById("screenshot-modal")?.remove();
+  document.body.classList.remove(
+    "is-options-modal-open",
+    "is-account-modal-open",
+    "is-leaderboard-modal-open",
+    "is-screenshot-modal-open",
+    "is-global-menu-open",
+  );
 };
 
 export const setPlayerPositionDebugUI = (enabled: boolean, x: number, y: number) => {
