@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.281
+### English
+- Added a 1200x630 title illustration as the site's OGP/Twitter card image.
+### Japanese
+- サイトのOGP/Twitterカード画像として、タイトルイラストを1200×630に加工して設定しました。
+
 ## v0.1.280
 ### English
 - Fixed leaderboard result actions so share and close buttons align cleanly on desktop and compact mobile layouts.
