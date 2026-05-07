@@ -9,6 +9,9 @@ const MAX_SCORE_DRIFT = 0.01;
 const TIMER_DRIFT_MS = 1000;
 const LEADERBOARD_ANTI_CHEAT_ENABLED = false;
 const DEFAULT_STAGE_SCORE_LIMIT: StageScoreLimit = {maxScoreBeforeTimeBonus: 100_000, minElapsedMs: 0};
+const STAGE_ID_ALIASES: Record<string, string> = {
+  neonCanal: "originalDowntown",
+};
 
 type StageScoreLimit = {
   maxScoreBeforeTimeBonus: number;
@@ -75,7 +78,7 @@ export function cleanLeaderboardPayload(data: unknown): CleanLeaderboardPayload 
     throw new HttpsError("invalid-argument", "Player id is required.");
   }
 
-  const stageId = cleanStageId(payload.stageId);
+  const stageId = normalizeStageId(cleanStageId(payload.stageId));
   if (!stageId) {
     throw new HttpsError("invalid-argument", "Stage id is invalid.");
   }
@@ -118,6 +121,10 @@ function cleanStageId(value: unknown) {
   return /^[a-zA-Z0-9_-]{1,40}$/.test(stageId) ? stageId : "";
 }
 
+function normalizeStageId(stageId: string) {
+  return STAGE_ID_ALIASES[stageId] ?? stageId;
+}
+
 function cleanText(value: unknown, maxLength: number) {
   return String(value ?? "").trim().slice(0, maxLength);
 }
@@ -144,7 +151,7 @@ function cleanGhostReplay(value: unknown, context: {stageId: string; playerName:
   if (value.schema !== GHOST_REPLAY_SCHEMA) {
     throw new HttpsError("invalid-argument", "Ghost replay schema is invalid.");
   }
-  const stageId = cleanStageId(value.stageId);
+  const stageId = normalizeStageId(cleanStageId(value.stageId));
   if (stageId !== context.stageId) {
     throw new HttpsError("invalid-argument", "Ghost replay stage does not match the score stage.");
   }

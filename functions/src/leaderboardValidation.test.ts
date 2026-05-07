@@ -16,10 +16,10 @@ const basePayload = {
   remainingMs: 0,
 };
 
-test("accepts a valid leaderboard payload", () => {
+test("normalizes the legacy Shibu-ya city stage id", () => {
   const payload = cleanLeaderboardPayload(basePayload);
 
-  assert.equal(payload.stageId, "neonCanal");
+  assert.equal(payload.stageId, "originalDowntown");
   assert.equal(payload.itemScore, 4250);
   assert.equal(payload.expectedScore, 4250);
 });
@@ -97,7 +97,7 @@ test("accepts a matching ghost replay payload", () => {
     },
   });
 
-  assert.equal(payload.ghostReplay?.stageId, "neonCanal");
+  assert.equal(payload.ghostReplay?.stageId, "originalDowntown");
   assert.equal(payload.ghostReplay?.frames.length, 2);
 });
 

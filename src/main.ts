@@ -10,7 +10,7 @@ import {
   type DashWallPlacement,
   type StageDefinition,
 } from "./assets";
-import { DEFAULT_STAGE_ID, PLAYABLE_STAGE_IDS, STAGES, cloneStage, type StageId } from "./stages";
+import { DEFAULT_STAGE_ID, PLAYABLE_STAGE_IDS, STAGES, cloneStage, normalizeStageId, type StageId } from "./stages";
 import { RainbowWinPipeline } from "./rainbowPipeline";
 import { StartCountdownOverlay } from "./countdown";
 import { StartModal, TITLE_SOUND_CONFIRM_STORAGE_KEY, type ControlMode, type StageOption, type StartAccountStatus } from "./startModal";
@@ -99,7 +99,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.344";
+const DEBUG_VERSION = "v0.1.345";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -1545,7 +1545,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private resolveStageId(stageId: string): StageId {
-    return stageId in STAGES ? (stageId as StageId) : DEFAULT_STAGE_ID;
+    return normalizeStageId(stageId);
   }
 
   private applySelectedStage(stageId: StageId) {
