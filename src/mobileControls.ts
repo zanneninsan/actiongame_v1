@@ -26,6 +26,12 @@ const MOBILE_LAYOUT_EDGE_PADDING = 8;
 const MOBILE_JOYSTICK_ACTIVATION_RATIO = 0.28;
 const MOBILE_JOYSTICK_DIAGONAL_RATIO = 0.38;
 const MOBILE_INPUT_KEYS: MobileInputKey[] = ["w", "a", "s", "d", "shift"];
+const MOBILE_CONTROL_SCALE_CSS_VAR = "--mobile-control-scale";
+const MOBILE_CONTROL_SCALE_MIN = 0.7;
+const MOBILE_CONTROL_SCALE_MAX = 1.45;
+const MOBILE_CONTROL_SCALE_STEP = 5;
+const MOBILE_CONTROL_SCALE_DEFAULT = 1;
+const MOBILE_CONTROLS_LAYOUT_STORAGE_VERSION = 3;
 
 type MobileControlLayoutId =
   | "joystick"
@@ -37,9 +43,33 @@ type MobileControlLayoutId =
 type MobileControlPosition = {
   x: number;
   y: number;
+  scale: number;
 };
 
 type MobileControlLayout = Partial<Record<MobileControlLayoutId, MobileControlPosition>>;
+
+type MobileControlLayoutStoragePayload = {
+  v: number;
+  layout: MobileControlLayout;
+};
+
+const clampMobileControlScale = (value: number) =>
+  Math.min(MOBILE_CONTROL_SCALE_MAX, Math.max(MOBILE_CONTROL_SCALE_MIN, Number.isFinite(value) ? value : MOBILE_CONTROL_SCALE_DEFAULT));
+
+const getMobileControlScaleFromElement = (button: HTMLElement | null) => {
+  if (!button) {
+    return MOBILE_CONTROL_SCALE_DEFAULT;
+  }
+  const rawScale = button.style.getPropertyValue(MOBILE_CONTROL_SCALE_CSS_VAR) || button.dataset.layoutScale || "";
+  const numericScale = Number.parseFloat(rawScale);
+  return clampMobileControlScale(Number.isFinite(numericScale) ? numericScale : MOBILE_CONTROL_SCALE_DEFAULT);
+};
+
+const setMobileControlScaleOnElement = (button: HTMLElement, value: number) => {
+  const nextScale = clampMobileControlScale(value);
+  button.style.setProperty(MOBILE_CONTROL_SCALE_CSS_VAR, `${nextScale}`);
+  button.dataset.layoutScale = `${nextScale}`;
+};
 
 export const createMobileControls = (options: MobileControlsOptions) => {
   document.getElementById("mobile-controls")?.remove();
@@ -51,6 +81,18 @@ export const createMobileControls = (options: MobileControlsOptions) => {
     <div class="mobile-layout-panel" aria-live="polite">
       <strong>${t(options.locale, "mobile.layoutTitle")}</strong>
       <span class="mobile-layout-status">${t(options.locale, "mobile.layoutReady")}</span>
+      <div class="mobile-layout-size-controls">
+        <label class="mobile-layout-size-label" for="mobile-control-size-range">${t(options.locale, "mobile.layoutScale")}</label>
+        <div class="mobile-layout-size-row">
+          <button class="mobile-layout-size-button" data-layout-size-action="decrease" type="button">-</button>
+          <input id="mobile-control-size-range" class="mobile-layout-size-slider" type="range" min="${Math.round(MOBILE_CONTROL_SCALE_MIN * 100)}" max="${Math.round(MOBILE_CONTROL_SCALE_MAX * 100)}" step="${MOBILE_CONTROL_SCALE_STEP}" value="${Math.round(MOBILE_CONTROL_SCALE_DEFAULT * 100)}" />
+          <button class="mobile-layout-size-button" data-layout-size-action="increase" type="button">+</button>
+        </div>
+        <div class="mobile-layout-size-meta">
+          <span class="mobile-layout-size-value" aria-live="polite">100%</span>
+          <span class="mobile-layout-size-hint">${t(options.locale, "mobile.layoutScaleHint")}</span>
+        </div>
+      </div>
       <div class="mobile-layout-actions">
         <button class="mobile-layout-button is-active" data-layout-action="done" type="button">${t(options.locale, "mobile.layoutDone")}</button>
         <button class="mobile-layout-button" data-layout-action="reset" type="button">${t(options.locale, "mobile.layoutReset")}</button>
@@ -76,6 +118,58 @@ export const createMobileControls = (options: MobileControlsOptions) => {
   const status = controls.querySelector<HTMLSpanElement>(".mobile-layout-status");
   const doneButton = controls.querySelector<HTMLButtonElement>("[data-layout-action='done']");
   const resetButton = controls.querySelector<HTMLButtonElement>("[data-layout-action='reset']");
+  const scaleRange = controls.querySelector<HTMLInputElement>("#mobile-control-size-range");
+  const scaleDecreaseButton = controls.querySelector<HTMLButtonElement>("[data-layout-size-action='decrease']");
+  const scaleIncreaseButton = controls.querySelector<HTMLButtonElement>("[data-layout-size-action='increase']");
+  const scaleValue = controls.querySelector<HTMLSpanElement>(".mobile-layout-size-value");
+  let selectedLayoutId: MobileControlLayoutId = "joystick";
+
+  const getSelectedControlElement = (layoutId = selectedLayoutId): HTMLElement | null =>
+    controls.querySelector<HTMLElement>(`[data-layout-id='${layoutId}']`);
+
+  const updateScaleHint = () => {
+    controls.querySelectorAll<HTMLElement>(".mobile-pad, .mobile-button").forEach((button) => {
+      button.classList.toggle("is-layout-selected", button.dataset.layoutId === selectedLayoutId);
+    });
+
+    const selectedElement = getSelectedControlElement();
+    const selectedScale = getMobileControlScaleFromElement(selectedElement);
+    const percent = Math.round(selectedScale * 100);
+    if (scaleRange) {
+      scaleRange.value = String(percent);
+      scaleRange.disabled = !isLayoutEditing;
+    }
+    if (scaleValue) {
+      scaleValue.textContent = `${percent}%`;
+    }
+  };
+
+  const setSelectedLayoutControl = (nextLayoutId: MobileControlLayoutId) => {
+    if (!isMobileControlLayoutId(nextLayoutId)) {
+      return;
+    }
+    selectedLayoutId = nextLayoutId;
+    updateScaleHint();
+  };
+
+  const applyScaleToSelectedControl = (value: number) => {
+    const selectedElement = getSelectedControlElement();
+    if (!selectedElement || !isLayoutEditing) {
+      return;
+    }
+    setMobileControlScaleOnElement(selectedElement, value);
+    updateScaleHint();
+    saveMobileControlsLayout(captureMobileControlsLayout(controls));
+  };
+
+  const onScaleAdjust = (delta: number) => {
+    if (!scaleRange) {
+      return;
+    }
+    const next = clampMobileControlScale((Number.parseFloat(scaleRange.value) + delta) / 100);
+    applyScaleToSelectedControl(next);
+  };
+
   const updateLayoutToolbar = () => {
     if (status) {
       status.textContent = isLayoutEditing ? t(options.locale, "mobile.layoutEditing") : t(options.locale, "mobile.layoutReady");
@@ -90,22 +184,43 @@ export const createMobileControls = (options: MobileControlsOptions) => {
     clearPointerInput();
     controls.classList.add("is-layout-editing", "is-layout-setup-open");
     controls.classList.remove("is-first-run-highlight");
+    setSelectedLayoutControl("joystick");
     applyMobileControlsLayout(controls, captureMobileControlsLayout(controls));
+    if (scaleRange) {
+      scaleRange.disabled = false;
+    }
     updateLayoutToolbar();
   };
+  let storedLayout = readMobileControlsLayout();
+  const applyStoredLayoutIfConfigured = () => {
+    const currentLayout = storedLayout;
+    if (isLayoutEditing || !currentLayout) {
+      return;
+    }
+    window.requestAnimationFrame(() => {
+      applyMobileControlsLayout(controls, currentLayout);
+      updateScaleHint();
+    });
+  };
+
   const finishLayoutEditing = () => {
     isLayoutEditing = false;
     touchInput.clearInput();
     clearPointerInput();
     controls.classList.remove("is-layout-editing", "is-layout-setup-open");
-    saveMobileControlsLayout(captureMobileControlsLayout(controls));
+    storedLayout = captureMobileControlsLayout(controls);
+    applyMobileControlsLayout(controls, storedLayout);
+    saveMobileControlsLayout(storedLayout);
     setMobileControlsLayoutSetupSeen();
+    if (scaleRange) {
+      scaleRange.disabled = true;
+    }
     updateLayoutToolbar();
     options.onLayoutEditFinish?.();
   };
-  const storedLayout = readMobileControlsLayout();
+
   if (storedLayout) {
-    applyMobileControlsLayout(controls, storedLayout);
+    applyStoredLayoutIfConfigured();
   }
 
   if (shouldShowMobileControlsHint()) {
@@ -193,9 +308,12 @@ export const createMobileControls = (options: MobileControlsOptions) => {
       isLayoutEditing = true;
       controls.classList.remove("is-layout-editing", "is-layout-customized");
       clearMobileControlsLayout();
+      storedLayout = undefined;
       controls.querySelectorAll<HTMLElement>("[data-layout-id]").forEach((button) => {
         button.style.left = "";
         button.style.top = "";
+        button.style.removeProperty(MOBILE_CONTROL_SCALE_CSS_VAR);
+        delete button.dataset.layoutScale;
       });
       startLayoutEditing();
       updateLayoutToolbar();
@@ -204,20 +322,48 @@ export const createMobileControls = (options: MobileControlsOptions) => {
     cleanup.push(() => resetButton.removeEventListener("click", resetLayout));
   }
 
+  if (scaleRange) {
+    const onScaleRangeInput = () => {
+      applyScaleToSelectedControl(Number.parseFloat(scaleRange.value) / 100);
+    };
+    scaleRange.addEventListener("input", onScaleRangeInput);
+    cleanup.push(() => scaleRange.removeEventListener("input", onScaleRangeInput));
+  }
+
+  if (scaleDecreaseButton) {
+    const onScaleDecrease = () => onScaleAdjust(-MOBILE_CONTROL_SCALE_STEP);
+    scaleDecreaseButton.addEventListener("click", onScaleDecrease);
+    cleanup.push(() => scaleDecreaseButton.removeEventListener("click", onScaleDecrease));
+  }
+
+  if (scaleIncreaseButton) {
+    const onScaleIncrease = () => onScaleAdjust(MOBILE_CONTROL_SCALE_STEP);
+    scaleIncreaseButton.addEventListener("click", onScaleIncrease);
+    cleanup.push(() => scaleIncreaseButton.removeEventListener("click", onScaleIncrease));
+  }
+
   const openLayoutFromMenu = () => startLayoutEditing();
   window.addEventListener(MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT, openLayoutFromMenu);
+  window.addEventListener("orientationchange", applyStoredLayoutIfConfigured);
+  window.addEventListener("resize", applyStoredLayoutIfConfigured);
   cleanup.push(() => window.removeEventListener(MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT, openLayoutFromMenu));
-  cleanup.push(bindMobileLayoutDragging(controls));
+  cleanup.push(() => window.removeEventListener("orientationchange", applyStoredLayoutIfConfigured));
+  cleanup.push(() => window.removeEventListener("resize", applyStoredLayoutIfConfigured));
+  cleanup.push(bindMobileLayoutDragging(controls, setSelectedLayoutControl));
   if (shouldShowMobileControlsLayoutSetup()) {
     window.setTimeout(startLayoutEditing, 0);
   }
+  updateScaleHint();
   updateLayoutToolbar();
 
   cleanup.push(() => document.getElementById("mobile-controls")?.remove());
   return cleanup;
 };
 
-const bindMobileLayoutDragging = (controls: HTMLDivElement) => {
+const bindMobileLayoutDragging = (
+  controls: HTMLDivElement,
+  onSelectControl: (layoutId: MobileControlLayoutId) => void,
+) => {
   const cleanup: Array<() => void> = [];
   controls.querySelectorAll<HTMLElement>("[data-layout-id]").forEach((button) => {
     let pointerId: number | undefined;
@@ -240,6 +386,10 @@ const bindMobileLayoutDragging = (controls: HTMLDivElement) => {
     const startDrag = (event: PointerEvent) => {
       if (!controls.classList.contains("is-layout-editing")) {
         return;
+      }
+      const layoutId = button.dataset.layoutId;
+      if (layoutId) {
+        onSelectControl(layoutId as MobileControlLayoutId);
       }
       event.preventDefault();
       event.stopPropagation();
@@ -553,6 +703,7 @@ const captureMobileControlsLayout = (controls: HTMLDivElement): MobileControlLay
     layout[layoutId] = {
       x: (rect.left - controlsRect.left) / controlsRect.width,
       y: (rect.top - controlsRect.top) / controlsRect.height,
+      scale: getMobileControlScaleFromElement(button),
     };
   });
   return layout;
@@ -577,7 +728,65 @@ const applyMobileControlsLayout = (controls: HTMLDivElement, layout: MobileContr
     const nextY = Math.min(maxY, Math.max(MOBILE_LAYOUT_EDGE_PADDING, position.y * controlsRect.height));
     button.style.left = `${nextX}px`;
     button.style.top = `${nextY}px`;
+    const nextScale = clampMobileControlScale(position.scale);
+    button.style.setProperty(MOBILE_CONTROL_SCALE_CSS_VAR, `${nextScale}`);
+    button.dataset.layoutScale = `${nextScale}`;
   });
+};
+
+const isMobileControlLayoutId = (value: unknown): value is MobileControlLayoutId => {
+  return value === "joystick" || value === "fullscreen" || value === "action-jump" || value === "action-dash" || value === "restart";
+};
+
+const normalizeMobileControlsPosition = (rawPosition: unknown): MobileControlPosition | undefined => {
+  if (typeof rawPosition !== "object" || rawPosition === null) {
+    return undefined;
+  }
+  const position = rawPosition as Partial<MobileControlPosition>;
+  if (typeof position.x !== "number" || !Number.isFinite(position.x) || typeof position.y !== "number" || !Number.isFinite(position.y)) {
+    return undefined;
+  }
+  const rawScale = typeof position.scale === "number" && Number.isFinite(position.scale) ? position.scale : MOBILE_CONTROL_SCALE_DEFAULT;
+  const scale = Math.min(MOBILE_CONTROL_SCALE_MAX, Math.max(MOBILE_CONTROL_SCALE_MIN, rawScale));
+  return {
+    x: position.x,
+    y: position.y,
+    scale,
+  };
+};
+
+const normalizeMobileControlsLayout = (rawLayout: unknown): MobileControlLayout | undefined => {
+  const layout: MobileControlLayout = {};
+  if (typeof rawLayout !== "object" || rawLayout === null) {
+    return undefined;
+  }
+
+  for (const [rawId, rawPosition] of Object.entries(rawLayout as Partial<Record<string, unknown>>)) {
+    if (!isMobileControlLayoutId(rawId)) {
+      continue;
+    }
+    const nextPosition = normalizeMobileControlsPosition(rawPosition);
+    if (!nextPosition) {
+      continue;
+    }
+    layout[rawId] = {
+      x: Math.min(1, Math.max(0, nextPosition.x)),
+      y: Math.min(1, Math.max(0, nextPosition.y)),
+      scale: nextPosition.scale,
+    };
+  }
+
+  return Object.keys(layout).length > 0 ? layout : undefined;
+};
+
+const normalizeStoredMobileControlsLayout = (rawLayout: unknown): MobileControlLayout | undefined => {
+  if (typeof rawLayout === "object" && rawLayout !== null && !Array.isArray(rawLayout)) {
+    const candidate = rawLayout as Partial<MobileControlLayoutStoragePayload>;
+    if (candidate.layout && typeof candidate.layout === "object") {
+      return normalizeMobileControlsLayout(candidate.layout);
+    }
+  }
+  return normalizeMobileControlsLayout(rawLayout);
 };
 
 const readMobileControlsLayout = (): MobileControlLayout | undefined => {
@@ -586,19 +795,26 @@ const readMobileControlsLayout = (): MobileControlLayout | undefined => {
     if (!rawLayout) {
       return undefined;
     }
-    const parsed = JSON.parse(rawLayout) as MobileControlLayout;
-    if (!parsed || typeof parsed !== "object") {
+    const parsed = JSON.parse(rawLayout) as unknown;
+    const normalizedLayout = normalizeStoredMobileControlsLayout(parsed);
+    if (!normalizedLayout) {
+      window.localStorage.removeItem(MOBILE_CONTROLS_LAYOUT_STORAGE_KEY);
       return undefined;
     }
-    return parsed;
+    return normalizedLayout;
   } catch {
+    window.localStorage.removeItem(MOBILE_CONTROLS_LAYOUT_STORAGE_KEY);
     return undefined;
   }
 };
 
 const saveMobileControlsLayout = (layout: MobileControlLayout) => {
   try {
-    window.localStorage.setItem(MOBILE_CONTROLS_LAYOUT_STORAGE_KEY, JSON.stringify(layout));
+    const payload: MobileControlLayoutStoragePayload = {
+      v: MOBILE_CONTROLS_LAYOUT_STORAGE_VERSION,
+      layout,
+    };
+    window.localStorage.setItem(MOBILE_CONTROLS_LAYOUT_STORAGE_KEY, JSON.stringify(payload));
   } catch {
     // The default fixed layout still works when storage is unavailable.
   }
