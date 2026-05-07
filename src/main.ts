@@ -220,6 +220,9 @@ const PLAYER_BODY_HEIGHT = 164;
 const PLAYER_BODY_OFFSET_X = 134;
 
 const BOOT_LOADING_OVERLAY_ID = "boot-loading-overlay";
+const BOOT_LOADING_RUNNER_COLUMNS = 6;
+const BOOT_LOADING_RUNNER_ROWS = 3;
+const BOOT_LOADING_RUNNER_FRAME_MS = 90;
 const PLAYER_BODY_OFFSET_Y = 86;
 const PLAYER_CROUCH_BODY_WIDTH = 58;
 const PLAYER_CROUCH_BODY_HEIGHT = 94;
@@ -291,6 +294,7 @@ const DASH_WALL_DEFAULT_HEIGHT = 260;
 const DASH_WALL_DEFAULT_KNOCKBACK_X = -560;
 const DASH_WALL_DEFAULT_KNOCKBACK_Y = -170;
 const DASH_WALL_BOUNCE_COOLDOWN_MS = 420;
+let bootLoadingRunnerTimer: number | null = null;
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
   webkitRequestFullscreen?: () => Promise<void> | void;
@@ -3832,10 +3836,15 @@ function showBootLoadingOverlay() {
   overlay.id = BOOT_LOADING_OVERLAY_ID;
   overlay.innerHTML = `
     <div class="boot-loading-panel" role="status" aria-live="polite" aria-label="Loading game">
-      <div class="boot-loading-runner">残念院さん</div>
+      <div class="boot-loading-runner" data-boot-loading-runner></div>
       <p class="boot-loading-text" data-boot-loading-text>Loading 0%</p>
     </div>
   `;
+  const runner = overlay.querySelector<HTMLDivElement>("[data-boot-loading-runner]");
+  if (runner) {
+    runner.style.backgroundImage = `url('${ASSET_BASE}assets/sprites/player_walk_13_6x3_320x260.webp')`;
+    startBootLoadingRunner(runner);
+  }
   document.body.appendChild(overlay);
 }
 
@@ -3848,5 +3857,29 @@ function setBootLoadingProgress(text: string) {
 }
 
 function hideBootLoadingOverlay() {
+  stopBootLoadingRunner();
   document.getElementById(BOOT_LOADING_OVERLAY_ID)?.remove();
+}
+
+function startBootLoadingRunner(runner: HTMLDivElement) {
+  stopBootLoadingRunner();
+  const totalFrames = BOOT_LOADING_RUNNER_COLUMNS * BOOT_LOADING_RUNNER_ROWS;
+  let frame = 0;
+  const setFrame = (frameIndex: number) => {
+    const column = frameIndex % BOOT_LOADING_RUNNER_COLUMNS;
+    const row = Math.floor(frameIndex / BOOT_LOADING_RUNNER_COLUMNS);
+    runner.style.backgroundPosition = `${-(column * 20)}% ${-(row * 50)}%`;
+  };
+  setFrame(0);
+  bootLoadingRunnerTimer = window.setInterval(() => {
+    frame = (frame + 1) % totalFrames;
+    setFrame(frame);
+  }, BOOT_LOADING_RUNNER_FRAME_MS);
+}
+
+function stopBootLoadingRunner() {
+  if (bootLoadingRunnerTimer !== null) {
+    window.clearInterval(bootLoadingRunnerTimer);
+    bootLoadingRunnerTimer = null;
+  }
 }
