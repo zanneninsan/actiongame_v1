@@ -99,7 +99,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.344";
+const DEBUG_VERSION = "v0.1.345";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -657,7 +657,10 @@ class PrototypeScene extends Phaser.Scene {
       player: this.player,
       placements: this.editorStage.items,
       canCollect: () => !this.stageEditor?.isEnabled,
-      onCollect: (itemType, points, x, y) => this.rewards?.collectItem(itemType, points, x, y),
+      onCollect: (itemType, points, x, y, placementIndex) => {
+        this.rewards?.collectItem(itemType, points, x, y);
+        this.minimap?.markItemCollected(placementIndex);
+      },
       trackStageObject: (object) => this.trackStageObject(object),
     });
     this.bonusBlocksGroup = createBonusBlocks({
@@ -2014,6 +2017,7 @@ class PrototypeScene extends Phaser.Scene {
     this.clearStaticGroup(this.itemsGroup);
     this.clearStaticGroup(this.bonusBlocksGroup);
     this.clearDynamicGroup(this.enemiesGroup);
+    this.minimap?.resetProgress();
 
     renderStageObjects({
       scene: this,
@@ -2533,6 +2537,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     if (this.rewards?.isStarActive()) {
+      this.minimap?.markEnemyDefeated(enemy.getData("placementIndex") as number | undefined);
       defeatEnemy(enemy, false);
       this.rewards.addEnemyDefeatScore(enemy);
       return;
@@ -2543,6 +2548,7 @@ class PrototypeScene extends Phaser.Scene {
       this.isLanding = false;
       this.landingFastForwarded = false;
       this.stompFreeJumpUntil = this.time.now + STOMP_FREE_JUMP_BUFFER_MS;
+      this.minimap?.markEnemyDefeated(stompTarget.getData("placementIndex") as number | undefined);
       this.rewards?.addEnemyDefeatScore(stompTarget);
       this.showAquaMascotStompDialogueOnce(stompTarget);
     });

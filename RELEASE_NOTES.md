@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.345
+### English
+- Updated the minimap so collected items and defeated enemies disappear during play, while stage editor rebuilds reset those temporary markers to match the rebuilt layout.
+### Japanese
+- プレイ中に取得したアイテムや撃破した敵がミニマップから消えるようにしつつ、ステージエディタで配置を再構築したときは一時的な消去状態をリセットして、編集後の配置と表示がずれないようにしました。
+
 ## v0.1.344
 ### English
 - Added a mobile fullscreen recovery reload action so users can recover from broken viewport states where the address bar appears and gameplay is cut off.

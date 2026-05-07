@@ -71,8 +71,8 @@ export const populateEnemies = (
     return;
   }
 
-  placements.forEach((placement) => {
-    createEnemySprite(enemiesGroup, placement);
+  placements.forEach((placement, index) => {
+    createEnemySprite(enemiesGroup, placement, index);
   });
 };
 
@@ -360,7 +360,11 @@ export const freezeEnemies = (enemiesGroup?: Phaser.Physics.Arcade.Group) => {
   });
 };
 
-const createEnemySprite = (enemiesGroup: Phaser.Physics.Arcade.Group, placement: EnemyPlacement) => {
+const createEnemySprite = (
+  enemiesGroup: Phaser.Physics.Arcade.Group,
+  placement: EnemyPlacement,
+  placementIndex: number,
+) => {
   const definition = ENEMY_DEFINITIONS[placement.type ?? "aquaMascot"];
   const animation = definition.animation;
   const animationReady =
@@ -374,6 +378,7 @@ const createEnemySprite = (enemiesGroup: Phaser.Physics.Arcade.Group, placement:
         : definition.key
       : getFallbackEnemyTextureKey(enemiesGroup.scene);
   const enemy = enemiesGroup.create(placement.x, placement.y, textureKey) as Phaser.Physics.Arcade.Sprite;
+  enemy.setData("placementIndex", placementIndex);
   const speed = placement.speed ?? ENEMY_DEFAULT_SPEED;
   const direction = speed >= 0 ? 1 : -1;
   enemy.setDisplaySize(definition.displayWidth, definition.displayHeight);
