@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.348
+### English
+- Improved mobile control layout editing with built-in control resizing: each button and the joystick can now be resized in a discoverable way, and control scale is persisted with layout data.
+- Ensured stored layouts are normalized for backward compatibility and clamped into valid ranges so restored controls stay inside the viewport after orientation changes.
+### Japanese
+- モバイル操作ボタンの配置編集画面に、拡大縮小UIを追加しました。ジョイスティックと各ボタンを選択して、スライダーや±ボタンでサイズを直感的に調整できます。
+- 旧版・最新版を含む保存データを読み込めるよう正規化し、画面回転時にも保存サイズを考慮して画面外にはみ出さないようにクランプ処理を強化しました。
+
 ## v0.1.347
 ### English
 - Updated the minimap so collected items and defeated enemies disappear during play, while stage editor rebuilds reset those temporary markers to match the rebuilt layout.
