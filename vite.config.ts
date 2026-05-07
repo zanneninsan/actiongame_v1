@@ -111,8 +111,15 @@ function backgroundAssetsPlugin(): Plugin {
   };
 }
 
+const githubPagesBasePath = process.env.GITHUB_PAGES_BASE_PATH;
+
 export default defineConfig({
-  base: process.env.GITHUB_PAGES === "true" ? "/actiongame_v1/" : "/",
+  base:
+    process.env.GITHUB_PAGES === "true"
+      ? githubPagesBasePath && githubPagesBasePath.length > 0
+        ? githubPagesBasePath
+        : "/actiongame_v1/"
+      : "/",
   plugins: [backgroundAssetsPlugin()],
   build: {
     chunkSizeWarningLimit: 1800,

@@ -2158,6 +2158,74 @@ export const NIGHTMARE_LONGRUN_STAGE: StageDefinition = {
   enemies: nightmareEnemies,
 };
 
+const monsterHouseEnemyTypes = [
+  "aquaMascot",
+  "hornedCyborg",
+  "knifePunk",
+  "rabbitTraveler",
+  "coneGolem",
+] as const;
+
+const monsterHouseEnemies: EnemyPlacement[] = Array.from({ length: 96 }, (_, index) => {
+  const lane = index % 6;
+  const block = Math.floor(index / 6);
+  const baseX = 760 + block * 250;
+  const x = baseX + lane * 32;
+  const y = 590 - (lane % 3) * 84;
+  const patrolSpan = 160 + (lane % 3) * 60;
+  return {
+    type: monsterHouseEnemyTypes[(index + lane) % monsterHouseEnemyTypes.length],
+    x,
+    y,
+    patrolLeft: x - patrolSpan,
+    patrolRight: x + patrolSpan,
+    speed: 88 + (index % 5) * 10,
+  };
+});
+
+export const MONSTER_HOUSE_STAGE: StageDefinition = {
+  name: {
+    jp: "モンスターハウス",
+    en: "Monster House",
+  },
+  backgrounds: {
+    rearKey: "rear-starry-sky",
+    midgroundKey: "midground-city-loop-strip",
+  },
+  worldWidth: 6400,
+  worldTop: -960,
+  worldBottom: 720,
+  groundTopY: 672,
+  playerStart: {
+    x: 120,
+    y: 552,
+  },
+  goal: {
+    x: 6180,
+    y: 568,
+  },
+  platforms: [
+    { x: 0, y: 672, units: 200 },
+    { x: 760, y: 520, units: 34 },
+    { x: 2080, y: 420, units: 36 },
+    { x: 3580, y: 312, units: 30 },
+    { x: 5080, y: 220, units: 20 },
+  ],
+  streetLamps: [],
+  decorations: [],
+  items: [
+    { type: "powerJump", x: 960, y: 452 },
+    { type: "powerSpeed", x: 2350, y: 352 },
+    { type: "star", x: 3860, y: 244 },
+    { type: "dashRing", x: 5340, y: 160 },
+  ],
+  checkpoints: [
+    { x: 2180, y: 606 },
+    { x: 4180, y: 606 },
+  ],
+  enemies: monsterHouseEnemies,
+};
+
 export const STAGES = {
   originalDowntown: ORIGINAL_DOWNTOWN_STAGE,
   neonCanal: NEON_CANAL_STAGE,
@@ -2166,6 +2234,7 @@ export const STAGES = {
   skyShaftClimb: SKY_SHAFT_CLIMB_STAGE,
   mobileTouchTutorial: MOBILE_TOUCH_TUTORIAL_STAGE,
   nightmareLongrun: NIGHTMARE_LONGRUN_STAGE,
+  monsterHouse: MONSTER_HOUSE_STAGE,
   rankingCheck: RANKING_CHECK_STAGE,
 };
 export type StageId = keyof typeof STAGES;
@@ -2177,6 +2246,7 @@ export const PLAYABLE_STAGE_IDS = [
   "skybridgeSprint",
   "skyShaftClimb",
   "nightmareLongrun",
+  "monsterHouse",
   "rankingCheck",
 ] as const satisfies readonly StageId[];
 export const ACTIVE_STAGE = STAGES[DEFAULT_STAGE_ID];

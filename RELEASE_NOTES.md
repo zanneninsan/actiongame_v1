@@ -2,6 +2,36 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.344
+### English
+- Added a mobile fullscreen recovery reload action so users can recover from broken viewport states where the address bar appears and gameplay is cut off.
+### Japanese
+- スマホで全画面解除後にアドレスバー表示で画面が見切れる復旧不能状態に備え、全画面復帰導線に「再読み込みで復旧」ボタンを追加しました。
+
+## v0.1.343
+### English
+- Adjusted story dialogue placement to avoid overlapping the top-left stamina HUD area by pushing the dialogue down when overlap is detected.
+### Japanese
+- ストーリーメッセージが左上のスタミナHUDに重なる場合、重なり判定でメッセージ表示位置を下へずらすようにしました。
+
+## v0.1.342
+### English
+- Added an immediate boot loading overlay with a walking Zannenin-san motion and load percentage so low-spec smartphones always show visible feedback before gameplay starts.
+### Japanese
+- 低スペック端末でも起動直後に真っ暗なまま待たされないよう、残念院さんの歩行モーション付きローディング表示と進捗パーセントを最初に出すようにしました。
+
+## v0.1.341
+### English
+- Added a new playable "Monster House" stage packed with an extreme number of enemies for high-density combat chaos.
+### Japanese
+- 敵を大量配置した高密度バトル用の新ステージ「モンスターハウス」を追加しました。
+
+## v0.1.340
+### English
+- Added a startup version check that fetches `version.json` when the first start menu appears and automatically reloads when the deployed version differs from the current client.
+### Japanese
+- 最初のスタートメニュー表示時に `version.json` を取得してバージョン差分を確認し、配信中のバージョンと不一致なら自動で再読み込みする仕組みを追加しました。
+
 ## v0.1.339
 ### English
 - Added a Japanese stage-name field to the stage editor and a Firebase-backed stage adoption proposal button with duplicate-name protection.

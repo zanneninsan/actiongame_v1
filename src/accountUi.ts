@@ -87,7 +87,7 @@ export function showAccountPanel(options: AccountPanelOptions) {
     linkButton.hidden = Boolean(identity?.isGoogleLinked);
     loginButton.hidden = Boolean(identity?.isGoogleLinked);
     unlinkButton.hidden = !identity?.isGoogleLinked;
-    clearTestDataButton.hidden = !identity?.isGoogleLinked;
+    clearTestDataButton.hidden = false;
   };
 
   const refresh = async (message?: string) => {
