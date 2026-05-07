@@ -1,0 +1,1005 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Spec - SUPER ZANNENIN=SAN LAND</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #10131a;
+        --panel: #171d26;
+        --panel-alt: #202631;
+        --line: #3e4a5c;
+        --text: #f8fafc;
+        --muted: #aeb9c8;
+        --gold: #f5c76a;
+        --mint: #8cffd2;
+        --rose: #f4a6b8;
+        --blue: #8fb7ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          linear-gradient(180deg, rgba(20, 24, 32, 0.96), rgba(12, 15, 22, 0.98)),
+          var(--bg);
+        color: var(--text);
+        font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+        line-height: 1.72;
+      }
+
+      a {
+        color: var(--mint);
+      }
+
+      .page-shell {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 40px 0 64px;
+      }
+
+      header {
+        padding: 24px 0 30px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .kicker {
+        margin: 0 0 8px;
+        color: var(--gold);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 36px;
+        line-height: 1.18;
+      }
+
+      .lead {
+        max-width: 780px;
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 16px;
+      }
+
+      .language-switch {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 18px 0 0;
+      }
+
+      .language-switch button {
+        min-height: 34px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #1b2230;
+        color: var(--text);
+        font: inherit;
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .language-switch button[aria-pressed="true"] {
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+
+      nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 24px 0 0;
+      }
+
+      nav a,
+      .back-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        padding: 0 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #1b2230;
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      main {
+        display: grid;
+        gap: 34px;
+        margin-top: 34px;
+      }
+
+      h2 {
+        margin: 0 0 12px;
+        color: var(--gold);
+        font-size: 24px;
+        line-height: 1.3;
+      }
+
+      h3 {
+        margin: 22px 0 8px;
+        color: var(--mint);
+        font-size: 18px;
+      }
+
+      p {
+        margin: 0 0 12px;
+      }
+
+      .spec-note {
+        color: var(--muted);
+      }
+
+      .table-wrap {
+        overflow-x: auto;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--panel);
+      }
+
+      table {
+        width: 100%;
+        min-width: 680px;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--panel-alt);
+        color: var(--gold);
+        font-size: 13px;
+        text-transform: uppercase;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      td.num,
+      th.num {
+        text-align: right;
+        white-space: nowrap;
+      }
+
+      code,
+      pre {
+        font-family: "Cascadia Mono", Consolas, monospace;
+      }
+
+      code {
+        color: var(--rose);
+      }
+
+      pre {
+        overflow-x: auto;
+        margin: 12px 0;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: #0b0f16;
+      }
+
+      .rule-list {
+        margin: 0;
+        padding-left: 22px;
+      }
+
+      .rule-list li + li {
+        margin-top: 6px;
+      }
+
+      .callout {
+        border-left: 4px solid var(--blue);
+        padding: 12px 16px;
+        background: rgba(143, 183, 255, 0.11);
+      }
+
+      footer {
+        margin-top: 46px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      @media (max-width: 640px) {
+        .page-shell {
+          width: min(100% - 22px, 1120px);
+          padding-top: 24px;
+        }
+
+        h1 {
+          font-size: 28px;
+        }
+
+        nav a,
+        .back-link {
+          width: 100%;
+          justify-content: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header>
+        <p class="kicker" data-i18n="kicker"></p>
+        <h1 data-i18n="title"></h1>
+        <p class="lead" data-i18n="lead"></p>
+        <div class="language-switch" aria-label="Language">
+          <button type="button" data-lang="ja">日本語</button>
+          <button type="button" data-lang="en">English</button>
+          <button type="button" data-lang="zh">中文</button>
+          <button type="button" data-lang="ko">한국어</button>
+        </div>
+        <nav aria-label="Page sections">
+          <a href="#score" data-i18n="navScore"></a>
+          <a href="#controls" data-i18n="navControls"></a>
+          <a href="#stomp-combo" data-i18n="navCombo"></a>
+          <a href="#powerups" data-i18n="navPowerups"></a>
+          <a href="#clear-rank" data-i18n="navRank"></a>
+          <a href="#missions" data-i18n="navMissions"></a>
+          <a class="back-link" href="../" data-i18n="navBack"></a>
+        </nav>
+      </header>
+
+      <main>
+        <section id="status">
+          <h2 data-i18n="statusTitle"></h2>
+          <p class="spec-note"><span data-i18n="updatedLabel"></span> <code data-spec-version></code></p>
+          <div class="callout">
+            <p><strong data-i18n="calloutStompTitle"></strong> <span data-i18n="calloutStompBody"></span></p>
+            <p><strong data-i18n="calloutComboTitle"></strong> <span data-i18n="calloutComboBody"></span></p>
+          </div>
+        </section>
+
+        <section id="score">
+          <h2 data-i18n="scoreTitle"></h2>
+          <h3 data-i18n="itemsTitle"></h3>
+          <div class="table-wrap">
+            <table>
+              <thead data-table-head="items"></thead>
+              <tbody data-table-body="items"></tbody>
+            </table>
+          </div>
+
+          <h3 data-i18n="enemyTitle"></h3>
+          <p data-i18n="enemyBody"></p>
+          <div class="table-wrap">
+            <table>
+              <thead data-table-head="enemies"></thead>
+              <tbody data-table-body="enemies"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="controls">
+          <h2 data-i18n="controlsTitle"></h2>
+          <p data-i18n="controlsLead"></p>
+          <ul class="rule-list" data-list="controlsRules"></ul>
+        </section>
+
+        <section id="stomp-combo">
+          <h2 data-i18n="comboTitle"></h2>
+          <p data-i18n="comboLead"></p>
+          <h3 data-i18n="comboConditionTitle"></h3>
+          <ul class="rule-list" data-list="comboRules"></ul>
+          <h3 data-i18n="scoreFormulaTitle"></h3>
+          <pre><code data-i18n="scoreFormula"></code></pre>
+          <div class="table-wrap">
+            <table>
+              <thead data-table-head="comboExamples"></thead>
+              <tbody data-table-body="comboExamples"></tbody>
+            </table>
+          </div>
+          <h3 data-i18n="popupTitle"></h3>
+          <ul class="rule-list" data-list="popupRules"></ul>
+        </section>
+
+        <section id="powerups">
+          <h2 data-i18n="powerupsTitle"></h2>
+          <div class="table-wrap">
+            <table>
+              <thead data-table-head="powerups"></thead>
+              <tbody data-table-body="powerups"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="clear-rank">
+          <h2 data-i18n="rankTitle"></h2>
+          <p data-i18n="rankLead"></p>
+          <div class="table-wrap">
+            <table>
+              <thead data-table-head="rankBonuses"></thead>
+              <tbody data-table-body="rankBonuses"></tbody>
+            </table>
+          </div>
+
+          <h3 data-i18n="rankThresholdTitle"></h3>
+          <div class="table-wrap">
+            <table>
+              <thead data-table-head="rankThresholds"></thead>
+              <tbody data-table-body="rankThresholds"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="missions">
+          <h2 data-i18n="missionsTitle"></h2>
+          <p data-i18n="missionsLead"></p>
+          <ul class="rule-list" data-list="missions"></ul>
+        </section>
+      </main>
+
+      <footer>
+        <p data-i18n="footer"></p>
+      </footer>
+    </div>
+
+    <script>
+      const SPEC_VERSION = "v0.1.318";
+      const STORAGE_KEY = "actiongame_locale";
+
+      const specText = {
+        ja: {
+          metaTitle: "ゲーム仕様 - スーパー残念院さんランド",
+          kicker: "Core Player Reference",
+          title: "スーパー残念院さんランド ゲーム仕様",
+          lead:
+            "スコア、踏みつけコンボ、パワーアップ、クリア評価を確認するためのプレイヤー向け仕様メモです。ゲーム内チュートリアルではなく、プレイ外で読み返すリファレンスです。",
+          navScore: "スコア",
+          navControls: "操作/スタミナ",
+          navCombo: "踏みつけコンボ",
+          navPowerups: "パワーアップ",
+          navRank: "クリアランク",
+          navMissions: "ミッションまとめ",
+          navBack: "ゲームに戻る",
+          statusTitle: "ステータス",
+          updatedLabel: "コード状態からの最終更新:",
+          calloutStompTitle: "踏みつけ撃破:",
+          calloutStompBody: "敵を踏みつけて倒すと、ボーナススコアが加算されます。",
+          calloutComboTitle: "連続踏みつけボーナス:",
+          calloutComboBody: "短い間隔で踏み続けるほど、獲得点が増えます。",
+          scoreTitle: "スコア源",
+          itemsTitle: "アイテム",
+          enemyTitle: "敵の踏みつけスコア",
+          enemyBody: "敵を踏みつけたときのスコアはボーナスとして加算されます。個別設定がない敵の基本踏みつけスコアは10点です。",
+          controlsTitle: "操作とスタミナ",
+          controlsLead: "移動、ジャンプ、ダッシュ、しゃがみの基本仕様です。",
+          comboTitle: "踏みつけコンボ",
+          comboLead: "短い間隔で敵を踏み続けると、踏みつけスコアの倍率が上がります。",
+          comboConditionTitle: "コンボ条件",
+          scoreFormulaTitle: "スコア計算式",
+          scoreFormula: "踏みつけ点 = 敵の基本踏みつけスコア * 現在の踏みつけコンボ数",
+          popupTitle: "画面上のポップアップ",
+          powerupsTitle: "パワーアップ",
+          rankTitle: "クリアランク",
+          rankLead: "クリアランクは3種類のボーナスから計算されます。",
+          rankThresholdTitle: "ランクしきい値",
+          missionsTitle: "ミッションまとめ",
+          missionsLead: "クリア時のミッションまとめには、現在次の内容が表示されます。",
+          footer:
+            "このページはスーパー残念院さんランドサイトの一部です。ゲーム内チュートリアルではなく、正確なプレイ仕様の参照用ページです。",
+          comboRules: [
+            "前回の敵踏みつけから1400ミリ秒以内に次の敵を踏むと、コンボが開始または継続します。",
+            "敵踏みつけの間隔が1400ミリ秒を超えると、次の踏みつけはコンボ1から始まります。",
+            "床に着地すると、現在のコンボ数は0に戻ります。",
+            "敵を踏むとプレイヤーが上に跳ねるため、着地前に次の踏みつけへつなげられます。",
+            "同じフレームで複数の敵がプレイヤーに重なった場合、有効な踏みつけ対象がダメージより優先されます。",
+          ],
+          popupRules: [
+            "コンボ1では、+10 のように獲得スコアだけが表示されます。",
+            "コンボ2以上では、+20 x2 のように獲得スコアとコンボ数が表示されます。",
+          ],
+          missions: [
+            ["ダメージ状態", "NO DMG OK または DMG n"],
+            ["集めたコイン数", "COIN n"],
+            ["高速クリア状態", "FAST OK または FAST --"],
+          ],
+          controlsRules: [
+            "PC操作ではA/Dで移動、WまたはSpaceでジャンプ、Shiftでダッシュ、Sまたは下入力でしゃがみます。",
+            "ダッシュと空中ジャンプはスタミナを使います。スタミナは地上で回復し、しゃがみ中は通常の2倍の速度で回復します。",
+            "バス停の屋根や街灯などの装飾足場では、しゃがみ続けると下へすり抜けて降りられます。",
+          ],
+          tables: {
+            items: {
+              heads: ["アイテム", "点数", "メモ"],
+              numeric: [1],
+              rows: [
+                ["エナジードリンク", "100", "スコアアイテムです。"],
+                ["ショッピングバッグ", "250", "スコアアイテムです。"],
+                ["タピオカティー", "150", "スコアアイテムです。"],
+                ["コイン", "25", "ミッションまとめのコイン数も増えます。"],
+                ["スピード", "0", "一時的に移動速度倍率を付与します。"],
+                ["ジャンプ", "0", "一時的にジャンプ倍率を付与します。"],
+                ["スター", "0", "一時的なスター無敵を付与します。"],
+                ["ダッシュリング", "0", "短時間の前方ダッシュを付与します。"],
+              ],
+            },
+            enemies: {
+              heads: ["敵", "基本踏みつけスコア"],
+              numeric: [1],
+              rows: [
+                ["Knife Punk", "10"],
+                ["Aqua Mascot", "10"],
+                ["Horned Cyborg", "20"],
+                ["Cone Golem", "15"],
+                ["Rabbit Traveler", "20"],
+                ["Neon Idol", "30"],
+                ["Heart Cannon", "25"],
+              ],
+            },
+            comboExamples: {
+              heads: ["流れ", "敵の基本点", "コンボ数", "獲得点"],
+              numeric: [1, 2, 3],
+              rows: [
+                ["1体目を踏む", "10", "1", "10"],
+                ["すばやく2体目を踏む", "10", "2", "20"],
+                ["すばやく3体目を踏む", "20", "3", "60"],
+                ["着地後に踏む", "10", "1", "10"],
+              ],
+            },
+            powerups: {
+              heads: ["パワーアップ", "効果時間", "効果"],
+              numeric: [1],
+              rows: [
+                ["スピード", "9000 ms", "プレイヤー速度を1.28倍にします。"],
+                ["ジャンプ", "9000 ms", "ジャンプ速度を1.18倍にします。"],
+                ["スター", "9000 ms", "スター無敵タイマーを設定します。"],
+                ["ダッシュリング", "900 ms", "向いている方向へ横速度720を設定し、ブースト中はスピード倍率も適用します。"],
+              ],
+            },
+            rankBonuses: {
+              heads: ["ボーナス", "条件", "ランク点"],
+              numeric: [2],
+              rows: [
+                ["ノーダメージ", "受けたダメージが0。", "1"],
+                ["高速クリア", "残り時間がステージ総時間の55%以上。", "1"],
+                ["スコアボーナス", "最終スコアが4200以上。", "1"],
+                ["部分スコアボーナス", "最終スコアが2600以上4200未満。", "0.5"],
+              ],
+            },
+            rankThresholds: {
+              heads: ["ランク", "必要ランク点"],
+              numeric: [1],
+              rows: [
+                ["S", "2.5以上"],
+                ["A", "1.5以上"],
+                ["B", "0.5以上"],
+                ["C", "0.5未満"],
+              ],
+            },
+          },
+        },
+        en: {
+          metaTitle: "Game Spec - SUPER ZANNENIN=SAN LAND",
+          kicker: "Core Player Reference",
+          title: "SUPER ZANNENIN=SAN LAND Game Spec",
+          lead:
+            "A player-facing reference for score sources, stomp combos, power-ups, and clear ranks. This is a readable spec outside the game, not an in-game tutorial.",
+          navScore: "Score",
+          navControls: "Controls/Stamina",
+          navCombo: "Stomp Combo",
+          navPowerups: "Power-Ups",
+          navRank: "Clear Rank",
+          navMissions: "Mission Summary",
+          navBack: "Back to Game",
+          statusTitle: "Status",
+          updatedLabel: "Last updated from code state:",
+          calloutStompTitle: "Enemy stomps:",
+          calloutStompBody: "Stomping enemies adds bonus score.",
+          calloutComboTitle: "Quick stomp bonus:",
+          calloutComboBody: "Chaining stomps in quick succession increases the awarded points.",
+          scoreTitle: "Score Sources",
+          itemsTitle: "Items",
+          enemyTitle: "Enemy Stomp Score",
+          enemyBody: "Enemy stomp score is added as bonus score. If an enemy does not define a custom stomp score, its base stomp score is 10.",
+          controlsTitle: "Controls and Stamina",
+          controlsLead: "Core movement, jump, dash, and crouch behavior.",
+          comboTitle: "Stomp Combo",
+          comboLead: "The stomp combo increases the score multiplier when enemies are stomped in quick succession.",
+          comboConditionTitle: "Combo Condition",
+          scoreFormulaTitle: "Score Formula",
+          scoreFormula: "stomp points = enemy base stomp score * current stomp combo count",
+          popupTitle: "On-Screen Popup",
+          powerupsTitle: "Power-Ups",
+          rankTitle: "Clear Rank",
+          rankLead: "Clear rank is calculated from three bonuses.",
+          rankThresholdTitle: "Rank Thresholds",
+          missionsTitle: "Mission Summary",
+          missionsLead: "The clear mission summary currently reports:",
+          footer:
+            "This page is part of the SUPER ZANNENIN=SAN LAND site and is intended as a precise gameplay reference, not an in-game tutorial.",
+          comboRules: [
+            "A stomp starts or continues the combo when the next enemy stomp happens within 1400 ms of the previous enemy stomp.",
+            "If more than 1400 ms passes between enemy stomps, the next stomp starts over at combo 1.",
+            "Landing on the floor resets the current combo count to 0.",
+            "Stomping an enemy bounces the player upward, so another stomp can continue the combo before landing.",
+            "When multiple enemies overlap the player in the same frame, a valid stomp target is prioritized over damage.",
+          ],
+          popupRules: [
+            "Combo 1 shows only the gained score, such as +10.",
+            "Combo 2 or higher shows the gained score and combo count, such as +20 x2.",
+          ],
+          missions: [
+            ["Damage state", "NO DMG OK or DMG n"],
+            ["Collected coin count", "COIN n"],
+            ["Fast clear state", "FAST OK or FAST --"],
+          ],
+          controlsRules: [
+            "On keyboard, A/D move, W or Space jumps, Shift dashes, and S or Down crouches.",
+            "Dash and air jump consume stamina. Stamina recovers while grounded, and crouching doubles the recovery speed.",
+            "On decoration platforms such as bus shelter roofs and street lamps, holding crouch drops through the floor.",
+          ],
+          tables: {
+            items: {
+              heads: ["Item", "Points", "Notes"],
+              numeric: [1],
+              rows: [
+                ["Energy drink", "100", "Score item."],
+                ["Shopping bag", "250", "Score item."],
+                ["Bubble tea", "150", "Score item."],
+                ["Coin", "25", "Also increments the coin count shown in the mission summary."],
+                ["Speed power-up", "0", "Grants a temporary speed multiplier."],
+                ["Jump power-up", "0", "Grants a temporary jump multiplier."],
+                ["Star", "0", "Grants temporary star invulnerability."],
+                ["Dash ring", "0", "Grants a short forward dash boost."],
+              ],
+            },
+            enemies: {
+              heads: ["Enemy", "Base Stomp Score"],
+              numeric: [1],
+              rows: [
+                ["Knife Punk", "10"],
+                ["Aqua Mascot", "10"],
+                ["Horned Cyborg", "20"],
+                ["Cone Golem", "15"],
+                ["Rabbit Traveler", "20"],
+                ["Neon Idol", "30"],
+                ["Heart Cannon", "25"],
+              ],
+            },
+            comboExamples: {
+              heads: ["Sequence", "Enemy Base Score", "Combo Count", "Awarded Points"],
+              numeric: [1, 2, 3],
+              rows: [
+                ["First stomp", "10", "1", "10"],
+                ["Second quick stomp", "10", "2", "20"],
+                ["Third quick stomp", "20", "3", "60"],
+                ["Stomp after landing", "10", "1", "10"],
+              ],
+            },
+            powerups: {
+              heads: ["Power-Up", "Duration", "Effect"],
+              numeric: [1],
+              rows: [
+                ["Speed", "9000 ms", "Multiplies player speed by 1.28."],
+                ["Jump", "9000 ms", "Multiplies jump velocity by 1.18."],
+                ["Star", "9000 ms", "Sets the star invulnerability timer."],
+                ["Dash ring", "900 ms", "Sets horizontal velocity to 720 in the facing direction and applies the speed multiplier during the boost."],
+              ],
+            },
+            rankBonuses: {
+              heads: ["Bonus", "Condition", "Rank Score"],
+              numeric: [2],
+              rows: [
+                ["No damage", "Damage taken is 0.", "1"],
+                ["Fast clear", "Remaining time is at least 55% of total stage time.", "1"],
+                ["Score bonus", "Final score is at least 4200.", "1"],
+                ["Partial score bonus", "Final score is at least 2600 and below 4200.", "0.5"],
+              ],
+            },
+            rankThresholds: {
+              heads: ["Rank", "Required Rank Score"],
+              numeric: [1],
+              rows: [
+                ["S", "2.5 or higher"],
+                ["A", "1.5 or higher"],
+                ["B", "0.5 or higher"],
+                ["C", "Below 0.5"],
+              ],
+            },
+          },
+        },
+        zh: {
+          metaTitle: "游戏说明 - 超级残念院さん乐园",
+          kicker: "核心玩家参考",
+          title: "超级残念院さん乐园 游戏说明",
+          lead: "面向玩家的分数、踩踏连击、强化道具和通关评价参考。这是游戏外可随时查看的说明页，不是游戏内教程。",
+          navScore: "分数",
+          navControls: "操作/体力",
+          navCombo: "踩踏连击",
+          navPowerups: "强化道具",
+          navRank: "通关评价",
+          navMissions: "任务总结",
+          navBack: "返回游戏",
+          statusTitle: "状态",
+          updatedLabel: "根据代码状态最后更新:",
+          calloutStompTitle: "踩踏敌人:",
+          calloutStompBody: "踩踏敌人会追加奖励分。",
+          calloutComboTitle: "快速踩踏奖励:",
+          calloutComboBody: "连续快速踩踏敌人时，获得的分数会提高。",
+          scoreTitle: "分数来源",
+          itemsTitle: "道具",
+          enemyTitle: "敌人踩踏分",
+          enemyBody: "踩踏敌人的分数会作为奖励分追加。没有单独设置踩踏分的敌人，基础踩踏分为10。",
+          controlsTitle: "操作和体力",
+          controlsLead: "移动、跳跃、冲刺和下蹲的基本规则。",
+          comboTitle: "踩踏连击",
+          comboLead: "在短时间内连续踩踏敌人时，踩踏分数倍率会提高。",
+          comboConditionTitle: "连击条件",
+          scoreFormulaTitle: "分数公式",
+          scoreFormula: "踩踏分 = 敌人的基础踩踏分 * 当前踩踏连击数",
+          popupTitle: "画面弹出提示",
+          powerupsTitle: "强化道具",
+          rankTitle: "通关评价",
+          rankLead: "通关评价由三种奖励计算。",
+          rankThresholdTitle: "评价阈值",
+          missionsTitle: "任务总结",
+          missionsLead: "通关时的任务总结目前会显示以下内容:",
+          footer: "本页面是超级残念院さん乐园网站的一部分，用作准确的游玩规则参考，不是游戏内教程。",
+          comboRules: [
+            "下一次踩踏敌人发生在上一次踩踏后的1400毫秒内时，会开始或继续连击。",
+            "两次踩踏敌人的间隔超过1400毫秒时，下一次踩踏会从连击1重新开始。",
+            "落到地面后，当前连击数会重置为0。",
+            "踩踏敌人会让玩家向上弹起，因此落地前可以继续踩踏下一个敌人。",
+            "同一帧内多个敌人与玩家重叠时，有效的踩踏目标会优先于受伤判定。",
+          ],
+          popupRules: [
+            "连击1只显示获得的分数，例如 +10。",
+            "连击2以上会显示获得的分数和连击数，例如 +20 x2。",
+          ],
+          missions: [
+            ["受伤状态", "NO DMG OK 或 DMG n"],
+            ["收集金币数", "COIN n"],
+            ["快速通关状态", "FAST OK 或 FAST --"],
+          ],
+          controlsRules: [
+            "键盘操作中，A/D移动，W或空格跳跃，Shift冲刺，S或下方向键下蹲。",
+            "冲刺和空中跳跃会消耗体力。体力会在地面上恢复，下蹲时恢复速度变为2倍。",
+            "在巴士站顶棚、路灯等装饰平台上，按住下蹲可以向下穿过平台。",
+          ],
+          tables: {
+            items: {
+              heads: ["道具", "分数", "说明"],
+              numeric: [1],
+              rows: [
+                ["能量饮料", "100", "分数道具。"],
+                ["购物袋", "250", "分数道具。"],
+                ["珍珠奶茶", "150", "分数道具。"],
+                ["金币", "25", "也会增加任务总结中显示的金币数。"],
+                ["速度强化", "0", "临时提升移动速度倍率。"],
+                ["跳跃强化", "0", "临时提升跳跃速度倍率。"],
+                ["星星", "0", "提供临时星星无敌。"],
+                ["冲刺环", "0", "提供短时间的前方冲刺加速。"],
+              ],
+            },
+            enemies: {
+              heads: ["敌人", "基础踩踏分"],
+              numeric: [1],
+              rows: [
+                ["Knife Punk", "10"],
+                ["Aqua Mascot", "10"],
+                ["Horned Cyborg", "20"],
+                ["Cone Golem", "15"],
+                ["Rabbit Traveler", "20"],
+                ["Neon Idol", "30"],
+                ["Heart Cannon", "25"],
+              ],
+            },
+            comboExamples: {
+              heads: ["流程", "敌人基础分", "连击数", "获得分数"],
+              numeric: [1, 2, 3],
+              rows: [
+                ["第一次踩踏", "10", "1", "10"],
+                ["第二次快速踩踏", "10", "2", "20"],
+                ["第三次快速踩踏", "20", "3", "60"],
+                ["落地后踩踏", "10", "1", "10"],
+              ],
+            },
+            powerups: {
+              heads: ["强化", "持续时间", "效果"],
+              numeric: [1],
+              rows: [
+                ["速度", "9000 ms", "玩家速度变为1.28倍。"],
+                ["跳跃", "9000 ms", "跳跃速度变为1.18倍。"],
+                ["星星", "9000 ms", "设置星星无敌计时。"],
+                ["冲刺环", "900 ms", "将面向方向的水平速度设为720，冲刺期间也会应用速度倍率。"],
+              ],
+            },
+            rankBonuses: {
+              heads: ["奖励", "条件", "评价分"],
+              numeric: [2],
+              rows: [
+                ["无伤", "受到伤害为0。", "1"],
+                ["快速通关", "剩余时间至少为关卡总时间的55%。", "1"],
+                ["分数奖励", "最终分数至少4200。", "1"],
+                ["部分分数奖励", "最终分数至少2600且低于4200。", "0.5"],
+              ],
+            },
+            rankThresholds: {
+              heads: ["评价", "所需评价分"],
+              numeric: [1],
+              rows: [
+                ["S", "2.5以上"],
+                ["A", "1.5以上"],
+                ["B", "0.5以上"],
+                ["C", "低于0.5"],
+              ],
+            },
+          },
+        },
+        ko: {
+          metaTitle: "게임 설명 - 슈퍼 잔넨인상 랜드",
+          kicker: "핵심 플레이어 참고",
+          title: "슈퍼 잔넨인상 랜드 게임 설명",
+          lead: "점수 획득원, 밟기 콤보, 파워업, 클리어 랭크를 확인하는 플레이어용 참고 페이지입니다. 게임 안 튜토리얼이 아니라, 게임 밖에서 읽는 규칙 설명입니다.",
+          navScore: "점수",
+          navControls: "조작/스태미나",
+          navCombo: "밟기 콤보",
+          navPowerups: "파워업",
+          navRank: "클리어 랭크",
+          navMissions: "미션 요약",
+          navBack: "게임으로 돌아가기",
+          statusTitle: "상태",
+          updatedLabel: "코드 상태 기준 마지막 업데이트:",
+          calloutStompTitle: "적 밟기:",
+          calloutStompBody: "적을 밟으면 보너스 점수가 추가됩니다.",
+          calloutComboTitle: "빠른 밟기 보너스:",
+          calloutComboBody: "짧은 시간 안에 연속으로 적을 밟으면 획득 점수가 증가합니다.",
+          scoreTitle: "점수 획득원",
+          itemsTitle: "아이템",
+          enemyTitle: "적 밟기 점수",
+          enemyBody: "적 밟기 점수는 보너스 점수로 더해집니다. 별도 밟기 점수가 없는 적의 기본 밟기 점수는 10점입니다.",
+          controlsTitle: "조작과 스태미나",
+          controlsLead: "이동, 점프, 대시, 숙이기의 기본 규칙입니다.",
+          comboTitle: "밟기 콤보",
+          comboLead: "짧은 시간 안에 적을 연속으로 밟으면 밟기 점수 배율이 올라갑니다.",
+          comboConditionTitle: "콤보 조건",
+          scoreFormulaTitle: "점수 공식",
+          scoreFormula: "밟기 점수 = 적 기본 밟기 점수 * 현재 밟기 콤보 수",
+          popupTitle: "화면 팝업",
+          powerupsTitle: "파워업",
+          rankTitle: "클리어 랭크",
+          rankLead: "클리어 랭크는 세 가지 보너스로 계산됩니다.",
+          rankThresholdTitle: "랭크 기준",
+          missionsTitle: "미션 요약",
+          missionsLead: "클리어 시 미션 요약에는 현재 다음 내용이 표시됩니다:",
+          footer: "이 페이지는 슈퍼 잔넨인상 랜드 사이트의 일부이며, 게임 안 튜토리얼이 아니라 정확한 플레이 규칙 참고용 페이지입니다.",
+          comboRules: [
+            "다음 적 밟기가 이전 적 밟기 후 1400ms 안에 발생하면 콤보가 시작되거나 이어집니다.",
+            "적 밟기 사이가 1400ms를 넘으면 다음 밟기는 콤보 1부터 다시 시작됩니다.",
+            "바닥에 착지하면 현재 콤보 수는 0으로 초기화됩니다.",
+            "적을 밟으면 플레이어가 위로 튀어 오르므로, 착지 전에 다음 밟기로 콤보를 이어갈 수 있습니다.",
+            "같은 프레임에서 여러 적이 플레이어와 겹치면, 유효한 밟기 대상이 대미지보다 우선됩니다.",
+          ],
+          popupRules: [
+            "콤보 1에서는 +10처럼 획득 점수만 표시됩니다.",
+            "콤보 2 이상에서는 +20 x2처럼 획득 점수와 콤보 수가 함께 표시됩니다.",
+          ],
+          missions: [
+            ["대미지 상태", "NO DMG OK 또는 DMG n"],
+            ["수집한 코인 수", "COIN n"],
+            ["빠른 클리어 상태", "FAST OK 또는 FAST --"],
+          ],
+          controlsRules: [
+            "키보드에서는 A/D로 이동, W 또는 Space로 점프, Shift로 대시, S 또는 아래 방향키로 숙입니다.",
+            "대시와 공중 점프는 스태미나를 소비합니다. 스태미나는 지상에서 회복되며, 숙이는 동안 회복 속도가 2배가 됩니다.",
+            "버스 정류장 지붕이나 가로등 같은 장식 발판에서는 숙이기를 누르고 있으면 아래로 통과할 수 있습니다.",
+          ],
+          tables: {
+            items: {
+              heads: ["아이템", "점수", "메모"],
+              numeric: [1],
+              rows: [
+                ["에너지 드링크", "100", "점수 아이템입니다."],
+                ["쇼핑백", "250", "점수 아이템입니다."],
+                ["버블티", "150", "점수 아이템입니다."],
+                ["코인", "25", "미션 요약에 표시되는 코인 수도 증가합니다."],
+                ["속도 파워업", "0", "일시적으로 이동 속도 배율을 부여합니다."],
+                ["점프 파워업", "0", "일시적으로 점프 속도 배율을 부여합니다."],
+                ["스타", "0", "일시적인 스타 무적을 부여합니다."],
+                ["대시 링", "0", "짧은 시간 동안 앞쪽으로 대시 부스트를 부여합니다."],
+              ],
+            },
+            enemies: {
+              heads: ["적", "기본 밟기 점수"],
+              numeric: [1],
+              rows: [
+                ["Knife Punk", "10"],
+                ["Aqua Mascot", "10"],
+                ["Horned Cyborg", "20"],
+                ["Cone Golem", "15"],
+                ["Rabbit Traveler", "20"],
+                ["Neon Idol", "30"],
+                ["Heart Cannon", "25"],
+              ],
+            },
+            comboExamples: {
+              heads: ["순서", "적 기본 점수", "콤보 수", "획득 점수"],
+              numeric: [1, 2, 3],
+              rows: [
+                ["첫 번째 밟기", "10", "1", "10"],
+                ["두 번째 빠른 밟기", "10", "2", "20"],
+                ["세 번째 빠른 밟기", "20", "3", "60"],
+                ["착지 후 밟기", "10", "1", "10"],
+              ],
+            },
+            powerups: {
+              heads: ["파워업", "지속 시간", "효과"],
+              numeric: [1],
+              rows: [
+                ["속도", "9000 ms", "플레이어 속도를 1.28배로 만듭니다."],
+                ["점프", "9000 ms", "점프 속도를 1.18배로 만듭니다."],
+                ["스타", "9000 ms", "스타 무적 타이머를 설정합니다."],
+                ["대시 링", "900 ms", "바라보는 방향의 수평 속도를 720으로 설정하고, 부스트 중에는 속도 배율도 적용합니다."],
+              ],
+            },
+            rankBonuses: {
+              heads: ["보너스", "조건", "랭크 점수"],
+              numeric: [2],
+              rows: [
+                ["노 대미지", "받은 대미지가 0입니다.", "1"],
+                ["빠른 클리어", "남은 시간이 전체 스테이지 시간의 55% 이상입니다.", "1"],
+                ["점수 보너스", "최종 점수가 4200 이상입니다.", "1"],
+                ["부분 점수 보너스", "최종 점수가 2600 이상 4200 미만입니다.", "0.5"],
+              ],
+            },
+            rankThresholds: {
+              heads: ["랭크", "필요 랭크 점수"],
+              numeric: [1],
+              rows: [
+                ["S", "2.5 이상"],
+                ["A", "1.5 이상"],
+                ["B", "0.5 이상"],
+                ["C", "0.5 미만"],
+              ],
+            },
+          },
+        },
+      };
+
+      function clearChildren(element) {
+        while (element.firstChild) {
+          element.removeChild(element.firstChild);
+        }
+      }
+
+      function renderList(name, rows) {
+        const list = document.querySelector(`[data-list="${name}"]`);
+        if (!list) return;
+        clearChildren(list);
+        rows.forEach((row) => {
+          const li = document.createElement("li");
+          if (Array.isArray(row)) {
+            li.append(`${row[0]}: `);
+            const code = document.createElement("code");
+            code.textContent = row[1];
+            li.append(code);
+          } else {
+            li.textContent = row;
+          }
+          list.append(li);
+        });
+      }
+
+      function renderTable(name, table) {
+        const head = document.querySelector(`[data-table-head="${name}"]`);
+        const body = document.querySelector(`[data-table-body="${name}"]`);
+        if (!head || !body) return;
+        clearChildren(head);
+        clearChildren(body);
+
+        const headerRow = document.createElement("tr");
+        table.heads.forEach((label, index) => {
+          const th = document.createElement("th");
+          th.textContent = label;
+          if (table.numeric.includes(index)) th.className = "num";
+          headerRow.append(th);
+        });
+        head.append(headerRow);
+
+        table.rows.forEach((row) => {
+          const tr = document.createElement("tr");
+          row.forEach((value, index) => {
+            const td = document.createElement("td");
+            td.textContent = value;
+            if (table.numeric.includes(index)) td.className = "num";
+            tr.append(td);
+          });
+          body.append(tr);
+        });
+      }
+
+      function normalizeLocale(value) {
+        const normalized = value ? value.toLowerCase() : "";
+        if (normalized.startsWith("zh")) return "zh";
+        if (normalized.startsWith("ko")) return "ko";
+        if (normalized.startsWith("ja")) return "ja";
+        return "en";
+      }
+
+      function isSupportedLocale(value) {
+        return value === "ja" || value === "en" || value === "zh" || value === "ko";
+      }
+
+      function getInitialLocale() {
+        const params = new URLSearchParams(window.location.search);
+        const queryLocale = params.get("lang");
+        if (isSupportedLocale(queryLocale)) return queryLocale;
+
+        try {
+          const storedLocale = window.localStorage.getItem(STORAGE_KEY);
+          if (isSupportedLocale(storedLocale)) return storedLocale;
+        } catch {
+          // Local storage can be blocked in some embedded browsers.
+        }
+
+        return normalizeLocale(window.navigator.language);
+      }
+
+      function setLanguage(locale) {
+        const text = specText[locale] ?? specText.ja;
+        document.documentElement.lang = locale;
+        document.title = text.metaTitle;
+
+        document.querySelectorAll("[data-i18n]").forEach((element) => {
+          const key = element.getAttribute("data-i18n");
+          element.textContent = text[key] ?? "";
+        });
+        document.querySelectorAll("[data-spec-version]").forEach((element) => {
+          element.textContent = SPEC_VERSION;
+        });
+        Object.entries(text.tables).forEach(([name, table]) => renderTable(name, table));
+        renderList("comboRules", text.comboRules);
+        renderList("popupRules", text.popupRules);
+        renderList("controlsRules", text.controlsRules);
+        renderList("missions", text.missions);
+
+        document.querySelectorAll("[data-lang]").forEach((button) => {
+          const isActive = button.getAttribute("data-lang") === locale;
+          button.setAttribute("aria-pressed", String(isActive));
+        });
+
+        try {
+          window.localStorage.setItem(STORAGE_KEY, locale);
+        } catch {
+          // Local storage can be blocked in some embedded browsers.
+        }
+      }
+
+      document.querySelectorAll("[data-lang]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const locale = button.getAttribute("data-lang");
+          if (isSupportedLocale(locale)) {
+            setLanguage(locale);
+          }
+        });
+      });
+
+      setLanguage(getInitialLocale());
+    </script>
+  </body>
+</html>
