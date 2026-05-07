@@ -1,0 +1,97 @@
+name: PR Preview (GitHub Pages Deployments)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+
+concurrency:
+  group: pr-pages-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+        env:
+          GITHUB_PAGES: "true"
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+          VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
+          VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
+          VITE_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}
+          VITE_FIREBASE_STORAGE_BUCKET: ${{ secrets.VITE_FIREBASE_STORAGE_BUCKET }}
+          VITE_FIREBASE_FUNCTIONS_REGION: ${{ secrets.VITE_FIREBASE_FUNCTIONS_REGION }}
+          VITE_FIREBASE_APPCHECK_SITE_KEY: ${{ secrets.VITE_FIREBASE_APPCHECK_SITE_KEY }}
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+        with:
+          enablement: true
+
+      - name: Upload preview artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy-preview:
+    needs: build-preview
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+    outputs:
+      preview_url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Deploy preview
+        id: deploy
+        uses: actions/deploy-pages@v5
+        with:
+          preview: true
+
+  comment-preview:
+    needs: deploy-preview
+    runs-on: ubuntu-latest
+    if: ${{ needs.deploy-preview.outputs.preview_url != '' }}
+    steps:
+      - name: Comment preview URL
+        uses: actions/github-script@v8
+        env:
+          PREVIEW_URL: ${{ needs.deploy-preview.outputs.preview_url }}
+        with:
+          script: |
+            const marker = "<!-- pr-preview-url -->";
+            const body = `${marker}
+            🔍 PRプレビュー: ${process.env.PREVIEW_URL}`;
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.rest.issues.listComments({ owner, repo, issue_number, per_page: 100 });
+            const existing = comments.data.find((comment) => comment.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner,
+                repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
