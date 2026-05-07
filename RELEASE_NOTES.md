@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.345
+### English
+- Normalized the legacy Shibu-ya city stage ID `neonCanal` to `originalDowntown` for new leaderboard scores and saved stage settings.
+- Added a Firestore migration script that merges existing `neonCanal` scores and ghosts into `originalDowntown`, keeping each player's higher score and matching ghost.
+### Japanese
+- 新しいランキング送信と保存済みステージ設定で、シブヤシティの旧ステージID `neonCanal` を `originalDowntown` に正規化するようにしました。
+- Firestore上の既存 `neonCanal` スコアとゴーストを `originalDowntown` へ統合し、同一プレイヤーでは高いスコアと対応するゴーストを残す移行スクリプトを追加しました。
+
 ## v0.1.344
 ### English
 - Added a mobile fullscreen recovery reload action so users can recover from broken viewport states where the address bar appears and gameplay is cut off.

@@ -3,6 +3,7 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
+    "migrate:legacy-shibuya-stage-id": "npm run build && node lib/migrateLegacyShibuyaStageId.js",
     "test": "npm run build && node --test lib/**/*.test.js",
     "serve": "npm run build && firebase emulators:start --only functions",
     "shell": "npm run build && firebase functions:shell",

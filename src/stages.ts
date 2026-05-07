@@ -2239,6 +2239,9 @@ export const STAGES = {
 };
 export type StageId = keyof typeof STAGES;
 export const DEFAULT_STAGE_ID = "originalDowntown" satisfies StageId;
+const STAGE_ID_ALIASES: Partial<Record<string, StageId>> = {
+  neonCanal: "originalDowntown",
+};
 export const PLAYABLE_STAGE_IDS = [
   "originalDowntown",
   "neoShibuyaCity",
@@ -2250,6 +2253,11 @@ export const PLAYABLE_STAGE_IDS = [
   "rankingCheck",
 ] as const satisfies readonly StageId[];
 export const ACTIVE_STAGE = STAGES[DEFAULT_STAGE_ID];
+
+export const normalizeStageId = (stageId: string): StageId => {
+  const aliasedStageId = STAGE_ID_ALIASES[stageId] ?? stageId;
+  return aliasedStageId in STAGES ? (aliasedStageId as StageId) : DEFAULT_STAGE_ID;
+};
 
 export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   name: typeof stage.name === "string" ? stage.name : { ...stage.name },
