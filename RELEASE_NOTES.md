@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.346
+### English
+- Replaced the opening loading oscillating text with the `player_walk_13_6x3_320x260.webp` walking animation and kept the load percentage display.
+### Japanese
+- 起動中に揺れていた文字アニメーションを止め、起動ローディング画面で「player_walk_13_6x3_320x260.webp」の歩行アニメーションを表示するように変更しました。読み込み進捗は数値表示のまま継続しています。
+
 ## v0.1.345
 ### English
 - Normalized the legacy Shibu-ya city stage ID `neonCanal` to `originalDowntown` for new leaderboard scores and saved stage settings.
