@@ -35,6 +35,11 @@ const DEFAULT_DIALOGUE_FONT_SIZE = 18;
 const MIN_DIALOGUE_FONT_SIZE = 10;
 const TV_SWITCH_IN_MS = 520;
 const TV_SWITCH_OUT_MS = 420;
+const HUD_GUARD_LEFT = 12;
+const HUD_GUARD_TOP = 12;
+const HUD_GUARD_WIDTH = 430;
+const HUD_GUARD_HEIGHT = 156;
+const HUD_GUARD_MARGIN = 10;
 
 export const resolveStoryDialogueLines = (storyDialogue: StageStoryDialogue, locale: Locale): StoryDialogueLine[] =>
   storyDialogue.lines.map((line) => ({
@@ -163,13 +168,30 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
     const logicalTop = options.top ?? DEFAULT_DIALOGUE_TOP;
     const logicalWidth = options.width ?? DEFAULT_DIALOGUE_WIDTH;
     const left = frameLeft + logicalLeft * safeScale;
-    const top = frameTop + logicalTop * safeScale;
+    let top = frameTop + logicalTop * safeScale;
     const maxWidth = Math.max(MIN_DIALOGUE_WIDTH, frameWidth - logicalLeft * safeScale - DEFAULT_DIALOGUE_LEFT * safeScale);
     const width = Math.max(MIN_DIALOGUE_WIDTH, Math.min(logicalWidth * safeScale, maxWidth));
     const fontSize = Math.min(
       DEFAULT_DIALOGUE_FONT_SIZE,
       Math.max(MIN_DIALOGUE_FONT_SIZE, DEFAULT_DIALOGUE_FONT_SIZE * safeScale),
     );
+
+    const guardLeft = frameLeft + HUD_GUARD_LEFT * safeScale;
+    const guardTop = frameTop + HUD_GUARD_TOP * safeScale;
+    const guardRight = guardLeft + HUD_GUARD_WIDTH * safeScale;
+    const guardBottom = guardTop + HUD_GUARD_HEIGHT * safeScale;
+    const dialogueLeft = left;
+    const dialogueTop = top;
+    const dialogueRight = left + width;
+    const dialogueBottom = top + Math.round(width * FRAME_ASPECT_RATIO);
+    const overlapsHud =
+      dialogueLeft < guardRight &&
+      dialogueRight > guardLeft &&
+      dialogueTop < guardBottom &&
+      dialogueBottom > guardTop;
+    if (overlapsHud) {
+      top = guardBottom + HUD_GUARD_MARGIN * safeScale;
+    }
 
     wrapper.style.left = `${Math.round(left)}px`;
     wrapper.style.top = `${Math.round(top)}px`;

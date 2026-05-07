@@ -92,13 +92,14 @@ import {
   showScreenshotPreview,
   type CapturedGameScreenshot,
 } from "./screenshotPreview";
+import { ensureLatestClientVersion } from "./versionSync";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.339";
+const DEBUG_VERSION = "v0.1.344";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -217,6 +218,8 @@ const PLAYER_DISPLAY_HEIGHT = 260;
 const PLAYER_BODY_WIDTH = 52;
 const PLAYER_BODY_HEIGHT = 164;
 const PLAYER_BODY_OFFSET_X = 134;
+
+const BOOT_LOADING_OVERLAY_ID = "boot-loading-overlay";
 const PLAYER_BODY_OFFSET_Y = 86;
 const PLAYER_CROUCH_BODY_WIDTH = 58;
 const PLAYER_CROUCH_BODY_HEIGHT = 94;
@@ -396,6 +399,7 @@ class PrototypeScene extends Phaser.Scene {
   private mobileFullscreenRecoveryDismissed = false;
   private mobileLayoutPaused = false;
   private mobileLayoutShouldStartCountdown = false;
+  private startModalVersionCheckStarted = false;
   private rewards?: RewardSystem;
   private startTime = 0;
   private editorTimerPausedMs = 0;
@@ -497,6 +501,11 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   preload() {
+    setBootLoadingProgress("Loading 0%");
+    this.load.on("progress", (value: number) => {
+      const percent = Math.max(0, Math.min(100, Math.round(value * 100)));
+      setBootLoadingProgress(`Loading ${percent}%`);
+    });
     REAR_BACKGROUNDS.forEach((background) => {
       this.load.image(background.key, `${ASSET_BASE}${background.path}`);
     });
@@ -560,6 +569,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   create() {
+    hideBootLoadingOverlay();
     this.registerRainbowPipeline();
     this.playerName = this.getCookieValue("actiongame_player_name") || this.playerName;
     this.leaderboardPlayerId = this.getOrCreateLeaderboardPlayerId();
@@ -905,7 +915,7 @@ class PrototypeScene extends Phaser.Scene {
     const hasGameplayInput = left || right || up || down || wantsDash || debugJump || normalJump;
     this.updateAfkIdleDanmaku(hasGameplayInput);
     const wantsStompFreeJump = jump && !onFloor && this.time.now <= this.stompFreeJumpUntil;
-    const wantsAirJump = jump && !onFloor && debugJump;
+    const wantsAirJump = jump && !onFloor && (debugJump || normalJump);
     const canJump = onFloor || wantsStompFreeJump || (wantsAirJump && this.consumeStamina(AIR_JUMP_STAMINA_COST));
     let startedJump = false;
     const baseHorizontalAcceleration = onFloor
@@ -1466,6 +1476,10 @@ class PrototypeScene extends Phaser.Scene {
 
   private showStartModal() {
     this.removeStartModal();
+    if (!this.startModalVersionCheckStarted) {
+      this.startModalVersionCheckStarted = true;
+      void ensureLatestClientVersion(DEBUG_VERSION);
+    }
 
     this.startModal = new StartModal({
       playerName: this.playerName,
@@ -2340,16 +2354,21 @@ class PrototypeScene extends Phaser.Scene {
       <div class="mobile-fullscreen-recovery-actions">
         <button type="button" data-action="restore">${t(this.locale, "mobile.fullscreenRestoreButton")}</button>
         <button type="button" data-action="dismiss">${t(this.locale, "mobile.fullscreenRestoreLater")}</button>
+        <button type="button" data-action="reload">${t(this.locale, "mobile.fullscreenRecoveryReload")}</button>
       </div>
     `;
     const restoreButton = overlay.querySelector<HTMLButtonElement>("[data-action='restore']")!;
     const dismissButton = overlay.querySelector<HTMLButtonElement>("[data-action='dismiss']")!;
+    const reloadButton = overlay.querySelector<HTMLButtonElement>("[data-action='reload']")!;
     restoreButton.addEventListener("click", () => {
       void this.enterMobileFullscreen();
     });
     dismissButton.addEventListener("click", () => {
       this.mobileFullscreenRecoveryDismissed = true;
       this.removeMobileFullscreenRecovery();
+    });
+    reloadButton.addEventListener("click", () => {
+      window.location.reload();
     });
     overlay.addEventListener("pointerdown", (event) => event.stopPropagation());
     document.body.appendChild(overlay);
@@ -2853,7 +2872,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(210)
       .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => this.downloadGhostReplayJson());
+      .on("pointerup", () => this.downloadGhostReplayJson());
   }
 
   private showScreenshotPreviewOrCapture() {
@@ -2878,7 +2897,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(210)
       .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => this.showScreenshotPreviewOrCapture());
+      .on("pointerup", () => this.showScreenshotPreviewOrCapture());
   }
 
   private captureGameScreenshot({ preview }: { preview: boolean }) {
@@ -2939,7 +2958,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(210)
       .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => this.returnToTitle());
+      .on("pointerup", () => this.returnToTitle());
   }
 
   private downloadGhostReplayJson() {
@@ -3769,6 +3788,7 @@ document.addEventListener("contextmenu", (event) => {
 
 initializePwaInstall();
 registerServiceWorker();
+showBootLoadingOverlay();
 
 new Phaser.Game({
   type: Phaser.AUTO,
@@ -3801,4 +3821,32 @@ function registerServiceWorker() {
       console.warn("Service worker registration failed.", error);
     });
   });
+}
+
+function showBootLoadingOverlay() {
+  const existing = document.getElementById(BOOT_LOADING_OVERLAY_ID);
+  if (existing) {
+    existing.remove();
+  }
+  const overlay = document.createElement("div");
+  overlay.id = BOOT_LOADING_OVERLAY_ID;
+  overlay.innerHTML = `
+    <div class="boot-loading-panel" role="status" aria-live="polite" aria-label="Loading game">
+      <div class="boot-loading-runner">残念院さん</div>
+      <p class="boot-loading-text" data-boot-loading-text>Loading 0%</p>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+
+function setBootLoadingProgress(text: string) {
+  const label = document.querySelector<HTMLElement>("[data-boot-loading-text]");
+  if (!label) {
+    return;
+  }
+  label.textContent = text;
+}
+
+function hideBootLoadingOverlay() {
+  document.getElementById(BOOT_LOADING_OVERLAY_ID)?.remove();
 }
