@@ -2,6 +2,18 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.341
+### English
+- Added a new playable "Monster House" stage packed with an extreme number of enemies for high-density combat chaos.
+### Japanese
+- 敵を大量配置した高密度バトル用の新ステージ「モンスターハウス」を追加しました。
+
+## v0.1.340
+### English
+- Added a startup version check that fetches `version.json` when the first start menu appears and automatically reloads when the deployed version differs from the current client.
+### Japanese
+- 最初のスタートメニュー表示時に `version.json` を取得してバージョン差分を確認し、配信中のバージョンと不一致なら自動で再読み込みする仕組みを追加しました。
+
 ## v0.1.339
 ### English
 - Added a Japanese stage-name field to the stage editor and a Firebase-backed stage adoption proposal button with duplicate-name protection.

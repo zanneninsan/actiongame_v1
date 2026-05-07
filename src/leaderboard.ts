@@ -233,7 +233,7 @@ export async function clearLeaderboardUserSettings() {
 
   const user = await ensureAnonymousAuth(services.auth);
   if (!isGoogleLinkedUser(user)) {
-    return { ok: false as const, reason: "Google account is not linked." };
+    return { ok: true as const, identity: createLeaderboardIdentity(user) };
   }
 
   await deleteDoc(doc(services.firestore, "users", user.uid, "settings", USER_SETTINGS_DOC));
