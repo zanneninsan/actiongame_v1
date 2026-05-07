@@ -14,6 +14,8 @@ type PlayerSprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 
 export class MinimapOverlay {
   private readonly graphics: Phaser.GameObjects.Graphics;
+  private readonly collectedItemIndexes = new Set<number>();
+  private readonly defeatedEnemyIndexes = new Set<number>();
   private nextUpdateAt = 0;
   private wasVisible = false;
 
@@ -43,6 +45,38 @@ export class MinimapOverlay {
     this.wasVisible = true;
     this.nextUpdateAt = now + MAP_UPDATE_INTERVAL_MS;
     this.draw();
+  }
+
+  resetProgress() {
+    if (this.collectedItemIndexes.size === 0 && this.defeatedEnemyIndexes.size === 0) {
+      return;
+    }
+    this.collectedItemIndexes.clear();
+    this.defeatedEnemyIndexes.clear();
+    this.requestRedraw();
+  }
+
+  markItemCollected(placementIndex: number | undefined) {
+    if (placementIndex === undefined || this.collectedItemIndexes.has(placementIndex)) {
+      return;
+    }
+    this.collectedItemIndexes.add(placementIndex);
+    this.requestRedraw();
+  }
+
+  markEnemyDefeated(placementIndex: number | undefined) {
+    if (placementIndex === undefined || this.defeatedEnemyIndexes.has(placementIndex)) {
+      return;
+    }
+    this.defeatedEnemyIndexes.add(placementIndex);
+    this.requestRedraw();
+  }
+
+  private requestRedraw() {
+    this.nextUpdateAt = 0;
+    if (this.wasVisible) {
+      this.draw();
+    }
   }
 
   private draw() {
@@ -86,9 +120,25 @@ export class MinimapOverlay {
       this.graphics.fillRect(drawX, drawY, Math.max(1.5, drawRight - drawX), 3);
     });
 
-    this.drawDots(stage.items, viewLeft, viewRight, toMapX, toMapY, 0xfde68a, 1.8);
+    this.drawDots(
+      stage.items.filter((_, index) => !this.collectedItemIndexes.has(index)),
+      viewLeft,
+      viewRight,
+      toMapX,
+      toMapY,
+      0xfde68a,
+      1.8,
+    );
     this.drawDots(stage.bonusBlocks ?? [], viewLeft, viewRight, toMapX, toMapY, 0xc084fc, 2);
-    this.drawDots(stage.enemies ?? [], viewLeft, viewRight, toMapX, toMapY, 0xfb7185, 2.2);
+    this.drawDots(
+      (stage.enemies ?? []).filter((_, index) => !this.defeatedEnemyIndexes.has(index)),
+      viewLeft,
+      viewRight,
+      toMapX,
+      toMapY,
+      0xfb7185,
+      2.2,
+    );
 
     if (stage.goal.x >= viewLeft && stage.goal.x <= viewRight) {
       this.graphics.fillStyle(0x22c55e, 0.95);

@@ -13,7 +13,7 @@ type CreateItemsOptions = {
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   placements: readonly ItemPlacement[];
   canCollect: () => boolean;
-  onCollect: (type: ItemType, points: number, x: number, y: number) => void;
+  onCollect: (type: ItemType, points: number, x: number, y: number, placementIndex: number | undefined) => void;
   trackStageObject: <T extends Phaser.GameObjects.GameObject>(object: T) => T;
 };
 
@@ -45,8 +45,8 @@ export const populateItems = (options: {
     return;
   }
 
-  options.placements.forEach((placement) => {
-    createItemSprite(options.scene, itemsGroup, placement, options.trackStageObject);
+  options.placements.forEach((placement, index) => {
+    createItemSprite(options.scene, itemsGroup, placement, index, options.trackStageObject);
   });
 };
 
@@ -54,6 +54,7 @@ const createItemSprite = (
   scene: Phaser.Scene,
   itemsGroup: Phaser.Physics.Arcade.StaticGroup,
   placement: ItemPlacement,
+  placementIndex: number,
   trackStageObject: <T extends Phaser.GameObjects.GameObject>(object: T) => T,
 ) => {
   const definition = ITEM_DEFINITIONS[placement.type];
@@ -76,6 +77,7 @@ const createItemSprite = (
   );
   const item = itemsGroup.create(placement.x, placement.y, definition.key) as Phaser.Physics.Arcade.Sprite;
   item.setData("itemType", placement.type);
+  item.setData("placementIndex", placementIndex);
   item.setData("glow", glow);
   item.setDisplaySize(displayWidth, displayHeight);
   item.setDepth(0.2);
@@ -116,7 +118,7 @@ const collectItem = (
   scene: Phaser.Scene,
   item: Phaser.Physics.Arcade.Sprite,
   canCollect: () => boolean,
-  onCollect: (type: ItemType, points: number, x: number, y: number) => void,
+  onCollect: (type: ItemType, points: number, x: number, y: number, placementIndex: number | undefined) => void,
 ) => {
   if (!item.active || !canCollect()) {
     return;
@@ -124,7 +126,8 @@ const collectItem = (
 
   const itemType = item.getData("itemType") as ItemType;
   const definition = ITEM_DEFINITIONS[itemType];
-  onCollect(itemType, definition.points, item.x, item.y);
+  const placementIndex = item.getData("placementIndex") as number | undefined;
+  onCollect(itemType, definition.points, item.x, item.y, placementIndex);
   scene.sound.play("item-pickup", { volume: getScaledSeVolume(scene, 0.65) });
   const glow = item.getData("glow") as Phaser.GameObjects.Image | undefined;
   if (glow) {
