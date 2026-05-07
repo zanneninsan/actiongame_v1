@@ -303,6 +303,7 @@ const bindTouchDrivenMobileControls = (
   const activeActionTouches = new Map<number, string>();
   const activeControlTouchIds = new Set<number>();
   const activeJoystickTouchIds = new Set<number>();
+  const activeJumpButtonTouches = new Set<number>();
 
   const setKeyPressed = (key: MobileInputKey, pressed: boolean) => {
     const wasPressed = pressedKeys.has(key);
@@ -330,6 +331,7 @@ const bindTouchDrivenMobileControls = (
     activeActionTouches.clear();
     activeControlTouchIds.clear();
     activeJoystickTouchIds.clear();
+    activeJumpButtonTouches.clear();
   };
 
   const findButtonAt = <T extends { button: HTMLButtonElement }>(buttons: T[], touch: Touch) =>
@@ -362,6 +364,12 @@ const bindTouchDrivenMobileControls = (
       if (keyHit) {
         nextKeys.add(keyHit.key);
         pressedButtons.add(keyHit.button);
+        if (keyHit.key === "w" && !activeJumpButtonTouches.has(touch.identifier)) {
+          activeJumpButtonTouches.add(touch.identifier);
+          options.onJumpQueued();
+        }
+      } else {
+        activeJumpButtonTouches.delete(touch.identifier);
       }
 
       const actionHit = findButtonAt(actionButtons, touch);
@@ -391,6 +399,11 @@ const bindTouchDrivenMobileControls = (
     Array.from(activeJoystickTouchIds).forEach((touchId) => {
       if (!activeTouchIds.has(touchId)) {
         activeJoystickTouchIds.delete(touchId);
+      }
+    });
+    Array.from(activeJumpButtonTouches).forEach((touchId) => {
+      if (!activeTouchIds.has(touchId)) {
+        activeJumpButtonTouches.delete(touchId);
       }
     });
 
