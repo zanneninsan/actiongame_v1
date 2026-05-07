@@ -92,13 +92,14 @@ import {
   showScreenshotPreview,
   type CapturedGameScreenshot,
 } from "./screenshotPreview";
+import { ensureLatestClientVersion } from "./versionSync";
 
 const GAME_WIDTH = 1280;
 const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.339";
+const DEBUG_VERSION = "v0.1.341";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -396,6 +397,7 @@ class PrototypeScene extends Phaser.Scene {
   private mobileFullscreenRecoveryDismissed = false;
   private mobileLayoutPaused = false;
   private mobileLayoutShouldStartCountdown = false;
+  private startModalVersionCheckStarted = false;
   private rewards?: RewardSystem;
   private startTime = 0;
   private editorTimerPausedMs = 0;
@@ -905,7 +907,7 @@ class PrototypeScene extends Phaser.Scene {
     const hasGameplayInput = left || right || up || down || wantsDash || debugJump || normalJump;
     this.updateAfkIdleDanmaku(hasGameplayInput);
     const wantsStompFreeJump = jump && !onFloor && this.time.now <= this.stompFreeJumpUntil;
-    const wantsAirJump = jump && !onFloor && debugJump;
+    const wantsAirJump = jump && !onFloor && (debugJump || normalJump);
     const canJump = onFloor || wantsStompFreeJump || (wantsAirJump && this.consumeStamina(AIR_JUMP_STAMINA_COST));
     let startedJump = false;
     const baseHorizontalAcceleration = onFloor
@@ -1466,6 +1468,10 @@ class PrototypeScene extends Phaser.Scene {
 
   private showStartModal() {
     this.removeStartModal();
+    if (!this.startModalVersionCheckStarted) {
+      this.startModalVersionCheckStarted = true;
+      void ensureLatestClientVersion(DEBUG_VERSION);
+    }
 
     this.startModal = new StartModal({
       playerName: this.playerName,
@@ -2853,7 +2859,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(210)
       .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => this.downloadGhostReplayJson());
+      .on("pointerup", () => this.downloadGhostReplayJson());
   }
 
   private showScreenshotPreviewOrCapture() {
@@ -2878,7 +2884,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(210)
       .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => this.showScreenshotPreviewOrCapture());
+      .on("pointerup", () => this.showScreenshotPreviewOrCapture());
   }
 
   private captureGameScreenshot({ preview }: { preview: boolean }) {
@@ -2939,7 +2945,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(210)
       .setInteractive({ useHandCursor: true })
-      .on("pointerdown", () => this.returnToTitle());
+      .on("pointerup", () => this.returnToTitle());
   }
 
   private downloadGhostReplayJson() {

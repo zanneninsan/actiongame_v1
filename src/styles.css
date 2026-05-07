@@ -1829,9 +1829,44 @@ body.is-screenshot-modal-open #mobile-controls {
       transform 180ms ease;
   }
 
+  #stage-editor .editor-body {
+    max-height: min(56dvh, calc(100dvh - (248px + env(safe-area-inset-top) + env(safe-area-inset-bottom))));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 9px;
+  }
+
   body.is-global-menu-open #stage-editor {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@media (max-width: 480px) {
+  #stage-editor {
+    width: min(94vw, 320px);
+  }
+
+  #stage-editor .editor-body {
+    max-height: min(52dvh, calc(100dvh - (236px + env(safe-area-inset-top) + env(safe-area-inset-bottom))));
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .editor-row {
+    grid-template-columns: 74px 1fr;
+    gap: 6px;
+    font-size: 11px;
+  }
+
+  .editor-row select,
+  .editor-row input,
+  .editor-history-row button,
+  .editor-io-row button,
+  .editor-submit-row button,
+  .editor-inline-control button {
+    height: 28px;
+    font-size: 10px;
   }
 }
 
@@ -2014,6 +2049,7 @@ body.is-screenshot-modal-open #mobile-controls {
 }
 
 .screenshot-image {
+  display: block;
   width: 100%;
   max-height: min(64dvh, 540px);
   object-fit: contain;
@@ -2044,6 +2080,44 @@ body.is-screenshot-modal-open #mobile-controls {
 
 .screenshot-actions button:hover {
   filter: brightness(1.12);
+}
+
+@media (max-width: 768px), (max-height: 560px) {
+  #screenshot-modal {
+    padding: clamp(8px, 2.6vw, 14px);
+  }
+
+  .screenshot-dialog {
+    width: min(100%, calc(100vw - 16px));
+    max-height: calc(100dvh - 16px);
+    gap: 8px;
+    padding: clamp(10px, 2.8vw, 14px);
+  }
+
+  .screenshot-dialog h2 {
+    font-size: clamp(15px, 4.2vw, 19px);
+  }
+
+  .screenshot-meta {
+    font-size: 11px;
+  }
+
+  .screenshot-image {
+    max-height: min(52dvh, 340px);
+  }
+
+  .screenshot-actions {
+    justify-content: stretch;
+    gap: 8px;
+  }
+
+  .screenshot-actions button {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+    min-height: 38px;
+    padding: 7px 10px;
+    font-size: 13px;
+  }
 }
 
 #account-modal {
