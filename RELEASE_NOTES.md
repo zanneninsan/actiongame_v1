@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.349
+### English
+- Kept the boot version marker in `version.json` synchronized with the in-game debug version.
+- Changed the startup version check to reload only when the deployed `version.json` is newer than the running client, preventing a stale marker from replaying the initial loading sequence.
+### Japanese
+- 起動時に参照する `version.json` をゲーム内のデバッグバージョンと揃えました。
+- 起動時のバージョン確認を、配信中の `version.json` が現在のクライアントより新しい場合だけ再読み込みするように変更し、古いバージョン情報で初期ローディングが再実行されないようにしました。
+
 ## v0.1.348
 ### English
 - Improved mobile control layout editing with built-in control resizing: each button and the joystick can now be resized in a discoverable way, and control scale is persisted with layout data.
