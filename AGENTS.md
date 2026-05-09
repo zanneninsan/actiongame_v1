@@ -19,6 +19,9 @@
 - For debug/global UI behavior, start with `src/globalUi.ts`; use `src/backgrounds.ts` for background switching.
 - For mobile control behavior, start with `src/mobileControls.ts`.
 - For stage editor behavior changes, start with `src/stageEditor.ts`; use `src/stageEditorPanel.ts` for editor panel DOM/UI only.
+- When using GPT-5.3 Codex-Spark, keep tasks extra narrow: read only `AGENTS.md`, `git status --short --branch`, and the smallest directly relevant file regions. Do not read `docs/CODEX_HANDOFF.md` unless starting a fresh session or the user asks for deeper context.
+- With GPT-5.3 Codex-Spark, prefer one focused fix per turn, avoid broad refactors, avoid optional investigations, and ask to switch to a stronger model for large visual redesigns, asset generation, cross-module architecture changes, CI/deploy debugging, or ambiguous bugs spanning several systems.
+- With GPT-5.3 Codex-Spark, verify with the cheapest relevant check first. Run full build only when the changed files can affect TypeScript/runtime behavior or before commit/ship workflows that require it.
 - Run `npm.cmd run build` after TypeScript, gameplay, or runtime asset changes. For docs-only changes, do not run build unless requested.
 - Commit each completed, coherent fix or feature chunk after verification. Do not leave finished work uncommitted unless the user explicitly asks not to commit.
 - If pushing, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md`.

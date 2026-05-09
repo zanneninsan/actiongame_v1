@@ -108,6 +108,9 @@ For the No1-No20 feature/backlog handoff, also read `docs/NO1_20_HANDOFF.md`.
 - Before build/dev/deploy commands, only if root `node_modules` is missing, run `npm.cmd ci`.
 - Before Firebase deploy, only if `functions/node_modules` is missing, run `npm.cmd --prefix functions ci`.
 - Do not install Playwright by default. Only install or use it when a task explicitly needs Playwright.
+- When using GPT-5.3 Codex-Spark, keep tasks extra narrow: read only `AGENTS.md`, `git status --short --branch`, and the smallest directly relevant file regions. Do not read this handoff again unless starting a fresh session or the user asks for deeper context.
+- With GPT-5.3 Codex-Spark, prefer one focused fix per turn, avoid broad refactors, avoid optional investigations, and ask to switch to a stronger model for large visual redesigns, asset generation, cross-module architecture changes, CI/deploy debugging, or ambiguous bugs spanning several systems.
+- With GPT-5.3 Codex-Spark, verify with the cheapest relevant check first. Run full build only when the changed files can affect TypeScript/runtime behavior or before commit/ship workflows that require it.
 - Run `npm.cmd run build` after TypeScript, gameplay, or runtime asset changes. For docs-only changes, do not run build unless requested.
 - Commit each completed, coherent fix or feature chunk after verification. Do not leave finished work uncommitted unless the user explicitly asks not to commit.
 - Before committing, check:
@@ -235,6 +238,9 @@ On Windows, use `npm.cmd`, `npx.cmd`, and `firebase.cmd` instead of `npm`, `npx`
 Before build/dev/deploy commands, only if root `node_modules` is missing, run `npm.cmd ci`.
 Before Firebase deploy, only if `functions/node_modules` is missing, run `npm.cmd --prefix functions ci`.
 Do not install Playwright by default. Only install or use it when a task explicitly needs Playwright.
+When using GPT-5.3 Codex-Spark, keep tasks extra narrow: read only `AGENTS.md`, `git status --short --branch`, and the smallest directly relevant file regions. Do not read `docs/CODEX_HANDOFF.md` unless starting a fresh session or the user asks for deeper context.
+With GPT-5.3 Codex-Spark, prefer one focused fix per turn, avoid broad refactors, avoid optional investigations, and ask to switch to a stronger model for large visual redesigns, asset generation, cross-module architecture changes, CI/deploy debugging, or ambiguous bugs spanning several systems.
+With GPT-5.3 Codex-Spark, verify with the cheapest relevant check first. Run full build only when the changed files can affect TypeScript/runtime behavior or before commit/ship workflows that require it.
 Use existing raster assets first. Generate new GPT Image2 assets only when a new polished visual layer is explicitly needed or existing assets cannot satisfy the request.
 Run `npm.cmd run build` after TypeScript, gameplay, or runtime asset changes. For docs-only changes, do not run build unless requested.
 Commit each completed, coherent fix or feature chunk after verification unless I explicitly ask not to commit.
