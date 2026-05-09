@@ -4,6 +4,10 @@
 - Use Japanese for conversation with the user.
 - Do not scan the whole repo. Only inspect files directly relevant to the user's next request.
 - When searching files, exclude `node_modules` from the search target.
+- On Windows, use `npm.cmd`, `npx.cmd`, and `firebase.cmd` instead of `npm`, `npx`, and `firebase` to avoid PowerShell `.ps1` execution-policy failures.
+- Before build/dev/deploy commands, only if root `node_modules` is missing, run `npm.cmd ci`.
+- Before Firebase deploy, only if `functions/node_modules` is missing, run `npm.cmd --prefix functions ci`.
+- Do not install Playwright by default. Only install or use it when a task explicitly needs Playwright.
 - For stage layout changes, start with `src/stages.ts`.
 - For stage rendering behavior, start with `src/stageRenderer.ts`.
 - For enemy behavior, start with `src/enemies.ts`; use `src/stages.ts` for enemy placement.
@@ -15,7 +19,7 @@
 - For debug/global UI behavior, start with `src/globalUi.ts`; use `src/backgrounds.ts` for background switching.
 - For mobile control behavior, start with `src/mobileControls.ts`.
 - For stage editor behavior changes, start with `src/stageEditor.ts`; use `src/stageEditorPanel.ts` for editor panel DOM/UI only.
-- Run `npm run build` after code edits.
+- Run `npm.cmd run build` after code edits.
 - Commit each completed, coherent fix or feature chunk after verification. Do not leave finished work uncommitted unless the user explicitly asks not to commit.
 - If pushing, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md`.
 - Also bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` for large or user-visible updates, even when not pushing yet.

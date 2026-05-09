@@ -18,16 +18,16 @@ For the No1-No20 feature/backlog handoff, also read `docs/NO1_20_HANDOFF.md`.
 
 - Latest known version at handoff creation: `v0.1.64`.
 - Version is displayed in-game through `DEBUG_VERSION` in `src/main.ts`.
-- Build command: `npm run build`.
-- Dev server command: `npm run dev`.
-  - When starting a dev server from a Codex worktree, avoid the default port if another worktree may already be using it. Pick a separate port such as `5176` and run `npm run dev -- --host 127.0.0.1 --port 5176`.
+- Build command: `npm.cmd run build` on Windows.
+- Dev server command: `npm.cmd run dev`.
+  - When starting a dev server from a Codex worktree, avoid the default port if another worktree may already be using it. Pick a separate port such as `5176` and run `npm.cmd run dev -- --host 127.0.0.1 --port 5176`.
   - Before reusing a port, check which worktree owns it; do not stop another worktree's server unless the user asks.
 - GitHub Pages deployment runs from GitHub Actions.
 - Firebase manual deployment:
   - Target project is defined in `.firebaserc` as `zannenin-sisters-leaderboard`.
   - Hosting URL is `https://zannenin-sisters-leaderboard.web.app/`.
-  - Run `npm run build` first, then run `firebase deploy` from the repository root to deploy Firestore rules/indexes, Functions, and Hosting together.
-  - If only Functions should be deployed, run `firebase deploy --only functions`.
+  - Run `npm.cmd run build` first, then run `firebase.cmd deploy` from the repository root to deploy Firestore rules/indexes, Functions, and Hosting together.
+  - If only Functions should be deployed, run `firebase.cmd deploy --only functions`.
   - `firebase.json` hosts the built Vite app from `dist` and runs the Functions predeploy build automatically.
 - The worktree may contain user or external changes. Always check `git status --short --branch` before editing.
 
@@ -104,12 +104,16 @@ For the No1-No20 feature/backlog handoff, also read `docs/NO1_20_HANDOFF.md`.
 - For HUD and rich in-game UI visuals, use GPT Image2-generated raster assets in `public/assets` as the baseline visual layer. Keep CSS/DOM styling limited to positioning, text overlays, and interaction hooks.
 - When changing labels or controls in the start modal, check the options modal for equivalent labels or controls and update matching items there as well when appropriate.
 - Use `apply_patch` for manual edits.
-- Run `npm run build` after code changes.
+- On Windows, use `npm.cmd`, `npx.cmd`, and `firebase.cmd` instead of `npm`, `npx`, and `firebase` to avoid PowerShell `.ps1` execution-policy failures.
+- Before build/dev/deploy commands, only if root `node_modules` is missing, run `npm.cmd ci`.
+- Before Firebase deploy, only if `functions/node_modules` is missing, run `npm.cmd --prefix functions ci`.
+- Do not install Playwright by default. Only install or use it when a task explicitly needs Playwright.
+- Run `npm.cmd run build` after code changes.
 - Commit each completed, coherent fix or feature chunk after verification. Do not leave finished work uncommitted unless the user explicitly asks not to commit.
 - Before committing, check:
   - `git status --short`
   - `git diff --stat`
-- When merging a work branch back into `main`, expect README and version/release-note files to conflict. Resolve them deliberately by preserving the newest user-facing version entry, keeping both relevant README changes when possible, and re-running `npm run build` before the merge commit is considered done.
+- When merging a work branch back into `main`, expect README and version/release-note files to conflict. Resolve them deliberately by preserving the newest user-facing version entry, keeping both relevant README changes when possible, and re-running `npm.cmd run build` before the merge commit is considered done.
 - If pushing, bump `DEBUG_VERSION` and add release notes.
 - Also bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` for large or user-visible updates, even when not pushing yet.
 - When updating `RELEASE_NOTES.md`, write the `### Japanese` section in natural Japanese text. Do not use romanized Japanese such as "wo", "ni", or "shimashita".
@@ -122,7 +126,7 @@ When pushing changes, or when making a large/user-visible update even before pus
 1. Increment `DEBUG_VERSION` in `src/main.ts`.
 2. Add a matching section to `RELEASE_NOTES.md`.
    - Write `### Japanese` entries in proper Japanese, not romanized Japanese.
-3. Run `npm run build`.
+3. Run `npm.cmd run build`.
 4. Commit the completed chunk with a concise message.
 5. If pushing, push `main`.
 
@@ -137,9 +141,9 @@ When the user says `ship-main` or asks for the usual main shipping flow:
 1. Confirm the current branch and a clean worktree.
 2. Fetch `origin/main`.
 3. Merge the current branch into `main`.
-4. Run `npm run build`.
+4. Run `npm.cmd run build`.
 5. Push `main`.
-6. Run `firebase deploy` from the repository root.
+6. Run `firebase.cmd deploy` from the repository root.
 7. Switch back to the original work branch.
 8. Fast-forward the original work branch to `main`.
 
@@ -212,7 +216,11 @@ For item behavior, start with `src/items.ts`; use `src/stages.ts` for item place
 For gameplay changes, search exact symbols in the focused module first; use `src/main.ts` for player movement, run state, collisions, score/timer integration, and scene wiring.
 For global/debug UI, start with `src/globalUi.ts`; for mobile controls, start with `src/mobileControls.ts`; for background switching, start with `src/backgrounds.ts`.
 For stage editor behavior changes, start with `src/stageEditor.ts`; use `src/stageEditorPanel.ts` for panel UI only.
-Run `npm run build` after code edits.
+On Windows, use `npm.cmd`, `npx.cmd`, and `firebase.cmd` instead of `npm`, `npx`, and `firebase`.
+Before build/dev/deploy commands, only if root `node_modules` is missing, run `npm.cmd ci`.
+Before Firebase deploy, only if `functions/node_modules` is missing, run `npm.cmd --prefix functions ci`.
+Do not install Playwright by default. Only install or use it when a task explicitly needs Playwright.
+Run `npm.cmd run build` after code edits.
 Commit each completed, coherent fix or feature chunk after verification unless I explicitly ask not to commit.
 If pushing, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md`.
 For large or user-visible updates, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` even before pushing.
