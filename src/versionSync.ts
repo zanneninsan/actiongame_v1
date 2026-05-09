@@ -33,7 +33,7 @@ function isNewerVersion(candidate: string, current: string): boolean {
   return false;
 }
 
-export async function ensureLatestClientVersion(currentVersion: string): Promise<void> {
+export async function ensureLatestClientVersion(currentVersion: string): Promise<boolean> {
   try {
     const response = await fetch(`${import.meta.env.BASE_URL}version.json?ts=${Date.now()}`, {
       cache: "no-store",
@@ -42,24 +42,26 @@ export async function ensureLatestClientVersion(currentVersion: string): Promise
       },
     });
     if (!response.ok) {
-      return;
+      return false;
     }
 
     const payload = (await response.json()) as LatestVersionPayload;
     const latestVersion = typeof payload.version === "string" ? payload.version.trim() : "";
     if (!latestVersion || !isNewerVersion(latestVersion, currentVersion)) {
       sessionStorage.removeItem(VERSION_CHECK_RELOAD_KEY);
-      return;
+      return false;
     }
 
     const lastReloadTarget = sessionStorage.getItem(VERSION_CHECK_RELOAD_KEY) ?? "";
     if (lastReloadTarget === latestVersion) {
-      return;
+      return false;
     }
 
     sessionStorage.setItem(VERSION_CHECK_RELOAD_KEY, latestVersion);
     window.location.reload();
+    return true;
   } catch (error) {
     console.warn("Latest version check failed.", error);
+    return false;
   }
 }

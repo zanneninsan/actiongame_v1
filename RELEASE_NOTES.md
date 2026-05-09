@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.350
+### English
+- Moved the startup version check before the Phaser boot loading overlay so clients reload before the initial loading sequence when a newer deployed version is available.
+### Japanese
+- 起動時のバージョン確認を Phaser の初期ローディング表示より前に移動し、新しい配信版がある場合はローディングを始める前に再読み込みするようにしました。
+
 ## v0.1.349
 ### English
 - Kept the boot version marker in `version.json` synchronized with the in-game debug version.

@@ -99,7 +99,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.349";
+const DEBUG_VERSION = "v0.1.350";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -403,7 +403,6 @@ class PrototypeScene extends Phaser.Scene {
   private mobileFullscreenRecoveryDismissed = false;
   private mobileLayoutPaused = false;
   private mobileLayoutShouldStartCountdown = false;
-  private startModalVersionCheckStarted = false;
   private rewards?: RewardSystem;
   private startTime = 0;
   private editorTimerPausedMs = 0;
@@ -1483,10 +1482,6 @@ class PrototypeScene extends Phaser.Scene {
 
   private showStartModal() {
     this.removeStartModal();
-    if (!this.startModalVersionCheckStarted) {
-      this.startModalVersionCheckStarted = true;
-      void ensureLatestClientVersion(DEBUG_VERSION);
-    }
 
     this.startModal = new StartModal({
       playerName: this.playerName,
@@ -3798,28 +3793,37 @@ document.addEventListener("contextmenu", (event) => {
 
 initializePwaInstall();
 registerServiceWorker();
-showBootLoadingOverlay();
+void startGame();
 
-new Phaser.Game({
-  type: Phaser.AUTO,
-  parent: "game",
-  width: GAME_WIDTH,
-  height: GAME_HEIGHT,
-  pixelArt: true,
-  backgroundColor: "#172033",
-  scale: {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-  },
-  physics: {
-    default: "arcade",
-    arcade: {
-      gravity: { x: 0, y: 1400 },
-      debug: false,
+async function startGame() {
+  const reloadRequested = await ensureLatestClientVersion(DEBUG_VERSION);
+  if (reloadRequested) {
+    return;
+  }
+
+  showBootLoadingOverlay();
+
+  new Phaser.Game({
+    type: Phaser.AUTO,
+    parent: "game",
+    width: GAME_WIDTH,
+    height: GAME_HEIGHT,
+    pixelArt: true,
+    backgroundColor: "#172033",
+    scale: {
+      mode: Phaser.Scale.FIT,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
     },
-  },
-  scene: PrototypeScene,
-});
+    physics: {
+      default: "arcade",
+      arcade: {
+        gravity: { x: 0, y: 1400 },
+        debug: false,
+      },
+    },
+    scene: PrototypeScene,
+  });
+}
 
 function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) {
