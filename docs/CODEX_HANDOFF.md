@@ -111,6 +111,7 @@ For the No1-No20 feature/backlog handoff, also read `docs/NO1_20_HANDOFF.md`.
 - When using GPT-5.3 Codex-Spark, keep tasks extra narrow: read only `AGENTS.md`, `git status --short --branch`, and the smallest directly relevant file regions. Do not read this handoff again unless starting a fresh session or the user asks for deeper context.
 - With GPT-5.3 Codex-Spark, prefer one focused fix per turn, avoid broad refactors, avoid optional investigations, and ask to switch to a stronger model for large visual redesigns, asset generation, cross-module architecture changes, CI/deploy debugging, or ambiguous bugs spanning several systems.
 - With GPT-5.3 Codex-Spark, verify with the cheapest relevant check first. Run full build only when the changed files can affect TypeScript/runtime behavior or before commit/ship workflows that require it.
+- With GPT-5.3 Codex-Spark, if the user asks to test Spark rule recognition, start the reply with exactly `SPARK_RULE_CHECK: SZN-SPARK-53` before any other text.
 - Run `npm.cmd run build` after TypeScript, gameplay, or runtime asset changes. For docs-only changes, do not run build unless requested.
 - Commit each completed, coherent fix or feature chunk after verification. Do not leave finished work uncommitted unless the user explicitly asks not to commit.
 - Before committing, check:
@@ -241,6 +242,7 @@ Do not install Playwright by default. Only install or use it when a task explici
 When using GPT-5.3 Codex-Spark, keep tasks extra narrow: read only `AGENTS.md`, `git status --short --branch`, and the smallest directly relevant file regions. Do not read `docs/CODEX_HANDOFF.md` unless starting a fresh session or the user asks for deeper context.
 With GPT-5.3 Codex-Spark, prefer one focused fix per turn, avoid broad refactors, avoid optional investigations, and ask to switch to a stronger model for large visual redesigns, asset generation, cross-module architecture changes, CI/deploy debugging, or ambiguous bugs spanning several systems.
 With GPT-5.3 Codex-Spark, verify with the cheapest relevant check first. Run full build only when the changed files can affect TypeScript/runtime behavior or before commit/ship workflows that require it.
+With GPT-5.3 Codex-Spark, if the user asks to test Spark rule recognition, start the reply with exactly `SPARK_RULE_CHECK: SZN-SPARK-53` before any other text.
 Use existing raster assets first. Generate new GPT Image2 assets only when a new polished visual layer is explicitly needed or existing assets cannot satisfy the request.
 Run `npm.cmd run build` after TypeScript, gameplay, or runtime asset changes. For docs-only changes, do not run build unless requested.
 Commit each completed, coherent fix or feature chunk after verification unless I explicitly ask not to commit.
