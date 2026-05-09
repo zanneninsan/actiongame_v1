@@ -1,6 +1,6 @@
 # Codex Instructions
 
-- Read `docs/CODEX_HANDOFF.md` first. Then check `git status --short --branch`.
+- At the start of a new session, read `docs/CODEX_HANDOFF.md` once. For later turns, rely on this `AGENTS.md` and inspect only the relevant sections/files as needed. Always check `git status --short --branch` before editing.
 - Use Japanese for conversation with the user.
 - Do not scan the whole repo. Only inspect files directly relevant to the user's next request.
 - When searching files, exclude `node_modules` from the search target.
@@ -14,13 +14,13 @@
 - For item behavior, start with `src/items.ts`; use `src/stages.ts` for item placement.
 - For gameplay changes, search exact symbols in the focused module first; use `src/main.ts` for player movement, run state, collisions, score/timer integration, and scene wiring.
 - Keep `src/main.ts` focused on core game behavior and thin integration hooks.
-- For HUD and rich in-game UI visuals, do not rely on CSS decoration as the primary look. Generate polished raster UI assets with GPT Image2, place them under `public/assets`, and keep DOM/CSS usage limited to positioning, text overlays, and interaction hooks.
+- For HUD and rich in-game UI visuals, use existing raster assets first. Generate new GPT Image2 assets only when a new polished visual layer is explicitly needed or existing assets cannot satisfy the request. Place new runtime assets under `public/assets`, and keep DOM/CSS usage limited to positioning, text overlays, and interaction hooks.
 - For raster asset processing, follow `docs/ASSET_PROCESSING.md`: final runtime outputs should be WebP, reversible/lossless intermediates should be preserved under `assets_source`, and transparency cleanup should bias toward preserving subject pixels rather than cutting too aggressively.
 - For debug/global UI behavior, start with `src/globalUi.ts`; use `src/backgrounds.ts` for background switching.
 - For mobile control behavior, start with `src/mobileControls.ts`.
 - For stage editor behavior changes, start with `src/stageEditor.ts`; use `src/stageEditorPanel.ts` for editor panel DOM/UI only.
-- Run `npm.cmd run build` after code edits.
+- Run `npm.cmd run build` after TypeScript, gameplay, or runtime asset changes. For docs-only changes, do not run build unless requested.
 - Commit each completed, coherent fix or feature chunk after verification. Do not leave finished work uncommitted unless the user explicitly asks not to commit.
 - If pushing, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md`.
-- Also bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` for large or user-visible updates, even when not pushing yet.
+- Also bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` when visible behavior, visuals, assets, or shipped runtime output changes, even before pushing. Do not bump for docs-only, comments-only, or Codex workflow-rule changes.
 - When updating `RELEASE_NOTES.md`, write the `### Japanese` section in natural Japanese. Do not use romanized Japanese such as "wo", "ni", or "shimashita".

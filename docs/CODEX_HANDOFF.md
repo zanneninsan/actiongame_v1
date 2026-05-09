@@ -1,6 +1,6 @@
 # Codex Handoff
 
-This file is the short context packet for future Codex sessions. Read this first before scanning the whole repository.
+This file is the detailed context packet for future Codex sessions. Read it once at the start of a new session, then rely on `AGENTS.md` and inspect only relevant sections/files as needed.
 
 For the No1-No20 feature/backlog handoff, also read `docs/NO1_20_HANDOFF.md`.
 
@@ -101,27 +101,27 @@ For the No1-No20 feature/backlog handoff, also read `docs/NO1_20_HANDOFF.md`.
   - Start screen: `src/startModal.ts`
   - Editor panel: `src/stageEditorPanel.ts`
   - Asset catalog: `src/assets.ts`
-- For HUD and rich in-game UI visuals, use GPT Image2-generated raster assets in `public/assets` as the baseline visual layer. Keep CSS/DOM styling limited to positioning, text overlays, and interaction hooks.
+- For HUD and rich in-game UI visuals, use existing raster assets first. Generate new GPT Image2 assets only when a new polished visual layer is explicitly needed or existing assets cannot satisfy the request. Place new runtime assets under `public/assets`, and keep DOM/CSS usage limited to positioning, text overlays, and interaction hooks.
 - When changing labels or controls in the start modal, check the options modal for equivalent labels or controls and update matching items there as well when appropriate.
 - Use `apply_patch` for manual edits.
 - On Windows, use `npm.cmd`, `npx.cmd`, and `firebase.cmd` instead of `npm`, `npx`, and `firebase` to avoid PowerShell `.ps1` execution-policy failures.
 - Before build/dev/deploy commands, only if root `node_modules` is missing, run `npm.cmd ci`.
 - Before Firebase deploy, only if `functions/node_modules` is missing, run `npm.cmd --prefix functions ci`.
 - Do not install Playwright by default. Only install or use it when a task explicitly needs Playwright.
-- Run `npm.cmd run build` after code changes.
+- Run `npm.cmd run build` after TypeScript, gameplay, or runtime asset changes. For docs-only changes, do not run build unless requested.
 - Commit each completed, coherent fix or feature chunk after verification. Do not leave finished work uncommitted unless the user explicitly asks not to commit.
 - Before committing, check:
   - `git status --short`
   - `git diff --stat`
 - When merging a work branch back into `main`, expect README and version/release-note files to conflict. Resolve them deliberately by preserving the newest user-facing version entry, keeping both relevant README changes when possible, and re-running `npm.cmd run build` before the merge commit is considered done.
 - If pushing, bump `DEBUG_VERSION` and add release notes.
-- Also bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` for large or user-visible updates, even when not pushing yet.
+- Also bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` when visible behavior, visuals, assets, or shipped runtime output changes, even before pushing. Do not bump for docs-only, comments-only, or Codex workflow-rule changes.
 - When updating `RELEASE_NOTES.md`, write the `### Japanese` section in natural Japanese text. Do not use romanized Japanese such as "wo", "ni", or "shimashita".
 - Do not revert user or external changes unless explicitly asked.
 
 ## Version Rule
 
-When pushing changes, or when making a large/user-visible update even before pushing:
+When pushing changes, or when visible behavior, visuals, assets, or shipped runtime output changes even before pushing:
 
 1. Increment `DEBUG_VERSION` in `src/main.ts`.
 2. Add a matching section to `RELEASE_NOTES.md`.
@@ -130,7 +130,7 @@ When pushing changes, or when making a large/user-visible update even before pus
 4. Commit the completed chunk with a concise message.
 5. If pushing, push `main`.
 
-If only making small local notes, documentation tweaks, or internal refactors with no user-visible behavior change, version bump is not required.
+If only making docs-only changes, comments-only changes, Codex workflow-rule updates, small local notes, or internal refactors with no user-visible behavior change, version bump is not required.
 
 ## Common Tasks
 
@@ -146,6 +146,21 @@ When the user says `ship-main` or asks for the usual main shipping flow:
 6. Run `firebase.cmd deploy` from the repository root.
 7. Switch back to the original work branch.
 8. Fast-forward the original work branch to `main`.
+
+### Named Workflow: ship-hosting
+
+When the user says `ship-hosting` or asks to ship a front-end-only change:
+
+1. Confirm the current branch and a clean worktree.
+2. Fetch `origin/main`.
+3. Merge the current branch into `main`.
+4. Run `npm.cmd run build`.
+5. Push `main`.
+6. Run `firebase.cmd deploy --only hosting` from the repository root.
+7. Switch back to the original work branch.
+8. Fast-forward the original work branch to `main`.
+
+Use the full `ship-main` workflow when Functions, Firestore rules/indexes, or backend behavior changed.
 
 ### Stage Layout
 
@@ -205,7 +220,7 @@ Asset keys are centralized in `src/assets.ts`.
 Use this at the start of a new chat:
 
 ```text
-Read `docs/CODEX_HANDOFF.md` first. Then check `git status --short --branch`.
+At the start of a new session, read `docs/CODEX_HANDOFF.md` once. For later turns, rely on `AGENTS.md` and inspect only relevant sections/files as needed. Always check `git status --short --branch` before editing.
 Use Japanese for conversation with the user.
 Do not scan the whole repo. Only inspect files directly relevant to my next request.
 When searching files, exclude `node_modules` from the search target.
@@ -220,10 +235,11 @@ On Windows, use `npm.cmd`, `npx.cmd`, and `firebase.cmd` instead of `npm`, `npx`
 Before build/dev/deploy commands, only if root `node_modules` is missing, run `npm.cmd ci`.
 Before Firebase deploy, only if `functions/node_modules` is missing, run `npm.cmd --prefix functions ci`.
 Do not install Playwright by default. Only install or use it when a task explicitly needs Playwright.
-Run `npm.cmd run build` after code edits.
+Use existing raster assets first. Generate new GPT Image2 assets only when a new polished visual layer is explicitly needed or existing assets cannot satisfy the request.
+Run `npm.cmd run build` after TypeScript, gameplay, or runtime asset changes. For docs-only changes, do not run build unless requested.
 Commit each completed, coherent fix or feature chunk after verification unless I explicitly ask not to commit.
 If pushing, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md`.
-For large or user-visible updates, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` even before pushing.
+For visible behavior, visuals, assets, or shipped runtime output changes, bump `DEBUG_VERSION` and update `RELEASE_NOTES.md` even before pushing. Do not bump for docs-only, comments-only, or Codex workflow-rule changes.
 When updating `RELEASE_NOTES.md`, write the `### Japanese` section in natural Japanese, not romanized Japanese.
 ```
 
