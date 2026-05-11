@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.352
+### English
+- Reworked the in-game HUD into a compact top-left status panel so player name, score, timer, and stamina read as one cluster without spreading across the playfield.
+- Replaced the always-on long control hint with a small mode chip, keeping the center play area clearer during normal play.
+### Japanese
+- ゲーム中HUDを左上のコンパクトなステータスパネルにまとめ、プレイヤー名、スコア、残り時間、スタミナがひとまとまりで読めるようにしました。
+- 常時表示の長い操作説明を小さなモード表示チップに置き換え、通常プレイ中の中央視界を広く保つようにしました。
+
 ## v0.1.351
 ### English
 - Restored clear rank and mission results on the clear screen, with per-stage mission definitions for no-damage, coin collection, and mini-challenge completion.

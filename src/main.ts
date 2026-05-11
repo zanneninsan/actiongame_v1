@@ -102,7 +102,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.351";
+const DEBUG_VERSION = "v0.1.352";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -267,16 +267,25 @@ const HUD_PLAYER_NAME_FONT_SIZE = 15;
 const HUD_MAIN_FONT_SIZE = 12;
 const HUD_SCORE_FONT_SIZE = 15;
 const HUD_HINT_FONT_SIZE = 11;
-const HUD_PLAYER_NAME_Y = 28;
-const HUD_SCORE_Y = 56;
-const HUD_TIMER_X = 230;
-const HUD_STAMINA_Y = 80;
-const HUD_STAMINA_BAR_X = 150;
-const HUD_STAMINA_BAR_Y = 89;
+const HUD_PANEL_X = 18;
+const HUD_PANEL_Y = 16;
+const HUD_PANEL_WIDTH = 344;
+const HUD_PANEL_HEIGHT = 104;
+const HUD_TEXT_X = 36;
+const HUD_PLAYER_NAME_Y = 30;
+const HUD_SCORE_Y = 58;
+const HUD_TIMER_X = 205;
+const HUD_STAMINA_Y = 84;
+const HUD_STAMINA_BAR_X = 142;
+const HUD_STAMINA_BAR_Y = 93;
 const HUD_STAMINA_BAR_WIDTH = 132;
 const HUD_STAMINA_BAR_HEIGHT = 9;
 const HUD_STAMINA_FILL_WIDTH = HUD_STAMINA_BAR_WIDTH;
 const HUD_STAMINA_FILL_HEIGHT = HUD_STAMINA_BAR_HEIGHT;
+const HUD_MODE_CHIP_X = GAME_WIDTH / 2;
+const HUD_MODE_CHIP_Y = 16;
+const HUD_MODE_CHIP_MIN_WIDTH = 86;
+const HUD_MODE_CHIP_HEIGHT = 30;
 const OVERHEAD_STAMINA_BAR_WIDTH = 76;
 const OVERHEAD_STAMINA_BAR_HEIGHT = 8;
 const OVERHEAD_STAMINA_FILL_WIDTH = 70;
@@ -373,6 +382,8 @@ class PrototypeScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d" | "shift", Phaser.Input.Keyboard.Key>;
   private backgrounds?: BackgroundController;
+  private hudPanelBack!: Phaser.GameObjects.Rectangle;
+  private hudPanelAccent!: Phaser.GameObjects.Rectangle;
   private playerNameText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
   private timerText!: Phaser.GameObjects.Text;
@@ -382,6 +393,7 @@ class PrototypeScene extends Phaser.Scene {
   private staminaBarFrame!: Phaser.GameObjects.Rectangle;
   private overheadStaminaBarBack!: Phaser.GameObjects.Rectangle;
   private overheadStaminaBarFill!: Phaser.GameObjects.Rectangle;
+  private controlHintBack!: Phaser.GameObjects.Rectangle;
   private controlHintText!: Phaser.GameObjects.Text;
   private hudScale = 1;
   private loadedGhostReplay?: GhostReplayData;
@@ -726,8 +738,20 @@ class PrototypeScene extends Phaser.Scene {
     this.cameras.main.setBackgroundColor("#080b16");
     this.collisionDebugGraphics = this.add.graphics().setDepth(300);
 
+    this.hudPanelBack = this.add
+      .rectangle(HUD_PANEL_X, HUD_PANEL_Y, HUD_PANEL_WIDTH, HUD_PANEL_HEIGHT, 0x07111f, 0.72)
+      .setOrigin(0, 0)
+      .setScrollFactor(0)
+      .setDepth(96);
+    this.hudPanelBack.setStrokeStyle(1, 0x38bdf8, 0.36);
+    this.hudPanelAccent = this.add
+      .rectangle(HUD_PANEL_X, HUD_PANEL_Y, 4, HUD_PANEL_HEIGHT, 0x67e8f9, 0.82)
+      .setOrigin(0, 0)
+      .setScrollFactor(0)
+      .setDepth(97);
+
     this.playerNameText = this.add
-      .text(58, HUD_PLAYER_NAME_Y, "", {
+      .text(HUD_TEXT_X, HUD_PLAYER_NAME_Y, "", {
         fontFamily: "monospace",
         fontSize: `${HUD_PLAYER_NAME_FONT_SIZE}px`,
         color: "#e0f2fe",
@@ -737,7 +761,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0);
 
     this.scoreText = this.add
-      .text(58, HUD_SCORE_Y, "", {
+      .text(HUD_TEXT_X, HUD_SCORE_Y, "", {
         fontFamily: "monospace",
         fontSize: `${HUD_SCORE_FONT_SIZE}px`,
         color: "#f8fafc",
@@ -759,7 +783,7 @@ class PrototypeScene extends Phaser.Scene {
     this.updateTimerText();
 
     this.staminaText = this.add
-      .text(58, HUD_STAMINA_Y, "", {
+      .text(HUD_TEXT_X, HUD_STAMINA_Y, "", {
         fontFamily: "monospace",
         fontSize: `${HUD_MAIN_FONT_SIZE}px`,
         color: "#bbf7d0",
@@ -796,8 +820,14 @@ class PrototypeScene extends Phaser.Scene {
       .setVisible(false);
     this.updateStaminaHud();
 
+    this.controlHintBack = this.add
+      .rectangle(HUD_MODE_CHIP_X, HUD_MODE_CHIP_Y, HUD_MODE_CHIP_MIN_WIDTH, HUD_MODE_CHIP_HEIGHT, 0x07111f, 0.58)
+      .setOrigin(0.5, 0)
+      .setScrollFactor(0)
+      .setDepth(98);
+    this.controlHintBack.setStrokeStyle(1, 0xfde68a, 0.36);
     this.controlHintText = this.add
-      .text(GAME_WIDTH / 2, 8, "", {
+      .text(HUD_MODE_CHIP_X, HUD_MODE_CHIP_Y + 7, "", {
         fontFamily: "monospace",
         fontSize: `${HUD_HINT_FONT_SIZE}px`,
         color: "#fde68a",
@@ -1896,13 +1926,26 @@ class PrototypeScene extends Phaser.Scene {
     const scale = this.calculateHudScale();
     this.hudScale = scale;
 
+    if (this.hudPanelBack) {
+      this.hudPanelBack.setPosition(HUD_PANEL_X * scale, HUD_PANEL_Y * scale);
+      this.hudPanelBack.width = HUD_PANEL_WIDTH * scale;
+      this.hudPanelBack.height = HUD_PANEL_HEIGHT * scale;
+      this.hudPanelBack.setStrokeStyle(Math.max(1, Math.round(scale)), 0x38bdf8, 0.36);
+    }
+
+    if (this.hudPanelAccent) {
+      this.hudPanelAccent.setPosition(HUD_PANEL_X * scale, HUD_PANEL_Y * scale);
+      this.hudPanelAccent.width = 4 * scale;
+      this.hudPanelAccent.height = HUD_PANEL_HEIGHT * scale;
+    }
+
     if (this.playerNameText) {
-      this.playerNameText.setPosition(58 * scale, HUD_PLAYER_NAME_Y * scale);
+      this.playerNameText.setPosition(HUD_TEXT_X * scale, HUD_PLAYER_NAME_Y * scale);
       this.playerNameText.setFontSize(`${Math.round(HUD_PLAYER_NAME_FONT_SIZE * scale)}px`);
     }
 
     if (this.scoreText) {
-      this.scoreText.setPosition(58 * scale, HUD_SCORE_Y * scale);
+      this.scoreText.setPosition(HUD_TEXT_X * scale, HUD_SCORE_Y * scale);
       this.scoreText.setFontSize(`${Math.round(HUD_SCORE_FONT_SIZE * scale)}px`);
     }
 
@@ -1912,7 +1955,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     if (this.staminaText) {
-      this.staminaText.setPosition(58 * scale, HUD_STAMINA_Y * scale);
+      this.staminaText.setPosition(HUD_TEXT_X * scale, HUD_STAMINA_Y * scale);
       this.staminaText.setFontSize(`${Math.round(HUD_MAIN_FONT_SIZE * scale)}px`);
     }
 
@@ -1935,9 +1978,17 @@ class PrototypeScene extends Phaser.Scene {
       this.staminaBarFrame.setStrokeStyle(Math.max(1, Math.round(scale)), 0x86efac, 0.8);
     }
 
+    if (this.controlHintBack) {
+      this.controlHintBack.setPosition(HUD_MODE_CHIP_X, HUD_MODE_CHIP_Y * scale);
+      this.controlHintBack.height = HUD_MODE_CHIP_HEIGHT * scale;
+      this.controlHintBack.setStrokeStyle(Math.max(1, Math.round(scale)), 0xfde68a, 0.36);
+      this.resizeControlHintBack();
+    }
+
     if (this.controlHintText) {
-      this.controlHintText.setPosition(GAME_WIDTH / 2, 8 * scale);
+      this.controlHintText.setPosition(HUD_MODE_CHIP_X, (HUD_MODE_CHIP_Y + 7) * scale);
       this.controlHintText.setFontSize(`${Math.round(HUD_HINT_FONT_SIZE * scale)}px`);
+      this.resizeControlHintBack();
     }
   }
 
@@ -3182,8 +3233,25 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    const editorHint = this.stageEditor?.isEnabled ? `\n${t(this.locale, "hint.editor")}` : "";
-    this.controlHintText.setText(`${this.controlHint}${editorHint}`);
+    this.controlHintText.setText(this.getHudModeLabel());
+    this.resizeControlHintBack();
+  }
+
+  private getHudModeLabel() {
+    if (this.stageEditor?.isEnabled) {
+      return this.locale === "ja" ? "編集中" : "EDIT";
+    }
+    return this.controlMode === "mobile" ? "MOBILE" : "PC";
+  }
+
+  private resizeControlHintBack() {
+    if (!this.controlHintBack || !this.controlHintText) {
+      return;
+    }
+
+    const scale = this.hudScale || 1;
+    const width = Math.max(HUD_MODE_CHIP_MIN_WIDTH * scale, this.controlHintText.width + 28 * scale);
+    this.controlHintBack.width = width;
   }
 
   private updateCollisionDebug() {
