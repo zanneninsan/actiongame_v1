@@ -140,3 +140,137 @@ AIがコマ割りを理解しやすい構成
 
 モーションブラー、エフェクト、残像は禁止。
 ```
+
+## Game Studio plugin投入用メモ
+
+`Game Studio` の `sprite-pipeline` は、単発の各コマ生成よりも「承認済みの基準フレームを左端に置いた1本の横長ストリップ生成」を前提にしています。
+
+そのため使い分けは以下が基本です。
+
+- 基準フレームがまだない場合:
+  - このドキュメント上部の日本語プロンプトで、まずポーズ案や初期スプライト案を作る
+- 基準フレームがある場合:
+  - `sprite-pipeline` 用のストリップ生成プロンプトに変換して使う
+
+### Game Studio向け変換方針
+
+- `向き` は `same facing direction` と `Action` 内の説明で固定する
+- `動作` は中割りではなく、フレーム1からフレームNまでの主要ポーズ列として書く
+- 自動決定した `フレーム数` はそのまま `single horizontal N-frame spritesheet` に入れる
+- 自動決定した `fps` は画像生成用プロンプトでは補助情報として扱い、主にポーズ密度の判断に使う
+- 背景透過しやすさは `transparent canvas` で指定する
+- 棒人間案のようなラフ設計でも、最終的に `sprite-pipeline` へ渡す文面は「1本の完成ストリップを生成する指示」に寄せる
+
+### Game Studio向け投入テンプレート
+
+以下は `sprite-pipeline` に食わせるための実用テンプレートです。  
+`<N>` や `{...}` を埋めて使います。
+
+```text
+Intended use: candidate production spritesheet for a 2D browser game animation review.
+Edit the provided transparent reference canvas into a single horizontal <N>-frame spritesheet.
+
+The existing sprite in the leftmost slot is the anchor frame and must remain the same character:
+- same facing direction ({向き})
+- same silhouette family
+- same proportions
+- same body construction
+- same line weight
+- same simplified stick-figure design
+- black lines only
+- no face
+- no clothing
+- no decoration
+
+Composition:
+- transparent canvas
+- exactly one row of <N> equal frame slots
+- full body visible in every slot
+- fixed camera angle
+- fixed camera distance
+- even spacing between poses
+- no extra characters
+- no labels
+- no scenery
+- no poster layout
+
+Action:
+{動作の短い全体説明}
+
+Frame beats:
+{フレーム1の役割}
+{フレーム2の役割}
+{フレーム3の役割}
+{必要に応じて続ける}
+
+Timing target:
+roughly {自動決定したfps} fps pacing, but prioritize readable key poses over in-between motion.
+
+Style:
+- production-ready 2D sprite sheet
+- clear pose separation
+- large readable silhouette changes between frames
+- no motion blur
+- no effects
+- no afterimages
+```
+
+### 変換例
+
+入力:
+
+- 向き: `右向き`
+- 動作: `走る`
+
+`sprite-pipeline` 向けの渡し方の例:
+
+```text
+Intended use: candidate production spritesheet for a 2D browser game animation review.
+Edit the provided transparent reference canvas into a single horizontal 6-frame spritesheet.
+
+The existing sprite in the leftmost slot is the anchor frame and must remain the same character:
+- same facing direction (right-facing)
+- same silhouette family
+- same proportions
+- same body construction
+- same line weight
+- same simplified stick-figure design
+- black lines only
+- no face
+- no clothing
+- no decoration
+
+Composition:
+- transparent canvas
+- exactly one row of 6 equal frame slots
+- full body visible in every slot
+- fixed camera angle
+- fixed camera distance
+- even spacing between poses
+- no extra characters
+- no labels
+- no scenery
+- no poster layout
+
+Action:
+A forward-leaning running motion with strong alternating leg extension and clear arm swing.
+
+Frame beats:
+- frame 1: right leg forward contact pose, left leg extended back, strong opposite arm swing
+- frame 2: weight shifts forward, rear leg pushes off, torso leans into acceleration
+- frame 3: passing pose, legs cross under the body, center of mass moves forward
+- frame 4: left leg forward contact pose, right leg extended back, arm swing reversed
+- frame 5: weight shifts forward on the opposite side, rear leg pushes off again
+- frame 6: passing pose returning cleanly toward the next contact frame
+
+Timing target:
+roughly 12 fps pacing, but prioritize readable key poses over in-between motion.
+
+Style:
+- production-ready 2D sprite sheet
+- clear pose separation
+- large readable silhouette changes between frames
+- no motion blur
+- no effects
+- no afterimages
+```
