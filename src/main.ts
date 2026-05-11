@@ -99,7 +99,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.352";
+const DEBUG_VERSION = "v0.1.353";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -230,6 +230,7 @@ const PLAYER_CROUCH_BODY_OFFSET_X = 131;
 const PLAYER_CROUCH_BODY_OFFSET_Y = PLAYER_BODY_OFFSET_Y + PLAYER_BODY_HEIGHT - PLAYER_CROUCH_BODY_HEIGHT;
 const PLAYER_IDLE_FRAME_COUNT = 8;
 const PLAYER_LONG_IDLE_FRAME_COUNT = 29;
+const PLAYER_DASH_FRAME_COUNT = 12;
 const PLAYER_FRAME_COUNT = 13;
 const PLAYER_CROUCH_FRAME_COUNT = 27;
 const PLAYER_DEFEAT_FRAME_COUNT = 8;
@@ -547,6 +548,10 @@ class PrototypeScene extends Phaser.Scene {
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
     this.load.spritesheet("player-walk", `${ASSET_BASE}assets/sprites/player_walk_13_320x260.webp`, {
+      frameWidth: PLAYER_DISPLAY_WIDTH,
+      frameHeight: PLAYER_DISPLAY_HEIGHT,
+    });
+    this.load.spritesheet("player-dash", `${ASSET_BASE}assets/sprites/player_dash_12_320x260.webp`, {
       frameWidth: PLAYER_DISPLAY_WIDTH,
       frameHeight: PLAYER_DISPLAY_HEIGHT,
     });
@@ -1010,7 +1015,11 @@ class PrototypeScene extends Phaser.Scene {
       }
     } else if (left || right || isMovingHorizontally) {
       this.resetPlayerIdleState();
-      this.player.anims.play("player-walk", true);
+      if (wantsDash && isShiftSpeedActive && (left || right)) {
+        this.player.anims.play("player-dash", true);
+      } else {
+        this.player.anims.play("player-walk", true);
+      }
     } else {
       this.updatePlayerIdleAnimation();
     }
@@ -3450,6 +3459,16 @@ class PrototypeScene extends Phaser.Scene {
         end: PLAYER_FRAME_COUNT - 1,
       }),
       frameRate: 12,
+      repeat: -1,
+    });
+
+    this.anims.create({
+      key: "player-dash",
+      frames: this.anims.generateFrameNumbers("player-dash", {
+        start: 0,
+        end: PLAYER_DASH_FRAME_COUNT - 1,
+      }),
+      frameRate: 18,
       repeat: -1,
     });
 

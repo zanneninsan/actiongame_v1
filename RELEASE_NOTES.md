@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.353
+### English
+- Added a new ground dash animation for the player so holding Shift while running now plays a dedicated 12-frame dash motion instead of the normal walk loop.
+### Japanese
+- プレイヤーの地上ダッシュ用アニメーションを追加し、走りながら Shift を押している間は通常の歩行ループではなく、専用の 12 コマダッシュモーションを再生するようにしました。
+
 ## v0.1.352
 ### English
 - Added a 6-frame idle loop for `neon_idol_shooter` so the enemy now animates in place instead of staying completely static.
