@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.357
+### English
+- Changed world map node selection into a two-step flow: selecting a different node moves the character marker, and selecting the current node opens a stage confirmation prompt.
+- Added an in-map Yes/No confirmation panel before opening the run setup screen.
+### Japanese
+- ワールドマップのマス選択を二段階にし、別のマスを選ぶとキャラがそのマスへ移動し、選択中のマスをもう一度選ぶとステージ確認を出すようにしました。
+- 出発準備画面へ進む前に、マップ上で「はい」「いいえ」を選べる確認パネルを追加しました。
+
 ## v0.1.356
 ### English
 - Fixed the run setup modal appearing immediately on top of the full-screen world map; it now stays hidden until a map node is selected.

@@ -151,6 +151,13 @@ export class StartModal {
           <strong class="start-world-current"></strong>
           <em>${t(this.options.locale, "start.worldMapPrompt")}</em>
         </div>
+        <div class="start-world-confirm" hidden role="dialog" aria-live="polite">
+          <p class="start-world-confirm-message"></p>
+          <div class="start-world-confirm-actions">
+            <button type="button" class="start-world-confirm-yes">${t(this.options.locale, "start.worldMapConfirmYes")}</button>
+            <button type="button" class="start-world-confirm-no">${t(this.options.locale, "start.worldMapConfirmNo")}</button>
+          </div>
+        </div>
       </section>
       <form class="start-dialog">
         <button type="button" class="start-map-back">${t(this.options.locale, "start.worldMapBack")}</button>
@@ -242,6 +249,10 @@ export class StartModal {
     const worldMapNodes = Array.from(overlay.querySelectorAll<HTMLButtonElement>(".start-world-node"));
     const worldCurrent = overlay.querySelector<HTMLElement>(".start-world-current")!;
     const worldMapPanel = overlay.querySelector<HTMLElement>(".start-world-map-panel")!;
+    const worldConfirm = overlay.querySelector<HTMLDivElement>(".start-world-confirm")!;
+    const worldConfirmMessage = overlay.querySelector<HTMLParagraphElement>(".start-world-confirm-message")!;
+    const worldConfirmYes = overlay.querySelector<HTMLButtonElement>(".start-world-confirm-yes")!;
+    const worldConfirmNo = overlay.querySelector<HTMLButtonElement>(".start-world-confirm-no")!;
     const mapBackButton = overlay.querySelector<HTMLButtonElement>(".start-map-back")!;
     const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
     const soundButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-sound]"));
@@ -288,17 +299,32 @@ export class StartModal {
     };
 
     const openStageConfig = () => {
+      hideWorldConfirm();
       overlay.classList.add("is-stage-config-open");
       window.setTimeout(() => input.focus(), 120);
     };
 
     const closeStageConfig = () => {
+      hideWorldConfirm();
       overlay.classList.remove("is-stage-config-open");
       const selectedNode = worldMapNodes.find((node) => node.dataset.stageId === selectedStageId);
       window.setTimeout(() => selectedNode?.focus(), 120);
     };
 
+    const showWorldConfirm = () => {
+      worldConfirmMessage.textContent = t(this.options.locale, "start.worldMapConfirm").replace("{stage}", getSelectedStageLabel());
+      worldConfirm.hidden = false;
+      worldMapPanel.classList.add("is-confirming");
+      window.setTimeout(() => worldConfirmYes.focus(), 80);
+    };
+
+    function hideWorldConfirm() {
+      worldConfirm.hidden = true;
+      worldMapPanel.classList.remove("is-confirming");
+    }
+
     const selectStage = (stageId: string, shouldRefreshGhostOptions: boolean) => {
+      hideWorldConfirm();
       selectedStageId = stageId;
       this.options.stageId = selectedStageId;
       stageSelect.value = selectedStageId;
@@ -658,9 +684,17 @@ export class StartModal {
         if (!stageId) {
           return;
         }
-        selectStage(stageId, stageId !== selectedStageId);
-        openStageConfig();
+        if (stageId !== selectedStageId) {
+          selectStage(stageId, true);
+          return;
+        }
+        showWorldConfirm();
       });
+    });
+    worldConfirmYes.addEventListener("click", openStageConfig);
+    worldConfirmNo.addEventListener("click", () => {
+      hideWorldConfirm();
+      worldMapNodes.find((node) => node.dataset.stageId === selectedStageId)?.focus();
     });
     mapBackButton.addEventListener("click", closeStageConfig);
     localeSelect.addEventListener("change", () => {
