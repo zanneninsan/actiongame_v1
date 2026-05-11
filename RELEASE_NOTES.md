@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.365
+### English
+- Redesigned `neon_idol_shooter` into a distinct cute neon shooter enemy, replacing the crude placeholder art and adding an in-place idle loop.
+- Added a dedicated ground dash motion for Shift-running and refined the arm pumping so the dash reads more clearly during gameplay.
+### Japanese
+- `neon_idol_shooter` を雑な仮アートから、主人公と見分けがつくキュートなネオン系シューター敵へ刷新し、その場で軽く動く待機ループも追加しました。
+- Shift 走行用の地上ダッシュモーションを追加し、プレイ中に腕振りがしっかり伝わるようにダッシュの見た目を調整しました。
+
 ## v0.1.364
 ### English
 - Placed the three new character cameos near the opening section of Despair Longrun EX.

@@ -1,8 +1,9 @@
 import type { Locale } from "./i18n";
 
 export type PlayerCharacterId = "zannenin" | "mint_ribbon" | "soda_star" | "lilac_moon";
-export type PlayerCharacterMotion = "idle" | "longidle" | "walk" | "jump" | "crouch" | "defeat";
-export type PlayerAnimationName = "idle" | "longidle" | "walk" | "jump-start" | "air" | "land" | "crouch" | "defeat";
+export type PlayerCharacterBaseMotion = "idle" | "longidle" | "walk" | "jump" | "crouch" | "defeat";
+export type PlayerCharacterMotion = PlayerCharacterBaseMotion | "dash";
+export type PlayerAnimationName = "idle" | "longidle" | "walk" | "dash" | "jump-start" | "air" | "land" | "crouch" | "defeat";
 
 type LocalizedText = Record<Locale, string>;
 
@@ -17,7 +18,9 @@ export type PlayerCharacterDefinition = {
   id: PlayerCharacterId;
   label: LocalizedText;
   tagline: LocalizedText;
-  spriteSheets: Record<PlayerCharacterMotion, PlayerSpriteSheetDefinition>;
+  spriteSheets: Record<PlayerCharacterBaseMotion, PlayerSpriteSheetDefinition> & {
+    dash?: PlayerSpriteSheetDefinition;
+  };
 };
 
 const PLAYER_FRAME_WIDTH = 320;
@@ -51,6 +54,7 @@ export const PLAYER_CHARACTERS: PlayerCharacterDefinition[] = [
       idle: sheet("assets/sprites/player_idle_8_320x260.webp", 8),
       longidle: sheet("assets/sprites/player_longidle_320x260.webp", 29),
       walk: sheet("assets/sprites/player_walk_13_320x260.webp", 13),
+      dash: sheet("assets/sprites/player_dash_12_320x260.webp", 12),
       jump: sheet("assets/sprites/player_jump_15_320x260.webp", 15),
       crouch: sheet("assets/sprites/player_crouch_27_9x3_320x260.webp", 27),
       defeat: sheet("assets/sprites/player_defeat_8_320x260.webp", 8),

@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.364";
+const DEBUG_VERSION = "v0.1.365";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -1060,7 +1060,11 @@ class PrototypeScene extends Phaser.Scene {
       }
     } else if (left || right || isMovingHorizontally) {
       this.resetPlayerIdleState();
-      this.player.anims.play(this.playerAnimationKey("walk"), true);
+      if (wantsDash && isShiftSpeedActive && (left || right)) {
+        this.player.anims.play(this.playerAnimationKey("dash"), true);
+      } else {
+        this.player.anims.play(this.playerAnimationKey("walk"), true);
+      }
     } else {
       this.updatePlayerIdleAnimation();
     }
@@ -3686,6 +3690,18 @@ class PrototypeScene extends Phaser.Scene {
           end: character.spriteSheets.walk.frameCount - 1,
         }),
         frameRate: 12,
+        repeat: -1,
+      });
+
+      const dashSpriteSheet = character.spriteSheets.dash ?? character.spriteSheets.walk;
+      const dashTextureMotion: PlayerCharacterMotion = character.spriteSheets.dash ? "dash" : "walk";
+      this.anims.create({
+        key: getPlayerAnimationKey(character.id, "dash"),
+        frames: this.anims.generateFrameNumbers(getPlayerTextureKey(character.id, dashTextureMotion), {
+          start: 0,
+          end: dashSpriteSheet.frameCount - 1,
+        }),
+        frameRate: 18,
         repeat: -1,
       });
 
