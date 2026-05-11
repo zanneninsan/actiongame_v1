@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.361
+### English
+- Replaced the browser-native return confirmation with an in-game styled dialog when returning to the world map.
+### Japanese
+- ワールドマップへ戻る確認をブラウザ標準ダイアログではなく、ゲーム内の見た目に合わせた専用確認ダイアログに置き換えました。
+
 ## v0.1.360
 ### English
 - Fixed the world map player marker flickering by holding a stable idle frame and limiting the walk animation to valid sprite frames.

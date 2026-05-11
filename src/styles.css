@@ -653,6 +653,79 @@ canvas {
   color: #fff7d6;
 }
 
+#world-map-return-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 4600;
+  display: grid;
+  place-items: center;
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom))
+    max(18px, env(safe-area-inset-left));
+  background:
+    radial-gradient(circle at 50% 45%, rgba(14, 165, 233, 0.2), transparent 32%),
+    rgba(2, 6, 23, 0.74);
+  color: #f8fafc;
+  font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+}
+
+.world-map-return-confirm-dialog {
+  box-sizing: border-box;
+  width: min(520px, 100%);
+  display: grid;
+  gap: 14px;
+  padding: 30px clamp(24px, 5vw, 38px) 28px;
+  background: url("../public/assets/ui/fantasy/dialogue_wide.png") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.58));
+  text-align: center;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.96);
+}
+
+.world-map-return-confirm-dialog h2 {
+  margin: 0;
+  color: #f5c76a;
+  font-size: clamp(19px, 3.4vw, 26px);
+  letter-spacing: 0;
+}
+
+.world-map-return-confirm-dialog p {
+  margin: 0;
+  color: #dbeafe;
+  font-size: clamp(14px, 2.3vw, 17px);
+  font-weight: 800;
+  line-height: 1.55;
+}
+
+.world-map-return-confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.world-map-return-confirm-actions button {
+  min-width: 0;
+  min-height: 46px;
+  border: 0;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #dbeafe;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 900;
+  cursor: pointer;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.world-map-return-confirm-actions button:hover,
+.world-map-return-confirm-actions button:focus-visible {
+  outline: none;
+  filter: brightness(1.28) saturate(1.18) drop-shadow(0 0 12px rgba(253, 230, 138, 0.5));
+}
+
+.world-map-return-confirm-yes {
+  background-image: url("../public/assets/ui/fantasy/button_primary_selected_safe.webp");
+  color: #fff7d6;
+}
+
 .start-world-path {
   position: absolute;
   inset: 8% 5% 8%;
@@ -1327,6 +1400,16 @@ canvas {
   .start-world-confirm-actions button {
     min-height: 38px;
     font-size: 14px;
+  }
+
+  .world-map-return-confirm-dialog {
+    gap: 11px;
+    padding: 22px 18px 20px;
+  }
+
+  .world-map-return-confirm-actions {
+    grid-template-columns: 1fr;
+    gap: 8px;
   }
 
   .start-world-node {

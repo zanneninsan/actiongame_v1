@@ -102,6 +102,7 @@ For the No1-No20 feature/backlog handoff, also read `docs/NO1_20_HANDOFF.md`.
   - Editor panel: `src/stageEditorPanel.ts`
   - Asset catalog: `src/assets.ts`
 - For HUD and rich in-game UI visuals, use existing raster assets first. Generate new GPT Image2 assets only when a new polished visual layer is explicitly needed or existing assets cannot satisfy the request. Place new runtime assets under `public/assets`, and keep DOM/CSS usage limited to positioning, text overlays, and interaction hooks.
+- For game-facing UI, menus, HUDs, overlays, world maps, stage select screens, and visual direction work, proactively use the Game Studio plugin skills when available, especially `game-ui-frontend`, `phaser-2d-game`, `game-playtest`, and asset/sprite pipeline guidance as relevant.
 - When changing labels or controls in the start modal, check the options modal for equivalent labels or controls and update matching items there as well when appropriate.
 - Use `apply_patch` for manual edits.
 - On Windows, use `npm.cmd`, `npx.cmd`, and `firebase.cmd` instead of `npm`, `npx`, and `firebase` to avoid PowerShell `.ps1` execution-policy failures.

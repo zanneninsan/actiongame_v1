@@ -102,7 +102,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.360";
+const DEBUG_VERSION = "v0.1.361";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -1505,11 +1505,11 @@ class PrototypeScene extends Phaser.Scene {
     this.scene.restart();
   }
 
-  private returnToTitle() {
+  private async returnToTitle() {
     if (this.isRestarting) {
       return;
     }
-    if (!window.confirm(t(this.locale, "menu.returnToWorldMapConfirm"))) {
+    if (!(await this.confirmReturnToWorldMap())) {
       return;
     }
 
@@ -1524,6 +1524,72 @@ class PrototypeScene extends Phaser.Scene {
     this.resetRunState();
     this.bgm?.stop();
     this.scene.restart();
+  }
+
+  private confirmReturnToWorldMap() {
+    document.getElementById("world-map-return-confirm")?.remove();
+    document.body.classList.add("is-world-map-return-confirm-open");
+
+    return new Promise<boolean>((resolve) => {
+      const overlay = document.createElement("div");
+      overlay.id = "world-map-return-confirm";
+      overlay.setAttribute("role", "dialog");
+      overlay.setAttribute("aria-modal", "true");
+      overlay.setAttribute("aria-labelledby", "world-map-return-confirm-title");
+
+      const dialog = document.createElement("div");
+      dialog.className = "world-map-return-confirm-dialog";
+
+      const title = document.createElement("h2");
+      title.id = "world-map-return-confirm-title";
+      title.textContent = t(this.locale, "menu.returnToWorldMapTitle");
+
+      const message = document.createElement("p");
+      message.textContent = t(this.locale, "menu.returnToWorldMapConfirm");
+
+      const actions = document.createElement("div");
+      actions.className = "world-map-return-confirm-actions";
+
+      const yesButton = document.createElement("button");
+      yesButton.type = "button";
+      yesButton.className = "world-map-return-confirm-yes";
+      yesButton.textContent = t(this.locale, "menu.returnToWorldMapYes");
+
+      const noButton = document.createElement("button");
+      noButton.type = "button";
+      noButton.className = "world-map-return-confirm-no";
+      noButton.textContent = t(this.locale, "menu.returnToWorldMapNo");
+
+      const finish = (shouldReturn: boolean) => {
+        overlay.remove();
+        document.body.classList.remove("is-world-map-return-confirm-open");
+        resolve(shouldReturn);
+      };
+
+      yesButton.addEventListener("click", () => finish(true));
+      noButton.addEventListener("click", () => finish(false));
+      overlay.addEventListener("pointerdown", (event) => {
+        event.stopPropagation();
+        if (event.target === overlay) {
+          finish(false);
+        }
+      });
+      overlay.addEventListener("keydown", (event) => {
+        event.stopPropagation();
+        if (event.key === "Escape") {
+          finish(false);
+        }
+        if (event.key === "Enter") {
+          finish(true);
+        }
+      });
+
+      actions.append(yesButton, noButton);
+      dialog.append(title, message, actions);
+      overlay.append(dialog);
+      document.body.appendChild(overlay);
+      noButton.focus();
+    });
   }
 
   private handleRestartKey() {
@@ -2595,7 +2661,7 @@ class PrototypeScene extends Phaser.Scene {
       },
       onLeaderboardOpen: () => this.showLeaderboard(),
       onAccountOpen: () => this.showAccount(),
-      onReturnToTitle: () => this.returnToTitle(),
+      onReturnToTitle: () => void this.returnToTitle(),
       onScreenshotOpen: () => this.captureGameScreenshot({ preview: true }),
       mobileLayoutAvailable: this.controlMode === "mobile" && this.setupComplete && !this.startModal,
       onMobileLayoutOpen: () => window.dispatchEvent(new Event(MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT)),
@@ -3094,7 +3160,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(210)
       .setInteractive({ useHandCursor: true })
-      .on("pointerup", () => this.returnToTitle());
+      .on("pointerup", () => void this.returnToTitle());
   }
 
   private downloadGhostReplayJson() {
