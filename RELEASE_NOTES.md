@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.364
+### English
+- Placed the three new character cameos near the opening section of Despair Longrun EX.
+### Japanese
+- 絶望ロングラン EX の序盤に、新しく追加した3人のキャラクターをカメオ配置しました。
+
 ## v0.1.363
 ### English
 - Added three selectable cute player characters with matching idle, walk, jump, crouch, long-idle, and defeat sprite sheet motions.
