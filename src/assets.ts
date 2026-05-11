@@ -97,6 +97,22 @@ export type StageStoryDialogue = {
   durationMs?: number;
   lines: StageStoryDialogueLine[];
 };
+export type StageMissionType = "noDamage" | "fastClear" | "minCoins" | "defeatEnemies" | "miniChallenge";
+export type StageMissionDefinition = {
+  id: string;
+  label: StageLocalizedText;
+  type: StageMissionType;
+  target?: number;
+  challengeId?: string;
+};
+export type MiniChallengeDefinition = {
+  id: string;
+  title: StageLocalizedText;
+  startX: number;
+  endX: number;
+  targetCoins?: number;
+  bonusScore?: number;
+};
 export type StageDefinition = {
   name: StageName;
   backgrounds?: StageBackgroundSelection;
@@ -118,6 +134,8 @@ export type StageDefinition = {
   checkpoints?: CheckpointPlacement[];
   oneWayGates?: OneWayGatePlacement[];
   dashWalls?: DashWallPlacement[];
+  missions?: StageMissionDefinition[];
+  miniChallenges?: MiniChallengeDefinition[];
   enemies?: EnemyPlacement[];
 };
 

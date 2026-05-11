@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.351
+### English
+- Restored clear rank and mission results on the clear screen, with per-stage mission definitions for no-damage, coin collection, and mini-challenge completion.
+- Added a mid-stage coin challenge system with completion bonuses, and expanded Skybridge Sprint with an upper branch and hidden reward route.
+### Japanese
+- クリア画面にゴール評価とミッション結果の表示を復活させ、ノーダメージ、コイン回収、中間チャレンジ達成をステージごとに判定できるようにしました。
+- 中間のコインチャレンジと達成ボーナスを追加し、スカイブリッジ・スプリントに上側の分岐ルートと隠し報酬ルートを追加しました。
+
 ## v0.1.350
 ### English
 - Moved the startup version check before the Phaser boot loading overlay so clients reload before the initial loading sequence when a newer deployed version is available.

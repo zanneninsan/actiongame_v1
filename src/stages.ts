@@ -1424,6 +1424,10 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     { x: 3880, y: 424, units: 3 },
     { x: 4300, y: 328, units: 4 },
     { x: 5180, y: 516, units: 5 },
+    { x: 5200, y: 272, units: 3 },
+    { x: 5620, y: 210, units: 3 },
+    { x: 6060, y: 252, units: 4 },
+    { x: 6520, y: 300, units: 3 },
     { x: 5750, y: 420, units: 4, moving: { axis: "x", distance: 288, speed: 88 } },
     { x: 6320, y: 332, units: 4 },
     { x: 7040, y: 520, units: 4 },
@@ -1470,6 +1474,12 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
     { type: "coin", x: 3780, y: 398 },
     { type: "coin", x: 3840, y: 420 },
     { type: "energyDrink", x: 5340, y: 460 },
+    { type: "coin", x: 5260, y: 220 },
+    { type: "coin", x: 5320, y: 196 },
+    { type: "coin", x: 5680, y: 158 },
+    { type: "coin", x: 5740, y: 146 },
+    { type: "shoppingBag", x: 6160, y: 200 },
+    { type: "coin", x: 6420, y: 214 },
     { type: "bubbleTea", x: 5900, y: 364 },
     { type: "shoppingBag", x: 6460, y: 276 },
     { type: "energyDrink", x: 7180, y: 464 },
@@ -1481,7 +1491,9 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
   bonusBlocks: [
     { type: "question", x: 1180, y: 464, reward: "powerJump" },
     { type: "question", x: 3660, y: 440, reward: "powerSpeed" },
+    { type: "hidden", x: 5000, y: 392, reward: "powerJump" },
     { type: "hidden", x: 6160, y: 424, reward: "star" },
+    { type: "hidden", x: 6280, y: 184, reward: "dashRing" },
     { type: "breakable", x: 6640, y: 452 },
     { type: "breakable", x: 6704, y: 452 },
   ],
@@ -1491,6 +1503,55 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
   ],
   oneWayGates: [
     { x: 7000, y: 592, height: 168 },
+  ],
+  miniChallenges: [
+    {
+      id: "fragileCoinRun",
+      title: {
+        ja: "中間チャレンジ",
+        en: "Mid-stage Challenge",
+        zh: "中段挑战",
+        ko: "중간 챌린지",
+      },
+      startX: 3500,
+      endX: 3920,
+      targetCoins: 3,
+      bonusScore: 350,
+    },
+  ],
+  missions: [
+    {
+      id: "noDamage",
+      label: {
+        ja: "ノーダメージ",
+        en: "No damage",
+        zh: "无伤",
+        ko: "노 데미지",
+      },
+      type: "noDamage",
+    },
+    {
+      id: "coinRunner",
+      label: {
+        ja: "コイン12枚以上",
+        en: "Collect 12+ coins",
+        zh: "收集12枚以上金币",
+        ko: "코인 12개 이상",
+      },
+      type: "minCoins",
+      target: 12,
+    },
+    {
+      id: "fragileCoinRun",
+      label: {
+        ja: "中間チャレンジ成功",
+        en: "Clear the mid-stage challenge",
+        zh: "完成中段挑战",
+        ko: "중간 챌린지 성공",
+      },
+      type: "miniChallenge",
+      challengeId: "fragileCoinRun",
+    },
   ],
   enemies: [
     { type: "knifePunk", x: 980, y: 590, patrolLeft: 780, patrolRight: 1160, speed: 78 },
@@ -2307,5 +2368,13 @@ export const cloneStage = (stage: StageDefinition): StageDefinition => ({
   checkpoints: (stage.checkpoints ?? []).map((checkpoint) => ({ ...checkpoint })),
   oneWayGates: (stage.oneWayGates ?? []).map((gate) => ({ ...gate })),
   dashWalls: (stage.dashWalls ?? []).map((wall) => ({ ...wall })),
+  missions: (stage.missions ?? []).map((mission) => ({
+    ...mission,
+    label: { ...mission.label },
+  })),
+  miniChallenges: (stage.miniChallenges ?? []).map((challenge) => ({
+    ...challenge,
+    title: { ...challenge.title },
+  })),
   enemies: (stage.enemies ?? []).map((enemy) => ({ ...enemy })),
 });

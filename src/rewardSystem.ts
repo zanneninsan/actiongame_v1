@@ -18,6 +18,7 @@ export class RewardSystem {
   private dashRingBoostUntil = 0;
   private damageTaken = 0;
   private collectedCoins = 0;
+  private enemyDefeats = 0;
   private enemyStompCombo = 0;
   private lastEnemyStompAt = 0;
 
@@ -37,6 +38,7 @@ export class RewardSystem {
     this.dashRingBoostUntil = 0;
     this.damageTaken = 0;
     this.collectedCoins = 0;
+    this.enemyDefeats = 0;
     this.enemyStompCombo = 0;
     this.lastEnemyStompAt = 0;
   }
@@ -95,6 +97,7 @@ export class RewardSystem {
   }
 
   addEnemyDefeatScore(enemy: Phaser.Physics.Arcade.Sprite) {
+    this.enemyDefeats += 1;
     this.enemyStompCombo = this.scene.time.now - this.lastEnemyStompAt <= ENEMY_STOMP_COMBO_MS ? this.enemyStompCombo + 1 : 1;
     this.lastEnemyStompAt = this.scene.time.now;
     const points = this.getEnemyStompScore(enemy) * this.enemyStompCombo;
@@ -102,6 +105,16 @@ export class RewardSystem {
     this.onScoreChanged();
     this.onScoreMilestone();
     this.showFloatingText(enemy.x, enemy.y - 48, `+${points}${this.enemyStompCombo > 1 ? ` x${this.enemyStompCombo}` : ""}`);
+  }
+
+  addChallengeBonus(points: number, x: number, y: number, label = "CHALLENGE") {
+    if (points <= 0) {
+      return;
+    }
+    this.bonusScore += points;
+    this.onScoreChanged();
+    this.onScoreMilestone();
+    this.showFloatingText(x, y, `${label} +${points}`);
   }
 
   private getEnemyStompScore(enemy: Phaser.Physics.Arcade.Sprite) {
@@ -137,6 +150,18 @@ export class RewardSystem {
 
   getItemScore() {
     return Object.values(this.score).reduce((sum, value) => sum + (value ?? 0), this.bonusScore);
+  }
+
+  getDamageTaken() {
+    return this.damageTaken;
+  }
+
+  getCollectedCoins() {
+    return this.collectedCoins;
+  }
+
+  getEnemyDefeats() {
+    return this.enemyDefeats;
   }
 
   getClearRank(finalScore: number, remainingMs: number, gameTimeMs: number) {

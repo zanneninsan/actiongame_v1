@@ -7,7 +7,10 @@ import {
   PROP_ASSETS,
   STAGE_OBJECT_ASSETS,
   resolveStageName,
+  resolveStageText,
   type DashWallPlacement,
+  type MiniChallengeDefinition,
+  type StageMissionDefinition,
   type StageDefinition,
 } from "./assets";
 import { DEFAULT_STAGE_ID, PLAYABLE_STAGE_IDS, STAGES, cloneStage, normalizeStageId, type StageId } from "./stages";
@@ -99,7 +102,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.350";
+const DEBUG_VERSION = "v0.1.351";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -285,7 +288,7 @@ const GHOST_EXPORT_BUTTON_X = GAME_WIDTH - 168;
 const GHOST_EXPORT_BUTTON_Y = 118;
 const CLEAR_MENU_BUTTON_Y = GHOST_EXPORT_BUTTON_Y + 46;
 const CLEAR_SCREENSHOT_BUTTON_Y = CLEAR_MENU_BUTTON_Y + 46;
-const SHOW_CLEAR_RANK_AND_MISSIONS = false;
+const SHOW_CLEAR_RANK_AND_MISSIONS = true;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
 const DECORATION_PLATFORM_DROP_VELOCITY = 140;
@@ -310,6 +313,13 @@ type QueuedStoryDialogue = {
   closeAtX?: number;
   stepDelayMs?: number;
   durationMs?: number;
+};
+type MiniChallengeState = {
+  definition: MiniChallengeDefinition;
+  started: boolean;
+  completed: boolean;
+  failed: boolean;
+  coins: number;
 };
 type StageMidpointProgress = {
   axis: "x" | "y";
@@ -462,6 +472,7 @@ class PrototypeScene extends Phaser.Scene {
   private triggeredStoryDialogueIndexes = new Set<number>();
   private stageMidpointProgress?: StageMidpointProgress;
   private hasShownStageMidpointDialogue = false;
+  private miniChallengeStates: MiniChallengeState[] = [];
   private storyDialogueAdvanceEvents: Phaser.Time.TimerEvent[] = [];
   private storyDialogueRemoveEvent?: Phaser.Time.TimerEvent;
   private currentStoryDialogueCloseAtX?: number;
@@ -597,6 +608,7 @@ class PrototypeScene extends Phaser.Scene {
     this.isRestarting = false;
     this.stageConstants = resolveStageConstants(this.editorStage);
     this.stageMidpointProgress = this.resolveStageMidpointProgress();
+    this.miniChallengeStates = this.createMiniChallengeStates();
     if (!extraTouchPointersAdded) {
       this.input.addPointer(4);
       extraTouchPointersAdded = true;
@@ -662,6 +674,7 @@ class PrototypeScene extends Phaser.Scene {
       canCollect: () => !this.stageEditor?.isEnabled,
       onCollect: (itemType, points, x, y, placementIndex) => {
         this.rewards?.collectItem(itemType, points, x, y);
+        this.noteMiniChallengeItem(itemType, x, y);
         this.minimap?.markItemCollected(placementIndex);
       },
       trackStageObject: (object) => this.trackStageObject(object),
@@ -859,6 +872,7 @@ class PrototypeScene extends Phaser.Scene {
 
     this.updateStoryDialogueProgress();
     this.updateStageMidpointProgress();
+    this.updateMiniChallenges();
     this.updateGoalInViewDialogue();
     this.refreshDropThroughDecorationPlatform();
     this.oneWayGateController?.update();
@@ -1093,6 +1107,7 @@ class PrototypeScene extends Phaser.Scene {
     this.hasShownAquaMascotStompDialogue = false;
     this.hasShownStaminaEmptyDialogue = false;
     this.hasShownGoalInViewDialogue = false;
+    this.miniChallengeStates = [];
     this.countdownOverlay?.clear();
     this.countdownOverlay = undefined;
     this.missText?.destroy();
@@ -1157,6 +1172,7 @@ class PrototypeScene extends Phaser.Scene {
     this.collisionDebugGraphics?.clear();
     this.collisionDebugGraphics = undefined;
     this.stageMidpointProgress = undefined;
+    this.miniChallengeStates = [];
     this.hasShownStageMidpointDialogue = false;
     this.hasShownGoalInViewDialogue = false;
     this.itemsGroup = undefined;
@@ -1230,6 +1246,64 @@ class PrototypeScene extends Phaser.Scene {
     this.enqueueStoryDialogue({
       lines: [resolveFixedStoryDialogue("stageMidpoint", this.locale)],
       durationMs: STAGE_MIDPOINT_DIALOGUE_DURATION_MS,
+    });
+  }
+
+  private createMiniChallengeStates(): MiniChallengeState[] {
+    return (this.editorStage.miniChallenges ?? []).map((definition) => ({
+      definition,
+      started: false,
+      completed: false,
+      failed: false,
+      coins: 0,
+    }));
+  }
+
+  private updateMiniChallenges() {
+    if (this.stageEditor?.isEnabled || !this.isRunActive || this.hasWon) {
+      return;
+    }
+
+    this.miniChallengeStates.forEach((state) => {
+      const { definition } = state;
+      if (!state.started && this.player.x >= definition.startX && this.player.x <= definition.endX) {
+        state.started = true;
+        this.rewards?.showFloatingText(this.player.x, this.player.y - 130, resolveStageText(definition.title, this.locale));
+      }
+
+      if (!state.started || state.completed || state.failed || this.player.x <= definition.endX) {
+        return;
+      }
+
+      state.failed = true;
+      this.rewards?.showFloatingText(definition.endX, this.player.y - 110, "CHALLENGE --");
+    });
+  }
+
+  private noteMiniChallengeItem(itemType: string, x: number, y: number) {
+    if (itemType !== "coin" || this.stageEditor?.isEnabled || !this.isRunActive) {
+      return;
+    }
+
+    this.miniChallengeStates.forEach((state) => {
+      const { definition } = state;
+      if (state.completed || state.failed || x < definition.startX || x > definition.endX) {
+        return;
+      }
+
+      if (!state.started) {
+        state.started = true;
+        this.rewards?.showFloatingText(x, y - 88, resolveStageText(definition.title, this.locale));
+      }
+
+      state.coins += 1;
+      const targetCoins = definition.targetCoins ?? 0;
+      if (targetCoins <= 0 || state.coins < targetCoins) {
+        return;
+      }
+
+      state.completed = true;
+      this.rewards?.addChallengeBonus(definition.bonusScore ?? 0, x, y - 96);
     });
   }
 
@@ -1557,6 +1631,7 @@ class PrototypeScene extends Phaser.Scene {
     this.restartStageEditorEnabled = false;
     this.stageConstants = resolveStageConstants(this.editorStage);
     this.stageMidpointProgress = this.resolveStageMidpointProgress();
+    this.miniChallengeStates = this.createMiniChallengeStates();
     this.hasShownStageMidpointDialogue = false;
     this.hasShownGoalInViewDialogue = false;
     this.applyStageBackgroundDefaults();
@@ -3705,6 +3780,40 @@ class PrototypeScene extends Phaser.Scene {
     this.player.setOffset(PLAYER_BODY_OFFSET_X, PLAYER_BODY_OFFSET_Y);
   }
 
+  private getClearMissionLines(remainingMs: number, gameTimeMs: number) {
+    const missions = this.editorStage.missions ?? [];
+    if (missions.length === 0) {
+      const fallback = this.rewards?.getMissionSummary(remainingMs, gameTimeMs);
+      return fallback ? [fallback] : [];
+    }
+
+    return missions.map((mission) => {
+      const achieved = this.isStageMissionAchieved(mission, remainingMs, gameTimeMs);
+      const label = resolveStageText(mission.label, this.locale);
+      return `${achieved ? "OK" : "--"} ${label}`;
+    });
+  }
+
+  private isStageMissionAchieved(mission: StageMissionDefinition, remainingMs: number, gameTimeMs: number) {
+    if (mission.type === "noDamage") {
+      return (this.rewards?.getDamageTaken() ?? 0) === 0;
+    }
+    if (mission.type === "fastClear") {
+      const targetRatio = mission.target ?? 0.55;
+      return remainingMs >= gameTimeMs * targetRatio;
+    }
+    if (mission.type === "minCoins") {
+      return (this.rewards?.getCollectedCoins() ?? 0) >= (mission.target ?? 1);
+    }
+    if (mission.type === "defeatEnemies") {
+      return (this.rewards?.getEnemyDefeats() ?? 0) >= (mission.target ?? 1);
+    }
+    if (mission.type === "miniChallenge") {
+      return this.miniChallengeStates.some((state) => state.definition.id === mission.challengeId && state.completed);
+    }
+    return false;
+  }
+
   private win() {
     if (this.hasWon) {
       return;
@@ -3719,9 +3828,9 @@ class PrototypeScene extends Phaser.Scene {
     const itemScore = this.roundScoreValue(this.rewards?.getItemScore() ?? 0);
     const finalScore = this.roundScoreValue(itemScore + timeBonus);
     const clearRank = this.rewards?.getClearRank(finalScore, remaining, GAME_TIME_MS) ?? "C";
-    const missionLine = this.rewards?.getMissionSummary(remaining, GAME_TIME_MS) ?? "";
+    const missionLines = this.getClearMissionLines(remaining, GAME_TIME_MS);
     const clearTitle = SHOW_CLEAR_RANK_AND_MISSIONS ? `${t(this.locale, "hud.clear")}  ${clearRank}` : t(this.locale, "hud.clear");
-    const missionResultLine = SHOW_CLEAR_RANK_AND_MISSIONS && missionLine ? `${missionLine}\n` : "";
+    const missionResultLine = SHOW_CLEAR_RANK_AND_MISSIONS && missionLines.length ? `${missionLines.join("\n")}\n` : "";
     this.stopGhostRecording();
     this.timerText.setText(
       `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,
@@ -3738,7 +3847,7 @@ class PrototypeScene extends Phaser.Scene {
         )} ${this.formatScoreValue(timeBonus)}`,
         {
           fontFamily: "monospace",
-          fontSize: "48px",
+          fontSize: missionLines.length >= 3 ? "38px" : "44px",
           color: "#f8fafc",
           stroke: "#020617",
           strokeThickness: 2,
