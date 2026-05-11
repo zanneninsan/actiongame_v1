@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.355
+### English
+- Changed the start flow so the title leads into a full-screen world map first, then selecting a route node opens the existing run setup screen.
+- Removed the world map from inside the setup modal and changed return-to-menu actions into confirmed returns to the world map.
+### Japanese
+- タイトル後の導線を、最初に全画面ワールドマップを表示し、ルート上のマスを選ぶと既存の出発準備画面へ進む流れに変更しました。
+- 出発準備画面内のワールドマップ表示は外し、メニューへ戻る操作は確認ダイアログ付きでワールドマップへ戻る動きにしました。
+
 ## v0.1.354
 ### English
 - Added a world-map style stage picker to the start screen, with connected route nodes that sync with the existing stage selector and ranking ghost list.

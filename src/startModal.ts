@@ -135,21 +135,25 @@ export class StartModal {
           </div>
         </div>
       </div>
+      <section class="start-world-map-panel" aria-label="${t(this.options.locale, "start.worldMap")}">
+        <div class="start-world-map-art">
+          <div class="start-world-map-glow" aria-hidden="true"></div>
+          ${renderWorldMapPath(this.options.stageOptions)}
+          ${this.options.stageOptions
+            .map((option, index) =>
+              renderWorldMapNode(option, index, this.options.stageOptions.length, this.options.stageId, this.options.locale),
+            )
+            .join("")}
+          <div class="start-world-player" aria-hidden="true"></div>
+        </div>
+        <div class="start-world-map-caption">
+          <span>${t(this.options.locale, "start.worldMap")}</span>
+          <strong class="start-world-current"></strong>
+          <em>${t(this.options.locale, "start.worldMapPrompt")}</em>
+        </div>
+      </section>
       <form class="start-dialog">
-        <section class="start-world-map-panel" aria-label="${t(this.options.locale, "start.worldMap")}">
-          <div class="start-world-map-header">
-            <span>${t(this.options.locale, "start.worldMap")}</span>
-            <strong class="start-world-current"></strong>
-          </div>
-          <div class="start-world-map-track">
-            ${renderWorldMapPath(this.options.stageOptions)}
-            ${this.options.stageOptions
-              .map((option, index) =>
-                renderWorldMapNode(option, index, this.options.stageOptions.length, this.options.stageId, this.options.locale),
-              )
-              .join("")}
-          </div>
-        </section>
+        <button type="button" class="start-map-back">${t(this.options.locale, "start.worldMapBack")}</button>
         <div class="start-primary-panel">
           <label class="start-field">
             <span>${t(this.options.locale, "start.playerName")}</span>
@@ -237,6 +241,8 @@ export class StartModal {
     const ghostSelect = overlay.querySelector<HTMLSelectElement>("select[name='leaderboardGhost']")!;
     const worldMapNodes = Array.from(overlay.querySelectorAll<HTMLButtonElement>(".start-world-node"));
     const worldCurrent = overlay.querySelector<HTMLElement>(".start-world-current")!;
+    const worldMapPanel = overlay.querySelector<HTMLElement>(".start-world-map-panel")!;
+    const mapBackButton = overlay.querySelector<HTMLButtonElement>(".start-map-back")!;
     const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
     const soundButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-sound]"));
     const ghostFileInput = overlay.querySelector<HTMLInputElement>("#start-ghost-file")!;
@@ -269,12 +275,27 @@ export class StartModal {
       this.options.stageOptions.find((option) => option.id === selectedStageId)?.label[selectedLocale] ?? selectedStageId;
 
     const refreshWorldMap = () => {
+      const selectedIndex = Math.max(0, this.options.stageOptions.findIndex((option) => option.id === selectedStageId));
+      const selectedPosition = getWorldMapNodePosition(selectedIndex, this.options.stageOptions.length);
+      worldMapPanel.style.setProperty("--player-x", `${selectedPosition.x}%`);
+      worldMapPanel.style.setProperty("--player-y", `${selectedPosition.y}%`);
       worldMapNodes.forEach((node) => {
         const isSelected = node.dataset.stageId === selectedStageId;
         node.classList.toggle("is-selected", isSelected);
         node.setAttribute("aria-pressed", isSelected ? "true" : "false");
       });
       worldCurrent.textContent = `${t(this.options.locale, "start.worldMapCurrent")}: ${getSelectedStageLabel()}`;
+    };
+
+    const openStageConfig = () => {
+      overlay.classList.add("is-stage-config-open");
+      window.setTimeout(() => input.focus(), 120);
+    };
+
+    const closeStageConfig = () => {
+      overlay.classList.remove("is-stage-config-open");
+      const selectedNode = worldMapNodes.find((node) => node.dataset.stageId === selectedStageId);
+      window.setTimeout(() => selectedNode?.focus(), 120);
     };
 
     const selectStage = (stageId: string, shouldRefreshGhostOptions: boolean) => {
@@ -413,7 +434,7 @@ export class StartModal {
       this.titleDismissTimer = window.setTimeout(() => {
         titleScreen.classList.add("is-dismissed");
         this.titleDismissTimer = undefined;
-        input.focus();
+        worldMapNodes.find((node) => node.dataset.stageId === selectedStageId)?.focus();
       }, 820);
     };
     const dismissSoundGate = (nextSoundOn: boolean) => {
@@ -634,12 +655,14 @@ export class StartModal {
     worldMapNodes.forEach((node) => {
       node.addEventListener("click", () => {
         const stageId = node.dataset.stageId;
-        if (!stageId || stageId === selectedStageId) {
+        if (!stageId) {
           return;
         }
-        selectStage(stageId, true);
+        selectStage(stageId, stageId !== selectedStageId);
+        openStageConfig();
       });
     });
+    mapBackButton.addEventListener("click", closeStageConfig);
     localeSelect.addEventListener("change", () => {
       selectedLocale = localeSelect.value as Locale;
       this.options.onLocaleChange(selectedLocale);
@@ -806,8 +829,8 @@ export class StartModal {
     void loadGhostOptions();
     showOrientationPrompt();
     if (orientationPrompt.hidden) {
-      input.focus();
-      input.select();
+      const selectedNode = worldMapNodes.find((node) => node.dataset.stageId === selectedStageId);
+      selectedNode?.focus();
     }
   }
 
