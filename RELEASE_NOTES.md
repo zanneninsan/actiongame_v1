@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.362
+### English
+- Added an early Heart Cannon turret to Skybridge Sprint so the cannon mechanic appears before the late-stage section.
+### Japanese
+- スカイブリッジ・スプリントの前半にハートキャノン砲台を追加し、ステージ後半に入る前から大砲ギミックを確認できるようにしました。
+
 ## v0.1.361
 ### English
 - Replaced the browser-native return confirmation with an in-game styled dialog when returning to the world map.
