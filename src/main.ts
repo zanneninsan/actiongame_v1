@@ -102,7 +102,9 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.352";
+const DEBUG_VERSION = "v0.1.353";
+const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
+const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -382,7 +384,7 @@ class PrototypeScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keys!: Record<"w" | "a" | "s" | "d" | "shift", Phaser.Input.Keyboard.Key>;
   private backgrounds?: BackgroundController;
-  private hudPanelBack!: Phaser.GameObjects.Rectangle;
+  private hudPanelBack!: Phaser.GameObjects.Image;
   private hudPanelAccent!: Phaser.GameObjects.Rectangle;
   private playerNameText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
@@ -393,7 +395,7 @@ class PrototypeScene extends Phaser.Scene {
   private staminaBarFrame!: Phaser.GameObjects.Rectangle;
   private overheadStaminaBarBack!: Phaser.GameObjects.Rectangle;
   private overheadStaminaBarFill!: Phaser.GameObjects.Rectangle;
-  private controlHintBack!: Phaser.GameObjects.Rectangle;
+  private controlHintBack!: Phaser.GameObjects.Image;
   private controlHintText!: Phaser.GameObjects.Text;
   private hudScale = 1;
   private loadedGhostReplay?: GhostReplayData;
@@ -544,6 +546,8 @@ class PrototypeScene extends Phaser.Scene {
     this.load.image(PLATFORM_ASSETS.single, `${ASSET_BASE}assets/platforms/platform_unit_single.webp`);
     this.load.image(PROP_ASSETS.lampSingle, `${ASSET_BASE}assets/props/street_lamp_single.webp`);
     this.load.image(PROP_ASSETS.lampDouble, `${ASSET_BASE}assets/props/street_lamp_double.webp`);
+    this.load.image(HUD_PANEL_TEXTURE_KEY, `${ASSET_BASE}assets/ui/hud_panel_fantasy.png`);
+    this.load.image(HUD_CHIP_TEXTURE_KEY, `${ASSET_BASE}assets/ui/fantasy/label_plate_safe.webp`);
     STAGE_OBJECT_ASSETS.forEach((asset) => {
       this.load.image(asset.key, `${ASSET_BASE}${asset.path}`);
     });
@@ -739,13 +743,14 @@ class PrototypeScene extends Phaser.Scene {
     this.collisionDebugGraphics = this.add.graphics().setDepth(300);
 
     this.hudPanelBack = this.add
-      .rectangle(HUD_PANEL_X, HUD_PANEL_Y, HUD_PANEL_WIDTH, HUD_PANEL_HEIGHT, 0x07111f, 0.72)
+      .image(HUD_PANEL_X, HUD_PANEL_Y, HUD_PANEL_TEXTURE_KEY)
       .setOrigin(0, 0)
       .setScrollFactor(0)
-      .setDepth(96);
-    this.hudPanelBack.setStrokeStyle(1, 0x38bdf8, 0.36);
+      .setDepth(96)
+      .setAlpha(0.92);
+    this.hudPanelBack.setDisplaySize(HUD_PANEL_WIDTH, HUD_PANEL_HEIGHT);
     this.hudPanelAccent = this.add
-      .rectangle(HUD_PANEL_X, HUD_PANEL_Y, 4, HUD_PANEL_HEIGHT, 0x67e8f9, 0.82)
+      .rectangle(HUD_PANEL_X + 12, HUD_PANEL_Y + 14, 3, HUD_PANEL_HEIGHT - 28, 0x67e8f9, 0.62)
       .setOrigin(0, 0)
       .setScrollFactor(0)
       .setDepth(97);
@@ -821,11 +826,12 @@ class PrototypeScene extends Phaser.Scene {
     this.updateStaminaHud();
 
     this.controlHintBack = this.add
-      .rectangle(HUD_MODE_CHIP_X, HUD_MODE_CHIP_Y, HUD_MODE_CHIP_MIN_WIDTH, HUD_MODE_CHIP_HEIGHT, 0x07111f, 0.58)
+      .image(HUD_MODE_CHIP_X, HUD_MODE_CHIP_Y, HUD_CHIP_TEXTURE_KEY)
       .setOrigin(0.5, 0)
       .setScrollFactor(0)
-      .setDepth(98);
-    this.controlHintBack.setStrokeStyle(1, 0xfde68a, 0.36);
+      .setDepth(98)
+      .setAlpha(0.9);
+    this.controlHintBack.setDisplaySize(HUD_MODE_CHIP_MIN_WIDTH, HUD_MODE_CHIP_HEIGHT);
     this.controlHintText = this.add
       .text(HUD_MODE_CHIP_X, HUD_MODE_CHIP_Y + 7, "", {
         fontFamily: "monospace",
@@ -1928,15 +1934,13 @@ class PrototypeScene extends Phaser.Scene {
 
     if (this.hudPanelBack) {
       this.hudPanelBack.setPosition(HUD_PANEL_X * scale, HUD_PANEL_Y * scale);
-      this.hudPanelBack.width = HUD_PANEL_WIDTH * scale;
-      this.hudPanelBack.height = HUD_PANEL_HEIGHT * scale;
-      this.hudPanelBack.setStrokeStyle(Math.max(1, Math.round(scale)), 0x38bdf8, 0.36);
+      this.hudPanelBack.setDisplaySize(HUD_PANEL_WIDTH * scale, HUD_PANEL_HEIGHT * scale);
     }
 
     if (this.hudPanelAccent) {
-      this.hudPanelAccent.setPosition(HUD_PANEL_X * scale, HUD_PANEL_Y * scale);
-      this.hudPanelAccent.width = 4 * scale;
-      this.hudPanelAccent.height = HUD_PANEL_HEIGHT * scale;
+      this.hudPanelAccent.setPosition((HUD_PANEL_X + 12) * scale, (HUD_PANEL_Y + 14) * scale);
+      this.hudPanelAccent.width = 3 * scale;
+      this.hudPanelAccent.height = (HUD_PANEL_HEIGHT - 28) * scale;
     }
 
     if (this.playerNameText) {
@@ -1980,8 +1984,6 @@ class PrototypeScene extends Phaser.Scene {
 
     if (this.controlHintBack) {
       this.controlHintBack.setPosition(HUD_MODE_CHIP_X, HUD_MODE_CHIP_Y * scale);
-      this.controlHintBack.height = HUD_MODE_CHIP_HEIGHT * scale;
-      this.controlHintBack.setStrokeStyle(Math.max(1, Math.round(scale)), 0xfde68a, 0.36);
       this.resizeControlHintBack();
     }
 
@@ -3251,7 +3253,7 @@ class PrototypeScene extends Phaser.Scene {
 
     const scale = this.hudScale || 1;
     const width = Math.max(HUD_MODE_CHIP_MIN_WIDTH * scale, this.controlHintText.width + 28 * scale);
-    this.controlHintBack.width = width;
+    this.controlHintBack.setDisplaySize(width, HUD_MODE_CHIP_HEIGHT * scale);
   }
 
   private updateCollisionDebug() {

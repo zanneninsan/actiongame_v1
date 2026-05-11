@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.353
+### English
+- Enriched the in-game HUD with existing fantasy UI raster panels for the status cluster and mode chip, reducing the plain rectangle look while keeping text layout and scaling behavior intact.
+### Japanese
+- ゲーム中HUDのステータス表示とモード表示に既存のファンタジー調UI画像を使い、文字配置と画面サイズ追従を保ったまま、単純な矩形表示に見えにくい見た目へ調整しました。
+
 ## v0.1.352
 ### English
 - Reworked the in-game HUD into a compact top-left status panel so player name, score, timer, and stamina read as one cluster without spreading across the playfield.
