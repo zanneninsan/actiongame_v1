@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.354
+### English
+- Refined the player's ground dash sprite sheet so the arm pumping reads more clearly during Shift-running, with stronger front/back arm separation across the loop.
+### Japanese
+- プレイヤーの地上ダッシュ用スプライトを調整し、Shift 走行中に腕振りが止まって見えないよう、前後の腕の差がはっきり分かるループへ改善しました。
+
 ## v0.1.353
 ### English
 - Added a new ground dash animation for the player so holding Shift while running now plays a dedicated 12-frame dash motion instead of the normal walk loop.
