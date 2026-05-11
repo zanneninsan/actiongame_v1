@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.354
+### English
+- Added a world-map style stage picker to the start screen, with connected route nodes that sync with the existing stage selector and ranking ghost list.
+- Kept the existing player, language, sound, account, and replay ghost controls available around the new map layout.
+### Japanese
+- スタート画面にすごろく風のワールドマップ型ステージ選択を追加し、ルート上のノード選択が既存のステージ選択とランキングゴースト一覧に連動するようにしました。
+- プレイヤー名、言語、サウンド、アカウント、リプレイゴースト設定は、新しいマップ配置の周辺から引き続き使えるようにしています。
+
 ## v0.1.353
 ### English
 - Enriched the in-game HUD with existing fantasy UI raster panels for the status cluster and mode chip, reducing the plain rectangle look while keeping text layout and scaling behavior intact.

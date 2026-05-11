@@ -19,6 +19,8 @@ const translations = {
     "start.soundOff": "SOUND OFF",
     "start.language": "Language／Language",
     "start.stage": "Stage",
+    "start.worldMap": "World Map",
+    "start.worldMapCurrent": "Selected route",
     "start.modePc": "PC",
     "start.modeMobile": "MOBILE",
     "start.playerSpec": "Game Spec",
@@ -547,6 +549,8 @@ const localeTranslations: Record<Locale, Partial<Record<TranslationKey, string>>
     "start.soundOff": "\u58f0\u97f3\u5173",
     "start.language": "\u8bed\u8a00 / Language",
     "start.stage": "\u5173\u5361",
+    "start.worldMap": "\u4e16\u754c\u5730\u56fe",
+    "start.worldMapCurrent": "\u5df2\u9009\u8def\u7ebf",
     "start.modePc": "\u7535\u8111",
     "start.modeMobile": "\u624b\u673a",
     "start.playerSpec": "\u6e38\u620f\u8bf4\u660e",
@@ -802,6 +806,8 @@ const localeTranslations: Record<Locale, Partial<Record<TranslationKey, string>>
     "start.soundOff": "\uc0ac\uc6b4\ub4dc \ub044\uae30",
     "start.language": "\uc5b8\uc5b4 / Language",
     "start.stage": "\uc2a4\ud14c\uc774\uc9c0",
+    "start.worldMap": "\uc6d4\ub4dc \ub9f5",
+    "start.worldMapCurrent": "\uc120\ud0dd\ub41c \ub8e8\ud2b8",
     "start.modePc": "PC",
     "start.modeMobile": "\ubaa8\ubc14\uc77c",
     "start.playerSpec": "\uac8c\uc784 \uc124\uba85",
@@ -1069,6 +1075,8 @@ export const getBrowserLocale = (): Locale => {
 };
 
 const japaneseRuntimeOverrides: Partial<Record<TranslationKey, string>> = {
+  "start.worldMap": "ワールドマップ",
+  "start.worldMapCurrent": "選択中",
   "editor.stageName": "ステージ名",
   "editor.stageNamePlaceholder": "日本語のステージ名",
   "editor.submitProposal": "採用申請",

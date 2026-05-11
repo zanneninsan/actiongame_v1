@@ -427,13 +427,13 @@ canvas {
   box-sizing: border-box;
   position: relative;
   z-index: 2;
-  width: min(620px, calc(100vw - 72px), calc((100dvh - 48px) * 1.125));
+  width: min(760px, calc(100vw - 72px), calc((100dvh - 48px) * 1.08));
   max-height: calc(100dvh - 48px);
-  aspect-ratio: 720 / 640;
+  aspect-ratio: 760 / 704;
   display: grid;
   align-content: start;
   gap: 11px;
-  padding: clamp(54px, 8vw, 72px) clamp(58px, 9vw, 86px) clamp(38px, 6vw, 56px);
+  padding: clamp(42px, 6vw, 58px) clamp(54px, 8vw, 82px) clamp(30px, 5vw, 48px);
   border: 0;
   background: url("../public/assets/ui/fantasy/start_modal_window.webp") center / 100% 100% no-repeat;
   filter: drop-shadow(0 24px 36px rgba(0, 0, 0, 0.58));
@@ -472,6 +472,168 @@ canvas {
 .start-choice-panel {
   display: grid;
   gap: 11px;
+}
+
+.start-world-map-panel {
+  box-sizing: border-box;
+  width: min(100%, calc(100% - 34px));
+  justify-self: center;
+  display: grid;
+  gap: 8px;
+  padding: 8px 12px 10px;
+  border: 1px solid rgba(245, 199, 106, 0.34);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(8, 18, 35, 0.78), rgba(5, 13, 28, 0.9)),
+    radial-gradient(circle at 20% 28%, rgba(56, 189, 248, 0.24), transparent 34%),
+    radial-gradient(circle at 78% 18%, rgba(253, 230, 138, 0.2), transparent 32%);
+  box-shadow:
+    inset 0 0 24px rgba(15, 23, 42, 0.96),
+    0 8px 20px rgba(0, 0, 0, 0.22);
+}
+
+.start-world-map-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #f5c76a;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.start-world-current {
+  min-width: 0;
+  color: #bae6fd;
+  font-size: 11px;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start-world-map-track {
+  position: relative;
+  height: 128px;
+  overflow: hidden;
+  border-radius: 7px;
+  background:
+    linear-gradient(180deg, rgba(6, 16, 32, 0.15), rgba(2, 6, 23, 0.48)),
+    radial-gradient(circle at 16% 70%, rgba(20, 184, 166, 0.28), transparent 18%),
+    radial-gradient(circle at 50% 32%, rgba(125, 211, 252, 0.18), transparent 26%),
+    radial-gradient(circle at 86% 55%, rgba(244, 114, 182, 0.18), transparent 22%);
+}
+
+.start-world-path {
+  position: absolute;
+  inset: 8px 8px 12px;
+  width: calc(100% - 16px);
+  height: calc(100% - 20px);
+  overflow: visible;
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.46));
+  pointer-events: none;
+}
+
+.start-world-path polyline {
+  fill: none;
+  stroke: rgba(186, 230, 253, 0.72);
+  stroke-dasharray: 3 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 2.4;
+}
+
+.start-world-node {
+  --map-x: 50%;
+  --map-y: 50%;
+  position: absolute;
+  left: var(--map-x);
+  top: var(--map-y);
+  z-index: 1;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #dbeafe;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.96);
+  transform: translate(-50%, -50%);
+  transition:
+    filter 160ms ease,
+    transform 160ms ease;
+}
+
+.start-world-node:hover,
+.start-world-node:focus-visible {
+  filter: brightness(1.2) saturate(1.12) drop-shadow(0 0 8px rgba(125, 211, 252, 0.42));
+  outline: none;
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+.start-world-node.is-selected {
+  background-image: url("../public/assets/ui/fantasy/button_primary_selected_safe.webp");
+  color: #fff7d6;
+  filter: brightness(1.28) saturate(1.35) drop-shadow(0 0 12px rgba(253, 230, 138, 0.64));
+}
+
+.start-world-node.is-selected::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  border: 1px solid rgba(253, 230, 138, 0.62);
+  border-radius: 50%;
+  animation: world-node-pulse 1400ms ease-in-out infinite;
+  pointer-events: none;
+}
+
+.start-world-node-index {
+  line-height: 1;
+}
+
+.start-world-node-label {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 2px);
+  max-width: 112px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.72);
+  color: #bfdbfe;
+  font-size: 10px;
+  line-height: 1.15;
+  opacity: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transform: translateX(-50%);
+  transition: opacity 140ms ease;
+  white-space: nowrap;
+}
+
+.start-world-node:hover .start-world-node-label,
+.start-world-node:focus-visible .start-world-node-label,
+.start-world-node.is-selected .start-world-node-label {
+  opacity: 1;
+}
+
+@keyframes world-node-pulse {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: scale(0.92);
+  }
+
+  50% {
+    opacity: 0.82;
+    transform: scale(1.08);
+  }
 }
 
 .start-field {
@@ -951,6 +1113,37 @@ canvas {
     gap: 12px;
   }
 
+  .start-world-map-panel {
+    width: 100%;
+    gap: 7px;
+    padding: 8px 9px 9px;
+  }
+
+  .start-world-map-track {
+    height: 138px;
+  }
+
+  .start-world-map-header {
+    display: grid;
+    gap: 2px;
+    font-size: 12px;
+  }
+
+  .start-world-current {
+    text-align: left;
+    white-space: normal;
+  }
+
+  .start-world-node {
+    width: 38px;
+    height: 38px;
+    font-size: 13px;
+  }
+
+  .start-world-node-label {
+    display: none;
+  }
+
   .start-field,
   .mode-row,
   .sound-row,
@@ -1064,6 +1257,24 @@ canvas {
   .start-primary-panel {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
+  }
+
+  .start-world-map-panel {
+    padding: 6px 10px;
+  }
+
+  .start-world-map-track {
+    height: 88px;
+  }
+
+  .start-world-node {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+
+  .start-world-node-label {
+    display: none;
   }
 
   .start-field {
