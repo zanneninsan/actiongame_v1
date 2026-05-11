@@ -451,7 +451,7 @@ canvas {
   transform: translateY(0) scale(1);
 }
 
-#start-modal.is-revealing-start-dialog .start-dialog {
+#start-modal.is-revealing-start-dialog.is-stage-config-open .start-dialog {
   animation: start-dialog-soft-reveal 720ms ease-out 180ms both;
 }
 
@@ -1478,7 +1478,7 @@ canvas {
 
   .start-title-screen.is-exiting,
   #start-modal.is-revealing-start-dialog::before,
-  #start-modal.is-revealing-start-dialog .start-dialog {
+  #start-modal.is-revealing-start-dialog.is-stage-config-open .start-dialog {
     animation: none;
   }
 }

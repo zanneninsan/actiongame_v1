@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.356
+### English
+- Fixed the run setup modal appearing immediately on top of the full-screen world map; it now stays hidden until a map node is selected.
+### Japanese
+- 全画面ワールドマップ表示中に出発準備モーダルが重なって出てしまう問題を修正し、マップのマスを選ぶまで表示されないようにしました。
+
 ## v0.1.355
 ### English
 - Changed the start flow so the title leads into a full-screen world map first, then selecting a route node opens the existing run setup screen.
