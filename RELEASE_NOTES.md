@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.359
+### English
+- Generated and added a dedicated cute resort-island theme park world map background for Zannenin-san Land.
+- Made the world map screen fully opaque so the stage no longer shows through behind it.
+### Japanese
+- 殘念院さんランド向けに、遊園地とリゾート島をイメージしたかわいいワールドマップ背景を画像生成で追加しました。
+- ワールドマップ画面を完全に不透明な独立画面にし、背後のステージが透けて見えないようにしました。
+
 ## v0.1.358
 ### English
 - Replaced the world map face marker with the existing player character sprite, using idle animation while waiting and walk animation while moving.

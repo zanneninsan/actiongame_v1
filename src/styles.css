@@ -72,7 +72,7 @@ canvas {
   place-items: center;
   padding: 24px 56px;
   overflow: auto;
-  background: rgba(4, 8, 18, 0.78);
+  background: #06101e;
   color: #f8fafc;
   font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
 }
@@ -525,14 +525,11 @@ canvas {
   overflow: hidden;
   border-radius: 10px;
   background:
-    linear-gradient(180deg, rgba(7, 13, 31, 0.24), rgba(1, 5, 16, 0.56)),
-    radial-gradient(circle at 18% 74%, rgba(20, 184, 166, 0.5), transparent 16%),
-    radial-gradient(circle at 35% 38%, rgba(125, 211, 252, 0.4), transparent 18%),
-    radial-gradient(circle at 62% 50%, rgba(253, 230, 138, 0.28), transparent 16%),
-    radial-gradient(circle at 82% 25%, rgba(244, 114, 182, 0.35), transparent 20%),
-    linear-gradient(135deg, #0b1227 0%, #12324f 34%, #1f3f46 58%, #402658 100%);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(1, 5, 16, 0.16)),
+    url("../public/assets/ui/world_map/zannenin_land_world_map.webp") center / cover no-repeat,
+    #0b2943;
   box-shadow:
-    inset 0 0 80px rgba(1, 5, 16, 0.86),
+    inset 0 0 66px rgba(1, 5, 16, 0.42),
     inset 0 0 0 1px rgba(245, 199, 106, 0.24),
     0 24px 54px rgba(0, 0, 0, 0.48);
 }
@@ -545,15 +542,10 @@ canvas {
 }
 
 .start-world-map-art::before {
-  inset: 8% 5% 8%;
+  inset: 0;
   background:
-    linear-gradient(145deg, transparent 0 18%, rgba(186, 230, 253, 0.2) 18.4% 19.2%, transparent 19.6% 100%),
-    linear-gradient(28deg, transparent 0 42%, rgba(253, 230, 138, 0.12) 42.4% 43.2%, transparent 43.6% 100%),
-    radial-gradient(ellipse at 18% 74%, rgba(16, 185, 129, 0.38) 0 15%, transparent 16%),
-    radial-gradient(ellipse at 39% 45%, rgba(14, 165, 233, 0.32) 0 16%, transparent 17%),
-    radial-gradient(ellipse at 63% 50%, rgba(234, 179, 8, 0.2) 0 15%, transparent 16%),
-    radial-gradient(ellipse at 83% 25%, rgba(168, 85, 247, 0.34) 0 16%, transparent 17%);
-  filter: blur(0.2px);
+    linear-gradient(90deg, rgba(2, 6, 23, 0.18), transparent 20% 80%, rgba(2, 6, 23, 0.18)),
+    linear-gradient(180deg, rgba(2, 6, 23, 0.1), transparent 32% 74%, rgba(2, 6, 23, 0.22));
 }
 
 .start-world-map-art::after {
