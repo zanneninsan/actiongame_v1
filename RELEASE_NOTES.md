@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.363
+### English
+- Added three selectable cute player characters with matching idle, walk, jump, crouch, long-idle, and defeat sprite sheet motions.
+- Added a compact character selector to the start screen and reflected the selected character on the world map and in gameplay.
+### Japanese
+- 待機、歩き、ジャンプ、しゃがみ、長待機、ミス用のモーション付きスプライトシートを持つ、選択可能な新キャラクターを3体追加しました。
+- スタート画面にコンパクトなキャラクター選択を追加し、選んだキャラクターがワールドマップとゲーム本編に反映されるようにしました。
+
 ## v0.1.362
 ### English
 - Added an early Heart Cannon turret to Skybridge Sprint so the cannon mechanic appears before the late-stage section.

@@ -67,6 +67,16 @@ import {
 import { DanmakuOverlay, type DanmakuMode } from "./danmaku";
 import { MinimapOverlay } from "./minimap";
 import {
+  DEFAULT_PLAYER_CHARACTER_ID,
+  PLAYER_CHARACTERS,
+  getPlayerAnimationKey,
+  getPlayerTextureKey,
+  normalizePlayerCharacterId,
+  type PlayerAnimationName,
+  type PlayerCharacterId,
+  type PlayerCharacterMotion,
+} from "./playerCharacters";
+import {
   clearLeaderboardUserSettings,
   fetchLeaderboardEntries,
   fetchLeaderboardGhostOptions,
@@ -102,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.362";
+const DEBUG_VERSION = "v0.1.363";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -189,6 +199,7 @@ const resolveFixedStoryDialogue = (key: FixedStoryDialogueKey, locale: Locale): 
 };
 
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
+const PLAYER_CHARACTER_STORAGE_KEY = "actiongame_player_character";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
 const DANMAKU_TUTORIAL_SEEN_STORAGE_KEY_PREFIX = "actiongame_danmaku_tutorial_seen";
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
@@ -233,11 +244,6 @@ const PLAYER_CROUCH_BODY_WIDTH = 58;
 const PLAYER_CROUCH_BODY_HEIGHT = 94;
 const PLAYER_CROUCH_BODY_OFFSET_X = 131;
 const PLAYER_CROUCH_BODY_OFFSET_Y = PLAYER_BODY_OFFSET_Y + PLAYER_BODY_HEIGHT - PLAYER_CROUCH_BODY_HEIGHT;
-const PLAYER_IDLE_FRAME_COUNT = 8;
-const PLAYER_LONG_IDLE_FRAME_COUNT = 29;
-const PLAYER_FRAME_COUNT = 13;
-const PLAYER_CROUCH_FRAME_COUNT = 27;
-const PLAYER_DEFEAT_FRAME_COUNT = 8;
 const PLAYER_LONG_IDLE_TRIGGER_MS = 5000;
 const GROUND_ACCELERATION = 2400;
 const CROUCH_GROUND_ACCELERATION = 1600;
@@ -437,6 +443,7 @@ class PrototypeScene extends Phaser.Scene {
   private isRestarting = false;
   private setupComplete = false;
   private playerName = "PLAYER";
+  private playerCharacterId: PlayerCharacterId = DEFAULT_PLAYER_CHARACTER_ID;
   private leaderboardPlayerId = "";
   private leaderboardGoogleLinked = false;
   private leaderboardGoogleEmail: string | null = null;
@@ -565,29 +572,17 @@ class PrototypeScene extends Phaser.Scene {
         });
       }
     });
-    this.load.spritesheet("player-idle", `${ASSET_BASE}assets/sprites/player_idle_8_320x260.webp`, {
-      frameWidth: PLAYER_DISPLAY_WIDTH,
-      frameHeight: PLAYER_DISPLAY_HEIGHT,
-    });
-    this.load.spritesheet("player-longidle", `${ASSET_BASE}assets/sprites/player_longidle_320x260.webp`, {
-      frameWidth: PLAYER_DISPLAY_WIDTH,
-      frameHeight: PLAYER_DISPLAY_HEIGHT,
-    });
-    this.load.spritesheet("player-walk", `${ASSET_BASE}assets/sprites/player_walk_13_320x260.webp`, {
-      frameWidth: PLAYER_DISPLAY_WIDTH,
-      frameHeight: PLAYER_DISPLAY_HEIGHT,
-    });
-    this.load.spritesheet("player-jump", `${ASSET_BASE}assets/sprites/player_jump_15_320x260.webp`, {
-      frameWidth: PLAYER_DISPLAY_WIDTH,
-      frameHeight: PLAYER_DISPLAY_HEIGHT,
-    });
-    this.load.spritesheet("player-crouch", `${ASSET_BASE}assets/sprites/player_crouch_27_9x3_320x260.webp`, {
-      frameWidth: PLAYER_DISPLAY_WIDTH,
-      frameHeight: PLAYER_DISPLAY_HEIGHT,
-    });
-    this.load.spritesheet("player-defeat", `${ASSET_BASE}assets/sprites/player_defeat_8_320x260.webp`, {
-      frameWidth: PLAYER_DISPLAY_WIDTH,
-      frameHeight: PLAYER_DISPLAY_HEIGHT,
+    PLAYER_CHARACTERS.forEach((character) => {
+      Object.entries(character.spriteSheets).forEach(([motion, spriteSheet]) => {
+        this.load.spritesheet(
+          getPlayerTextureKey(character.id, motion as PlayerCharacterMotion),
+          `${ASSET_BASE}${spriteSheet.path}`,
+          {
+            frameWidth: spriteSheet.frameWidth,
+            frameHeight: spriteSheet.frameHeight,
+          },
+        );
+      });
     });
     this.createPixelTexture("platform-hitbox", 1, 1, 0xffffff, 0xffffff);
     this.load.image(GOAL_TEXTURE_KEY, `${ASSET_BASE}assets/stage_objects/goal_gate.webp`);
@@ -602,6 +597,7 @@ class PrototypeScene extends Phaser.Scene {
     hideBootLoadingOverlay();
     this.registerRainbowPipeline();
     this.playerName = this.getCookieValue("actiongame_player_name") || this.playerName;
+    this.playerCharacterId = normalizePlayerCharacterId(this.getCookieValue(PLAYER_CHARACTER_STORAGE_KEY));
     this.leaderboardPlayerId = this.getOrCreateLeaderboardPlayerId();
     void this.refreshLeaderboardIdentity();
     this.locale = this.getSavedLocale();
@@ -651,7 +647,11 @@ class PrototypeScene extends Phaser.Scene {
     this.createPlayerAnimations();
     createEnemyAnimations(this);
 
-    this.player = this.physics.add.sprite(this.editorStage.playerStart.x, this.editorStage.playerStart.y, "player-idle");
+    this.player = this.physics.add.sprite(
+      this.editorStage.playerStart.x,
+      this.editorStage.playerStart.y,
+      this.playerTextureKey("idle"),
+    );
     movePlayerToCheckpointStart(this.currentStageId, this.editorStage, this.player);
     this.rewards = new RewardSystem(
       this,
@@ -663,18 +663,18 @@ class PrototypeScene extends Phaser.Scene {
     this.player.setCollideWorldBounds(true);
     this.applyPlayerBody();
     this.player.setMaxVelocity(MAX_RUN_SPEED, MAX_FALL_SPEED);
-    this.player.play("player-idle");
+    this.player.play(this.playerAnimationKey("idle"));
     this.wasOnFloor = true;
-    this.player.on(`${Phaser.Animations.Events.ANIMATION_COMPLETE_KEY}player-land`, () => {
+    this.player.on(`${Phaser.Animations.Events.ANIMATION_COMPLETE_KEY}${this.playerAnimationKey("land")}`, () => {
       this.isLanding = false;
       this.landingFastForwarded = false;
       this.player.anims.timeScale = 1;
     });
-    this.player.on(`${Phaser.Animations.Events.ANIMATION_COMPLETE_KEY}player-longidle`, () => {
+    this.player.on(`${Phaser.Animations.Events.ANIMATION_COMPLETE_KEY}${this.playerAnimationKey("longidle")}`, () => {
       this.isLongIdlePlaying = false;
       this.idleStartedAt = this.time.now;
-      if (this.isRunActive && this.player.anims.currentAnim?.key === "player-longidle") {
-        this.player.anims.play("player-idle", true);
+      if (this.isRunActive && this.player.anims.currentAnim?.key === this.playerAnimationKey("longidle")) {
+        this.player.anims.play(this.playerAnimationKey("idle"), true);
       }
     });
 
@@ -1009,7 +1009,7 @@ class PrototypeScene extends Phaser.Scene {
       this.player.anims.timeScale = 1;
       startedJump = true;
       this.resetPlayerIdleState();
-      this.player.anims.play("player-jump-start", true);
+      this.player.anims.play(this.playerAnimationKey("jump-start"), true);
       this.sound.play("player-jump-sfx", { volume: getScaledSeVolume(this, 0.42) });
     }
 
@@ -1027,13 +1027,13 @@ class PrototypeScene extends Phaser.Scene {
       this.landingFastForwarded = false;
       this.resetPlayerIdleState();
       this.player.anims.timeScale = 1;
-      this.player.anims.play("player-land", true);
+      this.player.anims.play(this.playerAnimationKey("land"), true);
     } else if (this.isLanding) {
       if (down) {
         this.isLanding = false;
         this.landingFastForwarded = false;
         this.player.anims.timeScale = 1;
-        this.player.anims.play("player-crouch");
+        this.player.anims.play(this.playerAnimationKey("crouch"));
       } else if ((left || right) && !this.landingFastForwarded) {
         this.landingFastForwarded = true;
         this.player.anims.timeScale = 2;
@@ -1045,22 +1045,22 @@ class PrototypeScene extends Phaser.Scene {
       }
     } else if (startedJump) {
       this.resetPlayerIdleState();
-      this.player.anims.play("player-jump-start", true);
+      this.player.anims.play(this.playerAnimationKey("jump-start"), true);
     } else if (!onFloor) {
       this.resetPlayerIdleState();
       const currentAnimation = this.player.anims.currentAnim?.key;
-      if (currentAnimation !== "player-jump-start" || !this.player.anims.isPlaying) {
-        this.player.anims.play("player-air", true);
+      if (currentAnimation !== this.playerAnimationKey("jump-start") || !this.player.anims.isPlaying) {
+        this.player.anims.play(this.playerAnimationKey("air"), true);
       }
     } else if (isCrouching) {
       this.resetPlayerIdleState();
       this.player.anims.timeScale = 1;
-      if (this.player.anims.currentAnim?.key !== "player-crouch") {
-        this.player.anims.play("player-crouch");
+      if (this.player.anims.currentAnim?.key !== this.playerAnimationKey("crouch")) {
+        this.player.anims.play(this.playerAnimationKey("crouch"));
       }
     } else if (left || right || isMovingHorizontally) {
       this.resetPlayerIdleState();
-      this.player.anims.play("player-walk", true);
+      this.player.anims.play(this.playerAnimationKey("walk"), true);
     } else {
       this.updatePlayerIdleAnimation();
     }
@@ -1094,7 +1094,7 @@ class PrototypeScene extends Phaser.Scene {
     this.landingFastForwarded = false;
     this.resetPlayerIdleState();
     if (velocityX !== 0 || velocityY !== 0) {
-      this.player.anims.play("player-air", true);
+      this.player.anims.play(this.playerAnimationKey("air"), true);
     } else {
       this.updatePlayerIdleAnimation();
     }
@@ -1108,8 +1108,8 @@ class PrototypeScene extends Phaser.Scene {
   private updatePlayerIdleAnimation() {
     this.player.anims.timeScale = 1;
     if (this.isLongIdlePlaying) {
-      if (this.player.anims.currentAnim?.key !== "player-longidle") {
-        this.player.anims.play("player-longidle", true);
+      if (this.player.anims.currentAnim?.key !== this.playerAnimationKey("longidle")) {
+        this.player.anims.play(this.playerAnimationKey("longidle"), true);
       }
       return;
     }
@@ -1120,11 +1120,11 @@ class PrototypeScene extends Phaser.Scene {
 
     if (this.time.now - this.idleStartedAt >= PLAYER_LONG_IDLE_TRIGGER_MS) {
       this.isLongIdlePlaying = true;
-      this.player.anims.play("player-longidle", true);
+      this.player.anims.play(this.playerAnimationKey("longidle"), true);
       return;
     }
 
-    this.player.anims.play("player-idle", true);
+    this.player.anims.play(this.playerAnimationKey("idle"), true);
   }
 
   private resetRunState() {
@@ -1664,6 +1664,8 @@ class PrototypeScene extends Phaser.Scene {
 
     this.startModal = new StartModal({
       playerName: this.playerName,
+      playerCharacterId: this.playerCharacterId,
+      characterOptions: PLAYER_CHARACTERS,
       controlMode: this.controlMode,
       stageId: this.currentStageId,
       stageOptions: this.getStageOptions(),
@@ -1677,9 +1679,13 @@ class PrototypeScene extends Phaser.Scene {
       onGhostReplayLoad: (jsonText) => this.loadGhostReplayFromJson(jsonText),
       onFetchGhostOptions: (stageId) => fetchLeaderboardGhostOptions(this.resolveStageId(stageId), 10),
       onGhostReplaySelect: (ghostId) => this.loadLeaderboardGhostReplay(ghostId),
-      onSubmit: ({ playerName, controlMode, stageId, soundOn, locale }) => {
+      onSubmit: ({ playerName, playerCharacterId, controlMode, stageId, soundOn, locale }) => {
         this.playerName = playerName;
         this.setCookieValue("actiongame_player_name", this.playerName);
+        this.playerCharacterId = normalizePlayerCharacterId(playerCharacterId);
+        this.setCookieValue(PLAYER_CHARACTER_STORAGE_KEY, this.playerCharacterId);
+        this.player.setTexture(this.playerTextureKey("idle"));
+        this.player.anims.play(this.playerAnimationKey("idle"), true);
         this.controlMode = controlMode;
         this.currentStageId = this.resolveStageId(stageId);
         this.setCookieValue(STAGE_ID_STORAGE_KEY, this.currentStageId);
@@ -1785,6 +1791,7 @@ class PrototypeScene extends Phaser.Scene {
 
     for (const key of [
       "actiongame_player_name",
+      PLAYER_CHARACTER_STORAGE_KEY,
       STAGE_ID_STORAGE_KEY,
       "actiongame_muted",
       "actiongame_bgm_volume",
@@ -1873,6 +1880,7 @@ class PrototypeScene extends Phaser.Scene {
   private getLeaderboardUserSettings(): LeaderboardUserSettings {
     return {
       playerName: this.playerName,
+      playerCharacterId: this.playerCharacterId,
       locale: this.locale,
       stageId: this.currentStageId,
       soundVolumePercent: Math.round((this.bgmVolumePercent + this.seVolumePercent) / 2),
@@ -1891,6 +1899,11 @@ class PrototypeScene extends Phaser.Scene {
       if (settings.playerName) {
         this.playerName = settings.playerName;
         this.setCookieValue("actiongame_player_name", this.playerName);
+      }
+      if (settings.playerCharacterId) {
+        this.playerCharacterId = normalizePlayerCharacterId(settings.playerCharacterId);
+        this.setCookieValue(PLAYER_CHARACTER_STORAGE_KEY, this.playerCharacterId);
+        this.player?.setTexture(this.playerTextureKey("idle"));
       }
       if (settings.locale && isLocale(settings.locale)) {
         this.setLocale(settings.locale);
@@ -2764,7 +2777,7 @@ class PrototypeScene extends Phaser.Scene {
     this.player.setVelocity(direction * DAMAGE_KNOCKBACK_X, DAMAGE_KNOCKBACK_Y);
     this.player.setDragX(AIR_DRAG);
     this.player.anims.timeScale = 1;
-    this.player.anims.play("player-air", true);
+    this.player.anims.play(this.playerAnimationKey("air"), true);
     this.resetPlayerIdleState();
     this.playDamageMotion(direction);
   }
@@ -2947,12 +2960,12 @@ class PrototypeScene extends Phaser.Scene {
 
     const firstFrame = this.loadedGhostReplay.frames[0];
     this.ghostReplaySprite = this.add
-      .sprite(firstFrame.x, firstFrame.y, "player-idle")
+      .sprite(firstFrame.x, firstFrame.y, this.playerTextureKey("idle"))
       .setDisplaySize(PLAYER_DISPLAY_WIDTH, PLAYER_DISPLAY_HEIGHT)
       .setAlpha(0.34)
       .setTint(0x67e8f9)
       .setDepth(88);
-    this.ghostReplaySprite.play("player-idle", true);
+    this.ghostReplaySprite.play(this.playerAnimationKey("idle"), true);
   }
 
   private updateGhostReplay() {
@@ -3632,89 +3645,99 @@ class PrototypeScene extends Phaser.Scene {
     graphics.destroy();
   }
 
+  private playerTextureKey(motion: PlayerCharacterMotion) {
+    return getPlayerTextureKey(this.playerCharacterId, motion);
+  }
+
+  private playerAnimationKey(animation: PlayerAnimationName) {
+    return getPlayerAnimationKey(this.playerCharacterId, animation);
+  }
+
   private createPlayerAnimations() {
-    if (this.anims.exists("player-idle")) {
-      return;
-    }
+    PLAYER_CHARACTERS.forEach((character) => {
+      if (this.anims.exists(getPlayerAnimationKey(character.id, "idle"))) {
+        return;
+      }
 
-    this.anims.create({
-      key: "player-idle",
-      frames: this.anims.generateFrameNumbers("player-idle", {
-        start: 0,
-        end: PLAYER_IDLE_FRAME_COUNT - 1,
-      }),
-      frameRate: 8,
-      repeat: -1,
-    });
+      this.anims.create({
+        key: getPlayerAnimationKey(character.id, "idle"),
+        frames: this.anims.generateFrameNumbers(getPlayerTextureKey(character.id, "idle"), {
+          start: 0,
+          end: character.spriteSheets.idle.frameCount - 1,
+        }),
+        frameRate: 8,
+        repeat: -1,
+      });
 
-    this.anims.create({
-      key: "player-longidle",
-      frames: this.anims.generateFrameNumbers("player-longidle", {
-        start: 0,
-        end: PLAYER_LONG_IDLE_FRAME_COUNT - 1,
-      }),
-      frameRate: 8,
-      repeat: 0,
-    });
+      this.anims.create({
+        key: getPlayerAnimationKey(character.id, "longidle"),
+        frames: this.anims.generateFrameNumbers(getPlayerTextureKey(character.id, "longidle"), {
+          start: 0,
+          end: character.spriteSheets.longidle.frameCount - 1,
+        }),
+        frameRate: 8,
+        repeat: 0,
+      });
 
-    this.anims.create({
-      key: "player-walk",
-      frames: this.anims.generateFrameNumbers("player-walk", {
-        start: 0,
-        end: PLAYER_FRAME_COUNT - 1,
-      }),
-      frameRate: 12,
-      repeat: -1,
-    });
+      this.anims.create({
+        key: getPlayerAnimationKey(character.id, "walk"),
+        frames: this.anims.generateFrameNumbers(getPlayerTextureKey(character.id, "walk"), {
+          start: 0,
+          end: character.spriteSheets.walk.frameCount - 1,
+        }),
+        frameRate: 12,
+        repeat: -1,
+      });
 
-    this.anims.create({
-      key: "player-jump-start",
-      frames: this.anims.generateFrameNumbers("player-jump", {
-        start: 0,
-        end: 2,
-      }),
-      frameRate: 12,
-      repeat: 0,
-    });
+      this.anims.create({
+        key: getPlayerAnimationKey(character.id, "jump-start"),
+        frames: this.anims.generateFrameNumbers(getPlayerTextureKey(character.id, "jump"), {
+          start: 0,
+          end: 2,
+        }),
+        frameRate: 12,
+        repeat: 0,
+      });
 
-    this.anims.create({
-      key: "player-air",
-      frames: this.anims.generateFrameNumbers("player-jump", {
-        start: 3,
-        end: 6,
-      }),
-      frameRate: 8,
-      repeat: -1,
-    });
+      this.anims.create({
+        key: getPlayerAnimationKey(character.id, "air"),
+        frames: this.anims.generateFrameNumbers(getPlayerTextureKey(character.id, "jump"), {
+          start: 3,
+          end: 6,
+        }),
+        frameRate: 8,
+        repeat: -1,
+      });
 
-    this.anims.create({
-      key: "player-land",
-      frames: this.anims.generateFrameNumbers("player-jump", {
-        start: 7,
-        end: 14,
-      }),
-      frameRate: 14,
-      repeat: 0,
-    });
+      this.anims.create({
+        key: getPlayerAnimationKey(character.id, "land"),
+        frames: this.anims.generateFrameNumbers(getPlayerTextureKey(character.id, "jump"), {
+          start: 7,
+          end: character.spriteSheets.jump.frameCount - 1,
+        }),
+        frameRate: 14,
+        repeat: 0,
+      });
 
-    this.anims.create({
-      key: "player-crouch",
-      frames: this.anims.generateFrameNumbers("player-crouch", {
-        start: 0,
-        end: PLAYER_CROUCH_FRAME_COUNT - 1,
-      }),
-      frameRate: 16,
-      repeat: 0,
-    });
+      this.anims.create({
+        key: getPlayerAnimationKey(character.id, "crouch"),
+        frames: this.anims.generateFrameNumbers(getPlayerTextureKey(character.id, "crouch"), {
+          start: 0,
+          end: character.spriteSheets.crouch.frameCount - 1,
+        }),
+        frameRate: 16,
+        repeat: 0,
+      });
 
-    this.anims.create({
-      key: "player-defeat",
-      frames: this.anims.generateFrameNumbers("player-defeat", {
-        start: 0,
-        end: PLAYER_DEFEAT_FRAME_COUNT - 1,
-      }),
-      frameRate: 11,
-      repeat: 0,
+      this.anims.create({
+        key: getPlayerAnimationKey(character.id, "defeat"),
+        frames: this.anims.generateFrameNumbers(getPlayerTextureKey(character.id, "defeat"), {
+          start: 0,
+          end: character.spriteSheets.defeat.frameCount - 1,
+        }),
+        frameRate: 11,
+        repeat: 0,
+      });
     });
   }
 
@@ -3745,8 +3768,8 @@ class PrototypeScene extends Phaser.Scene {
     this.player.setDrag(0, 0);
     this.player.body.setAllowGravity(false);
     this.player.anims.timeScale = 1;
-    this.player.anims.play("player-defeat", true);
-    this.player.once(`${Phaser.Animations.Events.ANIMATION_COMPLETE_KEY}player-defeat`, () => {
+    this.player.anims.play(this.playerAnimationKey("defeat"), true);
+    this.player.once(`${Phaser.Animations.Events.ANIMATION_COMPLETE_KEY}${this.playerAnimationKey("defeat")}`, () => {
       this.time.delayedCall(180, () => this.restartStage());
     });
   }
@@ -3780,7 +3803,7 @@ class PrototypeScene extends Phaser.Scene {
     this.player.setVelocity(this.player.flipX ? DAMAGE_KNOCKBACK_X : -DAMAGE_KNOCKBACK_X, DAMAGE_KNOCKBACK_Y);
     this.player.setDragX(AIR_DRAG);
     this.player.anims.timeScale = 1;
-    this.player.anims.play("player-air", true);
+    this.player.anims.play(this.playerAnimationKey("air"), true);
     this.playDamageMotion(this.player.flipX ? -1 : 1);
     this.cameras.main.flash(180, 253, 224, 71);
     this.cameras.main.shake(220, 0.008);

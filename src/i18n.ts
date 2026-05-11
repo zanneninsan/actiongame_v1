@@ -13,6 +13,7 @@ const translations = {
   en: {
     "start.title": "SUPER ZANNENIN=SAN LAND",
     "start.playerName": "Player Name",
+    "start.character": "Character",
     "start.controlMode": "Control mode",
     "start.soundSetting": "Sound setting",
     "start.soundOn": "SOUND ON",
@@ -289,6 +290,7 @@ const translations = {
   ja: {
     "start.title": "スーパー残念院さんランド",
     "start.playerName": "プレイヤー名",
+    "start.character": "キャラクター",
     "start.controlMode": "操作方法",
     "start.soundSetting": "サウンド設定",
     "start.soundOn": "サウンド ON",
@@ -552,6 +554,7 @@ const localeTranslations: Record<Locale, Partial<Record<TranslationKey, string>>
   zh: {
     "start.title": "\u8d85\u7ea7\u6b8b\u5ff5\u9662\u3055\u3093\u4e50\u56ed",
     "start.playerName": "\u73a9\u5bb6\u540d\u79f0",
+    "start.character": "\u89d2\u8272",
     "start.controlMode": "\u64cd\u4f5c\u65b9\u5f0f",
     "start.soundSetting": "\u58f0\u97f3\u8bbe\u7f6e",
     "start.soundOn": "\u58f0\u97f3\u5f00",
@@ -818,6 +821,7 @@ const localeTranslations: Record<Locale, Partial<Record<TranslationKey, string>>
   ko: {
     "start.title": "\uc288\ud37c \uc794\ub128\uc778\uc0c1 \ub79c\ub4dc",
     "start.playerName": "\ud50c\ub808\uc774\uc5b4 \uc774\ub984",
+    "start.character": "\uce90\ub9ad\ud130",
     "start.controlMode": "\uc870\uc791 \ubc29\uc2dd",
     "start.soundSetting": "\uc0ac\uc6b4\ub4dc \uc124\uc815",
     "start.soundOn": "\uc0ac\uc6b4\ub4dc \ucf1c\uae30",

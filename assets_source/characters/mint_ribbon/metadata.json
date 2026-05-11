@@ -1,0 +1,33 @@
+{
+  "id": "mint_ribbon",
+  "name": "Mint Ribbon",
+  "frameWidth": 320,
+  "frameHeight": 260,
+  "motions": {
+    "idle": {
+      "frames": 8,
+      "runtimePath": "assets/sprites/player_mint_ribbon_idle_8_320x260.webp"
+    },
+    "longidle": {
+      "frames": 29,
+      "runtimePath": "assets/sprites/player_mint_ribbon_longidle_29_320x260.webp"
+    },
+    "walk": {
+      "frames": 13,
+      "runtimePath": "assets/sprites/player_mint_ribbon_walk_13_320x260.webp"
+    },
+    "jump": {
+      "frames": 15,
+      "runtimePath": "assets/sprites/player_mint_ribbon_jump_15_320x260.webp"
+    },
+    "crouch": {
+      "frames": 27,
+      "runtimePath": "assets/sprites/player_mint_ribbon_crouch_27_320x260.webp"
+    },
+    "defeat": {
+      "frames": 8,
+      "runtimePath": "assets/sprites/player_mint_ribbon_defeat_8_320x260.webp"
+    }
+  },
+  "generator": "Pillow procedural chibi spritesheet, transparent runtime WebP, PNG source retained"
+}

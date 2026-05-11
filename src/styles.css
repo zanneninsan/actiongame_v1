@@ -824,7 +824,10 @@ canvas {
   z-index: 3;
   width: clamp(64px, 7vw, 104px);
   aspect-ratio: 320 / 260;
-  background: url("../public/assets/sprites/player_idle_8_320x260.webp") 0 0 / 800% 100% no-repeat;
+  background-image: var(--world-player-idle-image, url("../public/assets/sprites/player_idle_8_320x260.webp"));
+  background-position: 0 0;
+  background-size: 800% 100%;
+  background-repeat: no-repeat;
   filter:
     drop-shadow(0 0 8px rgba(253, 230, 138, 0.72))
     drop-shadow(0 10px 12px rgba(0, 0, 0, 0.52));
@@ -838,7 +841,7 @@ canvas {
 }
 
 .start-world-map-panel.is-moving .start-world-player {
-  background-image: url("../public/assets/sprites/player_walk_13_320x260.webp");
+  background-image: var(--world-player-walk-image, url("../public/assets/sprites/player_walk_13_320x260.webp"));
   background-size: 1300% 100%;
   animation: world-player-walk 720ms steps(12, end) infinite;
 }
@@ -904,6 +907,76 @@ canvas {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.start-character-field {
+  align-items: start;
+}
+
+.start-character-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+}
+
+.start-character-button {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 7px;
+  align-items: center;
+  min-width: 0;
+  min-height: 58px;
+  border: 0;
+  padding: 6px 8px;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #dbeafe;
+  cursor: pointer;
+  filter: brightness(0.76) saturate(0.86);
+  text-align: left;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+}
+
+.start-character-button.is-selected {
+  background-image: url("../public/assets/ui/fantasy/button_primary_selected_safe.webp");
+  color: #fff7d6;
+  filter: brightness(1.18) saturate(1.2) drop-shadow(0 0 8px rgba(253, 230, 138, 0.38));
+}
+
+.start-character-preview {
+  width: 52px;
+  aspect-ratio: 320 / 260;
+  background-position: 0 0;
+  background-size: 800% 100%;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.42));
+}
+
+.start-character-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.start-character-copy strong,
+.start-character-copy em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start-character-copy strong {
+  font-size: 13px;
+  line-height: 1.1;
+}
+
+.start-character-copy em {
+  color: #bfdbfe;
+  font-size: 10px;
+  font-style: normal;
+  line-height: 1.1;
 }
 
 .start-dialog input,

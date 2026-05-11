@@ -1,8 +1,14 @@
 import { LOCALE_OPTIONS, t, type Locale } from "./i18n";
 import { canPromptPwaInstall, isPwaInstalled, promptPwaInstall } from "./pwaInstall";
 import { hasFullscreenElement, isLandscapeViewport, isLikelySmartphone } from "./mobileViewport";
+import {
+  getPlayerCharacterDefinition,
+  type PlayerCharacterDefinition,
+  type PlayerCharacterId,
+} from "./playerCharacters";
 
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
+const ASSET_BASE = import.meta.env.BASE_URL;
 const PWA_INSTALL_DISMISSED_KEY = "actiongame_pwa_install_dismissed";
 export const TITLE_SOUND_CONFIRM_STORAGE_KEY = "actiongame_title_sound_confirmed";
 const TITLE_MUSIC_VOLUME = 0.72;
@@ -43,6 +49,8 @@ export type StartGhostOption = {
 
 type StartModalOptions = {
   playerName: string;
+  playerCharacterId: PlayerCharacterId;
+  characterOptions: PlayerCharacterDefinition[];
   controlMode: ControlMode;
   stageId: string;
   stageOptions: StageOption[];
@@ -56,10 +64,24 @@ type StartModalOptions = {
   onGhostReplayLoad: (jsonText: string) => StartGhostLoadResult;
   onFetchGhostOptions: (stageId: string) => Promise<StartGhostOption[]>;
   onGhostReplaySelect: (ghostId: string) => Promise<StartGhostLoadResult>;
-  onSubmit: (settings: { playerName: string; controlMode: ControlMode; stageId: string; soundOn: boolean; locale: Locale }) => void;
+  onSubmit: (settings: {
+    playerName: string;
+    playerCharacterId: PlayerCharacterId;
+    controlMode: ControlMode;
+    stageId: string;
+    soundOn: boolean;
+    locale: Locale;
+  }) => void;
 };
 
-type StartSettings = { playerName: string; controlMode: ControlMode; stageId: string; soundOn: boolean; locale: Locale };
+type StartSettings = {
+  playerName: string;
+  playerCharacterId: PlayerCharacterId;
+  controlMode: ControlMode;
+  stageId: string;
+  soundOn: boolean;
+  locale: Locale;
+};
 type OrientationPromptMode = "initial" | "startConfirm";
 
 export class StartModal {
@@ -167,6 +189,12 @@ export class StartModal {
             <span>${t(this.options.locale, "start.playerName")}</span>
             <input name="playerName" type="text" maxlength="16" autocomplete="off" value="${escapeHtml(this.options.playerName)}" />
           </label>
+          <div class="start-field start-character-field">
+            <span>${t(this.options.locale, "start.character")}</span>
+            <div class="start-character-grid" role="radiogroup" aria-label="${t(this.options.locale, "start.character")}">
+              ${renderCharacterOptions(this.options.characterOptions, this.options.playerCharacterId, this.options.locale)}
+            </div>
+          </div>
           <label class="start-field">
             <span>${t(this.options.locale, "start.language")}</span>
             <select name="locale">
@@ -247,6 +275,7 @@ export class StartModal {
     const localeSelect = overlay.querySelector<HTMLSelectElement>("select[name='locale']")!;
     const stageSelect = overlay.querySelector<HTMLSelectElement>("select[name='stage']")!;
     const ghostSelect = overlay.querySelector<HTMLSelectElement>("select[name='leaderboardGhost']")!;
+    const characterButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-character-id]"));
     const worldMapNodes = Array.from(overlay.querySelectorAll<HTMLButtonElement>(".start-world-node"));
     const worldCurrent = overlay.querySelector<HTMLElement>(".start-world-current")!;
     const worldMapPanel = overlay.querySelector<HTMLElement>(".start-world-map-panel")!;
@@ -276,6 +305,7 @@ export class StartModal {
     let selectedStageId = this.options.stageId;
     let soundOn = this.options.soundOn;
     let selectedLocale = this.options.locale;
+    let selectedCharacterId = this.options.playerCharacterId;
     let localGhostFileLoaded = false;
     let orientationPromptMode: OrientationPromptMode = "initial";
     let pendingStartSettings: StartSettings | undefined;
@@ -288,6 +318,18 @@ export class StartModal {
     const getSelectedStageLabel = () =>
       this.options.stageOptions.find((option) => option.id === selectedStageId)?.label[selectedLocale] ?? selectedStageId;
     const getStageIndex = (stageId: string) => this.options.stageOptions.findIndex((option) => option.id === stageId);
+    const getSelectedCharacter = () => getPlayerCharacterDefinition(selectedCharacterId);
+
+    const refreshCharacterSelection = () => {
+      const selectedCharacter = getSelectedCharacter();
+      worldMapPanel.style.setProperty("--world-player-idle-image", `url("${getAssetUrl(selectedCharacter.spriteSheets.idle.path)}")`);
+      worldMapPanel.style.setProperty("--world-player-walk-image", `url("${getAssetUrl(selectedCharacter.spriteSheets.walk.path)}")`);
+      characterButtons.forEach((button) => {
+        const isSelected = button.dataset.characterId === selectedCharacterId;
+        button.classList.toggle("is-selected", isSelected);
+        button.setAttribute("aria-checked", isSelected ? "true" : "false");
+      });
+    };
 
     const clearWorldMoveTimers = () => {
       worldMoveTimers.forEach((timer) => window.clearTimeout(timer));
@@ -762,6 +804,7 @@ export class StartModal {
       selectedLocale = localeSelect.value as Locale;
       this.options.onLocaleChange(selectedLocale);
       this.options.playerName = input.value;
+      this.options.playerCharacterId = selectedCharacterId;
       this.options.controlMode = selectedMode;
       this.options.stageId = selectedStageId;
       this.options.soundOn = soundOn;
@@ -798,6 +841,14 @@ export class StartModal {
       button.addEventListener("click", () => {
         selectedMode = button.dataset.mode === "mobile" ? "mobile" : "pc";
         refreshMode();
+      });
+    });
+
+    characterButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedCharacterId = (button.dataset.characterId ?? this.options.playerCharacterId) as PlayerCharacterId;
+        this.options.playerCharacterId = selectedCharacterId;
+        refreshCharacterSelection();
       });
     });
 
@@ -903,6 +954,7 @@ export class StartModal {
       event.preventDefault();
       const settings = {
         playerName: input.value.trim() || "PLAYER",
+        playerCharacterId: selectedCharacterId,
         controlMode: selectedMode,
         stageId: selectedStageId,
         soundOn,
@@ -918,6 +970,7 @@ export class StartModal {
 
     refreshMode();
     refreshSound();
+    refreshCharacterSelection();
     refreshWorldMap();
     refreshAccount();
     refreshInstallPanel();
@@ -1088,6 +1141,35 @@ function scheduleGameLayoutRefresh() {
       window.dispatchEvent(new Event(GAME_LAYOUT_REFRESH_EVENT));
     }, delayMs);
   }
+}
+
+function getAssetUrl(path: string) {
+  return `${ASSET_BASE}${path}`;
+}
+
+function renderCharacterOptions(characters: PlayerCharacterDefinition[], selectedCharacterId: PlayerCharacterId, locale: Locale) {
+  return characters
+    .map((character) => {
+      const isSelected = character.id === selectedCharacterId;
+      return `
+        <button
+          type="button"
+          class="start-character-button${isSelected ? " is-selected" : ""}"
+          role="radio"
+          aria-checked="${isSelected ? "true" : "false"}"
+          data-character-id="${escapeHtml(character.id)}"
+        >
+          <span class="start-character-preview" style="background-image: url('${escapeHtml(
+            getAssetUrl(character.spriteSheets.idle.path),
+          )}')"></span>
+          <span class="start-character-copy">
+            <strong>${escapeHtml(character.label[locale] ?? character.label.en)}</strong>
+            <em>${escapeHtml(character.tagline[locale] ?? character.tagline.en)}</em>
+          </span>
+        </button>
+      `;
+    })
+    .join("");
 }
 
 function escapeHtml(value: string) {
