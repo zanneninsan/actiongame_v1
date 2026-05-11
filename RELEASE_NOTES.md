@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.352
+### English
+- Added a 6-frame idle loop for `neon_idol_shooter` so the enemy now animates in place instead of staying completely static.
+### Japanese
+- `neon_idol_shooter` に 6 コマの待機ループを追加し、その場で完全に静止したままではなく、軽くバウンスするアニメーション付きの敵として表示されるようにしました。
+
 ## v0.1.351
 ### English
 - Replaced the placeholder `neon_idol_shooter` enemy art with a new neon idol shooter design that reads as a distinct cute enemy instead of a crude blocky stand-in.

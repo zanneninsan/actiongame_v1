@@ -356,6 +356,14 @@ export const ENEMY_DEFINITIONS: Record<
     bodyOffsetY: 28,
     aiType: "shooter",
     stompScore: 30,
+    animation: {
+      key: "enemy-neon-idol-shooter-idle",
+      assetPath: "assets/enemies/neon_idol_shooter_idle.webp",
+      frameWidth: 96,
+      frameHeight: 128,
+      frameCount: 6,
+      frameRate: 8,
+    },
   },
   heartCannonTurret: {
     key: "enemy-heart-cannon-turret",
