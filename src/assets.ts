@@ -347,7 +347,7 @@ export const ENEMY_DEFINITIONS: Record<
   neonIdolShooter: {
     key: "enemy-neon-idol-shooter",
     label: "Neon Idol",
-    assetPath: "assets/enemies/neon_idol_shooter.png",
+    assetPath: "assets/enemies/neon_idol_shooter.webp",
     displayWidth: 78,
     displayHeight: 104,
     bodyWidth: 40,

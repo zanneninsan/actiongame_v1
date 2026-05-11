@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.351
+### English
+- Replaced the placeholder `neon_idol_shooter` enemy art with a new neon idol shooter design that reads as a distinct cute enemy instead of a crude blocky stand-in.
+### Japanese
+- `neon_idol_shooter` の仮アートを差し替え、雑な箱型の見た目ではなく、主人公と見分けがつくキュートなネオン系シューター敵としてデザインを更新しました。
+
 ## v0.1.350
 ### English
 - Moved the startup version check before the Phaser boot loading overlay so clients reload before the initial loading sequence when a newer deployed version is available.
