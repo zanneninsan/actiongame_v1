@@ -757,22 +757,29 @@ canvas {
   left: var(--player-x);
   top: var(--player-y);
   z-index: 3;
-  width: clamp(34px, 4.6vw, 54px);
-  height: clamp(34px, 4.6vw, 54px);
-  border: 2px solid rgba(253, 230, 138, 0.9);
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.5), transparent 18%),
-    url("../public/assets/ui/message_faces/message_face_head_icon_02_smile.webp") center / cover no-repeat;
-  box-shadow:
-    0 0 0 6px rgba(253, 230, 138, 0.16),
-    0 0 18px rgba(253, 230, 138, 0.76),
-    0 8px 16px rgba(0, 0, 0, 0.4);
+  width: clamp(64px, 7vw, 104px);
+  aspect-ratio: 320 / 260;
+  background: url("../public/assets/sprites/player_idle_8_320x260.webp") 0 0 / 800% 100% no-repeat;
+  filter:
+    drop-shadow(0 0 8px rgba(253, 230, 138, 0.72))
+    drop-shadow(0 10px 12px rgba(0, 0, 0, 0.52));
+  image-rendering: auto;
   pointer-events: none;
-  transform: translate(-50%, -105%);
+  transform: translate(-50%, -82%);
   transition:
     left 320ms ease,
     top 320ms ease;
+  animation: world-player-idle 960ms steps(8) infinite;
+}
+
+.start-world-map-panel.is-moving .start-world-player {
+  background-image: url("../public/assets/sprites/player_walk_13_320x260.webp");
+  background-size: 1300% 100%;
+  animation: world-player-walk 720ms steps(13) infinite;
+}
+
+.start-world-map-panel.is-facing-left .start-world-player {
+  transform: translate(-50%, -82%) scaleX(-1);
 }
 
 .start-map-back {
@@ -805,6 +812,18 @@ canvas {
   50% {
     opacity: 0.82;
     transform: scale(1.08);
+  }
+}
+
+@keyframes world-player-idle {
+  to {
+    background-position-x: -800%;
+  }
+}
+
+@keyframes world-player-walk {
+  to {
+    background-position-x: -1300%;
   }
 }
 
@@ -1335,8 +1354,7 @@ canvas {
   }
 
   .start-world-player {
-    width: 34px;
-    height: 34px;
+    width: 56px;
   }
 
   .start-field,

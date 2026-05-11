@@ -11,6 +11,7 @@ const TITLE_MUSIC_REPLAY_GAP_MS = 5000;
 const TITLE_INITIAL_STILL_MS = 3000;
 const TITLE_REPEAT_STILL_MS = 10000;
 const MAKER_SPLASH_AUTO_ADVANCE_MS = 8000;
+const WORLD_MAP_MOVE_STEP_MS = 360;
 const WORLD_MAP_NODE_POSITIONS = [
   { x: 10, y: 72 },
   { x: 22, y: 44 },
@@ -281,9 +282,19 @@ export class StartModal {
     let titleMusicEnabled = soundOn;
     let titleVideoHasPlayed = false;
     let removeTitleMusicGestureRetry: (() => void) | undefined;
+    let isWorldPlayerMoving = false;
+    let worldMoveTimers: number[] = [];
 
     const getSelectedStageLabel = () =>
       this.options.stageOptions.find((option) => option.id === selectedStageId)?.label[selectedLocale] ?? selectedStageId;
+    const getStageIndex = (stageId: string) => this.options.stageOptions.findIndex((option) => option.id === stageId);
+
+    const clearWorldMoveTimers = () => {
+      worldMoveTimers.forEach((timer) => window.clearTimeout(timer));
+      worldMoveTimers = [];
+      isWorldPlayerMoving = false;
+      worldMapPanel.classList.remove("is-moving", "is-facing-left", "is-facing-right");
+    };
 
     const refreshWorldMap = () => {
       const selectedIndex = Math.max(0, this.options.stageOptions.findIndex((option) => option.id === selectedStageId));
@@ -332,6 +343,52 @@ export class StartModal {
       if (shouldRefreshGhostOptions) {
         void loadGhostOptions();
       }
+    };
+
+    const moveWorldPlayerToStage = (stageId: string) => {
+      if (isWorldPlayerMoving || stageId === selectedStageId) {
+        return;
+      }
+
+      const currentIndex = getStageIndex(selectedStageId);
+      const targetIndex = getStageIndex(stageId);
+      if (currentIndex < 0 || targetIndex < 0) {
+        selectStage(stageId, true);
+        return;
+      }
+
+      hideWorldConfirm();
+      clearWorldMoveTimers();
+      isWorldPlayerMoving = true;
+      const direction = Math.sign(targetIndex - currentIndex);
+      worldMapPanel.classList.add("is-moving", direction < 0 ? "is-facing-left" : "is-facing-right");
+
+      const route: number[] = [];
+      for (let index = currentIndex + direction; direction < 0 ? index >= targetIndex : index <= targetIndex; index += direction) {
+        route.push(index);
+      }
+
+      route.forEach((routeIndex, stepIndex) => {
+        const timer = window.setTimeout(() => {
+          const routeStageId = this.options.stageOptions[routeIndex]?.id;
+          if (!routeStageId) {
+            return;
+          }
+          selectedStageId = routeStageId;
+          this.options.stageId = selectedStageId;
+          stageSelect.value = selectedStageId;
+          refreshWorldMap();
+
+          if (stepIndex === route.length - 1) {
+            isWorldPlayerMoving = false;
+            worldMoveTimers = [];
+            worldMapPanel.classList.remove("is-moving", "is-facing-left", "is-facing-right");
+            void loadGhostOptions();
+            worldMapNodes.find((node) => node.dataset.stageId === selectedStageId)?.focus();
+          }
+        }, WORLD_MAP_MOVE_STEP_MS * (stepIndex + 1));
+        worldMoveTimers.push(timer);
+      });
     };
 
     const stopTitleMusic = () => {
@@ -656,6 +713,7 @@ export class StartModal {
       window.removeEventListener("focus", refreshInstallPanel);
       window.removeEventListener("pageshow", refreshInstallPanel);
       document.removeEventListener("visibilitychange", refreshInstallPanel);
+      clearWorldMoveTimers();
     };
     const loadGhostOptions = async () => {
       ghostSelect.innerHTML = `<option value="">${t(this.options.locale, "start.ghostRankingLoading")}</option>`;
@@ -685,7 +743,10 @@ export class StartModal {
           return;
         }
         if (stageId !== selectedStageId) {
-          selectStage(stageId, true);
+          moveWorldPlayerToStage(stageId);
+          return;
+        }
+        if (isWorldPlayerMoving) {
           return;
         }
         showWorldConfirm();

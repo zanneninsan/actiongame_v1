@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.358
+### English
+- Replaced the world map face marker with the existing player character sprite, using idle animation while waiting and walk animation while moving.
+- Changed world map movement so selecting a distant node walks through each intermediate node instead of jumping directly in a straight line.
+### Japanese
+- ワールドマップ上の顔アイコンを既存の操作キャラスプライトに置き換え、待機中は静止モーション、移動中は歩きモーションを表示するようにしました。
+- ワールドマップで離れたマスを選んだとき、直線で飛ばず、間のマスを順番に経由して移動するようにしました。
+
 ## v0.1.357
 ### English
 - Changed world map node selection into a two-step flow: selecting a different node moves the character marker, and selecting the current node opens a stage confirmation prompt.
