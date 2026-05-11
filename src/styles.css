@@ -761,13 +761,13 @@ canvas {
   transition:
     left 320ms ease,
     top 320ms ease;
-  animation: world-player-idle 960ms steps(8) infinite;
+  animation: none;
 }
 
 .start-world-map-panel.is-moving .start-world-player {
   background-image: url("../public/assets/sprites/player_walk_13_320x260.webp");
   background-size: 1300% 100%;
-  animation: world-player-walk 720ms steps(13) infinite;
+  animation: world-player-walk 720ms steps(12, end) infinite;
 }
 
 .start-world-map-panel.is-facing-left .start-world-player {
@@ -807,15 +807,9 @@ canvas {
   }
 }
 
-@keyframes world-player-idle {
-  to {
-    background-position-x: -800%;
-  }
-}
-
 @keyframes world-player-walk {
   to {
-    background-position-x: -1300%;
+    background-position-x: 100%;
   }
 }
 

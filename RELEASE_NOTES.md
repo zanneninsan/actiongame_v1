@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.360
+### English
+- Fixed the world map player marker flickering by holding a stable idle frame and limiting the walk animation to valid sprite frames.
+### Japanese
+- ワールドマップ上のプレイヤーキャラがちらつく問題を修正し、待機中は安定した静止フレーム、移動中は有効な歩きフレーム範囲だけを使うようにしました。
+
 ## v0.1.359
 ### English
 - Generated and added a dedicated cute resort-island theme park world map background for Zannenin-san Land.
