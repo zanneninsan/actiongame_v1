@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.366
+### English
+- Reworked the Shift-run ground dash sprite through multiple animation passes to give the motion stronger arm pumping, clearer grounded contact, and a cleaner loop.
+### Japanese
+- Shift 走行中の地上ダッシュ用スプライトを複数回のアニメーション調整で練り直し、腕振りの強さ、接地感、ループのつながりを分かりやすく改善しました。
+
 ## v0.1.365
 ### English
 - Redesigned `neon_idol_shooter` into a distinct cute neon shooter enemy, replacing the crude placeholder art and adding an in-place idle loop.
