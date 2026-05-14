@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.366
+### English
+- Hid and disabled the unfinished playable character selector while keeping the internal character-switching foundation for future use.
+- Removed the rough generated playable character assets, their Despair Longrun EX cameo placements, and leaderboard syncing for the character id.
+### Japanese
+- 将来のプレイアブルキャラ追加に向けた切り替え基盤は残しつつ、未完成のキャラクター選択UIを非表示・無効化しました。
+- 粗い生成プレイヤー素材、絶望ロングラン EX のカメオ配置、ランキング設定同期のキャラクターIDを削除しました。
+
 ## v0.1.365
 ### English
 - Redesigned `neon_idol_shooter` into a distinct cute neon shooter enemy, replacing the crude placeholder art and adding an in-place idle loop.

@@ -2143,9 +2143,6 @@ const nightmareEnemies: EnemyPlacement[] = [
 
 const nightmareDecorations: StageDecorationPlacement[] = [
   { x: 720, y: 672, key: "stage-structures-chainlink-fence", scale: 0.58 },
-  { x: 1060, y: 672, key: "stage-character-mint-ribbon", scale: 0.36 },
-  { x: 1220, y: 672, key: "stage-character-soda-star", scale: 0.36 },
-  { x: 1380, y: 672, key: "stage-character-lilac-moon", scale: 0.36 },
   { x: 1740, y: 672, key: "stage-props-traffic-cone", scale: 0.5 },
   { x: 3880, y: 672, key: "stage-structures-construction-fence", scale: 0.62 },
   { x: 5740, y: 672, key: "stage-props-roadwork-sign", scale: 0.5 },

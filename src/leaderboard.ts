@@ -98,7 +98,6 @@ export type LeaderboardIdentity = {
 
 export type LeaderboardUserSettings = {
   playerName?: string;
-  playerCharacterId?: string;
   locale?: string;
   stageId?: string;
   soundVolumePercent?: number;
@@ -588,9 +587,6 @@ function sanitizeUserSettings(data: unknown): LeaderboardUserSettings {
   const settings: LeaderboardUserSettings = {};
   if (typeof source.playerName === "string") {
     settings.playerName = sanitizePlayerName(source.playerName);
-  }
-  if (typeof source.playerCharacterId === "string") {
-    settings.playerCharacterId = source.playerCharacterId.slice(0, 48);
   }
   if (typeof source.locale === "string") {
     settings.locale = source.locale.slice(0, 8);

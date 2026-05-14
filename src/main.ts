@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.365";
+const DEBUG_VERSION = "v0.1.366";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -1670,6 +1670,7 @@ class PrototypeScene extends Phaser.Scene {
       playerName: this.playerName,
       playerCharacterId: this.playerCharacterId,
       characterOptions: PLAYER_CHARACTERS,
+      enableCharacterSelect: false,
       controlMode: this.controlMode,
       stageId: this.currentStageId,
       stageOptions: this.getStageOptions(),
@@ -1884,7 +1885,6 @@ class PrototypeScene extends Phaser.Scene {
   private getLeaderboardUserSettings(): LeaderboardUserSettings {
     return {
       playerName: this.playerName,
-      playerCharacterId: this.playerCharacterId,
       locale: this.locale,
       stageId: this.currentStageId,
       soundVolumePercent: Math.round((this.bgmVolumePercent + this.seVolumePercent) / 2),
@@ -1903,11 +1903,6 @@ class PrototypeScene extends Phaser.Scene {
       if (settings.playerName) {
         this.playerName = settings.playerName;
         this.setCookieValue("actiongame_player_name", this.playerName);
-      }
-      if (settings.playerCharacterId) {
-        this.playerCharacterId = normalizePlayerCharacterId(settings.playerCharacterId);
-        this.setCookieValue(PLAYER_CHARACTER_STORAGE_KEY, this.playerCharacterId);
-        this.player?.setTexture(this.playerTextureKey("idle"));
       }
       if (settings.locale && isLocale(settings.locale)) {
         this.setLocale(settings.locale);

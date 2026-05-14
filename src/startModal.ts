@@ -51,6 +51,7 @@ type StartModalOptions = {
   playerName: string;
   playerCharacterId: PlayerCharacterId;
   characterOptions: PlayerCharacterDefinition[];
+  enableCharacterSelect?: boolean;
   controlMode: ControlMode;
   stageId: string;
   stageOptions: StageOption[];
@@ -116,6 +117,7 @@ export class StartModal {
     if (this.titleScreenDismissed) {
       overlay.classList.add("is-title-cleared");
     }
+    const characterSelectEnabled = this.options.enableCharacterSelect === true;
     overlay.innerHTML = `
       <div class="title-sound-gate${this.soundGateDismissed ? " is-dismissed" : ""}" role="dialog" aria-modal="true" aria-label="${t(
         this.options.locale,
@@ -189,12 +191,16 @@ export class StartModal {
             <span>${t(this.options.locale, "start.playerName")}</span>
             <input name="playerName" type="text" maxlength="16" autocomplete="off" value="${escapeHtml(this.options.playerName)}" />
           </label>
-          <div class="start-field start-character-field">
+          ${
+            characterSelectEnabled
+              ? `<div class="start-field start-character-field">
             <span>${t(this.options.locale, "start.character")}</span>
             <div class="start-character-grid" role="radiogroup" aria-label="${t(this.options.locale, "start.character")}">
               ${renderCharacterOptions(this.options.characterOptions, this.options.playerCharacterId, this.options.locale)}
             </div>
-          </div>
+          </div>`
+              : ""
+          }
           <label class="start-field">
             <span>${t(this.options.locale, "start.language")}</span>
             <select name="locale">
