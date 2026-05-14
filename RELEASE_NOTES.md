@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.371
+### English
+- Nudged the left-side HUD text column to the right so the player name, score, and stamina labels no longer sit too close to the panel edge.
+### Japanese
+- HUD左側のテキスト列を少し右へ寄せ、プレイヤー名、スコア、スタミナ表示がパネル端に近すぎないように調整しました。
+
 ## v0.1.370
 ### English
 - Switched the in-game HUD to compact labels on mobile or narrow screens so player, score, time, stamina, and mode indicators stop crowding each other.
