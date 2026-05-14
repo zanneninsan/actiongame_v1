@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.367";
+const DEBUG_VERSION = "v0.1.368";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -288,8 +288,10 @@ const HUD_STAMINA_BAR_X = 158;
 const HUD_STAMINA_BAR_Y = 139;
 const HUD_STAMINA_BAR_WIDTH = 164;
 const HUD_STAMINA_BAR_HEIGHT = 12;
-const HUD_STAMINA_FILL_WIDTH = HUD_STAMINA_BAR_WIDTH;
-const HUD_STAMINA_FILL_HEIGHT = HUD_STAMINA_BAR_HEIGHT;
+const HUD_STAMINA_FILL_INSET = 4;
+const HUD_STAMINA_FILL_X = HUD_STAMINA_BAR_X + HUD_STAMINA_FILL_INSET;
+const HUD_STAMINA_FILL_WIDTH = HUD_STAMINA_BAR_WIDTH - HUD_STAMINA_FILL_INSET * 2;
+const HUD_STAMINA_FILL_HEIGHT = 6;
 const HUD_STAMINA_TICK_COUNT = 5;
 const HUD_MODE_CHIP_X = HUD_PANEL_X + HUD_PANEL_WIDTH - 58;
 const HUD_MODE_CHIP_Y = HUD_PANEL_Y + 13;
@@ -804,7 +806,7 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(99);
     this.staminaBarFill = this.add
-      .rectangle(HUD_STAMINA_BAR_X, HUD_STAMINA_BAR_Y, HUD_STAMINA_FILL_WIDTH, HUD_STAMINA_FILL_HEIGHT, 0x86efac, 0.95)
+      .rectangle(HUD_STAMINA_FILL_X, HUD_STAMINA_BAR_Y, HUD_STAMINA_FILL_WIDTH, HUD_STAMINA_FILL_HEIGHT, 0x86efac, 0.95)
       .setOrigin(0, 0.5)
       .setScrollFactor(0)
       .setDepth(100);
@@ -2062,27 +2064,23 @@ class PrototypeScene extends Phaser.Scene {
 
     if (this.staminaBarBack) {
       this.staminaBarBack.setPosition(HUD_STAMINA_BAR_X * scale, HUD_STAMINA_BAR_Y * scale);
-      this.staminaBarBack.width = HUD_STAMINA_BAR_WIDTH * scale;
-      this.staminaBarBack.height = HUD_STAMINA_BAR_HEIGHT * scale;
+      this.staminaBarBack.setSize(HUD_STAMINA_BAR_WIDTH * scale, HUD_STAMINA_BAR_HEIGHT * scale);
     }
 
     if (this.staminaBarFill) {
-      this.staminaBarFill.setPosition(HUD_STAMINA_BAR_X * scale, HUD_STAMINA_BAR_Y * scale);
-      this.staminaBarFill.height = HUD_STAMINA_FILL_HEIGHT * scale;
+      this.staminaBarFill.setPosition(HUD_STAMINA_FILL_X * scale, HUD_STAMINA_BAR_Y * scale);
       this.updateStaminaHud();
     }
 
     if (this.staminaBarFrame) {
       this.staminaBarFrame.setPosition(HUD_STAMINA_BAR_X * scale, HUD_STAMINA_BAR_Y * scale);
-      this.staminaBarFrame.width = HUD_STAMINA_BAR_WIDTH * scale;
-      this.staminaBarFrame.height = HUD_STAMINA_BAR_HEIGHT * scale;
+      this.staminaBarFrame.setSize(HUD_STAMINA_BAR_WIDTH * scale, HUD_STAMINA_BAR_HEIGHT * scale);
       this.staminaBarFrame.setStrokeStyle(Math.max(1, Math.round(scale)), 0x86efac, 0.8);
     }
 
     this.staminaBarTicks.forEach((tick, index) => {
       tick.setPosition((HUD_STAMINA_BAR_X + (HUD_STAMINA_BAR_WIDTH / HUD_STAMINA_TICK_COUNT) * (index + 1)) * scale, HUD_STAMINA_BAR_Y * scale);
-      tick.width = Math.max(1, Math.round(scale));
-      tick.height = HUD_STAMINA_BAR_HEIGHT * scale;
+      tick.setSize(Math.max(1, Math.round(scale)), HUD_STAMINA_BAR_HEIGHT * scale);
     });
 
     if (this.controlHintBack) {
@@ -2887,8 +2885,7 @@ class PrototypeScene extends Phaser.Scene {
     const fillColor = ratio > 0.5 ? 0x86efac : ratio > 0.22 ? 0xfde68a : 0xfb7185;
     const fillAlpha = ratio <= 0.22 ? 0.66 + Math.abs(Math.sin(this.time.now * 0.012)) * 0.32 : 0.95;
     this.staminaText.setText(`${t(this.locale, "hud.stamina")}:${Math.round(staminaValue)}`);
-    this.staminaBarFill.width = HUD_STAMINA_FILL_WIDTH * ratio * scale;
-    this.staminaBarFill.height = HUD_STAMINA_FILL_HEIGHT * scale;
+    this.staminaBarFill.setSize(HUD_STAMINA_FILL_WIDTH * ratio * scale, HUD_STAMINA_FILL_HEIGHT * scale);
     this.staminaBarFill.setFillStyle(fillColor, fillAlpha);
     this.staminaBarFrame?.setStrokeStyle(Math.max(1, Math.round(scale)), fillColor, ratio <= 0.22 ? 0.98 : 0.82);
     this.staminaBarTicks.forEach((tick, index) => {

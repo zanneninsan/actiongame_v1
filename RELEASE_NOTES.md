@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.368
+### English
+- Fixed the stamina HUD bar so the fill, frame, background, and tick marks scale from the same dimensions and the fill stays inside the frame.
+### Japanese
+- スタミナHUDバーの中身、外枠、背景、目盛りのスケール基準を揃え、中身が外枠内に収まるように修正しました。
+
 ## v0.1.367
 ### English
 - Refined the in-game HUD so the mode chip sits inside the top-left status panel instead of occupying the center of the screen, and moved the cluster below the debug buttons.
