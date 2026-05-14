@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.368
+### English
+- Added a local arm-readability pass to the Shift-run dash sprite so the forward and rear arm swings stay visible instead of blending into the outfit.
+### Japanese
+- Shift 走行用ダッシュスプライトに腕の視認性を上げるローカル補正を加え、前腕と後ろ腕の振りが衣装に埋もれず見えるようにしました。
+
 ## v0.1.367
 ### English
 - Rebuilt the Shift-run dash sprite with the Game Studio sprite pipeline from a fresh in-game walk seed, using one generation pass plus local normalization to improve the arm swing and stride readability while conserving image quota.
