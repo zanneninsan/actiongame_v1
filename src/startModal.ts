@@ -360,7 +360,6 @@ export class StartModal {
     const openStageConfig = () => {
       hideWorldConfirm();
       overlay.classList.add("is-stage-config-open");
-      window.setTimeout(() => input.focus(), 120);
     };
 
     const closeStageConfig = () => {
@@ -741,7 +740,6 @@ export class StartModal {
       }
       this.orientationPromptDismissed = true;
       orientationPrompt.hidden = true;
-      input.focus();
     });
     orientationPrompt.addEventListener("pointerdown", (event) => event.stopPropagation());
     orientationPrompt.addEventListener("keydown", (event) => event.stopPropagation());

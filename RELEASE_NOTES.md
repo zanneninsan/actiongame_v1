@@ -2,6 +2,16 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.370
+### English
+- Switched the in-game HUD to compact labels on mobile or narrow screens so player, score, time, stamina, and mode indicators stop crowding each other.
+- Top-aligned the game canvas while mobile controls are active so the HUD no longer floats below a large blank area on portrait screens.
+- Stopped automatically focusing the player-name input when entering the start settings screen, preventing the mobile keyboard from opening unexpectedly.
+### Japanese
+- スマホまたは狭い画面ではゲーム中HUDを短縮表記に切り替え、プレイヤー名、スコア、残り時間、スタミナ、モード表示が押し合わないようにしました。
+- スマホ操作UIが有効な間はゲーム画面を上寄せし、縦長画面でHUDが大きな余白の下に落ちないようにしました。
+- 開始設定画面へ入った時にプレイヤー名入力へ自動フォーカスしないようにし、スマホのキーボードが勝手に開かないようにしました。
+
 ## v0.1.369
 ### English
 - Added a PC/mobile control mode switch to the in-game options dialog opened from the gear button, with immediate HUD and mobile-control visibility updates.

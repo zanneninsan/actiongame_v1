@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.369";
+const DEBUG_VERSION = "v0.1.370";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -297,6 +297,8 @@ const HUD_MODE_CHIP_X = HUD_PANEL_X + HUD_PANEL_WIDTH - 58;
 const HUD_MODE_CHIP_Y = HUD_PANEL_Y + 13;
 const HUD_MODE_CHIP_MIN_WIDTH = 82;
 const HUD_MODE_CHIP_HEIGHT = 28;
+const HUD_COMPACT_DISPLAY_WIDTH = 760;
+const HUD_COMPACT_PLAYER_NAME_MAX_LENGTH = 12;
 const OVERHEAD_STAMINA_BAR_WIDTH = 76;
 const OVERHEAD_STAMINA_BAR_HEIGHT = 8;
 const OVERHEAD_STAMINA_FILL_WIDTH = 70;
@@ -2020,6 +2022,10 @@ class PrototypeScene extends Phaser.Scene {
     this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
     this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
+    this.updatePlayerNameText();
+    this.updateScoreText();
+    this.updateTimerText();
+    this.updateStaminaHud();
     this.updateControlHintText();
 
     if (this.controlMode === "mobile") {
@@ -2054,6 +2060,10 @@ class PrototypeScene extends Phaser.Scene {
 
   private handleScaleResize() {
     this.applyHudScale();
+    this.updatePlayerNameText();
+    this.updateScoreText();
+    this.updateTimerText();
+    this.updateStaminaHud();
   }
 
   private calculateHudScale() {
@@ -2132,8 +2142,26 @@ class PrototypeScene extends Phaser.Scene {
     }
   }
 
+  private usesCompactHud() {
+    const displayWidth = this.scale.displaySize?.width ?? GAME_WIDTH;
+    return this.controlMode === "mobile" || displayWidth <= HUD_COMPACT_DISPLAY_WIDTH;
+  }
+
+  private formatCompactHudText(value: string, maxLength: number) {
+    const characters = Array.from(value);
+    if (characters.length <= maxLength) {
+      return value;
+    }
+    return `${characters.slice(0, Math.max(1, maxLength - 3)).join("")}...`;
+  }
+
   private updatePlayerNameText() {
     if (!this.playerNameText) {
+      return;
+    }
+
+    if (this.usesCompactHud()) {
+      this.playerNameText.setText(this.formatCompactHudText(this.playerName || "PLAYER", HUD_COMPACT_PLAYER_NAME_MAX_LENGTH));
       return;
     }
 
@@ -2493,6 +2521,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private createMobileControls() {
     this.removeMobileControls();
+    document.body.classList.add("is-mobile-controls-active");
 
     this.mobileControlCleanup = createMobileControlElements({
       locale: this.locale,
@@ -2515,6 +2544,7 @@ class PrototypeScene extends Phaser.Scene {
   private removeMobileControls() {
     this.mobileControlCleanup.forEach((cleanup) => cleanup());
     this.mobileControlCleanup = [];
+    document.body.classList.remove("is-mobile-controls-active");
     document.getElementById("mobile-controls")?.remove();
     this.removeMobileFullscreenRecovery();
   }
@@ -2871,6 +2901,10 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     const total = this.rewards?.getItemScore() ?? 0;
+    if (this.usesCompactHud()) {
+      this.scoreText.setText(`S:${total}`);
+      return;
+    }
     this.scoreText.setText(`${t(this.locale, "hud.score")}:${total}`);
   }
 
@@ -2923,7 +2957,7 @@ class PrototypeScene extends Phaser.Scene {
     const scale = this.hudScale || 1;
     const fillColor = ratio > 0.5 ? 0x86efac : ratio > 0.22 ? 0xfde68a : 0xfb7185;
     const fillAlpha = ratio <= 0.22 ? 0.66 + Math.abs(Math.sin(this.time.now * 0.012)) * 0.32 : 0.95;
-    this.staminaText.setText(`${t(this.locale, "hud.stamina")}:${Math.round(staminaValue)}`);
+    this.staminaText.setText(this.usesCompactHud() ? `ST:${Math.round(staminaValue)}` : `${t(this.locale, "hud.stamina")}:${Math.round(staminaValue)}`);
     this.staminaBarFill.setSize(HUD_STAMINA_FILL_WIDTH * ratio * scale, HUD_STAMINA_FILL_HEIGHT * scale);
     this.staminaBarFill.setFillStyle(fillColor, fillAlpha);
     this.staminaBarFrame?.setStrokeStyle(Math.max(1, Math.round(scale)), fillColor, ratio <= 0.22 ? 0.98 : 0.82);
@@ -3351,7 +3385,8 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    this.timerText.setText(`${t(this.locale, "hud.time")}:${this.formatTimeSeconds(this.getRemainingMilliseconds())}`);
+    const timeText = this.formatTimeSeconds(this.getRemainingMilliseconds());
+    this.timerText.setText(this.usesCompactHud() ? `T:${timeText}` : `${t(this.locale, "hud.time")}:${timeText}`);
   }
 
   private updateEditorTimerPause(enabled = this.stageEditor?.isEnabled ?? false) {

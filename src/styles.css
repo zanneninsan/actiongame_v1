@@ -23,10 +23,20 @@ body {
   touch-action: none;
 }
 
+body.is-mobile-controls-active #game {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
 canvas {
   display: block;
   image-rendering: pixelated;
   touch-action: none;
+}
+
+body.is-mobile-controls-active canvas {
+  margin-top: 0 !important;
 }
 
 #boot-loading-overlay {
