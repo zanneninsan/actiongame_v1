@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.369
+### English
+- Added a PC/mobile control mode switch to the in-game options dialog opened from the gear button, with immediate HUD and mobile-control visibility updates.
+### Japanese
+- 歯車ボタンから開くゲーム内設定画面にPC/スマホ操作の切り替えを追加し、HUD表示とスマホ操作UIがすぐ反映されるようにしました。
+
 ## v0.1.368
 ### English
 - Fixed the stamina HUD bar so the fill, frame, background, and tick marks scale from the same dimensions and the fill stays inside the frame.

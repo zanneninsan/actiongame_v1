@@ -1,5 +1,6 @@
 import { isLocale, LOCALE_OPTIONS, t, type Locale } from "./i18n";
 import type { DanmakuMode } from "./danmaku";
+import type { ControlMode } from "./startModal";
 
 const getPlayerSpecUrl = (locale: Locale) =>
   `${import.meta.env.BASE_URL}player-spec/index.html?lang=${encodeURIComponent(locale)}`;
@@ -10,6 +11,7 @@ type GlobalUiOptions = {
   bgmVolumePercent: number;
   seVolumePercent: number;
   soundMuted: boolean;
+  controlMode: ControlMode;
   danmakuEnabled: boolean;
   danmakuMode: DanmakuMode;
   collisionDebugEnabled: boolean;
@@ -19,6 +21,7 @@ type GlobalUiOptions = {
   updateRearBackgroundToggle: (button: HTMLButtonElement) => void;
   updateMidgroundBackgroundToggle: (button: HTMLButtonElement) => void;
   onSoundChange: (bgmVolumePercent: number, seVolumePercent: number, muted: boolean) => void;
+  onControlModeChange: (mode: ControlMode) => void;
   onDanmakuModeChange: (mode: DanmakuMode) => void;
   onLocaleChange: (locale: Locale) => void;
   onLeaderboardOpen: () => void;
@@ -91,6 +94,13 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
           ).join("")}
         </select>
       </label>
+      <div class="options-mode-control">
+        <span>${t(options.locale, "start.controlMode")}</span>
+        <div class="options-mode-row" role="group" aria-label="${t(options.locale, "start.controlMode")}">
+          <button type="button" data-options-mode="pc" class="options-mode-button">${t(options.locale, "start.modePc")}</button>
+          <button type="button" data-options-mode="mobile" class="options-mode-button">${t(options.locale, "start.modeMobile")}</button>
+        </div>
+      </div>
       <label>
         <span>${t(options.locale, "options.danmakuMode")}</span>
         <select id="danmaku-mode-select">
@@ -120,6 +130,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const bgmVolumeSlider = document.getElementById("bgm-volume-slider") as HTMLInputElement;
   const seVolumeSlider = document.getElementById("se-volume-slider") as HTMLInputElement;
   const languageSelect = document.getElementById("language-select") as HTMLSelectElement;
+  const modeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-options-mode]"));
   const danmakuModeSelect = document.getElementById("danmaku-mode-select") as HTMLSelectElement;
   const setGlobalMenuOpen = (open: boolean) => {
     document.body.classList.toggle("is-global-menu-open", open);
@@ -130,14 +141,25 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   let currentBgmVolumePercent = options.bgmVolumePercent;
   let currentSeVolumePercent = options.seVolumePercent;
   let currentMuted = options.soundMuted;
+  let currentControlMode = options.controlMode;
   const changeSound = (bgmVolumePercent: number, seVolumePercent: number, muted: boolean) => {
     currentBgmVolumePercent = bgmVolumePercent;
     currentSeVolumePercent = seVolumePercent;
     currentMuted = muted;
     options.onSoundChange(bgmVolumePercent, seVolumePercent, muted);
   };
+  const updateControlModeUI = () => {
+    modeButtons.forEach((button) => {
+      const mode = button.dataset.optionsMode === "mobile" ? "mobile" : "pc";
+      const selected = mode === currentControlMode;
+      button.classList.toggle("is-selected", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
+    mobileLayoutToggle.hidden = !(currentControlMode === "mobile" && options.mobileLayoutAvailable);
+  };
 
   setGlobalSoundUI(currentBgmVolumePercent, currentSeVolumePercent, currentMuted);
+  updateControlModeUI();
   collisionDebugToggle.classList.toggle("is-active", options.collisionDebugEnabled);
   options.updateRearBackgroundToggle(rearDebugToggle);
   options.updateMidgroundBackgroundToggle(midgroundDebugToggle);
@@ -226,6 +248,19 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
       nextOptionsModal.style.display = "grid";
       document.body.classList.add("is-options-modal-open");
     }
+  });
+
+  modeButtons.forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.stopPropagation();
+      const nextMode: ControlMode = button.dataset.optionsMode === "mobile" ? "mobile" : "pc";
+      if (nextMode === currentControlMode) {
+        return;
+      }
+      currentControlMode = nextMode;
+      options.onControlModeChange(nextMode);
+      updateControlModeUI();
+    });
   });
 
   danmakuModeSelect.addEventListener("change", (event) => {

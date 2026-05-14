@@ -1013,7 +1013,8 @@ canvas {
 }
 
 .mode-row,
-.sound-row {
+.sound-row,
+.options-mode-row {
   width: min(100%, calc(100% - 34px));
   justify-self: center;
   display: grid;
@@ -1022,6 +1023,7 @@ canvas {
 }
 
 .mode-button,
+.options-mode-button,
 .sound-button,
 .start-button,
 .start-google-login {
@@ -1039,18 +1041,21 @@ canvas {
 }
 
 .mode-button,
+.options-mode-button,
 .sound-button {
   color: #cbd5e1;
   filter: brightness(0.62) saturate(0.72);
 }
 
 .mode-button.is-selected,
+.options-mode-button.is-selected,
 .sound-button.is-selected {
   background-image: url("../public/assets/ui/fantasy/button_primary_selected_safe.webp");
   color: #fef3c7;
 }
 
 .mode-button.is-selected,
+.options-mode-button.is-selected,
 .sound-button.is-selected {
   outline: 2px solid #fde68a;
   outline-offset: -5px;
@@ -1060,6 +1065,7 @@ canvas {
 }
 
 .mode-button.is-selected::before,
+.options-mode-button.is-selected::before,
 .sound-button.is-selected::before {
   content: "✓";
   position: absolute;
@@ -2617,12 +2623,12 @@ body.is-screenshot-modal-open #mobile-controls {
 
 .options-dialog {
   box-sizing: border-box;
-  width: min(440px, calc(100vw - 36px), calc((100dvh - 36px) * 1.2381));
+  width: min(440px, calc(100vw - 36px), calc((100dvh - 36px) * 1.0612));
   max-height: calc(100dvh - 36px);
-  aspect-ratio: 520 / 420;
+  aspect-ratio: 520 / 490;
   display: grid;
   align-content: start;
-  gap: 14px;
+  gap: 12px;
   padding: clamp(52px, 10vw, 64px) clamp(46px, 8vw, 66px) clamp(34px, 7vw, 48px);
   border: 0;
   background: url("../public/assets/ui/fantasy/options_modal_window.webp") center / 100% 100% no-repeat;
@@ -2668,6 +2674,25 @@ body.is-screenshot-modal-open #mobile-controls {
   height: 22px;
   accent-color: #f5c76a;
   cursor: pointer;
+}
+
+.options-mode-control {
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 800;
+  color: #f5c76a;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9);
+}
+
+.options-mode-row {
+  width: 100%;
+  gap: 10px;
+}
+
+.options-mode-button {
+  height: 38px;
+  font-size: 14px;
 }
 
 .options-dialog select {

@@ -104,6 +104,7 @@ export type LeaderboardUserSettings = {
   bgmVolumePercent?: number;
   seVolumePercent?: number;
   soundMuted?: boolean;
+  controlMode?: string;
   danmakuEnabled?: boolean;
   danmakuMode?: string;
   danmakuTutorialSeen?: boolean;
@@ -605,6 +606,9 @@ function sanitizeUserSettings(data: unknown): LeaderboardUserSettings {
   }
   if (typeof source.soundMuted === "boolean") {
     settings.soundMuted = source.soundMuted;
+  }
+  if (source.controlMode === "pc" || source.controlMode === "mobile") {
+    settings.controlMode = source.controlMode;
   }
   if (typeof source.danmakuEnabled === "boolean") {
     settings.danmakuEnabled = source.danmakuEnabled;

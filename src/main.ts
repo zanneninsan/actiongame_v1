@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.368";
+const DEBUG_VERSION = "v0.1.369";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -1909,6 +1909,7 @@ class PrototypeScene extends Phaser.Scene {
       bgmVolumePercent: this.bgmVolumePercent,
       seVolumePercent: this.seVolumePercent,
       soundMuted: this.soundMuted,
+      controlMode: this.controlMode,
       danmakuEnabled: this.danmakuEnabled,
       danmakuMode: this.danmakuMode,
       danmakuTutorialSeen: this.hasSeenDanmakuTutorialDialogue(),
@@ -1941,6 +1942,10 @@ class PrototypeScene extends Phaser.Scene {
           : legacyVolumePercent ?? this.seVolumePercent;
       if (typeof settings.soundMuted === "boolean") {
         this.soundMuted = settings.soundMuted;
+      }
+      if (settings.controlMode === "pc" || settings.controlMode === "mobile") {
+        this.controlMode = settings.controlMode;
+        this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
       }
       if (settings.danmakuMode === "classic" || settings.danmakuMode === "liveChat" || settings.danmakuMode === "none") {
         this.danmakuMode = settings.danmakuMode;
@@ -2003,6 +2008,38 @@ class PrototypeScene extends Phaser.Scene {
       // Ignore storage failures; the current session can still use the chosen language.
     }
     this.refreshLocalizedUI();
+    this.scheduleLeaderboardUserSettingsSave();
+  }
+
+  private setControlMode(mode: ControlMode) {
+    if (this.controlMode === mode) {
+      return;
+    }
+
+    this.controlMode = mode;
+    this.controlHint = this.controlMode === "mobile" ? t(this.locale, "hint.mobile") : t(this.locale, "hint.pc");
+    this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
+    this.mobileJumpQueued = false;
+    this.updateControlHintText();
+
+    if (this.controlMode === "mobile") {
+      if (this.setupComplete && !this.startModal) {
+        this.mobileFullscreenWasActive = hasFullscreenElement();
+        this.mobileFullscreenRecoveryDismissed = false;
+        this.createMobileControls();
+      }
+    } else {
+      if (this.mobileLayoutPaused) {
+        this.resumeFromMobileLayoutEdit();
+      }
+      this.mobileLayoutShouldStartCountdown = false;
+      this.mobileFullscreenWasActive = false;
+      this.mobileFullscreenRecoveryDismissed = false;
+      this.removeMobileControls();
+    }
+
+    this.refreshMobileFullscreenRecovery();
+    this.scheduleGameLayoutRefresh();
     this.scheduleLeaderboardUserSettingsSave();
   }
 
@@ -2667,6 +2704,7 @@ class PrototypeScene extends Phaser.Scene {
       bgmVolumePercent: this.bgmVolumePercent,
       seVolumePercent: this.seVolumePercent,
       soundMuted: this.soundMuted,
+      controlMode: this.controlMode,
       danmakuEnabled: this.danmakuEnabled,
       danmakuMode: this.danmakuMode,
       collisionDebugEnabled: this.collisionDebugEnabled,
@@ -2685,6 +2723,7 @@ class PrototypeScene extends Phaser.Scene {
         this.soundMuted = muted;
         this.applySoundSettings();
       },
+      onControlModeChange: (mode) => this.setControlMode(mode),
       onDanmakuModeChange: (mode) => this.setDanmakuMode(mode),
       onLocaleChange: (locale) => {
         this.setLocale(locale);
@@ -2695,7 +2734,7 @@ class PrototypeScene extends Phaser.Scene {
       onAccountOpen: () => this.showAccount(),
       onReturnToTitle: () => void this.returnToTitle(),
       onScreenshotOpen: () => this.captureGameScreenshot({ preview: true }),
-      mobileLayoutAvailable: this.controlMode === "mobile" && this.setupComplete && !this.startModal,
+      mobileLayoutAvailable: this.setupComplete && !this.startModal,
       onMobileLayoutOpen: () => window.dispatchEvent(new Event(MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT)),
     });
   }
