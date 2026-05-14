@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.367
+### English
+- Rebuilt the Shift-run dash sprite with the Game Studio sprite pipeline from a fresh in-game walk seed, using one generation pass plus local normalization to improve the arm swing and stride readability while conserving image quota.
+### Japanese
+- Game Studio のスプライトパイプラインで、ゲーム内の歩きフレームを種に Shift 走行用ダッシュを新規作成し、1回の生成とローカル正規化で腕振りと歩幅の読みやすさを改善しました。
+
 ## v0.1.366
 ### English
 - Reworked the Shift-run ground dash sprite through multiple animation passes to give the motion stronger arm pumping, clearer grounded contact, and a cleaner loop.
