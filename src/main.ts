@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.366";
+const DEBUG_VERSION = "v0.1.367";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -270,30 +270,31 @@ const CROUCH_STAMINA_RECOVERY_MULTIPLIER = 2;
 const HUD_SCALE_BASE_WIDTH = 1280;
 const HUD_SCALE_BASE_HEIGHT = 720;
 const HUD_MIN_SCALE = 1;
-const HUD_MAX_SCALE = 1.45;
-const HUD_PLAYER_NAME_FONT_SIZE = 15;
-const HUD_MAIN_FONT_SIZE = 12;
-const HUD_SCORE_FONT_SIZE = 15;
+const HUD_MAX_SCALE = 1.5;
+const HUD_PLAYER_NAME_FONT_SIZE = 14;
+const HUD_MAIN_FONT_SIZE = 13;
+const HUD_SCORE_FONT_SIZE = 16;
 const HUD_HINT_FONT_SIZE = 11;
 const HUD_PANEL_X = 18;
-const HUD_PANEL_Y = 16;
-const HUD_PANEL_WIDTH = 344;
-const HUD_PANEL_HEIGHT = 104;
-const HUD_TEXT_X = 36;
-const HUD_PLAYER_NAME_Y = 30;
-const HUD_SCORE_Y = 58;
-const HUD_TIMER_X = 205;
-const HUD_STAMINA_Y = 84;
-const HUD_STAMINA_BAR_X = 142;
-const HUD_STAMINA_BAR_Y = 93;
-const HUD_STAMINA_BAR_WIDTH = 132;
-const HUD_STAMINA_BAR_HEIGHT = 9;
+const HUD_PANEL_Y = 54;
+const HUD_PANEL_WIDTH = 360;
+const HUD_PANEL_HEIGHT = 116;
+const HUD_TEXT_X = 40;
+const HUD_PLAYER_NAME_Y = 69;
+const HUD_SCORE_Y = 99;
+const HUD_TIMER_X = 218;
+const HUD_STAMINA_Y = 129;
+const HUD_STAMINA_BAR_X = 158;
+const HUD_STAMINA_BAR_Y = 139;
+const HUD_STAMINA_BAR_WIDTH = 164;
+const HUD_STAMINA_BAR_HEIGHT = 12;
 const HUD_STAMINA_FILL_WIDTH = HUD_STAMINA_BAR_WIDTH;
 const HUD_STAMINA_FILL_HEIGHT = HUD_STAMINA_BAR_HEIGHT;
-const HUD_MODE_CHIP_X = GAME_WIDTH / 2;
-const HUD_MODE_CHIP_Y = 16;
-const HUD_MODE_CHIP_MIN_WIDTH = 86;
-const HUD_MODE_CHIP_HEIGHT = 30;
+const HUD_STAMINA_TICK_COUNT = 5;
+const HUD_MODE_CHIP_X = HUD_PANEL_X + HUD_PANEL_WIDTH - 58;
+const HUD_MODE_CHIP_Y = HUD_PANEL_Y + 13;
+const HUD_MODE_CHIP_MIN_WIDTH = 82;
+const HUD_MODE_CHIP_HEIGHT = 28;
 const OVERHEAD_STAMINA_BAR_WIDTH = 76;
 const OVERHEAD_STAMINA_BAR_HEIGHT = 8;
 const OVERHEAD_STAMINA_FILL_WIDTH = 70;
@@ -399,6 +400,7 @@ class PrototypeScene extends Phaser.Scene {
   private staminaBarBack!: Phaser.GameObjects.Rectangle;
   private staminaBarFill!: Phaser.GameObjects.Rectangle;
   private staminaBarFrame!: Phaser.GameObjects.Rectangle;
+  private staminaBarTicks: Phaser.GameObjects.Rectangle[] = [];
   private overheadStaminaBarBack!: Phaser.GameObjects.Rectangle;
   private overheadStaminaBarFill!: Phaser.GameObjects.Rectangle;
   private controlHintBack!: Phaser.GameObjects.Image;
@@ -750,7 +752,7 @@ class PrototypeScene extends Phaser.Scene {
       .setAlpha(0.92);
     this.hudPanelBack.setDisplaySize(HUD_PANEL_WIDTH, HUD_PANEL_HEIGHT);
     this.hudPanelAccent = this.add
-      .rectangle(HUD_PANEL_X + 12, HUD_PANEL_Y + 14, 3, HUD_PANEL_HEIGHT - 28, 0x67e8f9, 0.62)
+      .rectangle(HUD_PANEL_X + 14, HUD_PANEL_Y + 16, 3, HUD_PANEL_HEIGHT - 32, 0x67e8f9, 0.68)
       .setOrigin(0, 0)
       .setScrollFactor(0)
       .setDepth(97);
@@ -812,6 +814,20 @@ class PrototypeScene extends Phaser.Scene {
       .setScrollFactor(0)
       .setDepth(101);
     this.staminaBarFrame.setStrokeStyle(1, 0x86efac, 0.8);
+    this.staminaBarTicks = Array.from({ length: HUD_STAMINA_TICK_COUNT - 1 }, (_, index) =>
+      this.add
+        .rectangle(
+          HUD_STAMINA_BAR_X + (HUD_STAMINA_BAR_WIDTH / HUD_STAMINA_TICK_COUNT) * (index + 1),
+          HUD_STAMINA_BAR_Y,
+          1,
+          HUD_STAMINA_BAR_HEIGHT,
+          0xf8fafc,
+          0.32,
+        )
+        .setOrigin(0.5, 0.5)
+        .setScrollFactor(0)
+        .setDepth(102),
+    );
     this.overheadStaminaBarBack = this.add
       .rectangle(this.player.x, this.player.y, OVERHEAD_STAMINA_BAR_WIDTH, OVERHEAD_STAMINA_BAR_HEIGHT, 0x020617, 0.78)
       .setOrigin(0.5, 0.5)
@@ -2019,9 +2035,9 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     if (this.hudPanelAccent) {
-      this.hudPanelAccent.setPosition((HUD_PANEL_X + 12) * scale, (HUD_PANEL_Y + 14) * scale);
+      this.hudPanelAccent.setPosition((HUD_PANEL_X + 14) * scale, (HUD_PANEL_Y + 16) * scale);
       this.hudPanelAccent.width = 3 * scale;
-      this.hudPanelAccent.height = (HUD_PANEL_HEIGHT - 28) * scale;
+      this.hudPanelAccent.height = (HUD_PANEL_HEIGHT - 32) * scale;
     }
 
     if (this.playerNameText) {
@@ -2063,13 +2079,19 @@ class PrototypeScene extends Phaser.Scene {
       this.staminaBarFrame.setStrokeStyle(Math.max(1, Math.round(scale)), 0x86efac, 0.8);
     }
 
+    this.staminaBarTicks.forEach((tick, index) => {
+      tick.setPosition((HUD_STAMINA_BAR_X + (HUD_STAMINA_BAR_WIDTH / HUD_STAMINA_TICK_COUNT) * (index + 1)) * scale, HUD_STAMINA_BAR_Y * scale);
+      tick.width = Math.max(1, Math.round(scale));
+      tick.height = HUD_STAMINA_BAR_HEIGHT * scale;
+    });
+
     if (this.controlHintBack) {
-      this.controlHintBack.setPosition(HUD_MODE_CHIP_X, HUD_MODE_CHIP_Y * scale);
+      this.controlHintBack.setPosition(HUD_MODE_CHIP_X * scale, HUD_MODE_CHIP_Y * scale);
       this.resizeControlHintBack();
     }
 
     if (this.controlHintText) {
-      this.controlHintText.setPosition(HUD_MODE_CHIP_X, (HUD_MODE_CHIP_Y + 7) * scale);
+      this.controlHintText.setPosition(HUD_MODE_CHIP_X * scale, (HUD_MODE_CHIP_Y + 7) * scale);
       this.controlHintText.setFontSize(`${Math.round(HUD_HINT_FONT_SIZE * scale)}px`);
       this.resizeControlHintBack();
     }
@@ -2863,10 +2885,15 @@ class PrototypeScene extends Phaser.Scene {
     const ratio = staminaValue / MAX_STAMINA;
     const scale = this.hudScale || 1;
     const fillColor = ratio > 0.5 ? 0x86efac : ratio > 0.22 ? 0xfde68a : 0xfb7185;
+    const fillAlpha = ratio <= 0.22 ? 0.66 + Math.abs(Math.sin(this.time.now * 0.012)) * 0.32 : 0.95;
     this.staminaText.setText(`${t(this.locale, "hud.stamina")}:${Math.round(staminaValue)}`);
     this.staminaBarFill.width = HUD_STAMINA_FILL_WIDTH * ratio * scale;
     this.staminaBarFill.height = HUD_STAMINA_FILL_HEIGHT * scale;
-    this.staminaBarFill.setFillStyle(fillColor, 0.95);
+    this.staminaBarFill.setFillStyle(fillColor, fillAlpha);
+    this.staminaBarFrame?.setStrokeStyle(Math.max(1, Math.round(scale)), fillColor, ratio <= 0.22 ? 0.98 : 0.82);
+    this.staminaBarTicks.forEach((tick, index) => {
+      tick.setAlpha(ratio > (index + 1) / HUD_STAMINA_TICK_COUNT ? 0.22 : 0.44);
+    });
     this.updateOverheadStaminaBar(ratio, fillColor);
   }
 
@@ -3322,7 +3349,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private getHudModeLabel() {
     if (this.stageEditor?.isEnabled) {
-      return this.locale === "ja" ? "編集中" : "EDIT";
+      return "EDIT";
     }
     return this.controlMode === "mobile" ? "MOBILE" : "PC";
   }

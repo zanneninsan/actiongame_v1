@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.367
+### English
+- Refined the in-game HUD so the mode chip sits inside the top-left status panel instead of occupying the center of the screen, and moved the cluster below the debug buttons.
+- Enlarged the status cluster slightly and added stamina bar tick marks plus low-stamina color/pulse feedback for better readability during play.
+### Japanese
+- ゲーム中HUDのモード表示を画面中央から左上ステータスパネル内へ移し、デバッグボタンと重ならない位置に下げて、プレイ画面の中央をより広く使えるようにしました。
+- ステータス表示を少し見やすくし、スタミナバーに目盛りと低スタミナ時の色・点滅フィードバックを追加しました。
+
 ## v0.1.366
 ### English
 - Hid and disabled the unfinished playable character selector while keeping the internal character-switching foundation for future use.
