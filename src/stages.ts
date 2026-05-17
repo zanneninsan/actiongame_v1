@@ -1556,7 +1556,7 @@ export const SKYBRIDGE_SPRINT_STAGE: StageDefinition = {
   enemies: [
     { type: "knifePunk", x: 980, y: 590, patrolLeft: 780, patrolRight: 1160, speed: 78 },
     { type: "coneGolem", x: 1660, y: 590, patrolLeft: 1500, patrolRight: 1800, speed: 72 },
-    { type: "heartCannonTurret", x: 1888, y: 456, patrolLeft: 1888, patrolRight: 1888, speed: 0 },
+    { type: "heartCannonTurret", x: 2032, y: 456, patrolLeft: 2032, patrolRight: 2032, speed: 0 },
     { type: "aquaMascot", x: 2360, y: 590, patrolLeft: 2160, patrolRight: 2740, speed: 92 },
     { type: "rabbitTraveler", x: 3640, y: 444, patrolLeft: 3420, patrolRight: 3680, speed: 86 },
     { type: "knifePunk", x: 5320, y: 444, patrolLeft: 5180, patrolRight: 5480, speed: 82 },

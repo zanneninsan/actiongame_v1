@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.374
+### English
+- Moved the first Heart Cannon in Skybridge Sprint toward the right side of its early platform so it is easier to spot instead of overlapping the player path near x=1888.
+### Japanese
+- スカイブリッジ・スプリント序盤のハートキャノンを足場右寄りへ移動し、x=1888付近のプレイヤー進行位置と重なって見落としやすい配置を改善しました。
+
 ## v0.1.373
 ### English
 - Replaced the Heart Cannon turret runtime asset with a cropped WebP version so the cannon appears as a proper enemy sprite instead of being shrunk by unused transparent padding.
