@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.378
+### English
+- Simplified fixed enemy setup for Heart Cannon turrets so they are created without gravity, stay immovable from the first frame, render above ordinary enemies, and fall back to a visible enemy texture if their asset is missing.
+### Japanese
+- ハートキャノン砲台の固定敵としての初期化を単純化し、生成直後から重力なし・移動なし・通常敵より手前表示にして、素材が見つからない場合も見える敵テクスチャへフォールバックするようにしました。
+
 ## v0.1.377
 ### English
 - Moved the first Skybridge Sprint Heart Cannon onto an early elevated platform so it is visible from the opening screen instead of being hidden among later ground-route objects.
