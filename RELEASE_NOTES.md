@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.373
+### English
+- Replaced the Heart Cannon turret runtime asset with a cropped WebP version so the cannon appears as a proper enemy sprite instead of being shrunk by unused transparent padding.
+- Preserved the original cannon source image under `assets_source/enemies/heart_cannon_turret/`.
+### Japanese
+- ハートキャノン砲台の実行用素材を余白トリミング済みWebPに差し替え、透明余白ごと縮小されて敵キャラが小さく見える問題を修正しました。
+- 元の砲台ソース画像は `assets_source/enemies/heart_cannon_turret/` に保存しました。
+
 ## v0.1.372
 ### English
 - Delayed the boot loading overlay so fast startup no longer flashes the 0-100% loading display.
