@@ -41,18 +41,22 @@ export function showLeaderboardPanel(options: LeaderboardPanelOptions) {
   modal.innerHTML = `
     <div class="leaderboard-dialog" role="dialog" aria-modal="true" aria-label="${escapeHtml(t(locale, "leaderboard.title"))}">
       <h2>${escapeHtml(t(locale, "leaderboard.title"))}</h2>
-      <p class="leaderboard-meta">${escapeHtml(options.stageName)} / ${escapeHtml(options.gameVersion)}</p>
-      <p class="leaderboard-status">${escapeHtml(options.statusMessage ?? t(locale, "leaderboard.loading"))}</p>
-      <div class="leaderboard-header">
-        <span aria-hidden="true"></span>
-        <span>${escapeHtml(t(locale, "leaderboard.headerRank"))}</span>
-        <span>${escapeHtml(t(locale, "leaderboard.headerName"))}</span>
-        <span>${escapeHtml(t(locale, "leaderboard.headerId"))}</span>
-        <span>${escapeHtml(t(locale, "leaderboard.headerScore"))}</span>
-        <span>${escapeHtml(t(locale, "leaderboard.headerDate"))}</span>
+      <div class="leaderboard-subhead">
+        <p class="leaderboard-meta">${escapeHtml(options.stageName)} / ${escapeHtml(options.gameVersion)}</p>
+        <p class="leaderboard-status">${escapeHtml(options.statusMessage ?? t(locale, "leaderboard.loading"))}</p>
       </div>
-      <ol class="leaderboard-list"></ol>
       <div class="leaderboard-current-score" hidden></div>
+      <section class="leaderboard-table" aria-label="${escapeHtml(t(locale, "leaderboard.title"))}">
+        <div class="leaderboard-header">
+          <span aria-hidden="true"></span>
+          <span>${escapeHtml(t(locale, "leaderboard.headerRank"))}</span>
+          <span>${escapeHtml(t(locale, "leaderboard.headerName"))}</span>
+          <span>${escapeHtml(t(locale, "leaderboard.headerId"))}</span>
+          <span>${escapeHtml(t(locale, "leaderboard.headerScore"))}</span>
+          <span>${escapeHtml(t(locale, "leaderboard.headerDate"))}</span>
+        </div>
+        <ol class="leaderboard-list"></ol>
+      </section>
       <div class="leaderboard-footer">
         <div class="leaderboard-account-prompt" hidden></div>
         <div class="leaderboard-actions">

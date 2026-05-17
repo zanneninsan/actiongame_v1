@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.380
+### English
+- Reworked the leaderboard modal structure so the current run summary, ranking table, and account/share actions are visually separated for better readability.
+### Japanese
+- ランキング画面の構造を見直し、今回のスコア、ランキング表、アカウント/共有操作を分けて読みやすくしました。
+
 ## v0.1.379
 ### English
 - Changed unrevealed hidden blocks so they only collide when hit from below, preventing them from acting like invisible side walls during normal movement.
