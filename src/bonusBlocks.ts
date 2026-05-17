@@ -14,9 +14,14 @@ type BonusBlockOptions = {
 export const createBonusBlocks = (options: BonusBlockOptions) => {
   const blocks = options.scene.physics.add.staticGroup();
   populateBonusBlocks({ scene: options.scene, blocksGroup: blocks, placements: options.placements });
-  options.scene.physics.add.collider(options.player, blocks, (_, blockObject) => {
-    hitBonusBlock(options.scene, options.player, blockObject as Phaser.Physics.Arcade.Image, options.onReward);
-  });
+  options.scene.physics.add.collider(
+    options.player,
+    blocks,
+    (_, blockObject) => {
+      hitBonusBlock(options.scene, options.player, blockObject as Phaser.Physics.Arcade.Image, options.onReward);
+    },
+    (_, blockObject) => canCollideWithBonusBlock(options.player, blockObject as Phaser.Physics.Arcade.Image),
+  );
   return blocks;
 };
 
@@ -62,10 +67,7 @@ const hitBonusBlock = (
     return;
   }
 
-  const previousTop = playerBody.prev.y;
-  const blockBottom = blockBody.y + blockBody.height;
-  const hitFromBelow = playerBody.velocity.y <= 0 && previousTop >= blockBottom - HIT_TOLERANCE;
-  if (!hitFromBelow) {
+  if (!didHitBlockFromBelow(player, block)) {
     return;
   }
 
@@ -98,4 +100,32 @@ const hitBonusBlock = (
     ease: "Quad.easeOut",
     onComplete: () => block.refreshBody(),
   });
+};
+
+const canCollideWithBonusBlock = (
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+  block: Phaser.Physics.Arcade.Image,
+) => {
+  const blockType = block.getData("blockType") as BonusBlockPlacement["type"] | undefined;
+  const hasAppeared = Boolean(block.getData("used"));
+  if (blockType !== "hidden" || hasAppeared) {
+    return true;
+  }
+
+  return didHitBlockFromBelow(player, block);
+};
+
+const didHitBlockFromBelow = (
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
+  block: Phaser.Physics.Arcade.Image,
+) => {
+  const playerBody = player.body;
+  const blockBody = block.body as Phaser.Physics.Arcade.StaticBody | undefined;
+  if (!playerBody || !blockBody) {
+    return false;
+  }
+
+  const previousTop = playerBody.prev.y;
+  const blockBottom = blockBody.y + blockBody.height;
+  return playerBody.velocity.y <= 0 && previousTop >= blockBottom - HIT_TOLERANCE;
 };

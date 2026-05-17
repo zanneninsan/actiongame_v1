@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.379
+### English
+- Changed unrevealed hidden blocks so they only collide when hit from below, preventing them from acting like invisible side walls during normal movement.
+### Japanese
+- 未発見の隠しブロックは下から叩いた時だけ衝突するように変更し、通常移動中に透明な横壁として引っかかる問題を修正しました。
+
 ## v0.1.378
 ### English
 - Simplified fixed enemy setup for Heart Cannon turrets so they are created without gravity, stay immovable from the first frame, render above ordinary enemies, and fall back to a visible enemy texture if their asset is missing.
