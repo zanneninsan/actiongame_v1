@@ -209,7 +209,7 @@ function createEntryRow(
     row.classList.add("is-current-score");
   }
   row.innerHTML = `
-    <span class="leaderboard-new-marker">${isCurrentScore ? escapeHtml(t(locale, "leaderboard.newMarker")) : ""}</span>
+    <span class="leaderboard-new-marker">${isCurrentScore ? "NEW" : ""}</span>
     <span class="leaderboard-rank">${rank}</span>
     <span class="leaderboard-name">${escapeHtml(entry.playerName)}</span>
     <span class="leaderboard-player-id">${escapeHtml(formatPlayerId(playerId))}</span>

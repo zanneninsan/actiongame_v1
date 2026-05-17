@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.381
+### English
+- Changed the current leaderboard row marker to a compact NEW badge and refined the leaderboard modal cards, table panel, and account prompt styling.
+### Japanese
+- ランキングの現在スコア行マーカーをコンパクトなNEWバッジに変更し、ランキング画面のスコアカード、表パネル、アカウント案内の見た目を整えました。
+
 ## v0.1.380
 ### English
 - Reworked the leaderboard modal structure so the current run summary, ranking table, and account/share actions are visually separated for better readability.

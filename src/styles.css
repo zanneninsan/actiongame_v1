@@ -3225,6 +3225,7 @@ body.is-screenshot-modal-open #mobile-controls {
   gap: clamp(10px, 1.4vw, 18px);
   min-height: 30px;
   padding: 0 clamp(18px, 2vw, 28px);
+  border-bottom: 1px solid rgba(245, 199, 106, 0.28);
 }
 
 .leaderboard-meta,
@@ -3253,6 +3254,7 @@ body.is-screenshot-modal-open #mobile-controls {
   margin: 0;
   padding: clamp(8px, 1vw, 12px) clamp(10px, 1.2vw, 16px);
   border: 1px solid rgba(184, 233, 255, 0.2);
+  border-radius: 6px;
   background:
     linear-gradient(180deg, rgba(5, 24, 42, 0.7), rgba(2, 10, 23, 0.56)),
     radial-gradient(circle at 52% 0%, rgba(85, 201, 255, 0.15), transparent 50%);
@@ -3333,11 +3335,21 @@ body.is-screenshot-modal-open #mobile-controls {
 }
 
 .leaderboard-new-marker {
-  min-width: 0;
+  position: absolute;
+  left: clamp(10px, 1.5vw, 18px);
+  top: 50%;
+  min-width: clamp(36px, 4.4vw, 48px);
+  height: clamp(18px, 2.1vw, 24px);
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
   text-align: center;
-  font-size: clamp(14px, 1.8vw, 20px);
+  font-size: clamp(10px, 1.15vw, 13px);
   font-weight: 900;
   color: transparent;
+  line-height: 1;
+  transform: translateY(-50%) rotate(-3deg);
 }
 
 .leaderboard-rank {
@@ -3346,12 +3358,15 @@ body.is-screenshot-modal-open #mobile-controls {
 
 .leaderboard-entry.is-current-score {
   color: #fff7cf;
-  filter: drop-shadow(0 0 10px rgba(245, 199, 106, 0.5));
+  filter: drop-shadow(0 0 10px rgba(245, 199, 106, 0.44));
 }
 
 .leaderboard-entry.is-current-score .leaderboard-new-marker {
-  color: #fff7cf;
-  text-shadow: 0 2px 0 #450a0a, 0 0 8px #fff7cf, 0 0 16px rgba(245, 199, 106, 0.95);
+  border-color: rgba(255, 238, 177, 0.94);
+  background: linear-gradient(180deg, #fff5c9, #f5c76a 52%, #9b4b12);
+  color: #2b1304;
+  box-shadow: 0 0 10px rgba(245, 199, 106, 0.82), inset 0 1px 0 rgba(255, 255, 255, 0.62);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.42);
 }
 
 .leaderboard-name {
@@ -3385,6 +3400,7 @@ body.is-screenshot-modal-open #mobile-controls {
   margin: 0;
   padding: clamp(10px, 1.2vw, 14px) clamp(20px, 2.4vw, 32px);
   border: 1px solid rgba(245, 199, 106, 0.42);
+  border-radius: 6px;
   background:
     linear-gradient(90deg, rgba(13, 32, 56, 0.92), rgba(4, 20, 38, 0.76)),
     radial-gradient(circle at 68% 42%, rgba(245, 199, 106, 0.18), transparent 42%);
@@ -3408,9 +3424,22 @@ body.is-screenshot-modal-open #mobile-controls {
   white-space: nowrap;
 }
 
+.leaderboard-current-label {
+  color: #f8fafc;
+  font-size: clamp(13px, 1.45vw, 16px);
+}
+
 .leaderboard-current-rank,
 .leaderboard-current-value {
   color: #f5c76a;
+}
+
+.leaderboard-current-rank {
+  justify-self: start;
+  padding: 3px 10px;
+  border: 1px solid rgba(245, 199, 106, 0.34);
+  border-radius: 999px;
+  background: rgba(245, 199, 106, 0.1);
 }
 
 .leaderboard-current-value {
@@ -3443,7 +3472,10 @@ body.is-screenshot-modal-open #mobile-controls {
   margin: 0 6px;
   padding: 8px clamp(20px, 2.4vw, 32px);
   border: 1px solid rgba(184, 233, 255, 0.26);
-  background: rgba(3, 20, 34, 0.42);
+  border-radius: 6px;
+  background:
+    linear-gradient(90deg, rgba(3, 20, 34, 0.64), rgba(5, 24, 42, 0.46)),
+    radial-gradient(circle at 100% 50%, rgba(85, 201, 255, 0.14), transparent 42%);
   color: #f8fafc;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
 }
