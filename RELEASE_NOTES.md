@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.377
+### English
+- Moved the first Skybridge Sprint Heart Cannon onto an early elevated platform so it is visible from the opening screen instead of being hidden among later ground-route objects.
+### Japanese
+- スカイブリッジ・スプリント最初のハートキャノンを序盤の高台へ移し、後続の地上オブジェクトに紛れず開始画面付近から見えるようにしました。
+
 ## v0.1.376
 ### English
 - Fixed Heart Cannon turrets so they stay fixed in place instead of being updated with gravity like walking enemies.
