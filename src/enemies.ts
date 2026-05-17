@@ -281,8 +281,8 @@ const updateTurretEnemy = (
   player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
 ) => {
   const body = enemy.body as Phaser.Physics.Arcade.Body;
-  body.setAllowGravity(true);
-  enemy.setVelocityX(0);
+  body.setAllowGravity(false);
+  enemy.setVelocity(0, 0);
   if (!player?.active) {
     return;
   }

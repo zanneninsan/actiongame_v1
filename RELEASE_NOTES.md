@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.376
+### English
+- Fixed Heart Cannon turrets so they stay fixed in place instead of being updated with gravity like walking enemies.
+- Adjusted the early Skybridge Sprint cannon Y position to sit visibly on the ground route.
+### Japanese
+- ハートキャノン砲台が歩行敵と同じように重力更新されていた問題を修正し、固定砲台としてその場に残るようにしました。
+- スカイブリッジ・スプリント序盤の砲台Y位置を調整し、地上ルート上に見えるようにしました。
+
 ## v0.1.375
 ### English
 - Moved the first Skybridge Sprint Heart Cannon farther ahead on the ground path so the oversized player sprite no longer hides it when checking the early x-position.
