@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.375
+### English
+- Moved the first Skybridge Sprint Heart Cannon farther ahead on the ground path so the oversized player sprite no longer hides it when checking the early x-position.
+### Japanese
+- スカイブリッジ・スプリント序盤のハートキャノンを少し先の地上ルートへ移し、確認時に大きなプレイヤースプライトが砲台を隠してしまう問題を避けました。
+
 ## v0.1.374
 ### English
 - Moved the first Heart Cannon in Skybridge Sprint toward the right side of its early platform so it is easier to spot instead of overlapping the player path near x=1888.
