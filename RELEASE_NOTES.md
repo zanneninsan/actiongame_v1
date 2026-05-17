@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.372
+### English
+- Delayed the boot loading overlay so fast startup no longer flashes the 0-100% loading display.
+- Removed numeric boot loading progress text; if loading takes long enough to show the overlay, it now uses a steady loading message.
+### Japanese
+- 起動時ローディング表示を遅延させ、短い読み込みで0〜100%表示がちらつかないようにしました。
+- 起動時ローディングの数値進捗表示をやめ、表示が必要な場合も安定した読み込み中メッセージにしました。
+
 ## v0.1.371
 ### English
 - Nudged the left-side HUD text column to the right so the player name, score, and stamina labels no longer sit too close to the panel edge.
