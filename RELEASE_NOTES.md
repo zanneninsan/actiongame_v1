@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.382
+### English
+- Added a richer world-map stage select layer with route controls, random stage selection, favorite stages, visit stamps, daily picks, stage passports, difficulty/tempo/length/control stats, mission previews, gimmick chips, reward hints, secret counts, and leaderboard ghost availability.
+- Added a GPT-IMAGE2 generated passport panel texture for the world-map stage card.
+### Japanese
+- ワールドマップのステージ選択に、ルート移動、おまかせ選択、お気に入り、訪問スタンプ、本日の注目、ステージパスポート、難度・テンポ・長さ・推奨操作の表示、ミッションプレビュー、ギミックチップ、ごほうびヒント、秘密数、ランキングゴースト有無を追加しました。
+- GPT-IMAGE2で生成したパスポート風パネル素材をワールドマップのステージカードに追加しました。
+
 ## v0.1.381
 ### English
 - Changed the current leaderboard row marker to a compact NEW badge and refined the leaderboard modal cards, table panel, and account prompt styling.

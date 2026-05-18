@@ -6,10 +6,13 @@ import {
   type PlayerCharacterDefinition,
   type PlayerCharacterId,
 } from "./playerCharacters";
+import { getWorldMapDailyStageId, getWorldMapStageDetail, getWorldMapUiText } from "./worldMapFeatures";
 
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
 const ASSET_BASE = import.meta.env.BASE_URL;
 const PWA_INSTALL_DISMISSED_KEY = "actiongame_pwa_install_dismissed";
+const WORLD_MAP_FAVORITE_STAGE_KEY = "actiongame_world_map_favorite_stage";
+const WORLD_MAP_VISITED_STAGE_KEY_PREFIX = "actiongame_world_map_visited_stage";
 export const TITLE_SOUND_CONFIRM_STORAGE_KEY = "actiongame_title_sound_confirmed";
 const TITLE_MUSIC_VOLUME = 0.72;
 const TITLE_MUSIC_FADE_SECONDS = 3;
@@ -176,6 +179,13 @@ export class StartModal {
           <strong class="start-world-current"></strong>
           <em>${t(this.options.locale, "start.worldMapPrompt")}</em>
         </div>
+        <div class="start-world-map-toolbar" aria-label="${escapeHtml(t(this.options.locale, "start.worldMap"))}">
+          <button type="button" class="start-world-route-prev"></button>
+          <button type="button" class="start-world-random"></button>
+          <button type="button" class="start-world-favorite"></button>
+          <button type="button" class="start-world-route-next"></button>
+        </div>
+        <aside class="start-world-stage-card" aria-live="polite"></aside>
         <div class="start-world-confirm" hidden role="dialog" aria-live="polite">
           <p class="start-world-confirm-message"></p>
           <div class="start-world-confirm-actions">
@@ -289,6 +299,11 @@ export class StartModal {
     const worldConfirmMessage = overlay.querySelector<HTMLParagraphElement>(".start-world-confirm-message")!;
     const worldConfirmYes = overlay.querySelector<HTMLButtonElement>(".start-world-confirm-yes")!;
     const worldConfirmNo = overlay.querySelector<HTMLButtonElement>(".start-world-confirm-no")!;
+    const worldStageCard = overlay.querySelector<HTMLElement>(".start-world-stage-card")!;
+    const worldRoutePrev = overlay.querySelector<HTMLButtonElement>(".start-world-route-prev")!;
+    const worldRouteNext = overlay.querySelector<HTMLButtonElement>(".start-world-route-next")!;
+    const worldRandomButton = overlay.querySelector<HTMLButtonElement>(".start-world-random")!;
+    const worldFavoriteButton = overlay.querySelector<HTMLButtonElement>(".start-world-favorite")!;
     const mapBackButton = overlay.querySelector<HTMLButtonElement>(".start-map-back")!;
     const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
     const soundButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-sound]"));
@@ -320,11 +335,89 @@ export class StartModal {
     let removeTitleMusicGestureRetry: (() => void) | undefined;
     let isWorldPlayerMoving = false;
     let worldMoveTimers: number[] = [];
+    let leaderboardGhostCount: number | undefined;
+    let favoriteStageId = getStorageValue(WORLD_MAP_FAVORITE_STAGE_KEY);
+    const dailyStageId = getWorldMapDailyStageId(this.options.stageOptions.map((option) => option.id));
 
     const getSelectedStageLabel = () =>
       this.options.stageOptions.find((option) => option.id === selectedStageId)?.label[selectedLocale] ?? selectedStageId;
     const getStageIndex = (stageId: string) => this.options.stageOptions.findIndex((option) => option.id === stageId);
     const getSelectedCharacter = () => getPlayerCharacterDefinition(selectedCharacterId);
+    const isStageVisited = (stageId: string) => getStorageValue(`${WORLD_MAP_VISITED_STAGE_KEY_PREFIX}:${stageId}`) === "1";
+    const markStageVisited = (stageId: string) => setStorageValue(`${WORLD_MAP_VISITED_STAGE_KEY_PREFIX}:${stageId}`, "1");
+
+    const renderStars = (rating: number) =>
+      Array.from({ length: 5 }, (_, index) => `<span class="${index < rating ? "is-filled" : ""}">★</span>`).join("");
+
+    const refreshWorldStageCard = () => {
+      const option = this.options.stageOptions.find((stageOption) => stageOption.id === selectedStageId);
+      const stageIndex = Math.max(0, getStageIndex(selectedStageId));
+      const detail = getWorldMapStageDetail(selectedStageId);
+      const ui = getWorldMapUiText(selectedLocale);
+      const stageLabel = option?.label[selectedLocale] ?? selectedStageId;
+      const routeProgress = this.options.stageOptions.length <= 1 ? 100 : (stageIndex / (this.options.stageOptions.length - 1)) * 100;
+      const ghostLabel =
+        leaderboardGhostCount === undefined
+          ? ui.ghostLoading
+          : leaderboardGhostCount > 0
+            ? `${ui.ghostReady} (${leaderboardGhostCount})`
+            : ui.ghostEmpty;
+      const visitedLabel = isStageVisited(selectedStageId) ? ui.visited : ui.unvisited;
+      const favoriteLabel = favoriteStageId === selectedStageId ? ui.favoriteSet : ui.favorite;
+      const dailyBadge =
+        selectedStageId === dailyStageId ? `<span class="start-world-daily">${escapeHtml(ui.daily)}</span>` : "";
+
+      worldStageCard.style.setProperty("--stage-accent", detail.accent);
+      worldStageCard.innerHTML = `
+        <div class="start-world-card-passport" aria-hidden="true"></div>
+        <div class="start-world-card-head">
+          <span class="start-world-card-area">${escapeHtml(detail.area[selectedLocale])}</span>
+          ${dailyBadge}
+          <strong>${escapeHtml(stageLabel)}</strong>
+          <em>${escapeHtml(detail.tagline[selectedLocale])}</em>
+        </div>
+        <div class="start-world-badges">
+          <span>${escapeHtml(detail.badge[selectedLocale])}</span>
+          <span>${escapeHtml(detail.mood[selectedLocale])}</span>
+          <span>${escapeHtml(visitedLabel)}</span>
+          <span>${escapeHtml(ghostLabel)}</span>
+        </div>
+        <div class="start-world-route-meter" aria-label="${escapeHtml(ui.route)}">
+          <span>${escapeHtml(ui.route)} ${stageIndex + 1}/${this.options.stageOptions.length}</span>
+          <i><b style="width: ${routeProgress.toFixed(2)}%;"></b></i>
+        </div>
+        <div class="start-world-stat-grid">
+          <span><em>${escapeHtml(ui.difficulty)}</em><strong class="start-world-stars">${renderStars(detail.difficulty)}</strong></span>
+          <span><em>${escapeHtml(ui.tempo)}</em><strong>${detail.energy}</strong></span>
+          <span><em>${escapeHtml(ui.length)}</em><strong>${escapeHtml(ui.lengthLabels[detail.length])}</strong></span>
+          <span><em>${escapeHtml(ui.control)}</em><strong>${escapeHtml(ui.controlLabels[detail.recommendedMode])}</strong></span>
+          <span><em>${escapeHtml(ui.missions)}</em><strong>${detail.missionCount}</strong></span>
+          <span><em>${escapeHtml(ui.secrets)}</em><strong>${detail.secretCount}</strong></span>
+        </div>
+        <div class="start-world-info-grid">
+          <section>
+            <h3>${escapeHtml(ui.missions)}</h3>
+            <ul>${detail.missions.map((mission) => `<li>${escapeHtml(mission[selectedLocale])}</li>`).join("")}</ul>
+          </section>
+          <section>
+            <h3>${escapeHtml(ui.gimmicks)}</h3>
+            <div class="start-world-chip-list">${detail.gimmicks
+              .map((gimmick) => `<span>${escapeHtml(gimmick[selectedLocale])}</span>`)
+              .join("")}</div>
+            <p><b>${escapeHtml(ui.reward)}</b>${escapeHtml(detail.reward[selectedLocale])}</p>
+          </section>
+        </div>
+      `;
+
+      worldFavoriteButton.textContent = favoriteLabel;
+      worldFavoriteButton.classList.toggle("is-selected", favoriteStageId === selectedStageId);
+      worldFavoriteButton.setAttribute("aria-pressed", favoriteStageId === selectedStageId ? "true" : "false");
+      worldRandomButton.textContent = ui.random;
+      worldRoutePrev.textContent = ui.previous;
+      worldRouteNext.textContent = ui.next;
+      worldRoutePrev.disabled = stageIndex <= 0 || isWorldPlayerMoving;
+      worldRouteNext.disabled = stageIndex >= this.options.stageOptions.length - 1 || isWorldPlayerMoving;
+    };
 
     const refreshCharacterSelection = () => {
       const selectedCharacter = getSelectedCharacter();
@@ -351,10 +444,15 @@ export class StartModal {
       worldMapPanel.style.setProperty("--player-y", `${selectedPosition.y}%`);
       worldMapNodes.forEach((node) => {
         const isSelected = node.dataset.stageId === selectedStageId;
+        const stageId = node.dataset.stageId ?? "";
         node.classList.toggle("is-selected", isSelected);
+        node.classList.toggle("is-daily", stageId === dailyStageId);
+        node.classList.toggle("is-favorite", stageId !== "" && stageId === favoriteStageId);
+        node.classList.toggle("is-visited", stageId !== "" && isStageVisited(stageId));
         node.setAttribute("aria-pressed", isSelected ? "true" : "false");
       });
       worldCurrent.textContent = `${t(this.options.locale, "start.worldMapCurrent")}: ${getSelectedStageLabel()}`;
+      refreshWorldStageCard();
     };
 
     const openStageConfig = () => {
@@ -386,6 +484,9 @@ export class StartModal {
       selectedStageId = stageId;
       this.options.stageId = selectedStageId;
       stageSelect.value = selectedStageId;
+      if (shouldRefreshGhostOptions) {
+        leaderboardGhostCount = undefined;
+      }
       refreshWorldMap();
       if (shouldRefreshGhostOptions) {
         void loadGhostOptions();
@@ -409,6 +510,7 @@ export class StartModal {
       isWorldPlayerMoving = true;
       const direction = Math.sign(targetIndex - currentIndex);
       worldMapPanel.classList.add("is-moving", direction < 0 ? "is-facing-left" : "is-facing-right");
+      refreshWorldStageCard();
 
       const route: number[] = [];
       for (let index = currentIndex + direction; direction < 0 ? index >= targetIndex : index <= targetIndex; index += direction) {
@@ -430,6 +532,8 @@ export class StartModal {
             isWorldPlayerMoving = false;
             worldMoveTimers = [];
             worldMapPanel.classList.remove("is-moving", "is-facing-left", "is-facing-right");
+            leaderboardGhostCount = undefined;
+            refreshWorldStageCard();
             void loadGhostOptions();
             worldMapNodes.find((node) => node.dataset.stageId === selectedStageId)?.focus();
           }
@@ -762,10 +866,15 @@ export class StartModal {
       clearWorldMoveTimers();
     };
     const loadGhostOptions = async () => {
+      const stageIdForRequest = selectedStageId;
       ghostSelect.innerHTML = `<option value="">${t(this.options.locale, "start.ghostRankingLoading")}</option>`;
       ghostSelect.disabled = true;
       try {
-        const options = await this.options.onFetchGhostOptions(selectedStageId);
+        const options = await this.options.onFetchGhostOptions(stageIdForRequest);
+        if (stageIdForRequest !== selectedStageId) {
+          return;
+        }
+        leaderboardGhostCount = options.length;
         ghostSelect.innerHTML = options.length
           ? [
               `<option value="" selected>${t(this.options.locale, "start.ghostRankingSelect")}</option>`,
@@ -774,9 +883,15 @@ export class StartModal {
           : `<option value="">${t(this.options.locale, "start.ghostRankingEmpty")}</option>`;
         ghostSelect.disabled = options.length === 0;
       } catch (error) {
+        if (stageIdForRequest !== selectedStageId) {
+          return;
+        }
         console.warn("Could not load leaderboard ghost options.", error);
+        leaderboardGhostCount = 0;
         ghostSelect.innerHTML = `<option value="">${t(this.options.locale, "start.ghostRankingFailed")}</option>`;
         ghostSelect.disabled = true;
+      } finally {
+        refreshWorldStageCard();
       }
     };
     stageSelect.addEventListener("change", () => {
@@ -802,6 +917,31 @@ export class StartModal {
     worldConfirmNo.addEventListener("click", () => {
       hideWorldConfirm();
       worldMapNodes.find((node) => node.dataset.stageId === selectedStageId)?.focus();
+    });
+    worldRoutePrev.addEventListener("click", () => {
+      const target = this.options.stageOptions[Math.max(0, getStageIndex(selectedStageId) - 1)];
+      if (target) {
+        moveWorldPlayerToStage(target.id);
+      }
+    });
+    worldRouteNext.addEventListener("click", () => {
+      const target = this.options.stageOptions[Math.min(this.options.stageOptions.length - 1, getStageIndex(selectedStageId) + 1)];
+      if (target) {
+        moveWorldPlayerToStage(target.id);
+      }
+    });
+    worldRandomButton.addEventListener("click", () => {
+      const candidates = this.options.stageOptions.filter((option) => option.id !== selectedStageId);
+      const options = candidates.length > 0 ? candidates : this.options.stageOptions;
+      const target = options[Math.floor(Math.random() * options.length)];
+      if (target) {
+        moveWorldPlayerToStage(target.id);
+      }
+    });
+    worldFavoriteButton.addEventListener("click", () => {
+      favoriteStageId = favoriteStageId === selectedStageId ? "" : selectedStageId;
+      setStorageValue(WORLD_MAP_FAVORITE_STAGE_KEY, favoriteStageId);
+      refreshWorldMap();
     });
     mapBackButton.addEventListener("click", closeStageConfig);
     localeSelect.addEventListener("change", () => {
@@ -964,11 +1104,14 @@ export class StartModal {
         soundOn,
         locale: selectedLocale,
       };
+      markStageVisited(selectedStageId);
       if (shouldConfirmPortraitStart() || (shouldSuggestMobileFullscreen() && !this.orientationPromptSatisfied)) {
         pendingStartSettings = settings;
+        refreshWorldMap();
         showOrientationPrompt(false, "startConfirm");
         return;
       }
+      refreshWorldMap();
       this.options.onSubmit(settings);
     });
 

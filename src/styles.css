@@ -605,6 +605,266 @@ body.is-mobile-controls-active canvas {
   font-style: normal;
 }
 
+.start-world-map-toolbar {
+  position: absolute;
+  left: max(42px, env(safe-area-inset-left));
+  top: max(38px, calc(env(safe-area-inset-top) + 16px));
+  z-index: 4;
+  width: min(410px, calc(100% - 84px));
+  display: grid;
+  grid-template-columns: 0.7fr 1fr 1fr 0.7fr;
+  gap: 8px;
+}
+
+.start-world-map-toolbar button {
+  min-width: 0;
+  min-height: 38px;
+  border: 0;
+  padding: 0 12px;
+  background: url("../public/assets/ui/fantasy/button_primary_safe.webp") center / 100% 100% no-repeat;
+  color: #dbeafe;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 900;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+  white-space: nowrap;
+}
+
+.start-world-map-toolbar button:hover,
+.start-world-map-toolbar button:focus-visible {
+  outline: none;
+  filter: brightness(1.22) saturate(1.2) drop-shadow(0 0 10px rgba(125, 211, 252, 0.4));
+}
+
+.start-world-map-toolbar button:disabled {
+  cursor: default;
+  filter: grayscale(0.5) brightness(0.62);
+  opacity: 0.7;
+}
+
+.start-world-map-toolbar .start-world-favorite.is-selected {
+  background-image: url("../public/assets/ui/fantasy/button_primary_selected_safe.webp");
+  color: #fff7d6;
+}
+
+.start-world-stage-card {
+  --stage-accent: #60a5fa;
+  box-sizing: border-box;
+  position: absolute;
+  right: max(42px, env(safe-area-inset-right));
+  top: max(38px, calc(env(safe-area-inset-top) + 16px));
+  z-index: 4;
+  width: min(430px, calc(100% - 84px));
+  max-height: calc(100dvh - 178px);
+  display: grid;
+  gap: 10px;
+  padding: 22px 22px 20px;
+  background:
+    linear-gradient(180deg, rgba(2, 6, 23, 0.54), rgba(2, 6, 23, 0.78)),
+    url("../public/assets/ui/world_map/stage_passport_panel_gpt-image2.webp") center / 100% 100% no-repeat;
+  border: 1px solid color-mix(in srgb, var(--stage-accent), #f5c76a 42%);
+  border-radius: 10px;
+  color: #eff6ff;
+  filter: drop-shadow(0 20px 34px rgba(0, 0, 0, 0.54));
+  overflow: hidden auto;
+  scrollbar-color: color-mix(in srgb, var(--stage-accent), #f5c76a 36%) rgba(2, 6, 23, 0.28);
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.86);
+}
+
+.start-world-card-passport {
+  position: absolute;
+  inset: 8px;
+  border: 1px solid color-mix(in srgb, var(--stage-accent), transparent 36%);
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.start-world-card-head,
+.start-world-badges,
+.start-world-route-meter,
+.start-world-stat-grid,
+.start-world-info-grid {
+  position: relative;
+  z-index: 1;
+}
+
+.start-world-card-head {
+  display: grid;
+  gap: 5px;
+}
+
+.start-world-card-area {
+  color: var(--stage-accent);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.start-world-card-head strong {
+  min-width: 0;
+  color: #fff7d6;
+  font-size: clamp(20px, 2.2vw, 28px);
+  font-weight: 900;
+  line-height: 1.12;
+}
+
+.start-world-card-head em {
+  color: #dbeafe;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.start-world-daily {
+  width: fit-content;
+  padding: 3px 10px;
+  border: 1px solid rgba(253, 230, 138, 0.72);
+  border-radius: 999px;
+  background: rgba(120, 53, 15, 0.72);
+  color: #fde68a;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.start-world-badges,
+.start-world-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.start-world-badges span,
+.start-world-chip-list span {
+  min-width: 0;
+  padding: 4px 9px;
+  border: 1px solid color-mix(in srgb, var(--stage-accent), transparent 32%);
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.58);
+  color: #e0f2fe;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.start-world-route-meter {
+  display: grid;
+  gap: 6px;
+  color: #bae6fd;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.start-world-route-meter i {
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(186, 230, 253, 0.28);
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.66);
+}
+
+.start-world-route-meter b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--stage-accent), #f5c76a);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--stage-accent), transparent 35%);
+}
+
+.start-world-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.start-world-stat-grid > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  padding: 7px 8px;
+  border: 1px solid rgba(186, 230, 253, 0.18);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.54);
+}
+
+.start-world-stat-grid em {
+  color: #93c5fd;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.start-world-stat-grid strong {
+  color: #fff7d6;
+  font-size: 14px;
+  font-weight: 900;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start-world-stars {
+  letter-spacing: 0;
+}
+
+.start-world-stars span {
+  color: rgba(148, 163, 184, 0.48);
+}
+
+.start-world-stars .is-filled {
+  color: #fbbf24;
+}
+
+.start-world-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.start-world-info-grid section {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 7px;
+}
+
+.start-world-info-grid h3,
+.start-world-info-grid p,
+.start-world-info-grid ul {
+  margin: 0;
+}
+
+.start-world-info-grid h3 {
+  color: var(--stage-accent);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.start-world-info-grid ul {
+  display: grid;
+  gap: 5px;
+  padding-left: 17px;
+  color: #f8fafc;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.start-world-info-grid p {
+  color: #dbeafe;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.start-world-info-grid p b {
+  display: block;
+  color: #fde68a;
+  font-size: 11px;
+}
+
 .start-world-confirm {
   position: absolute;
   left: 50%;
@@ -802,6 +1062,38 @@ body.is-mobile-controls-active canvas {
   border-radius: 50%;
   animation: world-node-pulse 1400ms ease-in-out infinite;
   pointer-events: none;
+}
+
+.start-world-node.is-daily::before,
+.start-world-node.is-favorite::before,
+.start-world-node.is-visited::before {
+  position: absolute;
+  right: -4px;
+  top: -4px;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 247, 214, 0.86);
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.82);
+  color: #fde68a;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.start-world-node.is-visited::before {
+  content: "✓";
+}
+
+.start-world-node.is-daily::before {
+  content: "D";
+  background: rgba(120, 53, 15, 0.86);
+}
+
+.start-world-node.is-favorite::before {
+  content: "★";
+  background: rgba(14, 116, 144, 0.88);
 }
 
 .start-world-node-index {
@@ -1467,6 +1759,62 @@ body.is-mobile-controls-active canvas {
     font-size: 15px;
   }
 
+  .start-world-map-toolbar {
+    left: max(12px, env(safe-area-inset-left));
+    top: max(12px, env(safe-area-inset-top));
+    width: min(calc(100% - 24px), 420px);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .start-world-map-toolbar button {
+    min-height: 34px;
+    padding: 0 6px;
+    font-size: 11px;
+  }
+
+  .start-world-stage-card {
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    top: auto;
+    bottom: max(86px, calc(env(safe-area-inset-bottom) + 70px));
+    width: auto;
+    max-height: min(43dvh, 310px);
+    gap: 8px;
+    padding: 16px 16px 14px;
+  }
+
+  .start-world-card-head strong {
+    font-size: 18px;
+  }
+
+  .start-world-card-head em {
+    font-size: 12px;
+  }
+
+  .start-world-badges span,
+  .start-world-chip-list span {
+    font-size: 10px;
+  }
+
+  .start-world-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .start-world-stat-grid > span {
+    padding: 5px 6px;
+  }
+
+  .start-world-stat-grid strong {
+    font-size: 12px;
+  }
+
+  .start-world-info-grid {
+    grid-template-columns: 1fr;
+    gap: 7px;
+  }
+
   .start-world-current {
     font-size: 12px;
   }
@@ -1646,6 +1994,49 @@ body.is-mobile-controls-active canvas {
   .start-world-map-caption em {
     grid-column: 1 / -1;
     font-size: 10px;
+  }
+
+  .start-world-map-toolbar {
+    left: 16px;
+    top: 12px;
+    width: min(330px, calc(100% - 32px));
+    gap: 5px;
+  }
+
+  .start-world-map-toolbar button {
+    min-height: 30px;
+    padding: 0 5px;
+    font-size: 10px;
+  }
+
+  .start-world-stage-card {
+    right: 16px;
+    top: 52px;
+    width: min(330px, calc(50% - 24px));
+    max-height: calc(100dvh - 112px);
+    gap: 6px;
+    padding: 14px;
+  }
+
+  .start-world-card-head strong {
+    font-size: 16px;
+  }
+
+  .start-world-card-head em,
+  .start-world-info-grid ul,
+  .start-world-info-grid p {
+    font-size: 10px;
+  }
+
+  .start-world-badges,
+  .start-world-route-meter,
+  .start-world-info-grid {
+    display: none;
+  }
+
+  .start-world-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 5px;
   }
 
   .start-world-confirm {
