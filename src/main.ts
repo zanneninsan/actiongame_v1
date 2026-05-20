@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.383";
+const DEBUG_VERSION = "v0.1.384";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -201,6 +201,7 @@ const resolveFixedStoryDialogue = (key: FixedStoryDialogueKey, locale: Locale): 
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const PLAYER_CHARACTER_STORAGE_KEY = "actiongame_player_character";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
+const WORLD_MAP_CLEARED_STAGE_KEY_PREFIX = "actiongame_world_map_cleared_stage";
 const DANMAKU_TUTORIAL_SEEN_STORAGE_KEY_PREFIX = "actiongame_danmaku_tutorial_seen";
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -1797,6 +1798,14 @@ class PrototypeScene extends Phaser.Scene {
 
   private setCookieValue(name: string, value: string) {
     document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; max-age=31536000; path=/; SameSite=Lax`;
+  }
+
+  private saveWorldMapClearStamp(stageId: StageId) {
+    try {
+      window.localStorage.setItem(`${WORLD_MAP_CLEARED_STAGE_KEY_PREFIX}:${stageId}`, "1");
+    } catch {
+      // This is a map reward marker only; clearing the stage should still complete if storage is unavailable.
+    }
   }
 
   private deleteCookieValue(name: string) {
@@ -4100,6 +4109,7 @@ class PrototypeScene extends Phaser.Scene {
     const missionLines = this.getClearMissionLines(remaining, GAME_TIME_MS);
     const clearTitle = SHOW_CLEAR_RANK_AND_MISSIONS ? `${t(this.locale, "hud.clear")}  ${clearRank}` : t(this.locale, "hud.clear");
     const missionResultLine = SHOW_CLEAR_RANK_AND_MISSIONS && missionLines.length ? `${missionLines.join("\n")}\n` : "";
+    this.saveWorldMapClearStamp(this.currentStageId);
     this.stopGhostRecording();
     this.timerText.setText(
       `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,

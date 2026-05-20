@@ -13,6 +13,7 @@ const ASSET_BASE = import.meta.env.BASE_URL;
 const PWA_INSTALL_DISMISSED_KEY = "actiongame_pwa_install_dismissed";
 const WORLD_MAP_FAVORITE_STAGE_KEY = "actiongame_world_map_favorite_stage";
 const WORLD_MAP_VISITED_STAGE_KEY_PREFIX = "actiongame_world_map_visited_stage";
+const WORLD_MAP_CLEARED_STAGE_KEY_PREFIX = "actiongame_world_map_cleared_stage";
 export const TITLE_SOUND_CONFIRM_STORAGE_KEY = "actiongame_title_sound_confirmed";
 const TITLE_MUSIC_VOLUME = 0.72;
 const TITLE_MUSIC_FADE_SECONDS = 3;
@@ -344,6 +345,7 @@ export class StartModal {
     const getStageIndex = (stageId: string) => this.options.stageOptions.findIndex((option) => option.id === stageId);
     const getSelectedCharacter = () => getPlayerCharacterDefinition(selectedCharacterId);
     const isStageVisited = (stageId: string) => getStorageValue(`${WORLD_MAP_VISITED_STAGE_KEY_PREFIX}:${stageId}`) === "1";
+    const isStageCleared = (stageId: string) => getStorageValue(`${WORLD_MAP_CLEARED_STAGE_KEY_PREFIX}:${stageId}`) === "1";
     const markStageVisited = (stageId: string) => setStorageValue(`${WORLD_MAP_VISITED_STAGE_KEY_PREFIX}:${stageId}`, "1");
 
     const renderStars = (rating: number) =>
@@ -363,10 +365,12 @@ export class StartModal {
           : leaderboardGhostCount > 0
             ? `${ui.ghostReady} (${leaderboardGhostCount})`
             : ui.ghostEmpty;
-      const visitedLabel = isStageVisited(selectedStageId) ? ui.visited : ui.unvisited;
+      const stageCleared = isStageCleared(selectedStageId);
+      const visitedLabel = stageCleared ? ui.clearStamp : isStageVisited(selectedStageId) ? ui.visited : ui.unvisited;
       const favoriteLabel = favoriteStageId === selectedStageId ? ui.favoriteSet : ui.favorite;
       const dailyBadge =
         selectedStageId === dailyStageId ? `<span class="start-world-daily">${escapeHtml(ui.daily)}</span>` : "";
+      const clearBadge = stageCleared ? `<span class="start-world-clear-stamp">CLEAR</span>` : "";
 
       worldStageCard.style.setProperty("--stage-accent", detail.accent);
       worldMapPanel.classList.toggle("is-stage-card-left", selectedPosition.x >= 58);
@@ -375,6 +379,7 @@ export class StartModal {
         <div class="start-world-card-head">
           <span class="start-world-card-area">${escapeHtml(detail.area[selectedLocale])}</span>
           ${dailyBadge}
+          ${clearBadge}
           <strong>${escapeHtml(stageLabel)}</strong>
           <em>${escapeHtml(detail.tagline[selectedLocale])}</em>
         </div>
@@ -451,6 +456,7 @@ export class StartModal {
         node.classList.toggle("is-daily", stageId === dailyStageId);
         node.classList.toggle("is-favorite", stageId !== "" && stageId === favoriteStageId);
         node.classList.toggle("is-visited", stageId !== "" && isStageVisited(stageId));
+        node.classList.toggle("is-cleared", stageId !== "" && isStageCleared(stageId));
         node.setAttribute("aria-pressed", isSelected ? "true" : "false");
       });
       worldCurrent.textContent = `${t(this.options.locale, "start.worldMapCurrent")}: ${getSelectedStageLabel()}`;

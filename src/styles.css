@@ -751,6 +751,22 @@ body.is-mobile-controls-active canvas {
   font-weight: 900;
 }
 
+.start-world-clear-stamp {
+  width: fit-content;
+  padding: 4px 12px;
+  border: 2px solid rgba(255, 247, 214, 0.9);
+  border-radius: 6px;
+  background: rgba(127, 29, 29, 0.78);
+  color: #fff7d6;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0;
+  transform: rotate(-4deg);
+  box-shadow:
+    inset 0 0 0 1px rgba(248, 113, 113, 0.45),
+    0 0 14px rgba(248, 113, 113, 0.28);
+}
+
 .start-world-badges,
 .start-world-chip-list {
   display: flex;
@@ -1085,6 +1101,7 @@ body.is-mobile-controls-active canvas {
   pointer-events: none;
 }
 
+.start-world-node.is-cleared::before,
 .start-world-node.is-daily::before,
 .start-world-node.is-favorite::before,
 .start-world-node.is-visited::before {
@@ -1115,6 +1132,12 @@ body.is-mobile-controls-active canvas {
 .start-world-node.is-favorite::before {
   content: "★";
   background: rgba(14, 116, 144, 0.88);
+}
+
+.start-world-node.is-cleared::before {
+  content: "C";
+  background: rgba(127, 29, 29, 0.9);
+  color: #fff7d6;
 }
 
 .start-world-node-index {

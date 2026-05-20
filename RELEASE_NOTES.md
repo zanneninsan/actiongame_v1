@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.384
+### English
+- Saved a real world-map CLEAR stamp when a stage is finished, and showed it separately from the existing visited marker on the stage passport card and map nodes.
+### Japanese
+- ステージクリア時にワールドマップ用のCLEARスタンプを保存し、既存の訪問済み表示とは別にステージパスポートカードとマップのマスへ表示するようにしました。
+
 ## v0.1.383
 ### English
 - Made the world-map stage passport card move away from right-side stages and stop intercepting stage-node clicks, with a soft fade while hovering or focusing nodes.

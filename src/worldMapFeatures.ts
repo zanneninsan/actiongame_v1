@@ -36,6 +36,7 @@ export type WorldMapUiText = {
   ghostReady: string;
   ghostEmpty: string;
   ghostLoading: string;
+  clearStamp: string;
   visited: string;
   unvisited: string;
   favorite: string;
@@ -65,6 +66,7 @@ export const WORLD_MAP_UI_TEXT: Record<Locale, WorldMapUiText> = {
     ghostReady: "ランキングゴーストあり",
     ghostEmpty: "ランキングゴーストなし",
     ghostLoading: "ゴースト確認中",
+    clearStamp: "CLEARスタンプ獲得",
     visited: "訪問済み",
     unvisited: "未訪問",
     favorite: "お気に入り",
@@ -99,6 +101,7 @@ export const WORLD_MAP_UI_TEXT: Record<Locale, WorldMapUiText> = {
     ghostReady: "Leaderboard ghosts ready",
     ghostEmpty: "No leaderboard ghosts",
     ghostLoading: "Checking ghosts",
+    clearStamp: "CLEAR stamp earned",
     visited: "Visited",
     unvisited: "New stop",
     favorite: "Favorite",
@@ -133,6 +136,7 @@ export const WORLD_MAP_UI_TEXT: Record<Locale, WorldMapUiText> = {
     ghostReady: "有排行榜幽灵",
     ghostEmpty: "暂无排行榜幽灵",
     ghostLoading: "正在确认幽灵",
+    clearStamp: "CLEAR印章已获得",
     visited: "已到访",
     unvisited: "新地点",
     favorite: "收藏",
@@ -167,6 +171,7 @@ export const WORLD_MAP_UI_TEXT: Record<Locale, WorldMapUiText> = {
     ghostReady: "랭킹 고스트 있음",
     ghostEmpty: "랭킹 고스트 없음",
     ghostLoading: "고스트 확인 중",
+    clearStamp: "CLEAR 스탬프 획득",
     visited: "방문 완료",
     unvisited: "새 지점",
     favorite: "즐겨찾기",
@@ -352,4 +357,3 @@ export function getWorldMapDailyStageId(stageIds: string[], date = new Date()) {
   const day = Math.floor(date.getTime() / 86_400_000);
   return stageIds[Math.abs(day) % stageIds.length];
 }
-
