@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.383
+### English
+- Made the world-map stage passport card move away from right-side stages and stop intercepting stage-node clicks, with a soft fade while hovering or focusing nodes.
+### Japanese
+- ワールドマップのステージパスポートカードが右側ステージに被りにくい位置へ逃げ、ステージマスのクリックを奪わないようにしました。マスにホバーまたはフォーカスした時はカードが薄く退避します。
+
 ## v0.1.382
 ### English
 - Added a richer world-map stage select layer with route controls, random stage selection, favorite stages, visit stamps, daily picks, stage passports, difficulty/tempo/length/control stats, mission previews, gimmick chips, reward hints, secret counts, and leaderboard ghost availability.

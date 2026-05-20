@@ -616,6 +616,11 @@ body.is-mobile-controls-active canvas {
   gap: 8px;
 }
 
+.start-world-map-panel.is-stage-card-left .start-world-map-toolbar {
+  left: auto;
+  right: max(42px, env(safe-area-inset-right));
+}
+
 .start-world-map-toolbar button {
   min-width: 0;
   min-height: 38px;
@@ -670,8 +675,24 @@ body.is-mobile-controls-active canvas {
   color: #eff6ff;
   filter: drop-shadow(0 20px 34px rgba(0, 0, 0, 0.54));
   overflow: hidden auto;
+  pointer-events: none;
   scrollbar-color: color-mix(in srgb, var(--stage-accent), #f5c76a 36%) rgba(2, 6, 23, 0.28);
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.86);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    filter 180ms ease;
+}
+
+.start-world-map-panel.is-stage-card-left .start-world-stage-card {
+  left: max(42px, env(safe-area-inset-left));
+  right: auto;
+}
+
+.start-world-map-panel:has(.start-world-node:hover) .start-world-stage-card,
+.start-world-map-panel:has(.start-world-node:focus-visible) .start-world-stage-card {
+  opacity: 0.34;
+  filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.42));
 }
 
 .start-world-card-passport {
@@ -1761,10 +1782,16 @@ body.is-mobile-controls-active canvas {
 
   .start-world-map-toolbar {
     left: max(12px, env(safe-area-inset-left));
+    right: auto;
     top: max(12px, env(safe-area-inset-top));
     width: min(calc(100% - 24px), 420px);
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 6px;
+  }
+
+  .start-world-map-panel.is-stage-card-left .start-world-map-toolbar {
+    left: max(12px, env(safe-area-inset-left));
+    right: auto;
   }
 
   .start-world-map-toolbar button {
@@ -1782,6 +1809,11 @@ body.is-mobile-controls-active canvas {
     max-height: min(43dvh, 310px);
     gap: 8px;
     padding: 16px 16px 14px;
+  }
+
+  .start-world-map-panel.is-stage-card-left .start-world-stage-card {
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
   }
 
   .start-world-card-head strong {
@@ -1998,9 +2030,15 @@ body.is-mobile-controls-active canvas {
 
   .start-world-map-toolbar {
     left: 16px;
+    right: auto;
     top: 12px;
     width: min(330px, calc(100% - 32px));
     gap: 5px;
+  }
+
+  .start-world-map-panel.is-stage-card-left .start-world-map-toolbar {
+    left: 16px;
+    right: auto;
   }
 
   .start-world-map-toolbar button {
@@ -2016,6 +2054,11 @@ body.is-mobile-controls-active canvas {
     max-height: calc(100dvh - 112px);
     gap: 6px;
     padding: 14px;
+  }
+
+  .start-world-map-panel.is-stage-card-left .start-world-stage-card {
+    left: 16px;
+    right: auto;
   }
 
   .start-world-card-head strong {
