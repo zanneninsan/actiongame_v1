@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.394";
+const DEBUG_VERSION = "v0.1.395";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -3184,7 +3184,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private getClearActionButtonPosition(index: number) {
-    if (this.controlMode === "mobile" || this.usesCompactHud()) {
+    if (this.controlMode === "mobile") {
       return {
         x: CLEAR_ACTION_MOBILE_X,
         y: CLEAR_ACTION_MOBILE_Y + CLEAR_ACTION_MOBILE_GAP * index,
@@ -3198,7 +3198,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private getClearActionButtonStyle(color: string, backgroundColor: string): Phaser.Types.GameObjects.Text.TextStyle {
-    const isMobileLayout = this.controlMode === "mobile" || this.usesCompactHud();
+    const isMobileLayout = this.controlMode === "mobile";
     return {
       fontFamily: "monospace",
       fontSize: isMobileLayout ? "22px" : "18px",

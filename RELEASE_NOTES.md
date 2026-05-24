@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.395
+### English
+- Kept clear-result action buttons in the top-right on PC controls regardless of compact HUD width, while preserving the larger bottom-center layout for mobile controls.
+### Japanese
+- クリア後のゴースト保存、ワールドマップへ戻る、スクリーンショットの各ボタンを、PC操作では画面幅に関係なく右上に表示するように戻しました。スマホ操作では押しやすい下中央表示を維持しています。
+
 ## v0.1.394
 ### English
 - Reserved a safe center board for the world map on larger screens so persistent progress and stage-detail panels no longer cover the current stage marker.
