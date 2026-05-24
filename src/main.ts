@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.386";
+const DEBUG_VERSION = "v0.1.387";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -435,6 +435,7 @@ class PrototypeScene extends Phaser.Scene {
   private lastDashWallBounceAt = -Infinity;
   private countdownOverlay?: StartCountdownOverlay;
   private finalScoreText?: Phaser.GameObjects.Text;
+  private clearStampContainer?: Phaser.GameObjects.Container;
   private missText?: Phaser.GameObjects.Text;
   private danmaku?: DanmakuOverlay;
   private minimap?: MinimapOverlay;
@@ -1247,6 +1248,8 @@ class PrototypeScene extends Phaser.Scene {
     this.goal = undefined;
     this.finalScoreText?.destroy();
     this.finalScoreText = undefined;
+    this.clearStampContainer?.destroy(true);
+    this.clearStampContainer = undefined;
     this.missText = undefined;
   }
 
@@ -4140,10 +4143,73 @@ class PrototypeScene extends Phaser.Scene {
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(200);
+    this.showClearStampReward();
     this.showGhostExportButton();
     this.showClearMenuButton();
     this.showClearScreenshotButton();
     this.submitWinScore(finalScore, itemScore, timeBonus, remaining);
+  }
+
+  private showClearStampReward() {
+    this.clearStampContainer?.destroy(true);
+
+    const container = this.add.container(GAME_WIDTH / 2 + 278, GAME_HEIGHT / 2 - 104);
+    container.setScrollFactor(0).setDepth(235).setAlpha(0).setScale(0.34).setAngle(-18);
+
+    const stamp = this.add.graphics();
+    stamp.fillStyle(0x7f1d1d, 0.88);
+    stamp.fillRoundedRect(-118, -48, 236, 96, 14);
+    stamp.lineStyle(4, 0xfff7d6, 0.92);
+    stamp.strokeRoundedRect(-118, -48, 236, 96, 14);
+    stamp.lineStyle(2, 0xfca5a5, 0.72);
+    stamp.strokeRoundedRect(-104, -35, 208, 70, 9);
+
+    const text = this.add
+      .text(0, -4, "CLEAR STAMP\nGET!", {
+        fontFamily: "monospace",
+        fontSize: "26px",
+        color: "#fff7d6",
+        stroke: "#450a0a",
+        strokeThickness: 4,
+        align: "center",
+        lineSpacing: -3,
+      })
+      .setOrigin(0.5);
+
+    const shine = this.add
+      .rectangle(-78, -54, 42, 8, 0xfef3c7, 0.78)
+      .setOrigin(0.5)
+      .setAngle(-16)
+      .setBlendMode(Phaser.BlendModes.ADD);
+
+    container.add([stamp, text, shine]);
+    this.clearStampContainer = container;
+
+    this.tweens.add({
+      targets: container,
+      alpha: 1,
+      scale: 1,
+      angle: -7,
+      duration: 360,
+      ease: "Back.Out",
+    });
+    this.tweens.add({
+      targets: container,
+      y: container.y - 10,
+      duration: 760,
+      yoyo: true,
+      repeat: 1,
+      ease: "Sine.InOut",
+      delay: 360,
+    });
+    this.tweens.add({
+      targets: shine,
+      x: 88,
+      alpha: 0,
+      duration: 680,
+      ease: "Cubic.Out",
+      delay: 180,
+    });
   }
 
   private registerRainbowPipeline() {

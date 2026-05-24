@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.387
+### English
+- Added a CLEAR STAMP GET animation to the stage-clear result screen so earning a world-map stamp is visible immediately after reaching the goal.
+### Japanese
+- ゴール到達直後のクリア画面に「CLEAR STAMP GET」演出を追加し、ワールドマップ用スタンプを獲得したことがその場で分かるようにしました。
+
 ## v0.1.386
 ### English
 - Made the in-game top-left HUD more compact, moved it closer to the screen corner, and reduced its large-screen scaling so it covers less of the playfield.
