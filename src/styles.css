@@ -29,6 +29,19 @@ body.is-mobile-controls-active #game {
   justify-content: center;
 }
 
+body.is-game-booting #game {
+  visibility: hidden;
+}
+
+body.is-game-booting::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 18;
+  background: #000;
+  pointer-events: none;
+}
+
 canvas {
   display: block;
   image-rendering: pixelated;

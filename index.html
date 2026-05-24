@@ -30,9 +30,22 @@
     <link rel="icon" href="%BASE_URL%assets/pwa-icon-32.png" sizes="32x32" type="image/png" />
     <link rel="icon" href="%BASE_URL%assets/pwa-icon-192.png" sizes="192x192" type="image/png" />
     <link rel="apple-touch-icon" href="%BASE_URL%assets/pwa-icon-180.png" />
+    <style>
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        background: #000;
+      }
+
+      body.is-game-booting #game {
+        visibility: hidden;
+      }
+    </style>
     <title>スーパー残念院さんランド</title>
   </head>
-  <body>
+  <body class="is-game-booting">
     <div id="game"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

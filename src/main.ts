@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.388";
+const DEBUG_VERSION = "v0.1.389";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -4265,6 +4265,7 @@ document.addEventListener("contextmenu", (event) => {
 
 initializePwaInstall();
 registerServiceWorker();
+document.body.classList.add("is-game-booting");
 void startGame();
 
 async function startGame() {

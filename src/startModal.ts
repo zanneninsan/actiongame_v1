@@ -278,6 +278,7 @@ export class StartModal {
 
     document.body.appendChild(overlay);
     document.body.classList.add("is-start-modal-open");
+    document.body.classList.remove("is-game-booting");
     this.overlay = overlay;
 
     const soundGate = overlay.querySelector<HTMLDivElement>(".title-sound-gate")!;

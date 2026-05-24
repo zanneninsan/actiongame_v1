@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.389
+### English
+- Added a boot curtain that keeps the Phaser canvas hidden until the start modal is mounted, preventing the raw game canvas or interim loading visuals from flashing before the title flow appears.
+### Japanese
+- スタートモーダルが表示されるまでPhaserキャンバスを隠す起動カーテンを追加し、タイトル導線の前に素のゲーム画面や途中の読み込み表示がちらつかないようにしました。
+
 ## v0.1.388
 ### English
 - Moved clear-result action buttons to a larger bottom-center layout on mobile and compact screens, making ghost export, screenshot preview, and world-map return easier to tap after clearing a stage.
