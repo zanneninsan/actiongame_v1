@@ -281,8 +281,8 @@ const updateTurretEnemy = (
   player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
 ) => {
   const body = enemy.body as Phaser.Physics.Arcade.Body;
-  body.setAllowGravity(true);
-  enemy.setVelocityX(0);
+  body.setAllowGravity(false);
+  enemy.setVelocity(0, 0);
   if (!player?.active) {
     return;
   }
@@ -371,20 +371,21 @@ const createEnemySprite = (
     animation !== undefined &&
     enemiesGroup.scene.textures.exists(animation.key) &&
     enemiesGroup.scene.anims.exists(animation.key);
-  const textureKey =
-    animationReady || definition.assetPath
-      ? animationReady
-        ? animation.key
-        : definition.key
+  const staticTextureReady = definition.assetPath !== undefined && enemiesGroup.scene.textures.exists(definition.key);
+  const textureKey = animationReady
+    ? animation.key
+    : staticTextureReady
+      ? definition.key
       : getFallbackEnemyTextureKey(enemiesGroup.scene);
   const enemy = enemiesGroup.create(placement.x, placement.y, textureKey) as Phaser.Physics.Arcade.Sprite;
   enemy.setData("placementIndex", placementIndex);
   const speed = placement.speed ?? ENEMY_DEFAULT_SPEED;
   const direction = speed >= 0 ? 1 : -1;
   enemy.setDisplaySize(definition.displayWidth, definition.displayHeight);
-  enemy.setDepth(0.18);
   enemy.setData("enemyType", placement.type ?? "aquaMascot");
   const aiType = placement.aiType ?? definition.aiType;
+  const isFixedEnemy = aiType === "turret" || aiType === "stationaryNoGravity";
+  enemy.setDepth(aiType === "turret" ? 0.32 : 0.18);
   enemy.setData("aiType", aiType);
   enemy.setData("homeY", placement.y);
   enemy.setData("phase", Phaser.Math.FloatBetween(0, Math.PI * 2));
@@ -395,14 +396,17 @@ const createEnemySprite = (
   enemy.setData("speed", Math.abs(speed));
   enemy.setSize(definition.bodyWidth / Math.abs(enemy.scaleX), definition.bodyHeight / Math.abs(enemy.scaleY));
   enemy.setOffset(definition.bodyOffsetX / Math.abs(enemy.scaleX), definition.bodyOffsetY / Math.abs(enemy.scaleY));
-  enemy.setVelocityX(aiType === "turret" || aiType === "stationary" || aiType === "stationaryNoGravity" ? 0 : Math.abs(speed) * direction);
+  enemy.setVelocityX(isFixedEnemy || aiType === "stationary" ? 0 : Math.abs(speed) * direction);
   enemy.setFlipX(direction < 0);
   if (animationReady) {
     enemy.play(animation.key);
   }
   const body = enemy.body as Phaser.Physics.Arcade.Body;
-  body.setAllowGravity(aiType !== "flyingPatrol" && aiType !== "stationaryNoGravity");
-  body.setImmovable(aiType === "turret" || aiType === "stationaryNoGravity");
+  body.setAllowGravity(aiType !== "flyingPatrol" && !isFixedEnemy);
+  body.setImmovable(isFixedEnemy);
+  if (isFixedEnemy) {
+    body.setVelocity(0, 0);
+  }
 };
 
 const getFallbackEnemyTextureKey = (scene: Phaser.Scene) => {

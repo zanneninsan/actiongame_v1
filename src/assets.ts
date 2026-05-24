@@ -386,7 +386,7 @@ export const ENEMY_DEFINITIONS: Record<
   heartCannonTurret: {
     key: "enemy-heart-cannon-turret",
     label: "Heart Cannon",
-    assetPath: "assets/enemies/heart_cannon_turret.png",
+    assetPath: "assets/enemies/heart_cannon_turret.webp",
     displayWidth: 104,
     displayHeight: 82,
     bodyWidth: 70,

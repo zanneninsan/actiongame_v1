@@ -2,6 +2,92 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.384
+### English
+- Saved a real world-map CLEAR stamp when a stage is finished, and showed it separately from the existing visited marker on the stage passport card and map nodes.
+### Japanese
+- ステージクリア時にワールドマップ用のCLEARスタンプを保存し、既存の訪問済み表示とは別にステージパスポートカードとマップのマスへ表示するようにしました。
+
+## v0.1.383
+### English
+- Made the world-map stage passport card move away from right-side stages and stop intercepting stage-node clicks, with a soft fade while hovering or focusing nodes.
+### Japanese
+- ワールドマップのステージパスポートカードが右側ステージに被りにくい位置へ逃げ、ステージマスのクリックを奪わないようにしました。マスにホバーまたはフォーカスした時はカードが薄く退避します。
+
+## v0.1.382
+### English
+- Added a richer world-map stage select layer with route controls, random stage selection, favorite stages, visit stamps, daily picks, stage passports, difficulty/tempo/length/control stats, mission previews, gimmick chips, reward hints, secret counts, and leaderboard ghost availability.
+- Added a GPT-IMAGE2 generated passport panel texture for the world-map stage card.
+### Japanese
+- ワールドマップのステージ選択に、ルート移動、おまかせ選択、お気に入り、訪問スタンプ、本日の注目、ステージパスポート、難度・テンポ・長さ・推奨操作の表示、ミッションプレビュー、ギミックチップ、ごほうびヒント、秘密数、ランキングゴースト有無を追加しました。
+- GPT-IMAGE2で生成したパスポート風パネル素材をワールドマップのステージカードに追加しました。
+
+## v0.1.381
+### English
+- Changed the current leaderboard row marker to a compact NEW badge and refined the leaderboard modal cards, table panel, and account prompt styling.
+### Japanese
+- ランキングの現在スコア行マーカーをコンパクトなNEWバッジに変更し、ランキング画面のスコアカード、表パネル、アカウント案内の見た目を整えました。
+
+## v0.1.380
+### English
+- Reworked the leaderboard modal structure so the current run summary, ranking table, and account/share actions are visually separated for better readability.
+### Japanese
+- ランキング画面の構造を見直し、今回のスコア、ランキング表、アカウント/共有操作を分けて読みやすくしました。
+
+## v0.1.379
+### English
+- Changed unrevealed hidden blocks so they only collide when hit from below, preventing them from acting like invisible side walls during normal movement.
+### Japanese
+- 未発見の隠しブロックは下から叩いた時だけ衝突するように変更し、通常移動中に透明な横壁として引っかかる問題を修正しました。
+
+## v0.1.378
+### English
+- Simplified fixed enemy setup for Heart Cannon turrets so they are created without gravity, stay immovable from the first frame, render above ordinary enemies, and fall back to a visible enemy texture if their asset is missing.
+### Japanese
+- ハートキャノン砲台の固定敵としての初期化を単純化し、生成直後から重力なし・移動なし・通常敵より手前表示にして、素材が見つからない場合も見える敵テクスチャへフォールバックするようにしました。
+
+## v0.1.377
+### English
+- Moved the first Skybridge Sprint Heart Cannon onto an early elevated platform so it is visible from the opening screen instead of being hidden among later ground-route objects.
+### Japanese
+- スカイブリッジ・スプリント最初のハートキャノンを序盤の高台へ移し、後続の地上オブジェクトに紛れず開始画面付近から見えるようにしました。
+
+## v0.1.376
+### English
+- Fixed Heart Cannon turrets so they stay fixed in place instead of being updated with gravity like walking enemies.
+- Adjusted the early Skybridge Sprint cannon Y position to sit visibly on the ground route.
+### Japanese
+- ハートキャノン砲台が歩行敵と同じように重力更新されていた問題を修正し、固定砲台としてその場に残るようにしました。
+- スカイブリッジ・スプリント序盤の砲台Y位置を調整し、地上ルート上に見えるようにしました。
+
+## v0.1.375
+### English
+- Moved the first Skybridge Sprint Heart Cannon farther ahead on the ground path so the oversized player sprite no longer hides it when checking the early x-position.
+### Japanese
+- スカイブリッジ・スプリント序盤のハートキャノンを少し先の地上ルートへ移し、確認時に大きなプレイヤースプライトが砲台を隠してしまう問題を避けました。
+
+## v0.1.374
+### English
+- Moved the first Heart Cannon in Skybridge Sprint toward the right side of its early platform so it is easier to spot instead of overlapping the player path near x=1888.
+### Japanese
+- スカイブリッジ・スプリント序盤のハートキャノンを足場右寄りへ移動し、x=1888付近のプレイヤー進行位置と重なって見落としやすい配置を改善しました。
+
+## v0.1.373
+### English
+- Replaced the Heart Cannon turret runtime asset with a cropped WebP version so the cannon appears as a proper enemy sprite instead of being shrunk by unused transparent padding.
+- Preserved the original cannon source image under `assets_source/enemies/heart_cannon_turret/`.
+### Japanese
+- ハートキャノン砲台の実行用素材を余白トリミング済みWebPに差し替え、透明余白ごと縮小されて敵キャラが小さく見える問題を修正しました。
+- 元の砲台ソース画像は `assets_source/enemies/heart_cannon_turret/` に保存しました。
+
+## v0.1.372
+### English
+- Delayed the boot loading overlay so fast startup no longer flashes the 0-100% loading display.
+- Removed numeric boot loading progress text; if loading takes long enough to show the overlay, it now uses a steady loading message.
+### Japanese
+- 起動時ローディング表示を遅延させ、短い読み込みで0〜100%表示がちらつかないようにしました。
+- 起動時ローディングの数値進捗表示をやめ、表示が必要な場合も安定した読み込み中メッセージにしました。
+
 ## v0.1.371
 ### English
 - Nudged the left-side HUD text column to the right so the player name, score, and stamina labels no longer sit too close to the panel edge.

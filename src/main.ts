@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.371";
+const DEBUG_VERSION = "v0.1.384";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -201,6 +201,7 @@ const resolveFixedStoryDialogue = (key: FixedStoryDialogueKey, locale: Locale): 
 const STAGE_ID_STORAGE_KEY = "actiongame_stage_id";
 const PLAYER_CHARACTER_STORAGE_KEY = "actiongame_player_character";
 const LEADERBOARD_PLAYER_ID_STORAGE_KEY = "actiongame_leaderboard_player_id";
+const WORLD_MAP_CLEARED_STAGE_KEY_PREFIX = "actiongame_world_map_cleared_stage";
 const DANMAKU_TUTORIAL_SEEN_STORAGE_KEY_PREFIX = "actiongame_danmaku_tutorial_seen";
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
 const RAINBOW_PIPELINE_KEY = "RainbowWinPipeline";
@@ -236,6 +237,7 @@ const PLAYER_BODY_HEIGHT = 164;
 const PLAYER_BODY_OFFSET_X = 134;
 
 const BOOT_LOADING_OVERLAY_ID = "boot-loading-overlay";
+const BOOT_LOADING_OVERLAY_DELAY_MS = 500;
 const BOOT_LOADING_RUNNER_COLUMNS = 6;
 const BOOT_LOADING_RUNNER_ROWS = 3;
 const BOOT_LOADING_RUNNER_FRAME_MS = 90;
@@ -320,6 +322,7 @@ const DASH_WALL_DEFAULT_KNOCKBACK_X = -560;
 const DASH_WALL_DEFAULT_KNOCKBACK_Y = -170;
 const DASH_WALL_BOUNCE_COOLDOWN_MS = 420;
 let bootLoadingRunnerTimer: number | null = null;
+let bootLoadingOverlayTimer: number | null = null;
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
   webkitRequestFullscreen?: () => Promise<void> | void;
@@ -542,11 +545,7 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   preload() {
-    setBootLoadingProgress("Loading 0%");
-    this.load.on("progress", (value: number) => {
-      const percent = Math.max(0, Math.min(100, Math.round(value * 100)));
-      setBootLoadingProgress(`Loading ${percent}%`);
-    });
+    setBootLoadingProgress("Loading...");
     REAR_BACKGROUNDS.forEach((background) => {
       this.load.image(background.key, `${ASSET_BASE}${background.path}`);
     });
@@ -1799,6 +1798,14 @@ class PrototypeScene extends Phaser.Scene {
 
   private setCookieValue(name: string, value: string) {
     document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; max-age=31536000; path=/; SameSite=Lax`;
+  }
+
+  private saveWorldMapClearStamp(stageId: StageId) {
+    try {
+      window.localStorage.setItem(`${WORLD_MAP_CLEARED_STAGE_KEY_PREFIX}:${stageId}`, "1");
+    } catch {
+      // This is a map reward marker only; clearing the stage should still complete if storage is unavailable.
+    }
   }
 
   private deleteCookieValue(name: string) {
@@ -4102,6 +4109,7 @@ class PrototypeScene extends Phaser.Scene {
     const missionLines = this.getClearMissionLines(remaining, GAME_TIME_MS);
     const clearTitle = SHOW_CLEAR_RANK_AND_MISSIONS ? `${t(this.locale, "hud.clear")}  ${clearRank}` : t(this.locale, "hud.clear");
     const missionResultLine = SHOW_CLEAR_RANK_AND_MISSIONS && missionLines.length ? `${missionLines.join("\n")}\n` : "";
+    this.saveWorldMapClearStamp(this.currentStageId);
     this.stopGhostRecording();
     this.timerText.setText(
       `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,
@@ -4218,16 +4226,28 @@ function registerServiceWorker() {
 }
 
 function showBootLoadingOverlay() {
+  if (bootLoadingOverlayTimer !== null) {
+    window.clearTimeout(bootLoadingOverlayTimer);
+    bootLoadingOverlayTimer = null;
+  }
   const existing = document.getElementById(BOOT_LOADING_OVERLAY_ID);
   if (existing) {
     existing.remove();
   }
+
+  bootLoadingOverlayTimer = window.setTimeout(() => {
+    bootLoadingOverlayTimer = null;
+    showBootLoadingOverlayNow();
+  }, BOOT_LOADING_OVERLAY_DELAY_MS);
+}
+
+function showBootLoadingOverlayNow() {
   const overlay = document.createElement("div");
   overlay.id = BOOT_LOADING_OVERLAY_ID;
   overlay.innerHTML = `
     <div class="boot-loading-panel" role="status" aria-live="polite" aria-label="Loading game">
       <div class="boot-loading-runner" data-boot-loading-runner></div>
-      <p class="boot-loading-text" data-boot-loading-text>Loading 0%</p>
+      <p class="boot-loading-text" data-boot-loading-text>Loading...</p>
     </div>
   `;
   const runner = overlay.querySelector<HTMLDivElement>("[data-boot-loading-runner]");
@@ -4247,6 +4267,10 @@ function setBootLoadingProgress(text: string) {
 }
 
 function hideBootLoadingOverlay() {
+  if (bootLoadingOverlayTimer !== null) {
+    window.clearTimeout(bootLoadingOverlayTimer);
+    bootLoadingOverlayTimer = null;
+  }
   stopBootLoadingRunner();
   document.getElementById(BOOT_LOADING_OVERLAY_ID)?.remove();
 }
