@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.391
+### English
+- Rebuilt the dash sprite sheet from clean complete frames so sprinting no longer shows broken frame fragments or stray transparent-color artifacts.
+### Japanese
+- ダッシュ用スプライトシートを、欠けや隣フレームの混入がないフレームから作り直し、ダッシュ中に崩れた絵や透明部分の色にじみが出ないようにしました。
+
 ## v0.1.390
 ### English
 - Fixed the boot loading runner animation so it only plays the 13 real walk frames instead of stepping into empty sprite-sheet slots.
