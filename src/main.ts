@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.389";
+const DEBUG_VERSION = "v0.1.390";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -241,7 +241,7 @@ const BOOT_LOADING_OVERLAY_DELAY_MS = 1400;
 const BOOT_LOADING_OVERLAY_MIN_VISIBLE_MS = 720;
 const BOOT_LOADING_OVERLAY_FADE_MS = 220;
 const BOOT_LOADING_RUNNER_COLUMNS = 6;
-const BOOT_LOADING_RUNNER_ROWS = 3;
+const BOOT_LOADING_RUNNER_FRAMES = 13;
 const BOOT_LOADING_RUNNER_FRAME_MS = 90;
 const PLAYER_BODY_OFFSET_Y = 86;
 const PLAYER_CROUCH_BODY_WIDTH = 58;
@@ -4385,7 +4385,6 @@ function hideBootLoadingOverlay() {
 
 function startBootLoadingRunner(runner: HTMLDivElement) {
   stopBootLoadingRunner();
-  const totalFrames = BOOT_LOADING_RUNNER_COLUMNS * BOOT_LOADING_RUNNER_ROWS;
   let frame = 0;
   const setFrame = (frameIndex: number) => {
     const column = frameIndex % BOOT_LOADING_RUNNER_COLUMNS;
@@ -4394,7 +4393,7 @@ function startBootLoadingRunner(runner: HTMLDivElement) {
   };
   setFrame(0);
   bootLoadingRunnerTimer = window.setInterval(() => {
-    frame = (frame + 1) % totalFrames;
+    frame = (frame + 1) % BOOT_LOADING_RUNNER_FRAMES;
     setFrame(frame);
   }, BOOT_LOADING_RUNNER_FRAME_MS);
 }

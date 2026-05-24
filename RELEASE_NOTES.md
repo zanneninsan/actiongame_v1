@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.390
+### English
+- Fixed the boot loading runner animation so it only plays the 13 real walk frames instead of stepping into empty sprite-sheet slots.
+### Japanese
+- 起動ローディング中の歩きアニメーションが、空のスプライト枠まで再生してちらついていた問題を修正し、実際の13フレームだけを再生するようにしました。
+
 ## v0.1.389
 ### English
 - Added a boot curtain that keeps the Phaser canvas hidden until the start modal is mounted, preventing the raw game canvas or interim loading visuals from flashing before the title flow appears.
