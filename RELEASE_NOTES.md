@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.386
+### English
+- Made the in-game top-left HUD more compact, moved it closer to the screen corner, and reduced its large-screen scaling so it covers less of the playfield.
+### Japanese
+- プレイ中の左上HUDを少しコンパクトにし、画面左上へ寄せました。大画面での拡大率も抑えて、プレイ画面を覆う面積を減らしました。
+
 ## v0.1.385
 ### English
 - Reduced initial boot-loader flicker by only showing the loading overlay for slower starts, then keeping it visible long enough to fade out cleanly if it appears.
