@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.385
+### English
+- Reduced initial boot-loader flicker by only showing the loading overlay for slower starts, then keeping it visible long enough to fade out cleanly if it appears.
+### Japanese
+- 初期起動ローディングのちらつきを抑えるため、短いロードではローディング画面を出さず、表示された場合も最低表示時間とフェードアウトで自然に消えるようにしました。
+
 ## v0.1.384
 ### English
 - Saved a real world-map CLEAR stamp when a stage is finished, and showed it separately from the existing visited marker on the stage passport card and map nodes.

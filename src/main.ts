@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.384";
+const DEBUG_VERSION = "v0.1.385";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -237,7 +237,9 @@ const PLAYER_BODY_HEIGHT = 164;
 const PLAYER_BODY_OFFSET_X = 134;
 
 const BOOT_LOADING_OVERLAY_ID = "boot-loading-overlay";
-const BOOT_LOADING_OVERLAY_DELAY_MS = 500;
+const BOOT_LOADING_OVERLAY_DELAY_MS = 1400;
+const BOOT_LOADING_OVERLAY_MIN_VISIBLE_MS = 720;
+const BOOT_LOADING_OVERLAY_FADE_MS = 220;
 const BOOT_LOADING_RUNNER_COLUMNS = 6;
 const BOOT_LOADING_RUNNER_ROWS = 3;
 const BOOT_LOADING_RUNNER_FRAME_MS = 90;
@@ -323,6 +325,8 @@ const DASH_WALL_DEFAULT_KNOCKBACK_Y = -170;
 const DASH_WALL_BOUNCE_COOLDOWN_MS = 420;
 let bootLoadingRunnerTimer: number | null = null;
 let bootLoadingOverlayTimer: number | null = null;
+let bootLoadingOverlayHideTimer: number | null = null;
+let bootLoadingOverlayShownAt = 0;
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
   webkitRequestFullscreen?: () => Promise<void> | void;
@@ -4230,6 +4234,10 @@ function showBootLoadingOverlay() {
     window.clearTimeout(bootLoadingOverlayTimer);
     bootLoadingOverlayTimer = null;
   }
+  if (bootLoadingOverlayHideTimer !== null) {
+    window.clearTimeout(bootLoadingOverlayHideTimer);
+    bootLoadingOverlayHideTimer = null;
+  }
   const existing = document.getElementById(BOOT_LOADING_OVERLAY_ID);
   if (existing) {
     existing.remove();
@@ -4255,7 +4263,9 @@ function showBootLoadingOverlayNow() {
     runner.style.backgroundImage = `url('${ASSET_BASE}assets/sprites/player_walk_13_6x3_320x260.webp')`;
     startBootLoadingRunner(runner);
   }
+  bootLoadingOverlayShownAt = performance.now();
   document.body.appendChild(overlay);
+  window.requestAnimationFrame(() => overlay.classList.add("is-visible"));
 }
 
 function setBootLoadingProgress(text: string) {
@@ -4271,8 +4281,25 @@ function hideBootLoadingOverlay() {
     window.clearTimeout(bootLoadingOverlayTimer);
     bootLoadingOverlayTimer = null;
   }
-  stopBootLoadingRunner();
-  document.getElementById(BOOT_LOADING_OVERLAY_ID)?.remove();
+  if (bootLoadingOverlayHideTimer !== null) {
+    window.clearTimeout(bootLoadingOverlayHideTimer);
+    bootLoadingOverlayHideTimer = null;
+  }
+  const overlay = document.getElementById(BOOT_LOADING_OVERLAY_ID);
+  if (!overlay) {
+    stopBootLoadingRunner();
+    return;
+  }
+  const visibleElapsedMs = performance.now() - bootLoadingOverlayShownAt;
+  const delayMs = Math.max(0, BOOT_LOADING_OVERLAY_MIN_VISIBLE_MS - visibleElapsedMs);
+  bootLoadingOverlayHideTimer = window.setTimeout(() => {
+    bootLoadingOverlayHideTimer = null;
+    overlay.classList.add("is-exiting");
+    window.setTimeout(() => {
+      stopBootLoadingRunner();
+      overlay.remove();
+    }, BOOT_LOADING_OVERLAY_FADE_MS);
+  }, delayMs);
 }
 
 function startBootLoadingRunner(runner: HTMLDivElement) {

@@ -46,6 +46,17 @@ body.is-mobile-controls-active canvas {
   display: grid;
   place-items: center;
   background: radial-gradient(circle at 50% 35%, #243b63 0%, #0b1220 68%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+#boot-loading-overlay.is-visible {
+  opacity: 1;
+}
+
+#boot-loading-overlay.is-exiting {
+  opacity: 0;
 }
 
 .boot-loading-panel {
