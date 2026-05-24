@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.394
+### English
+- Reserved a safe center board for the world map on larger screens so persistent progress and stage-detail panels no longer cover the current stage marker.
+- Slimmed the always-on world-map progress and stage-detail panels to protect more of the map view.
+### Japanese
+- 大きめの画面ではワールドマップを常設UIの間に収める安全な中央ボードとして表示し、進行度やステージ詳細が現在地マーカーを隠さないようにしました。
+- 常時表示される進行度パネルとステージ詳細パネルを少し細くし、マップの見える範囲を広げました。
+
 ## v0.1.393
 ### English
 - Improved mobile landscape UI for the world map, settings panel, stage confirmation, start panel, and in-game HUD based on a Playwright audit.

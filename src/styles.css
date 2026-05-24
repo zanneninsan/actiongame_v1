@@ -525,6 +525,11 @@ body.is-mobile-controls-active canvas {
   --player-y: 72%;
   --stage-accent: #60a5fa;
   --clear-progress: 0%;
+  --world-map-ui-left: clamp(300px, 24vw, 468px);
+  --world-map-ui-right: clamp(290px, 22vw, 430px);
+  --world-map-ui-top: clamp(72px, 8vh, 96px);
+  --world-map-ui-bottom: clamp(106px, 15vh, 154px);
+  --world-map-board-gap: 22px;
   box-sizing: border-box;
   position: fixed;
   inset: 0;
@@ -557,6 +562,15 @@ body.is-mobile-controls-active canvas {
 
 .start-world-map-art {
   position: relative;
+  align-self: center;
+  justify-self: center;
+  width: min(
+    calc(100vw - var(--world-map-ui-left) - var(--world-map-ui-right) - (var(--world-map-board-gap) * 2)),
+    calc((100dvh - var(--world-map-ui-top) - var(--world-map-ui-bottom) - 112px) * 16 / 9),
+    1220px
+  );
+  max-width: calc(100vw - 56px);
+  aspect-ratio: 16 / 9;
   min-height: 0;
   overflow: hidden;
   border-radius: 10px;
@@ -648,7 +662,7 @@ body.is-mobile-controls-active canvas {
   left: max(42px, env(safe-area-inset-left));
   bottom: max(88px, calc(env(safe-area-inset-bottom) + 68px));
   z-index: 4;
-  width: min(480px, calc(100% - 84px));
+  width: min(420px, calc(100% - 84px));
   display: grid;
   gap: 9px;
   padding: 14px;
@@ -974,7 +988,7 @@ body.is-mobile-controls-active canvas {
   right: max(42px, env(safe-area-inset-right));
   top: max(38px, calc(env(safe-area-inset-top) + 16px));
   z-index: 4;
-  width: min(430px, calc(100% - 84px));
+  width: min(400px, calc(100% - 84px));
   max-height: calc(100dvh - 178px);
   display: grid;
   gap: 10px;
@@ -2141,11 +2155,20 @@ body.is-mobile-controls-active canvas {
   }
 
   .start-world-map-panel {
+    --world-map-ui-left: 0px;
+    --world-map-ui-right: 0px;
+    --world-map-ui-top: 0px;
+    --world-map-ui-bottom: 0px;
     padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom))
       max(10px, env(safe-area-inset-left));
   }
 
   .start-world-map-art {
+    align-self: stretch;
+    justify-self: stretch;
+    width: auto;
+    max-width: none;
+    aspect-ratio: auto;
     border-radius: 8px;
   }
 
