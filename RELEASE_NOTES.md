@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.393
+### English
+- Improved mobile landscape UI for the world map, settings panel, stage confirmation, start panel, and in-game HUD based on a Playwright audit.
+- Added a mobile landscape UI audit document with before/after screenshots and 20 concrete findings.
+### Japanese
+- Playwrightでの確認をもとに、スマホ横画面のワールドマップ、設定パネル、ステージ確認、開始画面、プレイ中HUDの見た目と操作性を改善しました。
+- 改善前後のスクリーンショットと20件の指摘・対応内容をまとめたスマホ横画面UI監査資料を追加しました。
+
 ## v0.1.392
 ### English
 - Expanded the world map into a richer stage-select hub with a GPT-IMAGE2 resort-island map background, progress/stamp tracking, stage search, persistent filters, a stage rail, route guidance, next-target notes, and a map-side settings panel.

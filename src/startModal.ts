@@ -631,12 +631,22 @@ export class StartModal {
       `;
 
       worldFavoriteButton.textContent = favoriteLabel;
+      worldFavoriteButton.title = favoriteLabel;
+      worldFavoriteButton.setAttribute("aria-label", favoriteLabel);
       worldFavoriteButton.classList.toggle("is-selected", favoriteStageId === selectedStageId);
       worldFavoriteButton.setAttribute("aria-pressed", favoriteStageId === selectedStageId ? "true" : "false");
       worldRandomButton.textContent = ui.random;
+      worldRandomButton.title = ui.random;
+      worldRandomButton.setAttribute("aria-label", ui.random);
       worldSettingsToggle.textContent = extra.settings;
+      worldSettingsToggle.title = extra.settingsTitle;
+      worldSettingsToggle.setAttribute("aria-label", extra.settingsTitle);
       worldRoutePrev.textContent = ui.previous;
       worldRouteNext.textContent = ui.next;
+      worldRoutePrev.title = ui.previous;
+      worldRouteNext.title = ui.next;
+      worldRoutePrev.setAttribute("aria-label", ui.previous);
+      worldRouteNext.setAttribute("aria-label", ui.next);
       worldRoutePrev.disabled = stageIndex <= 0 || isWorldPlayerMoving;
       worldRouteNext.disabled = stageIndex >= this.options.stageOptions.length - 1 || isWorldPlayerMoving;
       refreshWorldSettingsPanel();
@@ -1175,7 +1185,7 @@ export class StartModal {
       worldSettingsPanel.hidden = !shouldOpen;
       worldMapPanel.classList.toggle("is-settings-open", shouldOpen);
       if (shouldOpen) {
-        localeSelect.focus();
+        worldSettingsClose.focus();
       } else {
         worldSettingsToggle.focus();
       }

@@ -855,6 +855,17 @@ body.is-mobile-controls-active canvas {
   right: max(42px, env(safe-area-inset-right));
 }
 
+.start-world-map-panel.is-settings-open .start-world-map-dashboard,
+.start-world-map-panel.is-settings-open .start-world-stage-card {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.start-world-map-panel.is-confirming .start-world-map-dashboard {
+  opacity: 0.16;
+  pointer-events: none;
+}
+
 .start-world-settings-head {
   display: flex;
   align-items: center;
@@ -2139,18 +2150,23 @@ body.is-mobile-controls-active canvas {
   }
 
   .start-world-map-caption {
-    margin-top: 8px;
-    padding: 9px 14px;
-    font-size: 15px;
+    width: min(560px, 74vw);
+    margin-top: 6px;
+    padding: 7px 12px;
+    font-size: 13px;
+  }
+
+  .start-world-map-caption em {
+    display: none;
   }
 
   .start-world-map-toolbar {
     left: max(12px, env(safe-area-inset-left));
     right: auto;
     top: max(12px, env(safe-area-inset-top));
-    width: min(calc(100% - 24px), 520px);
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 6px;
+    width: auto;
+    grid-template-columns: repeat(5, 40px);
+    gap: 7px;
   }
 
   .start-world-map-panel.is-stage-card-left .start-world-map-toolbar {
@@ -2159,22 +2175,55 @@ body.is-mobile-controls-active canvas {
   }
 
   .start-world-map-toolbar button {
+    width: 40px;
     min-height: 34px;
-    padding: 0 6px;
-    font-size: 11px;
+    padding: 0;
+    color: transparent;
+    font-size: 0;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .start-world-map-toolbar button::before {
+    display: grid;
+    place-items: center;
+    color: #dbeafe;
+    font-size: 19px;
+    line-height: 1;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+  }
+
+  .start-world-route-prev::before {
+    content: "‹";
+  }
+
+  .start-world-random::before {
+    content: "?";
+  }
+
+  .start-world-favorite::before {
+    content: "★";
+  }
+
+  .start-world-settings-toggle::before {
+    content: "⚙";
+  }
+
+  .start-world-route-next::before {
+    content: "›";
   }
 
   .start-world-map-dashboard {
-    left: max(12px, env(safe-area-inset-left));
+    left: auto;
     right: max(12px, env(safe-area-inset-right));
-    bottom: max(58px, calc(env(safe-area-inset-bottom) + 48px));
-    width: auto;
-    gap: 7px;
-    padding: 10px;
+    bottom: max(62px, calc(env(safe-area-inset-bottom) + 46px));
+    width: min(390px, calc(52vw - 18px));
+    gap: 6px;
+    padding: 9px;
   }
 
   .start-world-map-panel.is-stage-card-left .start-world-map-dashboard {
-    left: max(12px, env(safe-area-inset-left));
+    left: auto;
     right: max(12px, env(safe-area-inset-right));
   }
 
@@ -2199,7 +2248,7 @@ body.is-mobile-controls-active canvas {
   }
 
   .start-world-rail {
-    max-height: 92px;
+    max-height: 70px;
   }
 
   .start-world-settings-panel {
@@ -2218,18 +2267,18 @@ body.is-mobile-controls-active canvas {
 
   .start-world-stage-card {
     left: max(12px, env(safe-area-inset-left));
-    right: max(12px, env(safe-area-inset-right));
-    top: auto;
-    bottom: max(298px, calc(env(safe-area-inset-bottom) + 280px));
-    width: auto;
-    max-height: min(28dvh, 230px);
-    gap: 8px;
-    padding: 16px 16px 14px;
+    right: auto;
+    top: max(58px, calc(env(safe-area-inset-top) + 46px));
+    bottom: auto;
+    width: min(350px, calc(48vw - 18px));
+    max-height: min(36dvh, 156px);
+    gap: 6px;
+    padding: 12px 13px 10px;
   }
 
   .start-world-map-panel.is-stage-card-left .start-world-stage-card {
     left: max(12px, env(safe-area-inset-left));
-    right: max(12px, env(safe-area-inset-right));
+    right: auto;
   }
 
   .start-world-card-head strong {
@@ -2243,6 +2292,11 @@ body.is-mobile-controls-active canvas {
   .start-world-badges span,
   .start-world-chip-list span {
     font-size: 10px;
+  }
+
+  .start-world-plan-grid,
+  .start-world-info-grid {
+    display: none;
   }
 
   .start-world-stat-grid {
@@ -2414,16 +2468,60 @@ body.is-mobile-controls-active canvas {
 
 @media (max-height: 560px) and (min-width: 561px) {
   .start-dialog {
-    width: min(640px, calc(100vw - 20px));
-    height: calc(100dvh - 16px);
+    width: min(600px, calc(100vw - 24px));
+    height: auto;
+    min-height: 0;
+    max-height: calc(100dvh - 18px);
     grid-template-rows: auto auto auto auto;
-    gap: 6px;
-    padding: 8px 14px;
+    align-content: start;
+    gap: 9px;
+    padding: 12px 18px;
   }
 
   .start-primary-panel {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 0;
     gap: 8px;
+  }
+
+  .start-field {
+    width: 100%;
+    grid-template-columns: 130px minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .start-map-back {
+    height: 32px;
+  }
+
+  .start-advanced-panel {
+    max-height: 112px;
+    overflow: hidden auto;
+  }
+
+  .start-advanced-panel summary {
+    min-height: 34px;
+  }
+
+  .start-ghost-panel {
+    grid-template-columns: minmax(120px, 0.7fr) minmax(0, 1fr);
+    gap: 7px;
+  }
+
+  .start-account-panel {
+    position: static;
+    margin: 0;
+    padding: 0;
+    background: none;
+  }
+
+  .start-account-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .start-button {
+    height: 42px;
+    font-size: 17px;
   }
 
   .start-world-map-panel {
@@ -2440,17 +2538,16 @@ body.is-mobile-controls-active canvas {
   }
 
   .start-world-map-caption em {
-    grid-column: 1 / -1;
-    font-size: 10px;
+    display: none;
   }
 
   .start-world-map-toolbar {
     left: 16px;
     right: auto;
     top: 12px;
-    width: min(430px, calc(100% - 32px));
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 5px;
+    width: auto;
+    grid-template-columns: repeat(5, 38px);
+    gap: 6px;
   }
 
   .start-world-map-panel.is-stage-card-left .start-world-map-toolbar {
@@ -2459,15 +2556,49 @@ body.is-mobile-controls-active canvas {
   }
 
   .start-world-map-toolbar button {
+    width: 38px;
     min-height: 30px;
-    padding: 0 5px;
-    font-size: 10px;
+    padding: 0;
+    color: transparent;
+    font-size: 0;
+    overflow: visible;
+    text-overflow: clip;
+  }
+
+  .start-world-map-toolbar button::before {
+    display: grid;
+    place-items: center;
+    color: #dbeafe;
+    font-size: 18px;
+    line-height: 1;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.95);
+  }
+
+  .start-world-route-prev::before {
+    content: "‹";
+  }
+
+  .start-world-random::before {
+    content: "?";
+  }
+
+  .start-world-favorite::before {
+    content: "★";
+  }
+
+  .start-world-settings-toggle::before {
+    content: "⚙";
+  }
+
+  .start-world-route-next::before {
+    content: "›";
   }
 
   .start-world-map-dashboard {
-    left: 16px;
+    left: auto;
+    right: 16px;
     bottom: 46px;
-    width: min(360px, calc(50% - 24px));
+    width: min(360px, calc(52% - 24px));
     gap: 5px;
     padding: 9px;
   }
@@ -2494,7 +2625,7 @@ body.is-mobile-controls-active canvas {
   .start-world-settings-panel {
     left: 16px;
     top: 50px;
-    width: min(360px, calc(50% - 24px));
+    width: min(380px, calc(50% - 24px));
     padding: 12px;
   }
 
@@ -2504,12 +2635,13 @@ body.is-mobile-controls-active canvas {
   }
 
   .start-world-stage-card {
-    right: 16px;
+    left: 16px;
+    right: auto;
     top: 52px;
-    width: min(330px, calc(50% - 24px));
-    max-height: calc(100dvh - 112px);
+    width: min(330px, calc(48% - 24px));
+    max-height: 150px;
     gap: 6px;
-    padding: 14px;
+    padding: 12px;
   }
 
   .start-world-map-panel.is-stage-card-left .start-world-stage-card {

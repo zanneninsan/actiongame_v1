@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.392";
+const DEBUG_VERSION = "v0.1.393";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -273,7 +273,7 @@ const STAMINA_RECOVERY_PER_SECOND = 42;
 const CROUCH_STAMINA_RECOVERY_MULTIPLIER = 2;
 const HUD_SCALE_BASE_WIDTH = 1280;
 const HUD_SCALE_BASE_HEIGHT = 720;
-const HUD_MIN_SCALE = 1;
+const HUD_MIN_SCALE = 0.76;
 const HUD_MAX_SCALE = 1.2;
 const HUD_PLAYER_NAME_FONT_SIZE = 14;
 const HUD_MAIN_FONT_SIZE = 13;
@@ -2085,6 +2085,9 @@ class PrototypeScene extends Phaser.Scene {
   private calculateHudScale() {
     const displayWidth = this.scale.displaySize?.width ?? GAME_WIDTH;
     const displayHeight = this.scale.displaySize?.height ?? GAME_HEIGHT;
+    if (displayHeight <= 520 && displayWidth > displayHeight) {
+      return Phaser.Math.Clamp((displayHeight / HUD_SCALE_BASE_HEIGHT) * 1.35, HUD_MIN_SCALE, 0.92);
+    }
     const fitScale = Math.min(displayWidth / HUD_SCALE_BASE_WIDTH, displayHeight / HUD_SCALE_BASE_HEIGHT);
     const targetScale = fitScale < 1 ? 1 + (1 - fitScale) * 0.35 : 1 + (fitScale - 1) * 0.28;
     return Phaser.Math.Clamp(targetScale, HUD_MIN_SCALE, HUD_MAX_SCALE);
