@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.392
+### English
+- Expanded the world map into a richer stage-select hub with a GPT-IMAGE2 resort-island map background, progress/stamp tracking, stage search, persistent filters, a stage rail, route guidance, next-target notes, and a map-side settings panel.
+- Moved language, control-mode, and sound choices out of the final start setup panel and into the world-map settings panel.
+### Japanese
+- GPT-IMAGE2で生成したリゾート島ワールドマップ背景を追加し、進行度・スタンプ帳、ステージ検索、保存されるフィルタ、ステージ一覧、ルートメモ、次の目的地、マップ側設定パネルを備えたステージ選択ハブに拡張しました。
+- 言語、操作モード、サウンドの選択を開始直前の画面からワールドマップ側の設定パネルへ移し、開始画面を最終確認に集中できる形にしました。
+
 ## v0.1.391
 ### English
 - Rebuilt the dash sprite sheet from clean complete frames so sprinting no longer shows broken frame fragments or stray transparent-color artifacts.

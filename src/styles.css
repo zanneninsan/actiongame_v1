@@ -523,6 +523,8 @@ body.is-mobile-controls-active canvas {
 .start-world-map-panel {
   --player-x: 10%;
   --player-y: 72%;
+  --stage-accent: #60a5fa;
+  --clear-progress: 0%;
   box-sizing: border-box;
   position: fixed;
   inset: 0;
@@ -560,6 +562,7 @@ body.is-mobile-controls-active canvas {
   border-radius: 10px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(1, 5, 16, 0.16)),
+    url("../public/assets/ui/world_map/resort_island_map_gpt-image2.webp") center / cover no-repeat,
     url("../public/assets/ui/world_map/zannenin_land_world_map.webp") center / cover no-repeat,
     #0b2943;
   box-shadow:
@@ -634,10 +637,284 @@ body.is-mobile-controls-active canvas {
   left: max(42px, env(safe-area-inset-left));
   top: max(38px, calc(env(safe-area-inset-top) + 16px));
   z-index: 4;
-  width: min(410px, calc(100% - 84px));
+  width: min(520px, calc(100% - 84px));
   display: grid;
-  grid-template-columns: 0.7fr 1fr 1fr 0.7fr;
+  grid-template-columns: 0.65fr 0.9fr 1fr 0.85fr 0.65fr;
   gap: 8px;
+}
+
+.start-world-map-dashboard {
+  position: absolute;
+  left: max(42px, env(safe-area-inset-left));
+  bottom: max(88px, calc(env(safe-area-inset-bottom) + 68px));
+  z-index: 4;
+  width: min(480px, calc(100% - 84px));
+  display: grid;
+  gap: 9px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--stage-accent), #f5c76a 38%);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(2, 6, 23, 0.5), rgba(2, 6, 23, 0.78)),
+    url("../public/assets/ui/fantasy/panel_medium.png") center / 100% 100% no-repeat;
+  color: #eff6ff;
+  filter: drop-shadow(0 18px 28px rgba(0, 0, 0, 0.48));
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.9);
+}
+
+.start-world-map-panel.is-stage-card-left .start-world-map-dashboard {
+  left: auto;
+  right: max(42px, env(safe-area-inset-right));
+}
+
+.start-world-progress-card {
+  display: grid;
+  grid-template-columns: minmax(0, 0.76fr) minmax(0, 1fr);
+  gap: 4px 10px;
+  align-items: center;
+}
+
+.start-world-progress-label {
+  color: #f5c76a;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.start-world-progress-value {
+  min-width: 0;
+  color: #dbeafe;
+  font-size: 13px;
+  font-weight: 900;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start-world-progress-meter {
+  grid-column: 1 / -1;
+  height: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(253, 230, 138, 0.34);
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.74);
+}
+
+.start-world-progress-meter b {
+  display: block;
+  width: var(--clear-progress);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #34d399, var(--stage-accent), #f5c76a);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--stage-accent), transparent 35%);
+}
+
+.start-world-search {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.start-world-search span {
+  color: #f5c76a;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.start-world-search-input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  border: 1px solid rgba(186, 230, 253, 0.22);
+  border-radius: 8px;
+  padding: 0 12px;
+  background: rgba(2, 6, 23, 0.7);
+  color: #f8fafc;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  outline: none;
+}
+
+.start-world-search-input:focus {
+  border-color: color-mix(in srgb, var(--stage-accent), #f5c76a 32%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--stage-accent), transparent 68%);
+}
+
+.start-world-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.start-world-filter-row button {
+  min-height: 26px;
+  border: 1px solid rgba(186, 230, 253, 0.2);
+  border-radius: 999px;
+  padding: 0 9px;
+  background: rgba(2, 6, 23, 0.62);
+  color: #dbeafe;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.start-world-filter-row button.is-selected {
+  border-color: rgba(253, 230, 138, 0.76);
+  background: color-mix(in srgb, var(--stage-accent), rgba(120, 53, 15, 0.78) 58%);
+  color: #fff7d6;
+}
+
+.start-world-rail {
+  max-height: 176px;
+  display: grid;
+  gap: 6px;
+  overflow: hidden auto;
+  scrollbar-color: color-mix(in srgb, var(--stage-accent), #f5c76a 36%) rgba(2, 6, 23, 0.28);
+}
+
+.start-world-rail button {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
+  border: 1px solid rgba(186, 230, 253, 0.16);
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: rgba(2, 6, 23, 0.52);
+  color: #f8fafc;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.start-world-rail button.is-selected {
+  border-color: rgba(253, 230, 138, 0.72);
+  background: color-mix(in srgb, var(--stage-accent), rgba(2, 6, 23, 0.76) 68%);
+}
+
+.start-world-rail span,
+.start-world-rail small,
+.start-world-rail em {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start-world-rail span {
+  color: #fff7d6;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.start-world-rail small,
+.start-world-rail em,
+.start-world-rail-empty {
+  color: #bfdbfe;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.start-world-rail-empty {
+  margin: 0;
+  padding: 8px;
+  text-align: center;
+}
+
+.start-world-settings-panel {
+  box-sizing: border-box;
+  position: absolute;
+  left: max(42px, env(safe-area-inset-left));
+  top: max(92px, calc(env(safe-area-inset-top) + 70px));
+  z-index: 6;
+  width: min(390px, calc(100% - 84px));
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid color-mix(in srgb, var(--stage-accent), #f5c76a 42%);
+  border-radius: 10px;
+  background:
+    linear-gradient(180deg, rgba(2, 6, 23, 0.58), rgba(2, 6, 23, 0.86)),
+    url("../public/assets/ui/fantasy/options_modal_window.webp") center / 100% 100% no-repeat;
+  color: #eff6ff;
+  filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.58));
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.92);
+}
+
+.start-world-settings-panel[hidden] {
+  display: none;
+}
+
+.start-world-map-panel.is-stage-card-left .start-world-settings-panel {
+  left: auto;
+  right: max(42px, env(safe-area-inset-right));
+}
+
+.start-world-settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #f5c76a;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.start-world-settings-close {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: url("../public/assets/ui/fantasy/icon_button.webp") center / 100% 100% no-repeat;
+  color: #fff7d6;
+  font: inherit;
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.start-world-setting-field {
+  display: grid;
+  gap: 7px;
+}
+
+.start-world-setting-field > span {
+  color: #f5c76a;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.start-world-setting-field .mode-row,
+.start-world-setting-field .sound-row {
+  width: 100%;
+}
+
+.start-world-setting-field select {
+  box-sizing: border-box;
+  width: 100%;
+  height: 40px;
+  border: 0;
+  padding: 0 42px 0 20px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: url("../public/assets/ui/fantasy/select_field_safe.webp") center / 100% 100% no-repeat;
+  color: #f8fafc;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 900;
+  outline: none;
+}
+
+.start-world-settings-note {
+  margin: 0;
+  color: #bfdbfe;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.45;
 }
 
 .start-world-map-panel.is-stage-card-left .start-world-map-toolbar {
@@ -730,6 +1007,7 @@ body.is-mobile-controls-active canvas {
 .start-world-card-head,
 .start-world-badges,
 .start-world-route-meter,
+.start-world-plan-grid,
 .start-world-stat-grid,
 .start-world-info-grid {
   position: relative;
@@ -832,6 +1110,40 @@ body.is-mobile-controls-active canvas {
   border-radius: inherit;
   background: linear-gradient(90deg, var(--stage-accent), #f5c76a);
   box-shadow: 0 0 12px color-mix(in srgb, var(--stage-accent), transparent 35%);
+}
+
+.start-world-plan-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.start-world-plan-grid > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  padding: 7px 9px;
+  border: 1px solid color-mix(in srgb, var(--stage-accent), transparent 72%);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.5);
+}
+
+.start-world-plan-grid em {
+  color: #93c5fd;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.start-world-plan-grid strong {
+  min-width: 0;
+  color: #f8fafc;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .start-world-stat-grid {
@@ -1113,6 +1425,11 @@ body.is-mobile-controls-active canvas {
   background-image: url("../public/assets/ui/fantasy/button_primary_selected_safe.webp");
   color: #fff7d6;
   filter: brightness(1.28) saturate(1.35) drop-shadow(0 0 12px rgba(253, 230, 138, 0.64));
+}
+
+.start-world-node.is-filtered-out {
+  opacity: 0.38;
+  filter: grayscale(0.55) brightness(0.7);
 }
 
 .start-world-node.is-selected::after {
@@ -1831,8 +2148,8 @@ body.is-mobile-controls-active canvas {
     left: max(12px, env(safe-area-inset-left));
     right: auto;
     top: max(12px, env(safe-area-inset-top));
-    width: min(calc(100% - 24px), 420px);
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    width: min(calc(100% - 24px), 520px);
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 6px;
   }
 
@@ -1847,13 +2164,65 @@ body.is-mobile-controls-active canvas {
     font-size: 11px;
   }
 
+  .start-world-map-dashboard {
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(58px, calc(env(safe-area-inset-bottom) + 48px));
+    width: auto;
+    gap: 7px;
+    padding: 10px;
+  }
+
+  .start-world-map-panel.is-stage-card-left .start-world-map-dashboard {
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+  }
+
+  .start-world-progress-card,
+  .start-world-search {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .start-world-progress-value {
+    text-align: left;
+  }
+
+  .start-world-filter-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .start-world-filter-row button {
+    flex: 0 0 auto;
+  }
+
+  .start-world-rail {
+    max-height: 92px;
+  }
+
+  .start-world-settings-panel {
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    top: max(54px, calc(env(safe-area-inset-top) + 44px));
+    width: auto;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .start-world-map-panel.is-stage-card-left .start-world-settings-panel {
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+  }
+
   .start-world-stage-card {
     left: max(12px, env(safe-area-inset-left));
     right: max(12px, env(safe-area-inset-right));
     top: auto;
-    bottom: max(86px, calc(env(safe-area-inset-bottom) + 70px));
+    bottom: max(298px, calc(env(safe-area-inset-bottom) + 280px));
     width: auto;
-    max-height: min(43dvh, 310px);
+    max-height: min(28dvh, 230px);
     gap: 8px;
     padding: 16px 16px 14px;
   }
@@ -2079,7 +2448,8 @@ body.is-mobile-controls-active canvas {
     left: 16px;
     right: auto;
     top: 12px;
-    width: min(330px, calc(100% - 32px));
+    width: min(430px, calc(100% - 32px));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 5px;
   }
 
@@ -2092,6 +2462,45 @@ body.is-mobile-controls-active canvas {
     min-height: 30px;
     padding: 0 5px;
     font-size: 10px;
+  }
+
+  .start-world-map-dashboard {
+    left: 16px;
+    bottom: 46px;
+    width: min(360px, calc(50% - 24px));
+    gap: 5px;
+    padding: 9px;
+  }
+
+  .start-world-map-panel.is-stage-card-left .start-world-map-dashboard {
+    left: auto;
+    right: 16px;
+  }
+
+  .start-world-progress-card,
+  .start-world-search {
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+  }
+
+  .start-world-filter-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+  }
+
+  .start-world-rail {
+    display: none;
+  }
+
+  .start-world-settings-panel {
+    left: 16px;
+    top: 50px;
+    width: min(360px, calc(50% - 24px));
+    padding: 12px;
+  }
+
+  .start-world-map-panel.is-stage-card-left .start-world-settings-panel {
+    left: auto;
+    right: 16px;
   }
 
   .start-world-stage-card {
@@ -2120,6 +2529,7 @@ body.is-mobile-controls-active canvas {
 
   .start-world-badges,
   .start-world-route-meter,
+  .start-world-plan-grid,
   .start-world-info-grid {
     display: none;
   }

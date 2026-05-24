@@ -14,6 +14,7 @@ const PWA_INSTALL_DISMISSED_KEY = "actiongame_pwa_install_dismissed";
 const WORLD_MAP_FAVORITE_STAGE_KEY = "actiongame_world_map_favorite_stage";
 const WORLD_MAP_VISITED_STAGE_KEY_PREFIX = "actiongame_world_map_visited_stage";
 const WORLD_MAP_CLEARED_STAGE_KEY_PREFIX = "actiongame_world_map_cleared_stage";
+const WORLD_MAP_FILTER_STORAGE_KEY = "actiongame_world_map_stage_filter";
 export const TITLE_SOUND_CONFIRM_STORAGE_KEY = "actiongame_title_sound_confirmed";
 const TITLE_MUSIC_VOLUME = 0.72;
 const TITLE_MUSIC_FADE_SECONDS = 3;
@@ -88,6 +89,17 @@ type StartSettings = {
   locale: Locale;
 };
 type OrientationPromptMode = "initial" | "startConfirm";
+type WorldMapFilter =
+  | "all"
+  | "new"
+  | "cleared"
+  | "favorite"
+  | "ghost"
+  | "daily"
+  | "pc"
+  | "mobile"
+  | "short"
+  | "challenge";
 
 export class StartModal {
   private readonly options: StartModalOptions;
@@ -131,7 +143,7 @@ export class StartModal {
           <p class="title-sound-gate-title">音を鳴らしますか？ / Play sound? / 播放声音吗？ / 소리를 켤까요?</p>
           <p class="title-sound-gate-body">
             タイトル画面で音楽が流れます。あとからトップ画面でも変更できます。<br />
-            Music will play on the title screen. You can change this again on the start menu.<br />
+            Music will play on the title screen. You can change this later from the world-map settings.<br />
             标题画面会播放音乐。之后也可以在开始菜单中更改。<br />
             타이틀 화면에서 음악이 재생됩니다. 나중에 시작 메뉴에서도 변경할 수 있습니다.
           </p>
@@ -184,8 +196,52 @@ export class StartModal {
           <button type="button" class="start-world-route-prev"></button>
           <button type="button" class="start-world-random"></button>
           <button type="button" class="start-world-favorite"></button>
+          <button type="button" class="start-world-settings-toggle"></button>
           <button type="button" class="start-world-route-next"></button>
         </div>
+        <div class="start-world-map-dashboard" aria-live="polite">
+          <div class="start-world-progress-card">
+            <span class="start-world-progress-label"></span>
+            <strong class="start-world-progress-value"></strong>
+            <i class="start-world-progress-meter"><b></b></i>
+          </div>
+          <label class="start-world-search">
+            <span></span>
+            <input type="search" class="start-world-search-input" autocomplete="off" />
+          </label>
+          <div class="start-world-filter-row" role="group"></div>
+          <div class="start-world-rail" role="listbox"></div>
+        </div>
+        <aside class="start-world-settings-panel" hidden>
+          <div class="start-world-settings-head">
+            <strong></strong>
+            <button type="button" class="start-world-settings-close">×</button>
+          </div>
+          <label class="start-world-setting-field">
+            <span></span>
+            <select name="locale">
+              ${LOCALE_OPTIONS.map(
+                (option) =>
+                  `<option value="${option.locale}"${option.locale === this.options.locale ? " selected" : ""}>${option.label}</option>`,
+              ).join("")}
+            </select>
+          </label>
+          <div class="start-world-setting-field">
+            <span></span>
+            <div class="mode-row" role="group" aria-label="${t(this.options.locale, "start.controlMode")}">
+              <button type="button" data-mode="pc" class="mode-button">${t(this.options.locale, "start.modePc")}</button>
+              <button type="button" data-mode="mobile" class="mode-button">${t(this.options.locale, "start.modeMobile")}</button>
+            </div>
+          </div>
+          <div class="start-world-setting-field">
+            <span></span>
+            <div class="sound-row" role="group" aria-label="${t(this.options.locale, "start.soundSetting")}">
+              <button type="button" data-sound="on" class="sound-button">&#128266; ${t(this.options.locale, "start.soundOn")}</button>
+              <button type="button" data-sound="off" class="sound-button">&#128263; ${t(this.options.locale, "start.soundOff")}</button>
+            </div>
+          </div>
+          <p class="start-world-settings-note"></p>
+        </aside>
         <aside class="start-world-stage-card" aria-live="polite"></aside>
         <div class="start-world-confirm" hidden role="dialog" aria-live="polite">
           <p class="start-world-confirm-message"></p>
@@ -212,38 +268,16 @@ export class StartModal {
           </div>`
               : ""
           }
-          <label class="start-field">
-            <span>${t(this.options.locale, "start.language")}</span>
-            <select name="locale">
-              ${LOCALE_OPTIONS.map(
+          <select name="stage" class="start-stage-hidden-select" hidden>
+            ${this.options.stageOptions
+              .map(
                 (option) =>
-                  `<option value="${option.locale}"${option.locale === this.options.locale ? " selected" : ""}>${option.label}</option>`,
-              ).join("")}
-            </select>
-          </label>
-          <label class="start-field">
-            <span>${t(this.options.locale, "start.stage")}</span>
-            <select name="stage">
-              ${this.options.stageOptions
-                .map(
-                  (option) =>
-                    `<option value="${escapeHtml(option.id)}"${option.id === this.options.stageId ? " selected" : ""}>${escapeHtml(
-                      option.label[this.options.locale],
-                    )}</option>`,
-                )
-                .join("")}
-            </select>
-          </label>
-        </div>
-        <div class="start-choice-panel">
-          <div class="mode-row" role="group" aria-label="${t(this.options.locale, "start.controlMode")}">
-            <button type="button" data-mode="pc" class="mode-button">${t(this.options.locale, "start.modePc")}</button>
-            <button type="button" data-mode="mobile" class="mode-button">${t(this.options.locale, "start.modeMobile")}</button>
-          </div>
-          <div class="sound-row" role="group" aria-label="${t(this.options.locale, "start.soundSetting")}">
-            <button type="button" data-sound="on" class="sound-button">&#128266; ${t(this.options.locale, "start.soundOn")}</button>
-            <button type="button" data-sound="off" class="sound-button">&#128263; ${t(this.options.locale, "start.soundOff")}</button>
-          </div>
+                  `<option value="${escapeHtml(option.id)}"${option.id === this.options.stageId ? " selected" : ""}>${escapeHtml(
+                    option.label[this.options.locale],
+                  )}</option>`,
+              )
+              .join("")}
+          </select>
         </div>
         <div class="start-install-panel" hidden>
           <strong>${t(this.options.locale, "start.installTitle")}</strong>
@@ -306,6 +340,19 @@ export class StartModal {
     const worldRouteNext = overlay.querySelector<HTMLButtonElement>(".start-world-route-next")!;
     const worldRandomButton = overlay.querySelector<HTMLButtonElement>(".start-world-random")!;
     const worldFavoriteButton = overlay.querySelector<HTMLButtonElement>(".start-world-favorite")!;
+    const worldSettingsToggle = overlay.querySelector<HTMLButtonElement>(".start-world-settings-toggle")!;
+    const worldSettingsPanel = overlay.querySelector<HTMLElement>(".start-world-settings-panel")!;
+    const worldSettingsClose = overlay.querySelector<HTMLButtonElement>(".start-world-settings-close")!;
+    const worldSettingsTitle = overlay.querySelector<HTMLElement>(".start-world-settings-head strong")!;
+    const worldSettingsLabels = Array.from(overlay.querySelectorAll<HTMLElement>(".start-world-setting-field > span"));
+    const worldSettingsNote = overlay.querySelector<HTMLElement>(".start-world-settings-note")!;
+    const worldProgressLabel = overlay.querySelector<HTMLElement>(".start-world-progress-label")!;
+    const worldProgressValue = overlay.querySelector<HTMLElement>(".start-world-progress-value")!;
+    const worldProgressMeter = overlay.querySelector<HTMLElement>(".start-world-progress-meter b")!;
+    const worldSearchLabel = overlay.querySelector<HTMLElement>(".start-world-search span")!;
+    const worldSearchInput = overlay.querySelector<HTMLInputElement>(".start-world-search-input")!;
+    const worldFilterRow = overlay.querySelector<HTMLElement>(".start-world-filter-row")!;
+    const worldStageRail = overlay.querySelector<HTMLElement>(".start-world-rail")!;
     const mapBackButton = overlay.querySelector<HTMLButtonElement>(".start-map-back")!;
     const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
     const soundButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-sound]"));
@@ -340,6 +387,8 @@ export class StartModal {
     let leaderboardGhostCount: number | undefined;
     let favoriteStageId = getStorageValue(WORLD_MAP_FAVORITE_STAGE_KEY);
     const dailyStageId = getWorldMapDailyStageId(this.options.stageOptions.map((option) => option.id));
+    let worldMapFilter = normalizeWorldMapFilter(getStorageValue(WORLD_MAP_FILTER_STORAGE_KEY));
+    let worldSearchQuery = "";
 
     const getSelectedStageLabel = () =>
       this.options.stageOptions.find((option) => option.id === selectedStageId)?.label[selectedLocale] ?? selectedStageId;
@@ -348,9 +397,162 @@ export class StartModal {
     const isStageVisited = (stageId: string) => getStorageValue(`${WORLD_MAP_VISITED_STAGE_KEY_PREFIX}:${stageId}`) === "1";
     const isStageCleared = (stageId: string) => getStorageValue(`${WORLD_MAP_CLEARED_STAGE_KEY_PREFIX}:${stageId}`) === "1";
     const markStageVisited = (stageId: string) => setStorageValue(`${WORLD_MAP_VISITED_STAGE_KEY_PREFIX}:${stageId}`, "1");
+    const getExtraText = () => getWorldMapExtraText(selectedLocale);
+    const getClearedCount = () => this.options.stageOptions.filter((option) => isStageCleared(option.id)).length;
+    const getVisitedCount = () => this.options.stageOptions.filter((option) => isStageVisited(option.id)).length;
+    const getNextUnclearedStage = () => this.options.stageOptions.find((option) => !isStageCleared(option.id));
+    const getStageLabel = (stageId: string) =>
+      this.options.stageOptions.find((option) => option.id === stageId)?.label[selectedLocale] ?? stageId;
+    const getStageRouteNote = (stageId: string) => {
+      const detail = getWorldMapStageDetail(stageId);
+      const ui = getWorldMapUiText(selectedLocale);
+      const extra = getExtraText();
+      const cleared = isStageCleared(stageId);
+      const ghostKnown = stageId === selectedStageId ? leaderboardGhostCount : undefined;
+      const ghostText =
+        ghostKnown === undefined ? ui.ghostLoading : ghostKnown > 0 ? `${ui.ghostReady} (${ghostKnown})` : ui.ghostEmpty;
+      return [
+        cleared ? extra.clearedPlan : extra.newPlan,
+        `${extra.energyPlan}: ${detail.energy}`,
+        `${extra.recommendedPlan}: ${ui.controlLabels[detail.recommendedMode]}`,
+        ghostText,
+      ].join(" / ");
+    };
+    const doesStageMatchFilter = (stageId: string) => {
+      const detail = getWorldMapStageDetail(stageId);
+      switch (worldMapFilter) {
+        case "new":
+          return !isStageCleared(stageId);
+        case "cleared":
+          return isStageCleared(stageId);
+        case "favorite":
+          return favoriteStageId === stageId;
+        case "ghost":
+          return stageId === selectedStageId ? (leaderboardGhostCount ?? 0) > 0 : true;
+        case "daily":
+          return dailyStageId === stageId;
+        case "pc":
+          return detail.recommendedMode === "pc" || detail.recommendedMode === "either";
+        case "mobile":
+          return detail.recommendedMode === "mobile" || detail.recommendedMode === "either";
+        case "short":
+          return detail.length === "short";
+        case "challenge":
+          return detail.difficulty >= 4 || detail.energy >= 85;
+        case "all":
+        default:
+          return true;
+      }
+    };
+    const getVisibleStageOptions = () => {
+      const normalizedQuery = worldSearchQuery.trim().toLocaleLowerCase();
+      return this.options.stageOptions.filter((option) => {
+        if (!doesStageMatchFilter(option.id)) {
+          return false;
+        }
+        if (!normalizedQuery) {
+          return true;
+        }
+        const detail = getWorldMapStageDetail(option.id);
+        const searchable = [
+          option.id,
+          option.label[selectedLocale],
+          option.label.en,
+          detail.area[selectedLocale],
+          detail.badge[selectedLocale],
+          detail.mood[selectedLocale],
+          detail.gimmicks.map((gimmick) => gimmick[selectedLocale]).join(" "),
+        ]
+          .join(" ")
+          .toLocaleLowerCase();
+        return searchable.includes(normalizedQuery);
+      });
+    };
 
     const renderStars = (rating: number) =>
       Array.from({ length: 5 }, (_, index) => `<span class="${index < rating ? "is-filled" : ""}">★</span>`).join("");
+
+    const refreshWorldSettingsPanel = () => {
+      const extra = getExtraText();
+      worldSettingsToggle.textContent = extra.settings;
+      worldSettingsTitle.textContent = extra.settingsTitle;
+      worldSettingsClose.setAttribute("aria-label", extra.closeSettings);
+      worldSettingsLabels[0]!.textContent = t(this.options.locale, "start.language");
+      worldSettingsLabels[1]!.textContent = t(this.options.locale, "start.controlMode");
+      worldSettingsLabels[2]!.textContent = t(this.options.locale, "start.soundSetting");
+      worldSettingsNote.textContent = extra.settingsNote;
+    };
+
+    const refreshWorldFilters = () => {
+      const extra = getExtraText();
+      const filters = getWorldMapFilterOptions(selectedLocale);
+      worldFilterRow.setAttribute("aria-label", extra.filters);
+      worldFilterRow.innerHTML = filters
+        .map(
+          (filter) =>
+            `<button type="button" class="${filter.id === worldMapFilter ? "is-selected" : ""}" data-world-filter="${filter.id}">${escapeHtml(
+              filter.label,
+            )}</button>`,
+        )
+        .join("");
+      worldFilterRow.querySelectorAll<HTMLButtonElement>("[data-world-filter]").forEach((button) => {
+        button.addEventListener("click", () => {
+          worldMapFilter = normalizeWorldMapFilter(button.dataset.worldFilter);
+          setStorageValue(WORLD_MAP_FILTER_STORAGE_KEY, worldMapFilter);
+          refreshWorldMap();
+        });
+      });
+    };
+
+    const refreshWorldDashboard = () => {
+      const extra = getExtraText();
+      const total = Math.max(1, this.options.stageOptions.length);
+      const clearedCount = getClearedCount();
+      const visitedCount = getVisitedCount();
+      const progress = (clearedCount / total) * 100;
+      const nextStage = getNextUnclearedStage();
+      const selectedDetail = getWorldMapStageDetail(selectedStageId);
+      const visibleStages = getVisibleStageOptions();
+      const nextLabel = nextStage ? getStageLabel(nextStage.id) : extra.allClear;
+
+      worldProgressLabel.textContent = `${extra.progress} / ${extra.stamps}`;
+      worldProgressValue.textContent = `${clearedCount}/${this.options.stageOptions.length} CLEAR · ${visitedCount} ${extra.visits}`;
+      worldProgressMeter.style.width = `${progress.toFixed(2)}%`;
+      worldSearchLabel.textContent = extra.search;
+      worldSearchInput.placeholder = extra.searchPlaceholder;
+      worldSearchInput.value = worldSearchQuery;
+      worldStageRail.innerHTML = visibleStages.length
+        ? visibleStages
+            .map((option) => {
+              const detail = getWorldMapStageDetail(option.id);
+              const isSelected = option.id === selectedStageId;
+              const badges = [
+                option.id === dailyStageId ? extra.dailyShort : "",
+                option.id === favoriteStageId ? extra.favoriteShort : "",
+                isStageCleared(option.id) ? "CLEAR" : "",
+              ].filter(Boolean);
+              return `
+                <button type="button" class="${isSelected ? "is-selected" : ""}" data-rail-stage-id="${escapeHtml(option.id)}">
+                  <span>${escapeHtml(option.label[selectedLocale])}</span>
+                  <small>${escapeHtml(detail.area[selectedLocale])} / ${escapeHtml(detail.mood[selectedLocale])}</small>
+                  <em>${escapeHtml(badges.join(" · ") || getStageRouteNote(option.id))}</em>
+                </button>
+              `;
+            })
+            .join("")
+        : `<p class="start-world-rail-empty">${escapeHtml(extra.noFilterResults)}</p>`;
+      worldStageRail.querySelectorAll<HTMLButtonElement>("[data-rail-stage-id]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const stageId = button.dataset.railStageId;
+          if (stageId) {
+            moveWorldPlayerToStage(stageId);
+          }
+        });
+      });
+      worldMapPanel.style.setProperty("--stage-accent", selectedDetail.accent);
+      worldMapPanel.style.setProperty("--clear-progress", `${progress.toFixed(2)}%`);
+      worldMapPanel.dataset.nextStage = nextLabel;
+    };
 
     const refreshWorldStageCard = () => {
       const option = this.options.stageOptions.find((stageOption) => stageOption.id === selectedStageId);
@@ -360,13 +562,18 @@ export class StartModal {
       const stageLabel = option?.label[selectedLocale] ?? selectedStageId;
       const selectedPosition = getWorldMapNodePosition(stageIndex, this.options.stageOptions.length);
       const routeProgress = this.options.stageOptions.length <= 1 ? 100 : (stageIndex / (this.options.stageOptions.length - 1)) * 100;
+      const extra = getExtraText();
+      const stageCleared = isStageCleared(selectedStageId);
+      const nextStage = getNextUnclearedStage();
+      const nextStageLabel = nextStage ? getStageLabel(nextStage.id) : extra.allClear;
+      const guideText = selectedMode === "mobile" ? extra.mobileGuide : extra.pcGuide;
+      const masteryText = stageCleared ? extra.masteryCleared : extra.masteryOpen;
       const ghostLabel =
         leaderboardGhostCount === undefined
           ? ui.ghostLoading
           : leaderboardGhostCount > 0
             ? `${ui.ghostReady} (${leaderboardGhostCount})`
             : ui.ghostEmpty;
-      const stageCleared = isStageCleared(selectedStageId);
       const visitedLabel = stageCleared ? ui.clearStamp : isStageVisited(selectedStageId) ? ui.visited : ui.unvisited;
       const favoriteLabel = favoriteStageId === selectedStageId ? ui.favoriteSet : ui.favorite;
       const dailyBadge =
@@ -393,6 +600,12 @@ export class StartModal {
         <div class="start-world-route-meter" aria-label="${escapeHtml(ui.route)}">
           <span>${escapeHtml(ui.route)} ${stageIndex + 1}/${this.options.stageOptions.length}</span>
           <i><b style="width: ${routeProgress.toFixed(2)}%;"></b></i>
+        </div>
+        <div class="start-world-plan-grid">
+          <span><em>${escapeHtml(extra.nextTarget)}</em><strong>${escapeHtml(nextStageLabel)}</strong></span>
+          <span><em>${escapeHtml(extra.routePlan)}</em><strong>${escapeHtml(getStageRouteNote(selectedStageId))}</strong></span>
+          <span><em>${escapeHtml(extra.playStyle)}</em><strong>${escapeHtml(guideText)}</strong></span>
+          <span><em>${escapeHtml(extra.mastery)}</em><strong>${escapeHtml(masteryText)}</strong></span>
         </div>
         <div class="start-world-stat-grid">
           <span><em>${escapeHtml(ui.difficulty)}</em><strong class="start-world-stars">${renderStars(detail.difficulty)}</strong></span>
@@ -421,10 +634,14 @@ export class StartModal {
       worldFavoriteButton.classList.toggle("is-selected", favoriteStageId === selectedStageId);
       worldFavoriteButton.setAttribute("aria-pressed", favoriteStageId === selectedStageId ? "true" : "false");
       worldRandomButton.textContent = ui.random;
+      worldSettingsToggle.textContent = extra.settings;
       worldRoutePrev.textContent = ui.previous;
       worldRouteNext.textContent = ui.next;
       worldRoutePrev.disabled = stageIndex <= 0 || isWorldPlayerMoving;
       worldRouteNext.disabled = stageIndex >= this.options.stageOptions.length - 1 || isWorldPlayerMoving;
+      refreshWorldSettingsPanel();
+      refreshWorldFilters();
+      refreshWorldDashboard();
     };
 
     const refreshCharacterSelection = () => {
@@ -458,6 +675,7 @@ export class StartModal {
         node.classList.toggle("is-favorite", stageId !== "" && stageId === favoriteStageId);
         node.classList.toggle("is-visited", stageId !== "" && isStageVisited(stageId));
         node.classList.toggle("is-cleared", stageId !== "" && isStageCleared(stageId));
+        node.classList.toggle("is-filtered-out", stageId !== "" && !doesStageMatchFilter(stageId));
         node.setAttribute("aria-pressed", isSelected ? "true" : "false");
       });
       worldCurrent.textContent = `${t(this.options.locale, "start.worldMapCurrent")}: ${getSelectedStageLabel()}`;
@@ -952,6 +1170,28 @@ export class StartModal {
       setStorageValue(WORLD_MAP_FAVORITE_STAGE_KEY, favoriteStageId);
       refreshWorldMap();
     });
+    worldSettingsToggle.addEventListener("click", () => {
+      const shouldOpen = worldSettingsPanel.hidden === true;
+      worldSettingsPanel.hidden = !shouldOpen;
+      worldMapPanel.classList.toggle("is-settings-open", shouldOpen);
+      if (shouldOpen) {
+        localeSelect.focus();
+      } else {
+        worldSettingsToggle.focus();
+      }
+    });
+    worldSettingsClose.addEventListener("click", () => {
+      worldSettingsPanel.hidden = true;
+      worldMapPanel.classList.remove("is-settings-open");
+      worldSettingsToggle.focus();
+    });
+    worldSearchInput.addEventListener("input", () => {
+      worldSearchQuery = worldSearchInput.value;
+      refreshWorldMap();
+    });
+    worldSearchInput.addEventListener("keydown", (event) => event.stopPropagation());
+    worldSearchInput.addEventListener("keyup", (event) => event.stopPropagation());
+    worldSearchInput.addEventListener("keypress", (event) => event.stopPropagation());
     mapBackButton.addEventListener("click", closeStageConfig);
     localeSelect.addEventListener("change", () => {
       selectedLocale = localeSelect.value as Locale;
@@ -1219,6 +1459,107 @@ function setStorageValue(key: string, value: string) {
   } catch {
     // Ignore storage failures; the prompt can simply appear again next session.
   }
+}
+
+function normalizeWorldMapFilter(value: string | null | undefined): WorldMapFilter {
+  const filters: WorldMapFilter[] = ["all", "new", "cleared", "favorite", "ghost", "daily", "pc", "mobile", "short", "challenge"];
+  return filters.includes(value as WorldMapFilter) ? (value as WorldMapFilter) : "all";
+}
+
+function getWorldMapFilterOptions(locale: Locale): Array<{ id: WorldMapFilter; label: string }> {
+  const text = getWorldMapExtraText(locale);
+  return [
+    { id: "all", label: text.filterAll },
+    { id: "new", label: text.filterNew },
+    { id: "cleared", label: text.filterCleared },
+    { id: "favorite", label: text.filterFavorite },
+    { id: "ghost", label: text.filterGhost },
+    { id: "daily", label: text.filterDaily },
+    { id: "pc", label: text.filterPc },
+    { id: "mobile", label: text.filterMobile },
+    { id: "short", label: text.filterShort },
+    { id: "challenge", label: text.filterChallenge },
+  ];
+}
+
+function getWorldMapExtraText(locale: Locale) {
+  const ja = {
+    settings: "設定",
+    settingsTitle: "マップ設定",
+    closeSettings: "設定を閉じる",
+    settingsNote: "言語・操作・サウンドはここで変更できます。ステージ開始前の画面は最終確認に絞りました。",
+    filters: "ステージフィルタ",
+    search: "さがす",
+    searchPlaceholder: "ステージ名・エリア・ギミック",
+    progress: "進行度",
+    stamps: "スタンプ帳",
+    visits: "訪問",
+    noFilterResults: "条件に合うステージがありません。",
+    allClear: "全ステージCLEAR",
+    dailyShort: "TODAY",
+    favoriteShort: "FAV",
+    nextTarget: "次の目的地",
+    routePlan: "ルートメモ",
+    playStyle: "プレイ方針",
+    mastery: "やりこみ",
+    energyPlan: "テンポ",
+    recommendedPlan: "推奨",
+    clearedPlan: "クリア済み",
+    newPlan: "未クリア",
+    pcGuide: "精密操作とタイム狙い",
+    mobileGuide: "横画面でゆったり攻略",
+    masteryCleared: "ミッション・ゴースト更新へ",
+    masteryOpen: "まずはCLEARスタンプ狙い",
+    filterAll: "ALL",
+    filterNew: "未CLEAR",
+    filterCleared: "CLEAR",
+    filterFavorite: "お気に入り",
+    filterGhost: "ゴースト",
+    filterDaily: "本日",
+    filterPc: "PC向け",
+    filterMobile: "スマホ向け",
+    filterShort: "短め",
+    filterChallenge: "高難度",
+  };
+  const en = {
+    settings: "Settings",
+    settingsTitle: "Map Settings",
+    closeSettings: "Close settings",
+    settingsNote: "Language, controls, and sound now live on the map. The start panel stays focused on final run setup.",
+    filters: "Stage filters",
+    search: "Search",
+    searchPlaceholder: "Stage, area, gimmick",
+    progress: "Progress",
+    stamps: "Stamp book",
+    visits: "visits",
+    noFilterResults: "No stages match this view.",
+    allClear: "All stages CLEAR",
+    dailyShort: "TODAY",
+    favoriteShort: "FAV",
+    nextTarget: "Next target",
+    routePlan: "Route memo",
+    playStyle: "Play style",
+    mastery: "Mastery",
+    energyPlan: "Tempo",
+    recommendedPlan: "Best on",
+    clearedPlan: "Cleared",
+    newPlan: "Uncleared",
+    pcGuide: "Precision and score routes",
+    mobileGuide: "Relaxed landscape play",
+    masteryCleared: "Chase missions and ghosts",
+    masteryOpen: "Aim for the CLEAR stamp",
+    filterAll: "ALL",
+    filterNew: "Uncleared",
+    filterCleared: "CLEAR",
+    filterFavorite: "Favorite",
+    filterGhost: "Ghosts",
+    filterDaily: "Daily",
+    filterPc: "PC",
+    filterMobile: "Mobile",
+    filterShort: "Short",
+    filterChallenge: "Challenge",
+  };
+  return locale === "ja" ? ja : en;
 }
 
 function getWorldMapNodePosition(index: number, total: number) {
