@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.388
+### English
+- Moved clear-result action buttons to a larger bottom-center layout on mobile and compact screens, making ghost export, screenshot preview, and world-map return easier to tap after clearing a stage.
+### Japanese
+- スマホモードとコンパクト表示では、クリア後の操作ボタンを大きめの画面下中央レイアウトに変更し、ゴースト保存、スクリーンショット確認、ワールドマップへ戻る操作を押しやすくしました。
+
 ## v0.1.387
 ### English
 - Added a CLEAR STAMP GET animation to the stage-clear result screen so earning a world-map stamp is visible immediately after reaching the goal.

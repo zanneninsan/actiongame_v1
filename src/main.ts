@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.387";
+const DEBUG_VERSION = "v0.1.388";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -310,10 +310,12 @@ const OVERHEAD_STAMINA_FILL_HEIGHT = 4;
 const OVERHEAD_STAMINA_OFFSET_Y = 18;
 const GHOST_REPLAY_SCHEMA = "zannenin-ghost-v1";
 const GHOST_RECORD_INTERVAL_MS = 50;
-const GHOST_EXPORT_BUTTON_X = GAME_WIDTH - 168;
-const GHOST_EXPORT_BUTTON_Y = 118;
-const CLEAR_MENU_BUTTON_Y = GHOST_EXPORT_BUTTON_Y + 46;
-const CLEAR_SCREENSHOT_BUTTON_Y = CLEAR_MENU_BUTTON_Y + 46;
+const CLEAR_ACTION_DESKTOP_X = GAME_WIDTH - 168;
+const CLEAR_ACTION_DESKTOP_Y = 118;
+const CLEAR_ACTION_DESKTOP_GAP = 46;
+const CLEAR_ACTION_MOBILE_X = GAME_WIDTH / 2;
+const CLEAR_ACTION_MOBILE_Y = GAME_HEIGHT - 178;
+const CLEAR_ACTION_MOBILE_GAP = 58;
 const SHOW_CLEAR_RANK_AND_MISSIONS = true;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
@@ -3178,6 +3180,33 @@ class PrototypeScene extends Phaser.Scene {
     };
   }
 
+  private getClearActionButtonPosition(index: number) {
+    if (this.controlMode === "mobile" || this.usesCompactHud()) {
+      return {
+        x: CLEAR_ACTION_MOBILE_X,
+        y: CLEAR_ACTION_MOBILE_Y + CLEAR_ACTION_MOBILE_GAP * index,
+      };
+    }
+
+    return {
+      x: CLEAR_ACTION_DESKTOP_X,
+      y: CLEAR_ACTION_DESKTOP_Y + CLEAR_ACTION_DESKTOP_GAP * index,
+    };
+  }
+
+  private getClearActionButtonStyle(color: string, backgroundColor: string): Phaser.Types.GameObjects.Text.TextStyle {
+    const isMobileLayout = this.controlMode === "mobile" || this.usesCompactHud();
+    return {
+      fontFamily: "monospace",
+      fontSize: isMobileLayout ? "22px" : "18px",
+      color,
+      backgroundColor,
+      padding: isMobileLayout ? { x: 22, y: 12 } : { x: 14, y: 8 },
+      align: "center",
+      fixedWidth: isMobileLayout ? 320 : undefined,
+    };
+  }
+
   private showGhostExportButton() {
     this.ghostExportButton?.destroy();
     this.ghostExportButton = undefined;
@@ -3185,17 +3214,12 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
+    const position = this.getClearActionButtonPosition(0);
     this.ghostExportButton = this.add
-      .text(GHOST_EXPORT_BUTTON_X, GHOST_EXPORT_BUTTON_Y, t(this.locale, "ghost.exportJson"), {
-        fontFamily: "monospace",
-        fontSize: "18px",
-        color: "#dcfce7",
-        backgroundColor: "#14532dcc",
-        padding: { x: 14, y: 8 },
-      })
+      .text(position.x, position.y, t(this.locale, "ghost.exportJson"), this.getClearActionButtonStyle("#dcfce7", "#14532dee"))
       .setOrigin(0.5)
       .setScrollFactor(0)
-      .setDepth(210)
+      .setDepth(260)
       .setInteractive({ useHandCursor: true })
       .on("pointerup", () => this.downloadGhostReplayJson());
   }
@@ -3210,17 +3234,12 @@ class PrototypeScene extends Phaser.Scene {
 
   private showClearScreenshotButton() {
     this.clearScreenshotButton?.destroy();
+    const position = this.getClearActionButtonPosition(2);
     this.clearScreenshotButton = this.add
-      .text(GHOST_EXPORT_BUTTON_X, CLEAR_SCREENSHOT_BUTTON_Y, t(this.locale, "screenshot.view"), {
-        fontFamily: "monospace",
-        fontSize: "18px",
-        color: "#e0f2fe",
-        backgroundColor: "#0f172acc",
-        padding: { x: 14, y: 8 },
-      })
+      .text(position.x, position.y, t(this.locale, "screenshot.view"), this.getClearActionButtonStyle("#e0f2fe", "#0f172aee"))
       .setOrigin(0.5)
       .setScrollFactor(0)
-      .setDepth(210)
+      .setDepth(260)
       .setInteractive({ useHandCursor: true })
       .on("pointerup", () => this.showScreenshotPreviewOrCapture());
   }
@@ -3271,17 +3290,12 @@ class PrototypeScene extends Phaser.Scene {
 
   private showClearMenuButton() {
     this.clearMenuButton?.destroy();
+    const position = this.getClearActionButtonPosition(1);
     this.clearMenuButton = this.add
-      .text(GHOST_EXPORT_BUTTON_X, CLEAR_MENU_BUTTON_Y, t(this.locale, "menu.backToMenu"), {
-        fontFamily: "monospace",
-        fontSize: "18px",
-        color: "#e0f2fe",
-        backgroundColor: "#0f172acc",
-        padding: { x: 14, y: 8 },
-      })
+      .text(position.x, position.y, t(this.locale, "menu.backToMenu"), this.getClearActionButtonStyle("#e0f2fe", "#0f172aee"))
       .setOrigin(0.5)
       .setScrollFactor(0)
-      .setDepth(210)
+      .setDepth(260)
       .setInteractive({ useHandCursor: true })
       .on("pointerup", () => void this.returnToTitle());
   }
