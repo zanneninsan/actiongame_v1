@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.405
+### English
+- Compacted the leaderboard dialog layout so the ranking list gets more vertical space and can show around five rows on medium desktop screens.
+### Japanese
+- ランキング画面の余白、ヘッダー、フッターを圧縮し、中間サイズのPC画面でも順位リストを5行前後見られるようにしました。
+
 ## v0.1.404
 ### English
 - Added a medium-viewport world-map layout that reserves a fixed 16:9 map area and moves the progress and stage-detail panels below it, preventing overlapping panels on tablet-like resolutions.

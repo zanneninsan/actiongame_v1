@@ -5859,6 +5859,114 @@ body.is-screenshot-modal-open #mobile-controls {
   border-radius: 999px;
 }
 
+@media (min-width: 821px) and (min-height: 561px) {
+  .leaderboard-dialog {
+    width: min(1120px, calc(100vw - clamp(18px, 3vw, 34px)));
+    height: min(720px, calc(100dvh - clamp(18px, 3vw, 34px)));
+    max-height: calc(100dvh - clamp(18px, 3vw, 34px));
+    aspect-ratio: auto;
+    grid-template-rows: auto auto auto minmax(285px, 1fr) auto;
+    gap: clamp(6px, 0.8vw, 10px);
+    padding: clamp(28px, 3vw, 42px) clamp(40px, 4.2vw, 64px) clamp(24px, 3vw, 38px);
+  }
+
+  .leaderboard-dialog h2 {
+    width: min(70%, 720px);
+    padding: 6px 18px;
+    font-size: clamp(22px, 2.7vw, 30px);
+  }
+
+  .leaderboard-subhead {
+    min-height: 22px;
+    padding: 0 clamp(10px, 1.4vw, 18px);
+  }
+
+  .leaderboard-meta,
+  .leaderboard-status {
+    font-size: 12px;
+  }
+
+  .leaderboard-current-score {
+    min-height: 56px;
+    grid-template-columns: minmax(116px, 1fr) clamp(96px, 10vw, 132px) clamp(118px, 13vw, 156px) minmax(136px, 1fr);
+    gap: clamp(6px, 0.9vw, 12px);
+    padding: 8px clamp(16px, 2vw, 24px);
+  }
+
+  .leaderboard-current-value {
+    font-size: clamp(22px, 2.7vw, 29px);
+  }
+
+  .leaderboard-table {
+    padding: 6px 10px 8px;
+  }
+
+  .leaderboard-header,
+  .leaderboard-entry {
+    grid-template-columns: clamp(32px, 3.7vw, 44px) clamp(42px, 4.4vw, 54px) minmax(136px, 1.25fr) clamp(82px, 8vw, 110px) clamp(96px, 10vw, 128px) clamp(104px, 11vw, 138px);
+    gap: clamp(6px, 0.9vw, 12px);
+    padding: 0 clamp(10px, 1.4vw, 18px);
+  }
+
+  .leaderboard-header {
+    min-height: 24px;
+    margin: 0 10px 3px 0;
+  }
+
+  .leaderboard-list {
+    gap: 4px;
+  }
+
+  .leaderboard-entry {
+    min-height: 42px;
+    font-size: clamp(13px, 1.45vw, 16px);
+  }
+
+  .leaderboard-new-marker {
+    left: clamp(8px, 1vw, 12px);
+    min-width: 44px;
+    height: 24px;
+  }
+
+  .leaderboard-footer {
+    grid-template-columns: minmax(0, 1fr) clamp(176px, 16vw, 220px);
+    gap: 10px;
+  }
+
+  .leaderboard-account-prompt {
+    min-height: 46px;
+    grid-template-columns: minmax(0, 1fr) clamp(180px, 21vw, 250px);
+    padding: 6px clamp(14px, 1.7vw, 22px);
+  }
+
+  .leaderboard-account-copy {
+    gap: 2px;
+  }
+
+  .leaderboard-account-copy span {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-height: 1.32;
+  }
+
+  .leaderboard-google-button {
+    min-height: 40px;
+    font-size: clamp(13px, 1.35vw, 15px);
+  }
+
+  #leaderboard-close {
+    min-height: 46px;
+    font-size: clamp(18px, 2vw, 20px);
+  }
+
+  #leaderboard-share-x {
+    min-height: 38px;
+    font-size: clamp(13px, 1.45vw, 16px);
+  }
+}
+
 #global-ui {
   border-radius: 999px;
   background: rgba(3, 9, 20, 0.42);
