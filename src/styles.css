@@ -6226,6 +6226,15 @@ body.is-screenshot-modal-open #mobile-controls {
     display: none;
   }
 
+  .start-world-confirm {
+    grid-area: auto;
+    position: fixed;
+    inset: 50% auto auto 50%;
+    z-index: 12;
+    width: min(560px, calc(100vw - 48px));
+    transform: translate(-50%, -50%);
+  }
+
   .start-world-map-panel:has(.start-world-node:hover) .start-world-stage-card,
   .start-world-map-panel:has(.start-world-node:focus-visible) .start-world-stage-card {
     opacity: 1;

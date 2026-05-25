@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.412
+### English
+- Fixed the wide world-map stage confirmation dialog so it appears centered in the viewport instead of being clipped at the top.
+### Japanese
+- 横幅の広いワールドマップ画面でステージ選択確認ダイアログが上に見切れないよう、画面中央固定の表示に変更しました。
+
 ## v0.1.411
 ### English
 - Renamed the confusing world-map "Reward" label to "Practice" because the field describes what the stage helps the player practice.
