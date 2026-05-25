@@ -100,6 +100,12 @@ type WorldMapFilter =
   | "mobile"
   | "short"
   | "challenge";
+type AdventureDemoLine = {
+  speaker: string;
+  message: string;
+  focus: "main" | "sub";
+  choices?: string[];
+};
 
 export class StartModal {
   private readonly options: StartModalOptions;
@@ -196,9 +202,39 @@ export class StartModal {
           <button type="button" class="start-world-route-prev"></button>
           <button type="button" class="start-world-random"></button>
           <button type="button" class="start-world-favorite"></button>
+          <button type="button" class="start-world-adventure"></button>
           <button type="button" class="start-world-settings-toggle"></button>
           <button type="button" class="start-world-route-next"></button>
         </div>
+        <section class="start-adventure-layer" hidden role="dialog" aria-modal="true" aria-label="Adventure demo">
+          <div class="start-adventure-backdrop" aria-hidden="true"></div>
+          <div class="start-adventure-topbar">
+            <span class="start-adventure-kicker">ADVENTURE</span>
+            <strong class="start-adventure-title"></strong>
+            <button type="button" class="start-adventure-close"></button>
+          </div>
+          <div class="start-adventure-stage" aria-hidden="true">
+            <img
+              class="start-adventure-character start-adventure-character-main is-active"
+              src="./assets/story/adventure/zannenin_maid_full.webp"
+              alt=""
+            />
+            <img
+              class="start-adventure-character start-adventure-character-sub"
+              src="./assets/story/adventure/zannenin_mama_maid_full.webp"
+              alt=""
+            />
+          </div>
+          <div class="start-adventure-dialogue">
+            <div class="start-adventure-name"></div>
+            <p class="start-adventure-text"></p>
+            <div class="start-adventure-choices"></div>
+            <div class="start-adventure-actions">
+              <button type="button" class="start-adventure-next"></button>
+              <button type="button" class="start-adventure-end"></button>
+            </div>
+          </div>
+        </section>
         <div class="start-world-map-dashboard" aria-live="polite">
           <div class="start-world-progress-card">
             <span class="start-world-progress-label"></span>
@@ -340,6 +376,7 @@ export class StartModal {
     const worldRouteNext = overlay.querySelector<HTMLButtonElement>(".start-world-route-next")!;
     const worldRandomButton = overlay.querySelector<HTMLButtonElement>(".start-world-random")!;
     const worldFavoriteButton = overlay.querySelector<HTMLButtonElement>(".start-world-favorite")!;
+    const worldAdventureButton = overlay.querySelector<HTMLButtonElement>(".start-world-adventure")!;
     const worldSettingsToggle = overlay.querySelector<HTMLButtonElement>(".start-world-settings-toggle")!;
     const worldSettingsPanel = overlay.querySelector<HTMLElement>(".start-world-settings-panel")!;
     const worldSettingsClose = overlay.querySelector<HTMLButtonElement>(".start-world-settings-close")!;
@@ -353,6 +390,15 @@ export class StartModal {
     const worldSearchInput = overlay.querySelector<HTMLInputElement>(".start-world-search-input")!;
     const worldFilterRow = overlay.querySelector<HTMLElement>(".start-world-filter-row")!;
     const worldStageRail = overlay.querySelector<HTMLElement>(".start-world-rail")!;
+    const adventureLayer = overlay.querySelector<HTMLElement>(".start-adventure-layer")!;
+    const adventureTitle = overlay.querySelector<HTMLElement>(".start-adventure-title")!;
+    const adventureCloseButton = overlay.querySelector<HTMLButtonElement>(".start-adventure-close")!;
+    const adventureName = overlay.querySelector<HTMLElement>(".start-adventure-name")!;
+    const adventureText = overlay.querySelector<HTMLElement>(".start-adventure-text")!;
+    const adventureChoices = overlay.querySelector<HTMLElement>(".start-adventure-choices")!;
+    const adventureNextButton = overlay.querySelector<HTMLButtonElement>(".start-adventure-next")!;
+    const adventureEndButton = overlay.querySelector<HTMLButtonElement>(".start-adventure-end")!;
+    const adventureCharacters = Array.from(overlay.querySelectorAll<HTMLImageElement>(".start-adventure-character"));
     const mapBackButton = overlay.querySelector<HTMLButtonElement>(".start-map-back")!;
     const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
     const soundButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-sound]"));
@@ -389,6 +435,7 @@ export class StartModal {
     const dailyStageId = getWorldMapDailyStageId(this.options.stageOptions.map((option) => option.id));
     let worldMapFilter = normalizeWorldMapFilter(getStorageValue(WORLD_MAP_FILTER_STORAGE_KEY));
     let worldSearchQuery = "";
+    let adventureLineIndex = 0;
 
     const getSelectedStageLabel = () =>
       this.options.stageOptions.find((option) => option.id === selectedStageId)?.label[selectedLocale] ?? selectedStageId;
@@ -418,6 +465,8 @@ export class StartModal {
         ghostText,
       ].join(" / ");
     };
+    const getAdventureText = () => getAdventureDemoText(selectedLocale);
+    const getAdventureLines = () => getAdventureDemoLines(selectedLocale);
     const doesStageMatchFilter = (stageId: string) => {
       const detail = getWorldMapStageDetail(stageId);
       switch (worldMapFilter) {
@@ -475,12 +524,60 @@ export class StartModal {
     const refreshWorldSettingsPanel = () => {
       const extra = getExtraText();
       worldSettingsToggle.textContent = extra.settings;
+      worldAdventureButton.textContent = extra.adventure;
+      worldAdventureButton.title = extra.adventureTitle;
+      worldAdventureButton.setAttribute("aria-label", extra.adventureTitle);
       worldSettingsTitle.textContent = extra.settingsTitle;
       worldSettingsClose.setAttribute("aria-label", extra.closeSettings);
       worldSettingsLabels[0]!.textContent = t(this.options.locale, "start.language");
       worldSettingsLabels[1]!.textContent = t(this.options.locale, "start.controlMode");
       worldSettingsLabels[2]!.textContent = t(this.options.locale, "start.soundSetting");
       worldSettingsNote.textContent = extra.settingsNote;
+    };
+
+    const refreshAdventureScene = () => {
+      const text = getAdventureText();
+      const lines = getAdventureLines();
+      const line = lines[Math.min(adventureLineIndex, lines.length - 1)]!;
+      adventureTitle.textContent = text.title;
+      adventureCloseButton.textContent = text.close;
+      adventureCloseButton.setAttribute("aria-label", text.close);
+      adventureName.textContent = line.speaker;
+      adventureText.textContent = line.message;
+      adventureNextButton.textContent = adventureLineIndex >= lines.length - 1 ? text.replay : text.next;
+      adventureEndButton.textContent = text.backToMap;
+      adventureCharacters.forEach((character) => {
+        const isActive =
+          (line.focus === "main" && character.classList.contains("start-adventure-character-main")) ||
+          (line.focus === "sub" && character.classList.contains("start-adventure-character-sub"));
+        character.classList.toggle("is-active", isActive);
+      });
+      adventureChoices.innerHTML =
+        line.choices?.map((choice) => `<button type="button">${escapeHtml(choice)}</button>`).join("") ?? "";
+      adventureChoices.querySelectorAll<HTMLButtonElement>("button").forEach((button) => {
+        button.addEventListener("click", () => {
+          adventureLineIndex = Math.min(adventureLineIndex + 1, lines.length - 1);
+          refreshAdventureScene();
+          adventureNextButton.focus();
+        });
+      });
+    };
+
+    const openAdventureScene = () => {
+      hideWorldConfirm();
+      worldSettingsPanel.hidden = true;
+      worldMapPanel.classList.remove("is-settings-open");
+      adventureLineIndex = 0;
+      refreshAdventureScene();
+      adventureLayer.hidden = false;
+      worldMapPanel.classList.add("is-adventure-open");
+      window.setTimeout(() => adventureNextButton.focus(), 80);
+    };
+
+    const closeAdventureScene = () => {
+      adventureLayer.hidden = true;
+      worldMapPanel.classList.remove("is-adventure-open");
+      worldAdventureButton.focus();
     };
 
     const refreshWorldFilters = () => {
@@ -1179,6 +1276,21 @@ export class StartModal {
       setStorageValue(WORLD_MAP_FAVORITE_STAGE_KEY, favoriteStageId);
       refreshWorldMap();
     });
+    worldAdventureButton.addEventListener("click", openAdventureScene);
+    adventureCloseButton.addEventListener("click", closeAdventureScene);
+    adventureEndButton.addEventListener("click", closeAdventureScene);
+    adventureNextButton.addEventListener("click", () => {
+      const lines = getAdventureLines();
+      adventureLineIndex = adventureLineIndex >= lines.length - 1 ? 0 : adventureLineIndex + 1;
+      refreshAdventureScene();
+    });
+    adventureLayer.addEventListener("pointerdown", (event) => event.stopPropagation());
+    adventureLayer.addEventListener("keydown", (event) => {
+      event.stopPropagation();
+      if (event.key === "Escape") {
+        closeAdventureScene();
+      }
+    });
     worldSettingsToggle.addEventListener("click", () => {
       const shouldOpen = worldSettingsPanel.hidden === true;
       worldSettingsPanel.hidden = !shouldOpen;
@@ -1493,6 +1605,8 @@ function getWorldMapFilterOptions(locale: Locale): Array<{ id: WorldMapFilter; l
 
 function getWorldMapExtraText(locale: Locale) {
   const ja = {
+    adventure: "ADV",
+    adventureTitle: "アドベンチャーパートを開く",
     settings: "設定",
     settingsTitle: "マップ設定",
     closeSettings: "設定を閉じる",
@@ -1531,6 +1645,8 @@ function getWorldMapExtraText(locale: Locale) {
     filterChallenge: "高難度",
   };
   const en = {
+    adventure: "ADV",
+    adventureTitle: "Open adventure scene",
     settings: "Settings",
     settingsTitle: "Map Settings",
     closeSettings: "Close settings",
@@ -1569,6 +1685,76 @@ function getWorldMapExtraText(locale: Locale) {
     filterChallenge: "Challenge",
   };
   return locale === "ja" ? ja : en;
+}
+
+function getAdventureDemoText(locale: Locale) {
+  if (locale === "ja") {
+    return {
+      title: "残念院さんランド・ナイトティー",
+      close: "閉じる",
+      next: "次へ",
+      replay: "もう一度",
+      backToMap: "マップへ戻る",
+    };
+  }
+  return {
+    title: "Zannenin Land Night Tea",
+    close: "Close",
+    next: "Next",
+    replay: "Replay",
+    backToMap: "Back to map",
+  };
+}
+
+function getAdventureDemoLines(locale: Locale): AdventureDemoLine[] {
+  if (locale === "ja") {
+    return [
+      {
+        speaker: "残念院さん",
+        message: "いらっしゃいませ。ここは、ステージに出る前に少しだけ息を整えるためのティールームです。",
+        focus: "main",
+      },
+      {
+        speaker: "残念院さん",
+        message: "今日はどのルートにしますか？ 走り込みでも、寄り道でも、あなたのペースで決めてください。",
+        focus: "sub",
+        choices: ["おすすめを聞く", "もう少し話す"],
+      },
+      {
+        speaker: "残念院さん",
+        message: "では、まずはシブヤシティから。クリアだけなら素直に、スコア狙いなら少し欲張るのがコツです。",
+        focus: "main",
+      },
+      {
+        speaker: "残念院さん",
+        message: "これはまだおためし版です。次は好感度、会話分岐、ステージ前イベントにつなげられます。",
+        focus: "sub",
+      },
+    ];
+  }
+  return [
+    {
+      speaker: "Zannenin-san",
+      message: "Welcome. This tea room is a quiet pause before you step into the next stage.",
+      focus: "main",
+    },
+    {
+      speaker: "Zannenin-san",
+      message: "Which route feels right today? A clean clear, a score route, or a little detour?",
+      focus: "sub",
+      choices: ["Ask for a route", "Keep talking"],
+    },
+    {
+      speaker: "Zannenin-san",
+      message: "Start with Shibuya City. Play it straight for a clear, or get greedy if you want score.",
+      focus: "main",
+    },
+    {
+      speaker: "Zannenin-san",
+      message: "This is a prototype. Later it can grow into affection, choices, and pre-stage events.",
+      focus: "sub",
+    },
+  ];
 }
 
 function getWorldMapNodePosition(index: number, total: number) {

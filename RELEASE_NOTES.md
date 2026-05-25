@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.414
+### English
+- Added a prototype full-screen adventure scene from the world map, with visual-novel style character art, dialogue, choices, and return controls.
+- Added the provided standee images as preserved source PNGs and runtime WebP assets.
+### Japanese
+- ワールドマップから開けるおためしの全画面アドベンチャーパートを追加し、恋愛シミュレーション風の立ち絵、会話、選択肢、戻る操作を入れました。
+- 受け取った立ち絵PNGを元素材として保存し、実行時用のWebPアセットを追加しました。
+
 ## v0.1.413
 ### English
 - Fixed the broken story portrait image by replacing the missing wink portrait reference with an existing blush portrait asset.
