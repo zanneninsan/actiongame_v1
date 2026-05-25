@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.398
+### English
+- Reworked the boot loading screen into a polished splash-style panel and added a stalled-load retry action so the top screen no longer sits indefinitely on a plain `Loading...` card.
+- Made the boot curtain clear more defensively when the game reaches the start flow, and surfaced asset load failures during startup.
+### Japanese
+- 起動中のローディング表示を簡素な`Loading...`カードからスプラッシュ風の見た目へ更新し、読み込みが詰まった場合は再読み込みできる導線を出すようにしました。
+- ゲームが開始導線まで進んだときに起動カーテンをより確実に外し、起動時の素材読み込み失敗も画面上で分かるようにしました。
+
 ## v0.1.397
 ### English
 - Restyled the game UI toward a modern mobile-game look, using dark glass surfaces and soft gold accents instead of heavy old-style gold frames.

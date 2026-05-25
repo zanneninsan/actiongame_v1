@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.397";
+const DEBUG_VERSION = "v0.1.398";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -240,6 +240,7 @@ const BOOT_LOADING_OVERLAY_ID = "boot-loading-overlay";
 const BOOT_LOADING_OVERLAY_DELAY_MS = 1400;
 const BOOT_LOADING_OVERLAY_MIN_VISIBLE_MS = 720;
 const BOOT_LOADING_OVERLAY_FADE_MS = 220;
+const BOOT_LOADING_STALL_MS = 10000;
 const BOOT_LOADING_RUNNER_COLUMNS = 6;
 const BOOT_LOADING_RUNNER_FRAMES = 13;
 const BOOT_LOADING_RUNNER_FRAME_MS = 90;
@@ -328,6 +329,7 @@ const DASH_WALL_BOUNCE_COOLDOWN_MS = 420;
 let bootLoadingRunnerTimer: number | null = null;
 let bootLoadingOverlayTimer: number | null = null;
 let bootLoadingOverlayHideTimer: number | null = null;
+let bootLoadingStallTimer: number | null = null;
 let bootLoadingOverlayShownAt = 0;
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
@@ -553,6 +555,10 @@ class PrototypeScene extends Phaser.Scene {
 
   preload() {
     setBootLoadingProgress("Loading...");
+    this.load.on("loaderror", (file: { key?: string; src?: string }) => {
+      console.warn("Asset load failed during boot.", file.key ?? file.src ?? file);
+      setBootLoadingProgress("一部の素材読み込みを再試行しています...");
+    });
     REAR_BACKGROUNDS.forEach((background) => {
       this.load.image(background.key, `${ASSET_BASE}${background.path}`);
     });
@@ -4318,33 +4324,37 @@ document.body.classList.add("is-game-booting");
 void startGame();
 
 async function startGame() {
-  const reloadRequested = await ensureLatestClientVersion(DEBUG_VERSION);
-  if (reloadRequested) {
-    return;
-  }
+  try {
+    const reloadRequested = await ensureLatestClientVersion(DEBUG_VERSION);
+    if (reloadRequested) {
+      return;
+    }
 
-  showBootLoadingOverlay();
+    showBootLoadingOverlay();
 
-  new Phaser.Game({
-    type: Phaser.AUTO,
-    parent: "game",
-    width: GAME_WIDTH,
-    height: GAME_HEIGHT,
-    pixelArt: true,
-    backgroundColor: "#172033",
-    scale: {
-      mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
-    },
-    physics: {
-      default: "arcade",
-      arcade: {
-        gravity: { x: 0, y: 1400 },
-        debug: false,
+    new Phaser.Game({
+      type: Phaser.AUTO,
+      parent: "game",
+      width: GAME_WIDTH,
+      height: GAME_HEIGHT,
+      pixelArt: true,
+      backgroundColor: "#172033",
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
       },
-    },
-    scene: PrototypeScene,
-  });
+      physics: {
+        default: "arcade",
+        arcade: {
+          gravity: { x: 0, y: 1400 },
+          debug: false,
+        },
+      },
+      scene: PrototypeScene,
+    });
+  } catch (error) {
+    showBootLoadingFailure(error);
+  }
 }
 
 function registerServiceWorker() {
@@ -4368,6 +4378,7 @@ function showBootLoadingOverlay() {
     window.clearTimeout(bootLoadingOverlayHideTimer);
     bootLoadingOverlayHideTimer = null;
   }
+  clearBootLoadingStallTimer();
   const existing = document.getElementById(BOOT_LOADING_OVERLAY_ID);
   if (existing) {
     existing.remove();
@@ -4384,8 +4395,11 @@ function showBootLoadingOverlayNow() {
   overlay.id = BOOT_LOADING_OVERLAY_ID;
   overlay.innerHTML = `
     <div class="boot-loading-panel" role="status" aria-live="polite" aria-label="Loading game">
+      <div class="boot-loading-brand">ZANNENIN LAND</div>
       <div class="boot-loading-runner" data-boot-loading-runner></div>
+      <div class="boot-loading-meter" aria-hidden="true"><span></span></div>
       <p class="boot-loading-text" data-boot-loading-text>Loading...</p>
+      <div class="boot-loading-actions" data-boot-loading-actions hidden></div>
     </div>
   `;
   const runner = overlay.querySelector<HTMLDivElement>("[data-boot-loading-runner]");
@@ -4396,6 +4410,7 @@ function showBootLoadingOverlayNow() {
   bootLoadingOverlayShownAt = performance.now();
   document.body.appendChild(overlay);
   window.requestAnimationFrame(() => overlay.classList.add("is-visible"));
+  scheduleBootLoadingStallNotice();
 }
 
 function setBootLoadingProgress(text: string) {
@@ -4407,6 +4422,7 @@ function setBootLoadingProgress(text: string) {
 }
 
 function hideBootLoadingOverlay() {
+  document.body.classList.remove("is-game-booting");
   if (bootLoadingOverlayTimer !== null) {
     window.clearTimeout(bootLoadingOverlayTimer);
     bootLoadingOverlayTimer = null;
@@ -4415,6 +4431,7 @@ function hideBootLoadingOverlay() {
     window.clearTimeout(bootLoadingOverlayHideTimer);
     bootLoadingOverlayHideTimer = null;
   }
+  clearBootLoadingStallTimer();
   const overlay = document.getElementById(BOOT_LOADING_OVERLAY_ID);
   if (!overlay) {
     stopBootLoadingRunner();
@@ -4430,6 +4447,56 @@ function hideBootLoadingOverlay() {
       overlay.remove();
     }, BOOT_LOADING_OVERLAY_FADE_MS);
   }, delayMs);
+}
+
+function clearBootLoadingStallTimer() {
+  if (bootLoadingStallTimer !== null) {
+    window.clearTimeout(bootLoadingStallTimer);
+    bootLoadingStallTimer = null;
+  }
+}
+
+function scheduleBootLoadingStallNotice() {
+  clearBootLoadingStallTimer();
+  bootLoadingStallTimer = window.setTimeout(() => {
+    bootLoadingStallTimer = null;
+    showBootLoadingStallNotice("読み込みに時間がかかっています");
+  }, BOOT_LOADING_STALL_MS);
+}
+
+function showBootLoadingStallNotice(message: string) {
+  const overlay = document.getElementById(BOOT_LOADING_OVERLAY_ID);
+  if (!overlay) {
+    return;
+  }
+  overlay.classList.add("is-stalled");
+  setBootLoadingProgress(message);
+  const actions = overlay.querySelector<HTMLDivElement>("[data-boot-loading-actions]");
+  if (!actions) {
+    return;
+  }
+  actions.hidden = false;
+  actions.innerHTML = "";
+  const reloadButton = document.createElement("button");
+  reloadButton.type = "button";
+  reloadButton.className = "boot-loading-retry";
+  reloadButton.textContent = "再読み込み";
+  reloadButton.addEventListener("click", () => window.location.reload());
+  actions.appendChild(reloadButton);
+}
+
+function showBootLoadingFailure(error: unknown) {
+  console.error("Game boot failed.", error);
+  if (bootLoadingOverlayTimer !== null) {
+    window.clearTimeout(bootLoadingOverlayTimer);
+    bootLoadingOverlayTimer = null;
+  }
+  if (!document.getElementById(BOOT_LOADING_OVERLAY_ID)) {
+    showBootLoadingOverlayNow();
+  }
+  document.body.classList.remove("is-game-booting");
+  clearBootLoadingStallTimer();
+  showBootLoadingStallNotice("読み込みに失敗しました");
 }
 
 function startBootLoadingRunner(runner: HTMLDivElement) {
