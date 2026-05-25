@@ -112,12 +112,12 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.402";
+const DEBUG_VERSION = "v0.1.403";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
-const UI_TEXT_FONT_FAMILY = '"Segoe UI", "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif';
-const UI_DISPLAY_FONT_FAMILY = '"Segoe UI Semibold", "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif';
-const UI_TEXT_RESOLUTION = 2;
+const UI_TEXT_FONT_FAMILY = 'Meiryo, "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif';
+const UI_DISPLAY_FONT_FAMILY = 'Meiryo, "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif';
+const UI_TEXT_RESOLUTION = 1;
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -783,11 +783,11 @@ class PrototypeScene extends Phaser.Scene {
         fontStyle: "700",
         color: "#e0f2fe",
         stroke: "#03111f",
-        strokeThickness: 1,
+        strokeThickness: 0,
         resolution: UI_TEXT_RESOLUTION,
       })
       .setDepth(100)
-      .setShadow(0, 1, "#020617", 2, true, true)
+      .setShadow(0, 1, "#020617", 0, true, true)
       .setScrollFactor(0);
 
     this.scoreText = this.add
@@ -797,12 +797,12 @@ class PrototypeScene extends Phaser.Scene {
         fontStyle: "700",
         color: "#f8fafc",
         stroke: "#03111f",
-        strokeThickness: 1,
+        strokeThickness: 0,
         resolution: UI_TEXT_RESOLUTION,
       })
       .setScrollFactor(0)
       .setDepth(100)
-      .setShadow(1, 1, "#020617", 2, true, true);
+      .setShadow(1, 1, "#020617", 0, true, true);
     this.updateScoreText();
 
     this.timerText = this.add
@@ -812,12 +812,12 @@ class PrototypeScene extends Phaser.Scene {
         fontStyle: "700",
         color: "#fde68a",
         stroke: "#03111f",
-        strokeThickness: 1,
+        strokeThickness: 0,
         resolution: UI_TEXT_RESOLUTION,
       })
       .setScrollFactor(0)
       .setDepth(100)
-      .setShadow(1, 1, "#020617", 2, true, true);
+      .setShadow(1, 1, "#020617", 0, true, true);
     this.updateTimerText();
 
     this.staminaText = this.add
@@ -827,12 +827,12 @@ class PrototypeScene extends Phaser.Scene {
         fontStyle: "700",
         color: "#bbf7d0",
         stroke: "#03111f",
-        strokeThickness: 1,
+        strokeThickness: 0,
         resolution: UI_TEXT_RESOLUTION,
       })
       .setScrollFactor(0)
       .setDepth(100)
-      .setShadow(1, 1, "#020617", 2, true, true);
+      .setShadow(1, 1, "#020617", 0, true, true);
     this.staminaBarBack = this.add
       .rectangle(HUD_STAMINA_BAR_X, HUD_STAMINA_BAR_Y, HUD_STAMINA_BAR_WIDTH, HUD_STAMINA_BAR_HEIGHT, 0x0f172a, 0.78)
       .setOrigin(0, 0.5)
@@ -895,7 +895,7 @@ class PrototypeScene extends Phaser.Scene {
       .setOrigin(0.5, 0)
       .setScrollFactor(0)
       .setDepth(100)
-      .setShadow(1, 1, "#020617", 2, true, true);
+      .setShadow(1, 1, "#020617", 0, true, true);
     this.applyHudScale();
     this.scale.off("resize", this.handleScaleResize, this);
     this.scale.on("resize", this.handleScaleResize, this);
@@ -3269,7 +3269,7 @@ class PrototypeScene extends Phaser.Scene {
         fontStyle: "800",
         color: theme.labelColor,
         stroke: "#020617",
-        strokeThickness: 1,
+        strokeThickness: 0,
         align: "center",
         fixedWidth: width - (isPrimary ? 86 : 64),
         resolution: UI_TEXT_RESOLUTION,

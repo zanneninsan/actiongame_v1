@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.403
+### English
+- Removed the hazy stretched look from in-game UI text by dropping high-resolution text scaling, soft blur shadows, and thin outline strokes from the main HUD and clear-action labels.
+### Japanese
+- ゲーム内UI文字の引き伸ばしたようなモヤ感を抑えるため、メインHUDとクリア後ボタンから高解像度テキストスケール、ぼかし影、細い縁取りを外しました。
+
 ## v0.1.402
 ### English
 - Improved in-game UI text clarity by switching key HUD, clear-result, miss, stamp, and clear-action labels to a UI font stack with higher-resolution canvas text rendering.
