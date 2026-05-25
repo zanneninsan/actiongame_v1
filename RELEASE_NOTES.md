@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.406
+### English
+- Removed the distracting cyan accent strip from the in-game HUD and constrained the player-name label so it no longer overlaps the control-mode chip.
+### Japanese
+- ゲーム中HUD左側の目立つ水色アクセント帯を消し、プレイヤー名表示が操作モードのチップに被らないよう省略表示を追加しました。
+
 ## v0.1.405
 ### English
 - Compacted the leaderboard dialog layout so the ranking list gets more vertical space and can show around five rows on medium desktop screens.

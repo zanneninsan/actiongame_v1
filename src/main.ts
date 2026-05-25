@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.405";
+const DEBUG_VERSION = "v0.1.406";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const UI_TEXT_FONT_FAMILY = 'Meiryo, "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif';
@@ -305,6 +305,7 @@ const HUD_MODE_CHIP_X = HUD_PANEL_X + HUD_PANEL_WIDTH - 58;
 const HUD_MODE_CHIP_Y = HUD_PANEL_Y + 13;
 const HUD_MODE_CHIP_MIN_WIDTH = 82;
 const HUD_MODE_CHIP_HEIGHT = 28;
+const HUD_PLAYER_NAME_MAX_WIDTH = HUD_MODE_CHIP_X - HUD_MODE_CHIP_MIN_WIDTH / 2 - HUD_TEXT_X - 12;
 const HUD_COMPACT_DISPLAY_WIDTH = 760;
 const HUD_COMPACT_PLAYER_NAME_MAX_LENGTH = 12;
 const OVERHEAD_STAMINA_BAR_WIDTH = 76;
@@ -774,7 +775,8 @@ class PrototypeScene extends Phaser.Scene {
       .rectangle(HUD_PANEL_X + 14, HUD_PANEL_Y + 16, 3, HUD_PANEL_HEIGHT - 32, 0x67e8f9, 0.68)
       .setOrigin(0, 0)
       .setScrollFactor(0)
-      .setDepth(97);
+      .setDepth(97)
+      .setVisible(false);
 
     this.playerNameText = this.add
       .text(HUD_TEXT_X, HUD_PLAYER_NAME_Y, "", {
@@ -2201,18 +2203,42 @@ class PrototypeScene extends Phaser.Scene {
     return `${characters.slice(0, Math.max(1, maxLength - 3)).join("")}...`;
   }
 
+  private setHudTextWithinWidth(textObject: Phaser.GameObjects.Text, value: string, maxWidth: number) {
+    textObject.setText(value);
+    if (textObject.width <= maxWidth) {
+      return;
+    }
+
+    const suffix = "...";
+    const characters = Array.from(value);
+    for (let length = Math.max(1, characters.length - 1); length > 0; length -= 1) {
+      textObject.setText(`${characters.slice(0, length).join("")}${suffix}`);
+      if (textObject.width <= maxWidth) {
+        return;
+      }
+    }
+
+    textObject.setText(suffix);
+  }
+
   private updatePlayerNameText() {
     if (!this.playerNameText) {
       return;
     }
 
+    const scale = this.hudScale || 1;
+    const maxWidth = HUD_PLAYER_NAME_MAX_WIDTH * scale;
+
     if (this.usesCompactHud()) {
-      this.playerNameText.setText(this.formatCompactHudText(this.playerName || "PLAYER", HUD_COMPACT_PLAYER_NAME_MAX_LENGTH));
+      this.setHudTextWithinWidth(
+        this.playerNameText,
+        this.formatCompactHudText(this.playerName || "PLAYER", HUD_COMPACT_PLAYER_NAME_MAX_LENGTH),
+        maxWidth,
+      );
       return;
     }
 
-    const playerIdLabel = isLeaderboardPlayerId(this.leaderboardPlayerId) ? ` #${this.leaderboardPlayerId.slice(0, 8)}` : "";
-    this.playerNameText.setText(`${t(this.locale, "hud.player")}:${this.playerName}${playerIdLabel}`);
+    this.setHudTextWithinWidth(this.playerNameText, `${t(this.locale, "hud.player")}:${this.playerName || "PLAYER"}`, maxWidth);
   }
 
   private getSavedVolumeSettings() {
