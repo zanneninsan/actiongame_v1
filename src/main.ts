@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.395";
+const DEBUG_VERSION = "v0.1.396";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -426,9 +426,9 @@ class PrototypeScene extends Phaser.Scene {
   private ghostRecordingActive = false;
   private ghostRecordingDisabled = false;
   private lastGhostRecordAt = -Infinity;
-  private ghostExportButton?: Phaser.GameObjects.Text;
-  private clearMenuButton?: Phaser.GameObjects.Text;
-  private clearScreenshotButton?: Phaser.GameObjects.Text;
+  private ghostExportButton?: Phaser.GameObjects.Container;
+  private clearMenuButton?: Phaser.GameObjects.Container;
+  private clearScreenshotButton?: Phaser.GameObjects.Container;
   private lastScreenshot?: CapturedGameScreenshot;
   private screenshotCapturePending = false;
   private screenshotPreviewOpen = false;
@@ -3197,17 +3197,65 @@ class PrototypeScene extends Phaser.Scene {
     };
   }
 
-  private getClearActionButtonStyle(color: string, backgroundColor: string): Phaser.Types.GameObjects.Text.TextStyle {
+  private createClearActionButton(
+    index: number,
+    label: string,
+    theme: { accent: number; fill: number; labelColor: string },
+    onPress: () => void,
+  ) {
+    const position = this.getClearActionButtonPosition(index);
     const isMobileLayout = this.controlMode === "mobile";
-    return {
-      fontFamily: "monospace",
-      fontSize: isMobileLayout ? "22px" : "18px",
-      color,
-      backgroundColor,
-      padding: isMobileLayout ? { x: 22, y: 12 } : { x: 14, y: 8 },
-      align: "center",
-      fixedWidth: isMobileLayout ? 320 : undefined,
-    };
+    const width = isMobileLayout ? 328 : 246;
+    const height = isMobileLayout ? 50 : 42;
+    const radius = isMobileLayout ? 13 : 11;
+    const container = this.add.container(position.x, position.y).setScrollFactor(0).setDepth(260).setSize(width, height);
+    const shadow = this.add.graphics();
+    shadow.fillStyle(0x020617, 0.46);
+    shadow.fillRoundedRect(-width / 2 + 4, -height / 2 + 6, width, height, radius);
+
+    const panel = this.add.graphics();
+    panel.fillStyle(theme.fill, 0.88);
+    panel.fillRoundedRect(-width / 2, -height / 2, width, height, radius);
+    panel.lineStyle(2, theme.accent, 0.86);
+    panel.strokeRoundedRect(-width / 2 + 1, -height / 2 + 1, width - 2, height - 2, radius);
+    panel.lineStyle(1, 0xfff7d6, 0.32);
+    panel.strokeRoundedRect(-width / 2 + 5, -height / 2 + 5, width - 10, height - 10, Math.max(4, radius - 4));
+
+    const accent = this.add.graphics();
+    accent.fillStyle(theme.accent, 0.92);
+    accent.fillRoundedRect(-width / 2 + 9, -height / 2 + 9, 7, height - 18, 4);
+
+    const text = this.add
+      .text(10, 0, label, {
+        fontFamily: "monospace",
+        fontSize: isMobileLayout ? "20px" : "16px",
+        color: theme.labelColor,
+        stroke: "#020617",
+        strokeThickness: 3,
+        align: "center",
+        fixedWidth: width - 44,
+      })
+      .setOrigin(0.5);
+
+    container.add([shadow, panel, accent, text]);
+    container
+      .setInteractive(new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height), Phaser.Geom.Rectangle.Contains)
+      .on("pointerover", () => {
+        container.setScale(1.025);
+        panel.setAlpha(1);
+        accent.setAlpha(1);
+      })
+      .on("pointerout", () => {
+        container.setScale(1);
+        panel.setAlpha(1);
+        accent.setAlpha(0.92);
+      })
+      .on("pointerdown", () => container.setScale(0.985))
+      .on("pointerup", () => {
+        container.setScale(1.025);
+        onPress();
+      });
+    return container;
   }
 
   private showGhostExportButton() {
@@ -3218,13 +3266,12 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     const position = this.getClearActionButtonPosition(0);
-    this.ghostExportButton = this.add
-      .text(position.x, position.y, t(this.locale, "ghost.exportJson"), this.getClearActionButtonStyle("#dcfce7", "#14532dee"))
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(260)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerup", () => this.downloadGhostReplayJson());
+    this.ghostExportButton = this.createClearActionButton(
+      0,
+      t(this.locale, "ghost.exportJson"),
+      { accent: 0x86efac, fill: 0x14532d, labelColor: "#dcfce7" },
+      () => this.downloadGhostReplayJson(),
+    );
   }
 
   private showScreenshotPreviewOrCapture() {
@@ -3237,14 +3284,12 @@ class PrototypeScene extends Phaser.Scene {
 
   private showClearScreenshotButton() {
     this.clearScreenshotButton?.destroy();
-    const position = this.getClearActionButtonPosition(2);
-    this.clearScreenshotButton = this.add
-      .text(position.x, position.y, t(this.locale, "screenshot.view"), this.getClearActionButtonStyle("#e0f2fe", "#0f172aee"))
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(260)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerup", () => this.showScreenshotPreviewOrCapture());
+    this.clearScreenshotButton = this.createClearActionButton(
+      2,
+      t(this.locale, "screenshot.view"),
+      { accent: 0x7dd3fc, fill: 0x0f172a, labelColor: "#e0f2fe" },
+      () => this.showScreenshotPreviewOrCapture(),
+    );
   }
 
   private captureGameScreenshot({ preview }: { preview: boolean }) {
@@ -3293,14 +3338,12 @@ class PrototypeScene extends Phaser.Scene {
 
   private showClearMenuButton() {
     this.clearMenuButton?.destroy();
-    const position = this.getClearActionButtonPosition(1);
-    this.clearMenuButton = this.add
-      .text(position.x, position.y, t(this.locale, "menu.backToMenu"), this.getClearActionButtonStyle("#e0f2fe", "#0f172aee"))
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(260)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerup", () => void this.returnToTitle());
+    this.clearMenuButton = this.createClearActionButton(
+      1,
+      t(this.locale, "menu.backToMenu"),
+      { accent: 0xf5c76a, fill: 0x0f172a, labelColor: "#fff7d6" },
+      () => void this.returnToTitle(),
+    );
   }
 
   private downloadGhostReplayJson() {

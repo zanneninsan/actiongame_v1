@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.396
+### English
+- Polished 20 grouped UI areas across the world map, start flow, clear-result actions, modals, leaderboard, screenshot preview, global controls, and mobile controls.
+- Rebuilt clear-result action buttons as richer in-canvas controls and added an HTML before/after visual polish report.
+### Japanese
+- ワールドマップ、開始導線、クリア後アクション、各種モーダル、ランキング、スクリーンショット確認、グローバル操作、スマホ操作UIの外見改善を20カテゴリにまとめて実施しました。
+- クリア後の各ボタンをCanvas内のリッチな専用ボタンに作り直し、改善前後を確認できるHTMLレポートを追加しました。
+
 ## v0.1.395
 ### English
 - Kept clear-result action buttons in the top-right on PC controls regardless of compact HUD width, while preserving the larger bottom-center layout for mobile controls.
