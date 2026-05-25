@@ -6196,6 +6196,30 @@ body.is-screenshot-modal-open #mobile-controls {
     overflow: hidden auto;
     overscroll-behavior: contain;
     pointer-events: auto;
+    scrollbar-gutter: stable;
+  }
+
+  .start-world-stage-card .start-world-info-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .start-world-stage-card .start-world-info-grid section,
+  .start-world-stage-card .start-world-info-grid ul,
+  .start-world-stage-card .start-world-chip-list,
+  .start-world-stage-card .start-world-chip-list span {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .start-world-stage-card .start-world-info-grid ul {
+    padding-left: 14px;
+  }
+
+  .start-world-stage-card .start-world-chip-list span {
+    overflow-wrap: anywhere;
+    white-space: normal;
+    line-height: 1.25;
   }
 
   .start-world-map-panel:has(.start-world-node:hover) .start-world-stage-card,

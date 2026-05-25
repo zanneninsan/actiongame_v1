@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.410
+### English
+- Fixed clipping in the wide world-map right sidebar by stacking mission/gimmick details into one column and allowing chips to wrap inside the panel.
+### Japanese
+- 横幅の広いワールドマップ右サイドバーでミッション/ギミック欄が見切れないよう、詳細欄を1カラム化し、チップがパネル内で折り返すようにしました。
+
 ## v0.1.409
 ### English
 - Made the wide world-map view prioritize the map art by removing the large left stage-list column and folding the compact progress/stamp panel into the right sidebar.
