@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.409
+### English
+- Made the wide world-map view prioritize the map art by removing the large left stage-list column and folding the compact progress/stamp panel into the right sidebar.
+### Japanese
+- 横幅の広いワールドマップ画面で大きな左側ステージ一覧カラムをやめ、進行度/スタンプ帳を右サイドバーへ小さく統合してマップをより大きく表示するようにしました。
+
 ## v0.1.408
 ### English
 - Rebuilt the wide world-map layout into fixed left/map/right columns so the progress list and stage detail panel no longer float over the map.
