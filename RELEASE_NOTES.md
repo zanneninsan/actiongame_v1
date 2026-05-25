@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.399
+### English
+- Kept the world-map menu panels fixed in place while switching selected stages, so buttons no longer jump between the left and right sides mid-interaction.
+### Japanese
+- ワールドマップで選択ステージを切り替えてもメニューパネルの左右位置を固定し、操作しようとしたボタンが反対側へ逃げないようにしました。
+
 ## v0.1.398
 ### English
 - Reworked the boot loading screen into a polished splash-style panel and added a stalled-load retry action so the top screen no longer sits indefinitely on a plain `Loading...` card.

@@ -560,7 +560,6 @@ export class StartModal {
       const detail = getWorldMapStageDetail(selectedStageId);
       const ui = getWorldMapUiText(selectedLocale);
       const stageLabel = option?.label[selectedLocale] ?? selectedStageId;
-      const selectedPosition = getWorldMapNodePosition(stageIndex, this.options.stageOptions.length);
       const routeProgress = this.options.stageOptions.length <= 1 ? 100 : (stageIndex / (this.options.stageOptions.length - 1)) * 100;
       const extra = getExtraText();
       const stageCleared = isStageCleared(selectedStageId);
@@ -581,7 +580,7 @@ export class StartModal {
       const clearBadge = stageCleared ? `<span class="start-world-clear-stamp">CLEAR</span>` : "";
 
       worldStageCard.style.setProperty("--stage-accent", detail.accent);
-      worldMapPanel.classList.toggle("is-stage-card-left", selectedPosition.x >= 58);
+      worldMapPanel.classList.remove("is-stage-card-left");
       worldStageCard.innerHTML = `
         <div class="start-world-card-passport" aria-hidden="true"></div>
         <div class="start-world-card-head">
