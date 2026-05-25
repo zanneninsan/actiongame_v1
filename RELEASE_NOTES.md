@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.400
+### English
+- Made the post-clear "To World Map" action the primary, larger CTA and moved ghost export below it as a secondary action.
+### Japanese
+- クリア後の「ワールドマップへ」を大きな主ボタンとして最上位に出し、ゴーストJSON出力などの補助操作より先に見つけやすくしました。
+
 ## v0.1.399
 ### English
 - Kept the world-map menu panels fixed in place while switching selected stages, so buttons no longer jump between the left and right sides mid-interaction.

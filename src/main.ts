@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.399";
+const DEBUG_VERSION = "v0.1.400";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -313,10 +313,10 @@ const GHOST_REPLAY_SCHEMA = "zannenin-ghost-v1";
 const GHOST_RECORD_INTERVAL_MS = 50;
 const CLEAR_ACTION_DESKTOP_X = GAME_WIDTH - 168;
 const CLEAR_ACTION_DESKTOP_Y = 118;
-const CLEAR_ACTION_DESKTOP_GAP = 46;
+const CLEAR_ACTION_DESKTOP_GAP = 58;
 const CLEAR_ACTION_MOBILE_X = GAME_WIDTH / 2;
 const CLEAR_ACTION_MOBILE_Y = GAME_HEIGHT - 178;
-const CLEAR_ACTION_MOBILE_GAP = 58;
+const CLEAR_ACTION_MOBILE_GAP = 62;
 const SHOW_CLEAR_RANK_AND_MISSIONS = true;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
@@ -3208,42 +3208,48 @@ class PrototypeScene extends Phaser.Scene {
     label: string,
     theme: { accent: number; fill: number; labelColor: string },
     onPress: () => void,
+    variant: "primary" | "secondary" = "secondary",
   ) {
     const position = this.getClearActionButtonPosition(index);
     const isMobileLayout = this.controlMode === "mobile";
-    const width = isMobileLayout ? 336 : 252;
-    const height = isMobileLayout ? 52 : 44;
-    const radius = isMobileLayout ? 18 : 16;
+    const isPrimary = variant === "primary";
+    const width = isMobileLayout ? (isPrimary ? 380 : 324) : isPrimary ? 292 : 232;
+    const height = isMobileLayout ? (isPrimary ? 62 : 46) : isPrimary ? 54 : 38;
+    const radius = isMobileLayout ? 20 : 18;
     const container = this.add.container(position.x, position.y).setScrollFactor(0).setDepth(260).setSize(width, height);
     const shadow = this.add.graphics();
-    shadow.fillStyle(0x020617, 0.38);
-    shadow.fillRoundedRect(-width / 2 + 5, -height / 2 + 8, width, height, radius);
+    shadow.fillStyle(0x020617, isPrimary ? 0.5 : 0.34);
+    shadow.fillRoundedRect(-width / 2 + 6, -height / 2 + (isPrimary ? 10 : 7), width, height, radius);
 
     const panel = this.add.graphics();
-    panel.fillStyle(0x061629, 0.86);
+    panel.fillStyle(isPrimary ? 0x0b1f2d : 0x061629, isPrimary ? 0.94 : 0.82);
     panel.fillRoundedRect(-width / 2, -height / 2, width, height, radius);
-    panel.fillStyle(theme.fill, 0.22);
+    panel.fillStyle(theme.fill, isPrimary ? 0.42 : 0.2);
     panel.fillRoundedRect(-width / 2 + 2, -height / 2 + 2, width - 4, height - 4, radius - 2);
-    panel.lineStyle(2, theme.accent, 0.68);
+    panel.lineStyle(isPrimary ? 3 : 2, theme.accent, isPrimary ? 0.95 : 0.6);
     panel.strokeRoundedRect(-width / 2 + 1, -height / 2 + 1, width - 2, height - 2, radius);
-    panel.lineStyle(1, 0xfff7d6, 0.16);
+    panel.lineStyle(1, 0xfff7d6, isPrimary ? 0.28 : 0.14);
     panel.strokeRoundedRect(-width / 2 + 7, -height / 2 + 7, width - 14, height - 14, Math.max(8, radius - 6));
+    if (isPrimary) {
+      panel.lineStyle(2, 0xffffff, 0.16);
+      panel.lineBetween(-width / 2 + 24, -height / 2 + 13, width / 2 - 24, -height / 2 + 13);
+    }
 
     const accent = this.add.graphics();
-    accent.fillStyle(theme.accent, 0.9);
-    accent.fillRoundedRect(-width / 2 + 13, -height / 2 + 10, 34, height - 20, 10);
-    accent.fillStyle(0xffffff, 0.2);
-    accent.fillCircle(-width / 2 + 30, 0, 5);
+    accent.fillStyle(theme.accent, isPrimary ? 1 : 0.84);
+    accent.fillRoundedRect(-width / 2 + 13, -height / 2 + 9, isPrimary ? 44 : 30, height - 18, 12);
+    accent.fillStyle(0xffffff, isPrimary ? 0.36 : 0.18);
+    accent.fillCircle(-width / 2 + (isPrimary ? 35 : 28), 0, isPrimary ? 7 : 5);
 
     const text = this.add
-      .text(26, 0, label, {
+      .text(isPrimary ? 34 : 22, 0, label, {
         fontFamily: "monospace",
-        fontSize: isMobileLayout ? "20px" : "15px",
+        fontSize: isMobileLayout ? (isPrimary ? "23px" : "18px") : isPrimary ? "18px" : "14px",
         color: theme.labelColor,
         stroke: "#020617",
         strokeThickness: 2,
         align: "center",
-        fixedWidth: width - 70,
+        fixedWidth: width - (isPrimary ? 86 : 64),
       })
       .setOrigin(0.5);
 
@@ -3276,7 +3282,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.ghostExportButton = this.createClearActionButton(
-      0,
+      1,
       t(this.locale, "ghost.exportJson"),
       { accent: 0xf5c76a, fill: 0x12343a, labelColor: "#fff7d6" },
       () => this.downloadGhostReplayJson(),
@@ -3348,10 +3354,11 @@ class PrototypeScene extends Phaser.Scene {
   private showClearMenuButton() {
     this.clearMenuButton?.destroy();
     this.clearMenuButton = this.createClearActionButton(
-      1,
+      0,
       t(this.locale, "menu.backToMenu"),
-      { accent: 0xf5c76a, fill: 0x3a2b12, labelColor: "#fff7d6" },
+      { accent: 0xf8d66d, fill: 0x4b2f08, labelColor: "#fff7d6" },
       () => void this.returnToTitle(),
+      "primary",
     );
   }
 
