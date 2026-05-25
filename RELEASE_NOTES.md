@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.397
+### English
+- Restyled the game UI toward a modern mobile-game look, using dark glass surfaces and soft gold accents instead of heavy old-style gold frames.
+- Updated clear-result action buttons and the UI polish report to match the newer visual direction.
+### Japanese
+- 古い金色の額縁感を抑え、満足教の金をアクセントにしたダークガラス調の今風スマホゲームUIへ全体の見た目を寄せました。
+- クリア後アクションボタンとUI改善レポートも、新しい見た目の方向性に合わせて更新しました。
+
 ## v0.1.396
 ### English
 - Polished 20 grouped UI areas across the world map, start flow, clear-result actions, modals, leaderboard, screenshot preview, global controls, and mobile controls.

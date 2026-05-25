@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.396";
+const DEBUG_VERSION = "v0.1.397";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -3205,35 +3205,39 @@ class PrototypeScene extends Phaser.Scene {
   ) {
     const position = this.getClearActionButtonPosition(index);
     const isMobileLayout = this.controlMode === "mobile";
-    const width = isMobileLayout ? 328 : 246;
-    const height = isMobileLayout ? 50 : 42;
-    const radius = isMobileLayout ? 13 : 11;
+    const width = isMobileLayout ? 336 : 252;
+    const height = isMobileLayout ? 52 : 44;
+    const radius = isMobileLayout ? 18 : 16;
     const container = this.add.container(position.x, position.y).setScrollFactor(0).setDepth(260).setSize(width, height);
     const shadow = this.add.graphics();
-    shadow.fillStyle(0x020617, 0.46);
-    shadow.fillRoundedRect(-width / 2 + 4, -height / 2 + 6, width, height, radius);
+    shadow.fillStyle(0x020617, 0.38);
+    shadow.fillRoundedRect(-width / 2 + 5, -height / 2 + 8, width, height, radius);
 
     const panel = this.add.graphics();
-    panel.fillStyle(theme.fill, 0.88);
+    panel.fillStyle(0x061629, 0.86);
     panel.fillRoundedRect(-width / 2, -height / 2, width, height, radius);
-    panel.lineStyle(2, theme.accent, 0.86);
+    panel.fillStyle(theme.fill, 0.22);
+    panel.fillRoundedRect(-width / 2 + 2, -height / 2 + 2, width - 4, height - 4, radius - 2);
+    panel.lineStyle(2, theme.accent, 0.68);
     panel.strokeRoundedRect(-width / 2 + 1, -height / 2 + 1, width - 2, height - 2, radius);
-    panel.lineStyle(1, 0xfff7d6, 0.32);
-    panel.strokeRoundedRect(-width / 2 + 5, -height / 2 + 5, width - 10, height - 10, Math.max(4, radius - 4));
+    panel.lineStyle(1, 0xfff7d6, 0.16);
+    panel.strokeRoundedRect(-width / 2 + 7, -height / 2 + 7, width - 14, height - 14, Math.max(8, radius - 6));
 
     const accent = this.add.graphics();
-    accent.fillStyle(theme.accent, 0.92);
-    accent.fillRoundedRect(-width / 2 + 9, -height / 2 + 9, 7, height - 18, 4);
+    accent.fillStyle(theme.accent, 0.9);
+    accent.fillRoundedRect(-width / 2 + 13, -height / 2 + 10, 34, height - 20, 10);
+    accent.fillStyle(0xffffff, 0.2);
+    accent.fillCircle(-width / 2 + 30, 0, 5);
 
     const text = this.add
-      .text(10, 0, label, {
+      .text(26, 0, label, {
         fontFamily: "monospace",
-        fontSize: isMobileLayout ? "20px" : "16px",
+        fontSize: isMobileLayout ? "20px" : "15px",
         color: theme.labelColor,
         stroke: "#020617",
-        strokeThickness: 3,
+        strokeThickness: 2,
         align: "center",
-        fixedWidth: width - 44,
+        fixedWidth: width - 70,
       })
       .setOrigin(0.5);
 
@@ -3265,11 +3269,10 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    const position = this.getClearActionButtonPosition(0);
     this.ghostExportButton = this.createClearActionButton(
       0,
       t(this.locale, "ghost.exportJson"),
-      { accent: 0x86efac, fill: 0x14532d, labelColor: "#dcfce7" },
+      { accent: 0xf5c76a, fill: 0x12343a, labelColor: "#fff7d6" },
       () => this.downloadGhostReplayJson(),
     );
   }
@@ -3287,7 +3290,7 @@ class PrototypeScene extends Phaser.Scene {
     this.clearScreenshotButton = this.createClearActionButton(
       2,
       t(this.locale, "screenshot.view"),
-      { accent: 0x7dd3fc, fill: 0x0f172a, labelColor: "#e0f2fe" },
+      { accent: 0x7dd3fc, fill: 0x0d2a4a, labelColor: "#e0f2fe" },
       () => this.showScreenshotPreviewOrCapture(),
     );
   }
@@ -3341,7 +3344,7 @@ class PrototypeScene extends Phaser.Scene {
     this.clearMenuButton = this.createClearActionButton(
       1,
       t(this.locale, "menu.backToMenu"),
-      { accent: 0xf5c76a, fill: 0x0f172a, labelColor: "#fff7d6" },
+      { accent: 0xf5c76a, fill: 0x3a2b12, labelColor: "#fff7d6" },
       () => void this.returnToTitle(),
     );
   }

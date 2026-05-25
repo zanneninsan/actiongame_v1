@@ -5352,3 +5352,498 @@ body.is-screenshot-modal-open #mobile-controls {
     font-size: 9px;
   }
 }
+
+/* Modern mobile-game skin: Manzoku gold as an accent, not a heavy frame. */
+:root {
+  --modern-bg: #06101f;
+  --modern-surface: rgba(8, 21, 39, 0.8);
+  --modern-surface-strong: rgba(8, 22, 42, 0.94);
+  --modern-surface-soft: rgba(15, 38, 68, 0.56);
+  --modern-line: rgba(184, 233, 255, 0.18);
+  --modern-line-strong: rgba(184, 233, 255, 0.32);
+  --modern-gold: #f5c76a;
+  --modern-gold-bright: #ffe8a3;
+  --modern-gold-deep: #8a5a1e;
+  --modern-sky: #a9e8ff;
+  --modern-text: #f8fbff;
+  --modern-muted: #a9bdd7;
+  --modern-radius-lg: 24px;
+  --modern-radius-md: 16px;
+  --modern-radius-sm: 12px;
+  --modern-shadow: 0 20px 54px rgba(0, 0, 0, 0.42);
+  --modern-glow: 0 0 26px rgba(245, 199, 106, 0.18);
+}
+
+#start-modal,
+#options-modal,
+#leaderboard-modal,
+#account-modal,
+#screenshot-modal {
+  background:
+    radial-gradient(circle at 50% -12%, rgba(245, 199, 106, 0.1), transparent 28%),
+    radial-gradient(circle at 80% 8%, rgba(56, 189, 248, 0.1), transparent 24%),
+    linear-gradient(180deg, #08172b, #030914 76%);
+}
+
+.title-sound-gate-panel,
+.start-orientation-dialog,
+.start-dialog,
+.start-world-map-dashboard,
+.start-world-settings-panel,
+.start-world-stage-card,
+.start-world-confirm,
+.world-map-return-confirm-dialog,
+.options-dialog,
+.screenshot-dialog,
+.account-dialog,
+.leaderboard-dialog {
+  border: 1px solid var(--modern-line);
+  border-radius: var(--modern-radius-lg);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent 16%),
+    linear-gradient(180deg, var(--modern-surface-strong), rgba(3, 9, 20, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(245, 199, 106, 0.05),
+    var(--modern-shadow),
+    var(--modern-glow);
+  backdrop-filter: blur(14px) saturate(1.12);
+}
+
+.start-dialog,
+.options-dialog,
+.account-dialog,
+.leaderboard-dialog {
+  background-image:
+    radial-gradient(circle at 18% 0%, rgba(245, 199, 106, 0.12), transparent 28%),
+    radial-gradient(circle at 88% 10%, rgba(56, 189, 248, 0.1), transparent 24%),
+    linear-gradient(180deg, var(--modern-surface-strong), rgba(3, 9, 20, 0.96));
+}
+
+.start-dialog {
+  width: min(720px, calc(100vw - 72px));
+  height: auto;
+  min-height: 0;
+  max-height: calc(100dvh - 48px);
+  aspect-ratio: auto;
+  gap: 13px;
+  padding: clamp(28px, 4vw, 38px) clamp(34px, 5vw, 54px);
+}
+
+.start-dialog .start-account-panel,
+.start-dialog .start-primary-panel,
+.start-dialog .start-choice-panel {
+  align-content: start;
+}
+
+.start-dialog::before,
+.options-dialog::before,
+.account-dialog::before,
+.leaderboard-dialog::before,
+.start-world-map-dashboard::before,
+.start-world-stage-card::before,
+.start-world-settings-panel::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(245, 199, 106, 0.08);
+  border-radius: calc(var(--modern-radius-lg) - 8px);
+  pointer-events: none;
+}
+
+.start-dialog,
+.options-dialog,
+.account-dialog,
+.leaderboard-dialog,
+.start-world-map-dashboard,
+.start-world-stage-card,
+.start-world-settings-panel {
+  position: relative;
+}
+
+.start-world-map-caption {
+  width: min(680px, calc(100vw - 32px));
+  border: 1px solid rgba(245, 199, 106, 0.18);
+  border-radius: 20px;
+  background:
+    linear-gradient(90deg, rgba(245, 199, 106, 0.12), transparent 18% 82%, rgba(245, 199, 106, 0.12)),
+    rgba(3, 9, 20, 0.82);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
+}
+
+.start-world-map-art {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.start-world-map-caption {
+  grid-area: 2 / 1 / 3 / 2;
+}
+
+.start-world-map-toolbar,
+.start-world-map-dashboard,
+.start-world-settings-panel,
+.start-world-stage-card,
+.start-world-confirm {
+  grid-area: 1 / 1 / 3 / 2;
+  position: absolute;
+}
+
+.start-world-map-caption span,
+.start-world-current,
+.start-world-map-caption em {
+  text-shadow: none;
+}
+
+.start-world-map-caption span {
+  color: var(--modern-gold-bright);
+  letter-spacing: 0;
+}
+
+.start-world-current,
+.start-world-map-caption em {
+  color: var(--modern-muted);
+}
+
+.start-world-map-art {
+  border-radius: 22px;
+  border: 1px solid rgba(184, 233, 255, 0.2);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 -72px 90px rgba(3, 9, 20, 0.34),
+    0 22px 70px rgba(0, 0, 0, 0.52);
+}
+
+.start-world-map-toolbar button,
+.start-world-confirm-actions button,
+.title-sound-gate-actions button,
+.start-orientation-actions button,
+.mode-button,
+.options-mode-button,
+.sound-button,
+.start-button,
+.start-google-login,
+.start-ghost-load,
+.start-ghost-fullscreen,
+.start-map-back,
+.leaderboard-google-button,
+#leaderboard-share-x,
+#leaderboard-close,
+#account-close,
+#options-close,
+.screenshot-actions button,
+.account-actions button,
+.ui-button,
+.mobile-layout-button,
+.mobile-layout-size-button {
+  border: 1px solid rgba(184, 233, 255, 0.18);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 42%),
+    linear-gradient(180deg, rgba(17, 43, 74, 0.94), rgba(4, 13, 28, 0.94));
+  color: var(--modern-text);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 10px 22px rgba(0, 0, 0, 0.24);
+  text-shadow: none;
+}
+
+.start-button,
+.mode-button.is-selected,
+.options-mode-button.is-selected,
+.sound-button.is-selected,
+.start-world-confirm-yes,
+.start-orientation-actions button:first-child,
+.title-sound-on,
+.start-world-map-toolbar .start-world-favorite.is-selected,
+#leaderboard-close,
+.leaderboard-entry.is-current-score .leaderboard-new-marker {
+  border-color: rgba(255, 232, 163, 0.52);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 44%),
+    linear-gradient(135deg, #ffe8a3, #f5c76a 42%, #9b661f);
+  color: #211307;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 0 20px rgba(245, 199, 106, 0.28),
+    0 14px 28px rgba(0, 0, 0, 0.26);
+}
+
+.mode-button.is-selected::before,
+.options-mode-button.is-selected::before,
+.sound-button.is-selected::before {
+  color: #211307;
+  text-shadow: none;
+}
+
+.start-world-map-toolbar button:hover,
+.start-world-map-toolbar button:focus-visible,
+.start-world-confirm-actions button:hover,
+.start-world-confirm-actions button:focus-visible,
+.title-sound-gate-actions button:hover,
+.title-sound-gate-actions button:focus-visible,
+.start-orientation-actions button:hover,
+.start-orientation-actions button:focus-visible,
+.mode-button:hover,
+.mode-button:focus-visible,
+.options-mode-button:hover,
+.options-mode-button:focus-visible,
+.sound-button:hover,
+.sound-button:focus-visible,
+.start-button:hover,
+.start-button:focus-visible,
+.start-google-login:not(:disabled):hover,
+.start-google-login:not(:disabled):focus-visible,
+.leaderboard-google-button:not(:disabled):hover,
+.leaderboard-google-button:not(:disabled):focus-visible,
+#leaderboard-share-x:hover,
+#leaderboard-share-x:focus-visible,
+#leaderboard-close:hover,
+#leaderboard-close:focus-visible,
+#account-close:hover,
+#account-close:focus-visible,
+#options-close:hover,
+#options-close:focus-visible,
+.screenshot-actions button:hover,
+.screenshot-actions button:focus-visible,
+.account-actions button:not(:disabled):hover,
+.account-actions button:not(:disabled):focus-visible,
+.ui-button:hover,
+.ui-button:focus-visible {
+  transform: translateY(-1px) scale(1.015);
+  filter: brightness(1.08) saturate(1.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 0 22px rgba(245, 199, 106, 0.22),
+    0 16px 30px rgba(0, 0, 0, 0.32);
+}
+
+.start-world-map-dashboard,
+.start-world-settings-panel,
+.start-world-stage-card {
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(245, 199, 106, 0.1), transparent 36%),
+    linear-gradient(180deg, rgba(13, 35, 63, 0.82), rgba(3, 9, 20, 0.9));
+}
+
+.start-world-progress-card {
+  border-bottom-color: rgba(245, 199, 106, 0.16);
+}
+
+.start-world-progress-label,
+.start-world-search span,
+.start-world-settings-head,
+.start-world-setting-field > span,
+.start-field,
+.options-dialog label,
+.options-mode-control,
+.account-card h3,
+.leaderboard-dialog h2,
+.account-dialog h2,
+.options-dialog h2,
+.screenshot-dialog h2 {
+  color: var(--modern-gold-bright);
+  text-shadow: none;
+}
+
+.start-world-progress-value,
+.start-world-card-head em,
+.start-world-route-meter,
+.start-world-info-grid p,
+.start-account-status,
+.start-ghost-status,
+.leaderboard-status,
+.leaderboard-meta,
+.account-note,
+.screenshot-meta {
+  color: var(--modern-muted);
+  text-shadow: none;
+}
+
+.start-world-search-input,
+.start-dialog input,
+.start-dialog select,
+.start-world-setting-field select,
+.options-dialog select {
+  border: 1px solid rgba(184, 233, 255, 0.22);
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent),
+    rgba(3, 9, 20, 0.62);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03),
+    inset 0 10px 18px rgba(0, 0, 0, 0.16);
+}
+
+.start-world-filter-row button,
+.start-world-badges span,
+.start-world-chip-list span,
+.start-world-daily,
+.start-world-clear-stamp,
+.leaderboard-current-rank {
+  border: 1px solid rgba(184, 233, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(8, 22, 42, 0.72);
+  color: var(--modern-sky);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.start-world-filter-row button.is-selected,
+.start-world-daily,
+.start-world-clear-stamp {
+  border-color: rgba(255, 232, 163, 0.42);
+  background: rgba(245, 199, 106, 0.14);
+  color: var(--modern-gold-bright);
+}
+
+.start-world-rail button,
+.start-world-plan-grid > span,
+.start-world-stat-grid > span,
+.start-world-info-grid > div,
+.account-card,
+.leaderboard-table,
+.leaderboard-current-score,
+.leaderboard-account-prompt,
+.account-score-row {
+  border: 1px solid rgba(184, 233, 255, 0.14);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 44%),
+    rgba(7, 20, 38, 0.7);
+}
+
+.start-world-rail button::before {
+  width: 5px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--modern-gold-bright), var(--stage-accent));
+}
+
+.start-world-node {
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), transparent 45%),
+    linear-gradient(180deg, #102a49, #040d1c);
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(184, 233, 255, 0.16);
+}
+
+.start-world-node.is-selected {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent 45%),
+    linear-gradient(135deg, #ffe8a3, #f5c76a 44%, #9b661f);
+  color: #211307;
+  box-shadow:
+    0 0 22px rgba(245, 199, 106, 0.38),
+    0 12px 24px rgba(0, 0, 0, 0.34);
+}
+
+.start-world-node.is-selected::after {
+  border-radius: 18px;
+  border-color: rgba(255, 232, 163, 0.5);
+}
+
+.start-world-node-label {
+  border-radius: 999px;
+  background: rgba(3, 9, 20, 0.76);
+  color: var(--modern-text);
+}
+
+.start-field,
+.start-ghost-panel,
+.start-advanced-panel summary {
+  border-radius: 16px;
+  background: rgba(7, 20, 38, 0.42);
+  border-color: rgba(184, 233, 255, 0.12);
+}
+
+.leaderboard-dialog h2,
+.account-dialog h2,
+.options-dialog h2 {
+  min-height: auto;
+  padding: 8px 18px;
+  border: 1px solid rgba(245, 199, 106, 0.18);
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(245, 199, 106, 0.1), rgba(184, 233, 255, 0.06), rgba(245, 199, 106, 0.1));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.leaderboard-entry {
+  border: 1px solid rgba(184, 233, 255, 0.12);
+  border-radius: 14px;
+  background:
+    linear-gradient(90deg, rgba(245, 199, 106, 0.08), transparent 18%),
+    rgba(7, 20, 38, 0.66);
+}
+
+.leaderboard-entry.is-current-score {
+  border-color: rgba(255, 232, 163, 0.36);
+  background:
+    linear-gradient(90deg, rgba(245, 199, 106, 0.18), rgba(8, 22, 42, 0.72)),
+    rgba(7, 20, 38, 0.76);
+}
+
+.leaderboard-new-marker {
+  border-radius: 999px;
+}
+
+#global-ui {
+  border-radius: 999px;
+  background: rgba(3, 9, 20, 0.42);
+  border-color: rgba(184, 233, 255, 0.12);
+}
+
+.ui-button {
+  border-radius: 999px;
+}
+
+.mobile-layout-panel,
+.mobile-button,
+.mobile-joystick-ring {
+  border-radius: 22px;
+  border-color: rgba(184, 233, 255, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 44%),
+    rgba(6, 18, 35, 0.68);
+  backdrop-filter: blur(8px);
+}
+
+.mobile-joystick-ring {
+  border-radius: 50%;
+}
+
+.mobile-button.is-pressed,
+.mobile-button.is-active {
+  border-color: rgba(255, 232, 163, 0.5);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), transparent 44%),
+    rgba(245, 199, 106, 0.2);
+}
+
+@media (max-width: 820px), (max-height: 560px) {
+  .start-dialog,
+  .options-dialog,
+  .account-dialog,
+  .leaderboard-dialog,
+  .start-world-map-dashboard,
+  .start-world-stage-card,
+  .start-world-settings-panel {
+    border-radius: 18px;
+  }
+
+  .start-world-map-caption {
+    border-radius: 16px;
+  }
+
+  .start-world-map-toolbar button {
+    border-radius: 14px;
+  }
+
+  .start-world-stage-card::before,
+  .start-world-map-dashboard::before,
+  .start-world-settings-panel::before {
+    inset: 6px;
+    border-radius: 12px;
+  }
+}
