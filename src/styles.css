@@ -738,9 +738,10 @@ body.is-mobile-controls-active canvas {
   padding: max(22px, env(safe-area-inset-top)) max(28px, env(safe-area-inset-right)) max(26px, env(safe-area-inset-bottom))
     max(28px, env(safe-area-inset-left));
   background:
-    radial-gradient(circle at 25% 18%, rgba(255, 224, 162, 0.32), transparent 28%),
-    radial-gradient(circle at 74% 22%, rgba(125, 211, 252, 0.22), transparent 26%),
-    linear-gradient(180deg, rgba(8, 19, 38, 0.48), rgba(3, 7, 18, 0.92)),
+    radial-gradient(circle at 50% 18%, rgba(255, 224, 162, 0.3), transparent 27%),
+    radial-gradient(circle at 22% 52%, rgba(244, 114, 182, 0.2), transparent 28%),
+    radial-gradient(circle at 82% 46%, rgba(125, 211, 252, 0.24), transparent 28%),
+    linear-gradient(180deg, rgba(8, 19, 38, 0.2), rgba(3, 7, 18, 0.88)),
     url("../public/assets/ui/world_map/resort_island_map_gpt-image2.webp") center / cover no-repeat;
   color: #f8fafc;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.78);
@@ -759,9 +760,9 @@ body.is-mobile-controls-active canvas {
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, rgba(2, 6, 23, 0.42), transparent 24% 68%, rgba(2, 6, 23, 0.5)),
-    linear-gradient(180deg, rgba(2, 6, 23, 0.1), rgba(2, 6, 23, 0.46) 76%, rgba(2, 6, 23, 0.88));
-  backdrop-filter: blur(2px) saturate(1.08);
+    linear-gradient(90deg, rgba(2, 6, 23, 0.56), transparent 28% 62%, rgba(2, 6, 23, 0.6)),
+    linear-gradient(180deg, rgba(2, 6, 23, 0.06), rgba(2, 6, 23, 0.28) 58%, rgba(2, 6, 23, 0.92));
+  backdrop-filter: blur(2px) saturate(1.05);
 }
 
 .start-adventure-topbar,
@@ -773,17 +774,15 @@ body.is-mobile-controls-active canvas {
 
 .start-adventure-topbar {
   justify-self: center;
+  z-index: 6;
   width: min(1040px, 100%);
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px 10px 18px;
-  border: 1px solid rgba(253, 230, 138, 0.24);
-  border-radius: 999px;
-  background: rgba(5, 13, 29, 0.58);
-  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.28), inset 0 0 0 1px rgba(186, 230, 253, 0.08);
-  backdrop-filter: blur(14px);
+  padding: 12px 18px 12px 22px;
+  background: url("../public/assets/ui/adventure/vn_topbar_panel.webp") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.34));
 }
 
 .start-adventure-kicker {
@@ -810,10 +809,9 @@ body.is-mobile-controls-active canvas {
 .start-adventure-close {
   min-width: 86px;
   min-height: 36px;
-  border: 1px solid rgba(186, 230, 253, 0.22);
-  border-radius: 999px;
+  border: 0;
   padding: 0 16px;
-  background: linear-gradient(180deg, rgba(15, 31, 56, 0.92), rgba(6, 13, 27, 0.92));
+  background: url("../public/assets/ui/adventure/vn_button.webp") center / 100% 100% no-repeat;
   color: #dbeafe;
   font: inherit;
   font-size: 13px;
@@ -825,64 +823,67 @@ body.is-mobile-controls-active canvas {
   width: min(1040px, 100%);
   justify-self: center;
   min-height: 0;
+  overflow: visible;
 }
 
 .start-adventure-character {
   position: absolute;
-  bottom: clamp(-54px, -5vh, -18px);
-  width: min(34vw, 390px);
-  max-height: calc(100dvh - 210px);
+  bottom: clamp(-430px, -52vh, -330px);
+  z-index: 1;
+  width: auto;
+  height: min(88dvh, 800px);
   object-fit: contain;
-  opacity: 0.58;
-  filter: drop-shadow(0 24px 34px rgba(0, 0, 0, 0.52)) saturate(0.82) brightness(0.78);
-  transform: translateY(18px) scale(0.94);
+  opacity: 0.42;
+  filter: drop-shadow(0 28px 38px rgba(0, 0, 0, 0.56)) saturate(0.74) brightness(0.7);
+  transform: translateY(22px) scale(0.9);
   transform-origin: bottom center;
   transition:
+    height 240ms ease,
     opacity 240ms ease,
     filter 240ms ease,
     transform 240ms ease;
 }
 
 .start-adventure-character-main {
-  left: max(28px, 4vw);
+  left: clamp(-12px, 8vw, 148px);
 }
 
 .start-adventure-character-sub {
-  right: max(20px, 3vw);
+  right: clamp(-36px, 5vw, 118px);
 }
 
 .start-adventure-character.is-active {
+  z-index: 2;
+  height: min(106dvh, 980px);
   opacity: 1;
-  filter: drop-shadow(0 26px 36px rgba(0, 0, 0, 0.58)) saturate(1.03) brightness(1.04);
-  transform: translateY(0) scale(1);
+  filter: drop-shadow(0 30px 42px rgba(0, 0, 0, 0.62)) saturate(1.04) brightness(1.05);
+  transform: translateY(0) scale(1.03);
 }
 
 .start-adventure-dialogue {
   box-sizing: border-box;
   width: min(1040px, 100%);
   justify-self: center;
+  z-index: 5;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 10px 18px;
-  padding: 20px clamp(20px, 3vw, 30px) 18px;
-  border: 1px solid rgba(253, 230, 138, 0.34);
-  border-radius: 22px;
-  background:
-    linear-gradient(180deg, rgba(9, 21, 42, 0.9), rgba(4, 9, 20, 0.94)),
-    rgba(2, 6, 23, 0.82);
-  box-shadow:
-    0 22px 48px rgba(0, 0, 0, 0.5),
-    inset 0 0 0 1px rgba(186, 230, 253, 0.1);
-  backdrop-filter: blur(18px) saturate(1.08);
+  min-height: clamp(178px, 24dvh, 238px);
+  padding: 26px clamp(28px, 4vw, 46px) 26px;
+  background: url("../public/assets/ui/adventure/vn_textbox_panel.webp") center / 100% 100% no-repeat;
+  filter: drop-shadow(0 22px 38px rgba(0, 0, 0, 0.5));
 }
 
 .start-adventure-name {
   grid-column: 1 / -1;
   width: fit-content;
   max-width: 100%;
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(255, 243, 199, 0.98), rgba(217, 153, 42, 0.94));
+  min-width: 150px;
+  min-height: 38px;
+  display: grid;
+  place-items: center;
+  padding: 6px 24px;
+  background: url("../public/assets/ui/adventure/vn_nameplate.webp") center / 100% 100% no-repeat;
   color: #172033;
   font-size: clamp(14px, 1.8vw, 18px);
   font-weight: 1000;
@@ -896,9 +897,12 @@ body.is-mobile-controls-active canvas {
   min-height: 3.2em;
   margin: 0;
   color: #f8fafc;
-  font-size: clamp(18px, 2.5vw, 27px);
+  font-size: clamp(20px, 2.7vw, 30px);
   font-weight: 900;
   line-height: 1.55;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.82),
+    0 0 16px rgba(14, 165, 233, 0.16);
 }
 
 .start-adventure-choices {
@@ -916,10 +920,9 @@ body.is-mobile-controls-active canvas {
 .start-adventure-actions button {
   min-width: 0;
   min-height: 42px;
-  border: 1px solid rgba(186, 230, 253, 0.22);
-  border-radius: 999px;
+  border: 0;
   padding: 0 18px;
-  background: linear-gradient(180deg, rgba(22, 46, 78, 0.95), rgba(7, 17, 34, 0.95));
+  background: url("../public/assets/ui/adventure/vn_button.webp") center / 100% 100% no-repeat;
   color: #e0f2fe;
   font: inherit;
   font-size: 14px;
@@ -936,7 +939,7 @@ body.is-mobile-controls-active canvas {
 .start-adventure-close:focus-visible {
   outline: none;
   filter: brightness(1.16) saturate(1.15);
-  box-shadow: 0 0 0 2px rgba(253, 230, 138, 0.28), 0 0 22px rgba(253, 230, 138, 0.22);
+  box-shadow: none;
 }
 
 .start-adventure-actions {
@@ -947,7 +950,7 @@ body.is-mobile-controls-active canvas {
 }
 
 .start-adventure-next {
-  background: linear-gradient(135deg, #ffe69a, #d99b2e) !important;
+  background: url("../public/assets/ui/adventure/vn_button_primary.webp") center / 100% 100% no-repeat !important;
   color: #111827 !important;
   text-shadow: none;
 }
@@ -2695,7 +2698,7 @@ body.is-mobile-controls-active canvas {
 
   .start-adventure-topbar {
     gap: 8px;
-    padding: 8px 8px 8px 10px;
+    padding: 10px 10px 10px 14px;
   }
 
   .start-adventure-kicker {
@@ -2714,25 +2717,30 @@ body.is-mobile-controls-active canvas {
   }
 
   .start-adventure-character {
-    bottom: -2px;
+    bottom: clamp(-154px, -34dvh, -106px);
     width: auto;
-    height: min(43dvh, 172px);
-    max-height: calc(100dvh - 246px);
+    height: min(76dvh, 350px);
+    max-height: none;
   }
 
   .start-adventure-character-main {
-    left: 2vw;
+    left: -2vw;
   }
 
   .start-adventure-character-sub {
-    right: 1vw;
+    right: -2vw;
+  }
+
+  .start-adventure-character.is-active {
+    height: min(98dvh, 450px);
+    transform: translateY(0) scale(1.04);
   }
 
   .start-adventure-dialogue {
     grid-template-columns: 1fr;
     gap: 8px;
-    padding: 13px 14px 12px;
-    border-radius: 16px;
+    min-height: 148px;
+    padding: 19px 20px 18px;
   }
 
   .start-adventure-name {
@@ -2741,9 +2749,9 @@ body.is-mobile-controls-active canvas {
   }
 
   .start-adventure-text {
-    min-height: 2.8em;
-    font-size: 15px;
-    line-height: 1.45;
+    min-height: 2.65em;
+    font-size: 16px;
+    line-height: 1.48;
   }
 
   .start-adventure-actions {

@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.415
+### English
+- Reworked the prototype adventure scene toward a visual-novel layout with closer character framing instead of forcing full-body standees into view.
+- Added raster UI assets for the adventure textbox, nameplate, top bar, and buttons so the scene no longer relies on CSS-only panels.
+### Japanese
+- おためしアドベンチャーパートを、全身表示にこだわらないバストアップ寄りのギャルゲー風レイアウトへ調整しました。
+- 会話枠、ネームプレート、トップバー、ボタンのラスターUI素材を追加し、CSSだけの板っぽい見た目を減らしました。
+
 ## v0.1.414
 ### English
 - Added a prototype full-screen adventure scene from the world map, with visual-novel style character art, dialogue, choices, and return controls.
