@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.402
+### English
+- Improved in-game UI text clarity by switching key HUD, clear-result, miss, stamp, and clear-action labels to a UI font stack with higher-resolution canvas text rendering.
+- Added DOM font smoothing so menu and overlay text renders more cleanly across screens.
+### Japanese
+- HUD、クリア結果、ミス表示、スタンプ、クリア後ボタンの文字をUI向けフォントと高解像度Canvas描画に切り替え、読みやすさを改善しました。
+- メニューやオーバーレイのDOM文字にもフォントスムージングを加え、画面全体の文字をよりクリアにしました。
+
 ## v0.1.401
 ### English
 - Removed remaining-time and bonus breakdown text from the clear result display so the HUD no longer overflows after clearing a stage.

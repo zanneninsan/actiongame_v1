@@ -9,6 +9,9 @@ body {
   position: fixed;
   inset: 0;
   touch-action: none;
+  font-family: "Segoe UI", "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   -webkit-user-select: none;

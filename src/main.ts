@@ -112,9 +112,12 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.401";
+const DEBUG_VERSION = "v0.1.402";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
+const UI_TEXT_FONT_FAMILY = '"Segoe UI", "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif';
+const UI_DISPLAY_FONT_FAMILY = '"Segoe UI Semibold", "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, sans-serif';
+const UI_TEXT_RESOLUTION = 2;
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -775,19 +778,27 @@ class PrototypeScene extends Phaser.Scene {
 
     this.playerNameText = this.add
       .text(HUD_TEXT_X, HUD_PLAYER_NAME_Y, "", {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: `${HUD_PLAYER_NAME_FONT_SIZE}px`,
+        fontStyle: "700",
         color: "#e0f2fe",
+        stroke: "#03111f",
+        strokeThickness: 1,
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setDepth(100)
-      .setShadow(0, 0, "#22d3ee", 8, true, true)
+      .setShadow(0, 1, "#020617", 2, true, true)
       .setScrollFactor(0);
 
     this.scoreText = this.add
       .text(HUD_TEXT_X, HUD_SCORE_Y, "", {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: `${HUD_SCORE_FONT_SIZE}px`,
+        fontStyle: "700",
         color: "#f8fafc",
+        stroke: "#03111f",
+        strokeThickness: 1,
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setScrollFactor(0)
       .setDepth(100)
@@ -796,9 +807,13 @@ class PrototypeScene extends Phaser.Scene {
 
     this.timerText = this.add
       .text(HUD_TIMER_X, HUD_SCORE_Y, "", {
-        fontFamily: "monospace",
+        fontFamily: UI_TEXT_FONT_FAMILY,
         fontSize: `${HUD_MAIN_FONT_SIZE}px`,
+        fontStyle: "700",
         color: "#fde68a",
+        stroke: "#03111f",
+        strokeThickness: 1,
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setScrollFactor(0)
       .setDepth(100)
@@ -807,9 +822,13 @@ class PrototypeScene extends Phaser.Scene {
 
     this.staminaText = this.add
       .text(HUD_TEXT_X, HUD_STAMINA_Y, "", {
-        fontFamily: "monospace",
+        fontFamily: UI_TEXT_FONT_FAMILY,
         fontSize: `${HUD_MAIN_FONT_SIZE}px`,
+        fontStyle: "700",
         color: "#bbf7d0",
+        stroke: "#03111f",
+        strokeThickness: 1,
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setScrollFactor(0)
       .setDepth(100)
@@ -866,10 +885,12 @@ class PrototypeScene extends Phaser.Scene {
     this.controlHintBack.setDisplaySize(HUD_MODE_CHIP_MIN_WIDTH, HUD_MODE_CHIP_HEIGHT);
     this.controlHintText = this.add
       .text(HUD_MODE_CHIP_X, HUD_MODE_CHIP_Y + 7, "", {
-        fontFamily: "monospace",
+        fontFamily: UI_TEXT_FONT_FAMILY,
         fontSize: `${HUD_HINT_FONT_SIZE}px`,
+        fontStyle: "700",
         color: "#fde68a",
         align: "center",
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5, 0)
       .setScrollFactor(0)
@@ -3243,13 +3264,15 @@ class PrototypeScene extends Phaser.Scene {
 
     const text = this.add
       .text(isPrimary ? 34 : 22, 0, label, {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: isMobileLayout ? (isPrimary ? "23px" : "18px") : isPrimary ? "18px" : "14px",
+        fontStyle: "800",
         color: theme.labelColor,
         stroke: "#020617",
-        strokeThickness: 2,
+        strokeThickness: 1,
         align: "center",
         fixedWidth: width - (isPrimary ? 86 : 64),
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5);
 
@@ -4053,12 +4076,14 @@ class PrototypeScene extends Phaser.Scene {
     const missLabel = t(this.locale, "hud.miss");
     const missBurst = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, missLabel, {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: "104px",
+        fontStyle: "900",
         color: "#ff003c",
         stroke: "#fff7cf",
         strokeThickness: 10,
         align: "center",
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
@@ -4067,12 +4092,14 @@ class PrototypeScene extends Phaser.Scene {
       .setShadow(0, 0, "#ff003c", 24, true, true);
     const missEchoLeft = this.add
       .text(GAME_WIDTH / 2 - 18, GAME_HEIGHT / 2 + 10, missLabel, {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: "72px",
+        fontStyle: "900",
         color: "#38bdf8",
         stroke: "#0f172a",
         strokeThickness: 8,
         align: "center",
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
@@ -4080,12 +4107,14 @@ class PrototypeScene extends Phaser.Scene {
       .setAlpha(0.58);
     const missEchoRight = this.add
       .text(GAME_WIDTH / 2 + 20, GAME_HEIGHT / 2 - 8, missLabel, {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: "72px",
+        fontStyle: "900",
         color: "#fde047",
         stroke: "#7f1d1d",
         strokeThickness: 8,
         align: "center",
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
@@ -4093,12 +4122,14 @@ class PrototypeScene extends Phaser.Scene {
       .setAlpha(0.58);
     this.missText = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, missLabel, {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: "82px",
+        fontStyle: "900",
         color: "#ff1f4f",
         stroke: "#fff7cf",
         strokeThickness: 9,
         align: "center",
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
@@ -4203,12 +4234,14 @@ class PrototypeScene extends Phaser.Scene {
         GAME_HEIGHT / 2,
         `${clearTitle}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}${missionResultLine ? `\n${missionResultLine.trimEnd()}` : ""}`,
         {
-          fontFamily: "monospace",
+          fontFamily: UI_DISPLAY_FONT_FAMILY,
           fontSize: missionLines.length >= 3 ? "38px" : "44px",
+          fontStyle: "800",
           color: "#f8fafc",
           stroke: "#020617",
-          strokeThickness: 2,
+          strokeThickness: 3,
           align: "center",
+          resolution: UI_TEXT_RESOLUTION,
         },
       )
       .setOrigin(0.5)
@@ -4237,13 +4270,15 @@ class PrototypeScene extends Phaser.Scene {
 
     const text = this.add
       .text(0, -4, "CLEAR STAMP\nGET!", {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: "26px",
+        fontStyle: "900",
         color: "#fff7d6",
         stroke: "#450a0a",
         strokeThickness: 4,
         align: "center",
         lineSpacing: -3,
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5);
 
