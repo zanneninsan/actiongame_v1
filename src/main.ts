@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.406";
+const DEBUG_VERSION = "v0.1.407";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const UI_TEXT_FONT_FAMILY = 'Meiryo, "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif';
@@ -438,6 +438,7 @@ class PrototypeScene extends Phaser.Scene {
   private lastScreenshot?: CapturedGameScreenshot;
   private screenshotCapturePending = false;
   private screenshotPreviewOpen = false;
+  private screenshotPreviewPausedScene = false;
   private dashLingerUntil = -Infinity;
   private isDashActive = false;
   private lastDashWallBounceAt = -Infinity;
@@ -1220,6 +1221,7 @@ class PrototypeScene extends Phaser.Scene {
     this.clearScreenshotButton = undefined;
     this.screenshotCapturePending = false;
     this.screenshotPreviewOpen = false;
+    this.screenshotPreviewPausedScene = false;
     this.ghostRecordingFrames = [];
     this.ghostRecordingActive = false;
     this.ghostRecordingDisabled = false;
@@ -2852,6 +2854,12 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.screenshotPreviewOpen = true;
+    if (this.hasWon) {
+      this.screenshotPreviewPausedScene = false;
+      return;
+    }
+
+    this.screenshotPreviewPausedScene = true;
     if (this.isRunActive) {
       this.editorTimerPauseStartedAt ||= this.time.now;
     }
@@ -2866,6 +2874,12 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.screenshotPreviewOpen = false;
+    if (!this.screenshotPreviewPausedScene) {
+      this.updateTimerText();
+      return;
+    }
+
+    this.screenshotPreviewPausedScene = false;
     if (this.isRunActive && this.editorTimerPauseStartedAt !== 0) {
       this.editorTimerPausedMs += Math.max(0, this.time.now - this.editorTimerPauseStartedAt);
       this.editorTimerPauseStartedAt = this.stageEditor?.isEnabled ? this.time.now : 0;

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.407
+### English
+- Prevented the post-clear screenshot preview from pausing the whole scene, so clear-result controls remain responsive after closing the screenshot.
+### Japanese
+- クリア後のスクリーンショット表示ではシーン全体を一時停止しないようにし、スクリーンショットを閉じた後もクリア後の操作ボタンが反応するようにしました。
+
 ## v0.1.406
 ### English
 - Removed the distracting cyan accent strip from the in-game HUD and constrained the player-name label so it no longer overlaps the control-mode chip.
