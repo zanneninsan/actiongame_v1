@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.401
+### English
+- Removed remaining-time and bonus breakdown text from the clear result display so the HUD no longer overflows after clearing a stage.
+### Japanese
+- ステージクリア時の表示から残り時間とボーナス内訳を外し、クリア後HUDの文字がパネルからはみ出さないようにしました。
+
 ## v0.1.400
 ### English
 - Made the post-clear "To World Map" action the primary, larger CTA and moved ghost export below it as a secondary action.

@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.400";
+const DEBUG_VERSION = "v0.1.401";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
@@ -4194,19 +4194,14 @@ class PrototypeScene extends Phaser.Scene {
     const missionResultLine = SHOW_CLEAR_RANK_AND_MISSIONS && missionLines.length ? `${missionLines.join("\n")}\n` : "";
     this.saveWorldMapClearStamp(this.currentStageId);
     this.stopGhostRecording();
-    this.timerText.setText(
-      `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,
-    );
+    this.timerText.setText("");
     this.scoreText.setText(`${t(this.locale, "hud.itemScore")}:${itemScore}`);
     this.startRainbowWinEffect();
     this.finalScoreText = this.add
       .text(
         GAME_WIDTH / 2,
         GAME_HEIGHT / 2,
-        `${clearTitle}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}\n${missionResultLine}${t(
-          this.locale,
-          "hud.timeBonus",
-        )} ${this.formatScoreValue(timeBonus)}`,
+        `${clearTitle}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}${missionResultLine ? `\n${missionResultLine.trimEnd()}` : ""}`,
         {
           fontFamily: "monospace",
           fontSize: missionLines.length >= 3 ? "38px" : "44px",
