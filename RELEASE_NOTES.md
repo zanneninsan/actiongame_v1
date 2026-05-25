@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.413
+### English
+- Fixed the broken story portrait image by replacing the missing wink portrait reference with an existing blush portrait asset.
+- Audited local image and media references; no other missing local assets were found.
+### Japanese
+- ストーリー会話のウィンク表情ポートレート参照を、存在する照れ表情ポートレートへ差し替えました。
+- ローカル画像/メディア参照を洗い出し、ほかに欠落しているローカルアセットがないことを確認しました。
+
 ## v0.1.412
 ### English
 - Fixed the wide world-map stage confirmation dialog so it appears centered in the viewport instead of being clipped at the top.
