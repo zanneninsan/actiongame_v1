@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.404
+### English
+- Added a medium-viewport world-map layout that reserves a fixed 16:9 map area and moves the progress and stage-detail panels below it, preventing overlapping panels on tablet-like resolutions.
+### Japanese
+- 中間サイズの画面向けにワールドマップ専用レイアウトを追加し、16:9のマップ表示領域を確保したうえで進行度パネルとステージ詳細を下段へ逃がすようにしました。
+
 ## v0.1.403
 ### English
 - Removed the hazy stretched look from in-game UI text by dropping high-resolution text scaling, soft blur shadows, and thin outline strokes from the main HUD and clear-action labels.

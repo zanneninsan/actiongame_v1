@@ -5918,3 +5918,77 @@ body.is-screenshot-modal-open #mobile-controls {
     border-radius: 12px;
   }
 }
+
+@media (min-width: 821px) and (max-width: 1180px) and (min-height: 561px) {
+  .start-world-map-panel {
+    --world-map-ui-left: 0px;
+    --world-map-ui-right: 0px;
+    --world-map-ui-top: 92px;
+    --world-map-ui-bottom: 270px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    gap: 12px 14px;
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom))
+      max(16px, env(safe-area-inset-left));
+  }
+
+  .start-world-map-toolbar,
+  .start-world-map-art,
+  .start-world-map-dashboard,
+  .start-world-stage-card,
+  .start-world-map-caption {
+    position: relative;
+    left: auto;
+    right: auto;
+    top: auto;
+    bottom: auto;
+  }
+
+  .start-world-map-toolbar,
+  .start-world-map-panel.is-stage-card-left .start-world-map-toolbar {
+    grid-area: 1 / 1 / 2 / 3;
+    justify-self: center;
+    width: min(620px, calc(100vw - 32px));
+  }
+
+  .start-world-map-art {
+    grid-area: 2 / 1 / 3 / 3;
+    align-self: center;
+    justify-self: center;
+    width: min(calc(100vw - 72px), calc((100dvh - 390px) * 16 / 9), 760px);
+    max-width: calc(100vw - 72px);
+    min-width: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .start-world-map-dashboard,
+  .start-world-map-panel.is-stage-card-left .start-world-map-dashboard {
+    grid-area: 3 / 1 / 4 / 2;
+    align-self: stretch;
+    justify-self: stretch;
+    width: auto;
+    max-height: none;
+    min-height: 0;
+    overflow: hidden auto;
+  }
+
+  .start-world-stage-card,
+  .start-world-map-panel.is-stage-card-left .start-world-stage-card {
+    grid-area: 3 / 2 / 4 / 3;
+    align-self: stretch;
+    justify-self: stretch;
+    width: auto;
+    max-height: none;
+    min-height: 0;
+    overflow: hidden auto;
+    opacity: 0.96;
+  }
+
+  .start-world-map-caption {
+    grid-area: 4 / 1 / 5 / 3;
+    justify-self: center;
+    width: min(720px, calc(100vw - 64px));
+    margin-top: 0;
+  }
+}
