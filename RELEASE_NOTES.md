@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.408
+### English
+- Rebuilt the wide world-map layout into fixed left/map/right columns so the progress list and stage detail panel no longer float over the map.
+- Fixed the stage detail panel so its scrollbar can be operated on wide screens.
+### Japanese
+- 横幅の広いワールドマップ画面を左パネル、地図、右詳細の3カラム構成に組み直し、進行度リストやステージ詳細が地図に被らないようにしました。
+- 横幅の広い画面でステージ詳細パネルのスクロールバーを操作できない問題を修正しました。
+
 ## v0.1.407
 ### English
 - Prevented the post-clear screenshot preview from pausing the whole scene, so clear-result controls remain responsive after closing the screenshot.
