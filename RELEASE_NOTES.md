@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.411
+### English
+- Renamed the confusing world-map "Reward" label to "Practice" because the field describes what the stage helps the player practice.
+- Removed the inner passport frame from the wide world-map detail sidebar so scrolled content no longer appears outside the decorative frame.
+### Japanese
+- ワールドマップ詳細の「ごほうび」表示を、実態に合わせて「練習テーマ」に変更しました。
+- 横幅の広いワールドマップ詳細サイドバーから内側のパスポート枠を外し、スクロールした内容が装飾枠の外に見える状態を解消しました。
+
 ## v0.1.410
 ### English
 - Fixed clipping in the wide world-map right sidebar by stacking mission/gimmick details into one column and allowing chips to wrap inside the panel.

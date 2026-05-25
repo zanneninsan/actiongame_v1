@@ -6222,6 +6222,10 @@ body.is-screenshot-modal-open #mobile-controls {
     line-height: 1.25;
   }
 
+  .start-world-stage-card .start-world-card-passport {
+    display: none;
+  }
+
   .start-world-map-panel:has(.start-world-node:hover) .start-world-stage-card,
   .start-world-map-panel:has(.start-world-node:focus-visible) .start-world-stage-card {
     opacity: 1;
