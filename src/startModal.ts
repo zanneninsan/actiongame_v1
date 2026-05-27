@@ -7,7 +7,7 @@ import {
   type PlayerCharacterId,
 } from "./playerCharacters";
 import { getWorldMapDailyStageId, getWorldMapStageDetail, getWorldMapUiText } from "./worldMapFeatures";
-import { getAdventureStoryLines, getAdventureStoryText } from "./adventureStory";
+import type { AdventureStoryLine } from "./adventureStory";
 
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
 const ASSET_BASE = import.meta.env.BASE_URL;
@@ -17,6 +17,9 @@ const WORLD_MAP_VISITED_STAGE_KEY_PREFIX = "actiongame_world_map_visited_stage";
 const WORLD_MAP_CLEARED_STAGE_KEY_PREFIX = "actiongame_world_map_cleared_stage";
 const WORLD_MAP_FILTER_STORAGE_KEY = "actiongame_world_map_stage_filter";
 export const TITLE_SOUND_CONFIRM_STORAGE_KEY = "actiongame_title_sound_confirmed";
+type AdventureStoryModule = typeof import("./adventureStory");
+type AdventureStoryText = ReturnType<AdventureStoryModule["getAdventureStoryText"]>;
+
 const TITLE_MUSIC_VOLUME = 0.72;
 const TITLE_MUSIC_FADE_SECONDS = 3;
 const TITLE_MUSIC_REPLAY_GAP_MS = 5000;
@@ -444,6 +447,10 @@ export class StartModal {
     let worldMapFilter = normalizeWorldMapFilter(getStorageValue(WORLD_MAP_FILTER_STORAGE_KEY));
     let worldSearchQuery = "";
     let adventureLineIndex = 0;
+    let adventureStoryModule: AdventureStoryModule | undefined;
+    let adventureStoryLoadPromise: Promise<AdventureStoryModule> | undefined;
+    let adventureLines: AdventureStoryLine[] = [];
+    let adventureUiText: AdventureStoryText | undefined;
 
     const getSelectedStageLabel = () =>
       this.options.stageOptions.find((option) => option.id === selectedStageId)?.label[selectedLocale] ?? selectedStageId;
@@ -473,8 +480,23 @@ export class StartModal {
         ghostText,
       ].join(" / ");
     };
-    const getAdventureText = () => getAdventureStoryText(selectedLocale);
-    const getAdventureLines = () => getAdventureStoryLines(selectedLocale);
+    const loadAdventureStory = async () => {
+      if (adventureStoryModule) {
+        return adventureStoryModule;
+      }
+      adventureStoryLoadPromise ??= import("./adventureStory");
+      adventureStoryModule = await adventureStoryLoadPromise;
+      return adventureStoryModule;
+    };
+    const refreshAdventureStoryCache = (storyModule = adventureStoryModule) => {
+      if (!storyModule) {
+        adventureUiText = undefined;
+        adventureLines = [];
+        return;
+      }
+      adventureUiText = storyModule.getAdventureStoryText(selectedLocale);
+      adventureLines = storyModule.getAdventureStoryLines(selectedLocale);
+    };
     const doesStageMatchFilter = (stageId: string) => {
       const detail = getWorldMapStageDetail(stageId);
       switch (worldMapFilter) {
@@ -544,8 +566,29 @@ export class StartModal {
     };
 
     const refreshAdventureScene = () => {
-      const text = getAdventureText();
-      const lines = getAdventureLines();
+      const text =
+        adventureUiText ??
+        ({
+          title: "Adventure",
+          close: "Close",
+          next: "Next",
+          replay: "Restart",
+          backToMap: "Back to map",
+        } satisfies AdventureStoryText);
+      const lines = adventureLines;
+      if (lines.length === 0) {
+        adventureTitle.textContent = text.title;
+        adventureProgress.textContent = "";
+        adventureCloseButton.textContent = text.close;
+        adventureCloseButton.setAttribute("aria-label", text.close);
+        adventureName.textContent = "SYSTEM";
+        adventureText.textContent = "Loading story...";
+        adventureNextButton.textContent = text.next;
+        adventureNextButton.disabled = true;
+        adventureEndButton.textContent = text.backToMap;
+        adventureChoices.innerHTML = "";
+        return;
+      }
       const line = lines[Math.min(adventureLineIndex, lines.length - 1)]!;
       adventureTitle.textContent = `${text.title} / ${line.chapter}`;
       adventureProgress.textContent = `${adventureLineIndex + 1}/${lines.length}`;
@@ -554,6 +597,7 @@ export class StartModal {
       adventureName.textContent = line.speaker;
       adventureText.textContent = line.message;
       adventureNextButton.textContent = adventureLineIndex >= lines.length - 1 ? text.replay : text.next;
+      adventureNextButton.disabled = false;
       adventureEndButton.textContent = text.backToMap;
       if (line.background) {
         adventureLayer.style.setProperty("--adventure-bg-image", `url("${getAssetUrl(line.background)}")`);
@@ -596,20 +640,32 @@ export class StartModal {
       });
     };
 
-    const openAdventureScene = () => {
+    const openAdventureScene = async () => {
       hideWorldConfirm();
       worldSettingsPanel.hidden = true;
       worldMapPanel.classList.remove("is-settings-open");
       adventureLineIndex = 0;
-      refreshAdventureScene();
       adventureLayer.hidden = false;
-      worldMapPanel.classList.add("is-adventure-open");
-      window.setTimeout(() => adventureNextButton.focus(), 80);
+      worldMapPanel.classList.add("is-adventure-open", "is-adventure-loading");
+      refreshAdventureScene();
+      try {
+        const storyModule = await loadAdventureStory();
+        refreshAdventureStoryCache(storyModule);
+        worldMapPanel.classList.remove("is-adventure-loading");
+        refreshAdventureScene();
+        window.setTimeout(() => adventureNextButton.focus(), 80);
+      } catch (error) {
+        console.warn("Adventure story load failed.", error);
+        worldMapPanel.classList.remove("is-adventure-loading");
+        adventureName.textContent = "SYSTEM";
+        adventureText.textContent = "Story load failed. Please close and try again.";
+        adventureNextButton.disabled = true;
+      }
     };
 
     const closeAdventureScene = () => {
       adventureLayer.hidden = true;
-      worldMapPanel.classList.remove("is-adventure-open");
+      worldMapPanel.classList.remove("is-adventure-open", "is-adventure-loading");
       worldAdventureButton.focus();
     };
 
@@ -1313,7 +1369,10 @@ export class StartModal {
     adventureCloseButton.addEventListener("click", closeAdventureScene);
     adventureEndButton.addEventListener("click", closeAdventureScene);
     adventureNextButton.addEventListener("click", () => {
-      const lines = getAdventureLines();
+      const lines = adventureLines;
+      if (lines.length === 0) {
+        return;
+      }
       adventureLineIndex = adventureLineIndex >= lines.length - 1 ? 0 : adventureLineIndex + 1;
       refreshAdventureScene();
     });

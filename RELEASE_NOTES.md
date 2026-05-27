@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.417
+### English
+- Deferred loading of the long adventure story module until the adventure scene is opened, reducing the initial boot bundle work.
+- Increased the boot-loading stall notice threshold so temporary slow first loads do not show the retry state too early.
+### Japanese
+- 長編アドベンチャーシナリオを起動時ではなく、アドベンチャーパートを開いた時に読み込むようにし、初期起動時の処理量を減らしました。
+- 一時的に初回読み込みが遅いだけの時に再読み込み表示が早く出すぎないよう、起動ローディングの時間超過判定を後ろへずらしました。
+
 ## v0.1.416
 ### English
 - Replaced the prototype adventure scene script with a long-form after-hours story inspired by Zannenin-san lore and the current Super Zannenin-san Land feature history.
