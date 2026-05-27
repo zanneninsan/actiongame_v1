@@ -729,6 +729,7 @@ body.is-mobile-controls-active canvas {
 }
 
 .start-adventure-layer {
+  --adventure-bg-image: url("../public/assets/ui/world_map/resort_island_map_gpt-image2.webp");
   position: absolute;
   inset: 0;
   z-index: 8;
@@ -742,7 +743,7 @@ body.is-mobile-controls-active canvas {
     radial-gradient(circle at 22% 52%, rgba(244, 114, 182, 0.2), transparent 28%),
     radial-gradient(circle at 82% 46%, rgba(125, 211, 252, 0.24), transparent 28%),
     linear-gradient(180deg, rgba(8, 19, 38, 0.2), rgba(3, 7, 18, 0.88)),
-    url("../public/assets/ui/world_map/resort_island_map_gpt-image2.webp") center / cover no-repeat;
+    var(--adventure-bg-image) center / cover no-repeat;
   color: #f8fafc;
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.78);
 }
@@ -753,6 +754,15 @@ body.is-mobile-controls-active canvas {
 
 .start-world-map-panel.is-adventure-open > :not(.start-adventure-layer) {
   pointer-events: none;
+}
+
+.start-adventure-scene-bg {
+  position: absolute;
+  inset: -2%;
+  z-index: 0;
+  background: var(--adventure-bg-image) center / cover no-repeat;
+  filter: blur(2px) saturate(1.06);
+  transform: scale(1.03);
 }
 
 .start-adventure-backdrop {
@@ -777,7 +787,7 @@ body.is-mobile-controls-active canvas {
   z-index: 6;
   width: min(1040px, 100%);
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   align-items: center;
   gap: 12px;
   padding: 12px 18px 12px 22px;
@@ -803,6 +813,15 @@ body.is-mobile-controls-active canvas {
   font-weight: 1000;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.start-adventure-progress {
+  min-width: 58px;
+  color: #bae6fd;
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
   white-space: nowrap;
 }
 
@@ -844,6 +863,27 @@ body.is-mobile-controls-active canvas {
     transform 240ms ease;
 }
 
+.start-adventure-eventcg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: min(46vw, 560px);
+  max-height: min(48dvh, 360px);
+  object-fit: contain;
+  opacity: 0.72;
+  border-radius: 18px;
+  filter:
+    drop-shadow(0 24px 34px rgba(0, 0, 0, 0.52))
+    saturate(0.96)
+    brightness(0.9);
+  transform: translate(-50%, -48%);
+}
+
+.start-adventure-eventcg[hidden] {
+  display: none;
+}
+
 .start-adventure-character-main {
   left: clamp(-12px, 8vw, 148px);
 }
@@ -858,6 +898,11 @@ body.is-mobile-controls-active canvas {
   opacity: 1;
   filter: drop-shadow(0 30px 42px rgba(0, 0, 0, 0.62)) saturate(1.04) brightness(1.05);
   transform: translateY(0) scale(1.03);
+}
+
+.start-adventure-character.is-muted {
+  opacity: 0.24;
+  filter: drop-shadow(0 22px 30px rgba(0, 0, 0, 0.48)) saturate(0.55) brightness(0.58);
 }
 
 .start-adventure-dialogue {
@@ -2709,6 +2754,10 @@ body.is-mobile-controls-active canvas {
     font-size: 15px;
   }
 
+  .start-adventure-progress {
+    display: none;
+  }
+
   .start-adventure-close {
     min-width: 64px;
     min-height: 32px;
@@ -2721,6 +2770,12 @@ body.is-mobile-controls-active canvas {
     width: auto;
     height: min(76dvh, 350px);
     max-height: none;
+  }
+
+  .start-adventure-eventcg {
+    width: min(46vw, 260px);
+    max-height: 30dvh;
+    border-radius: 12px;
   }
 
   .start-adventure-character-main {

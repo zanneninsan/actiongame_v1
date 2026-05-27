@@ -2,6 +2,16 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.416
+### English
+- Replaced the prototype adventure scene script with a long-form after-hours story inspired by Zannenin-san lore and the current Super Zannenin-san Land feature history.
+- Added data-driven adventure scene backgrounds, event CG switching, character-standee switching, and progress display.
+- Added processed WebP adventure story assets from the approved local image folders while preserving source PNGs under `assets_source`.
+### Japanese
+- 残念院さん情報とスーパー残念院さんランドの開発経緯を元に、閉園後の満足教を描く長編アドベンチャーシナリオへ差し替えました。
+- アドベンチャーパートで背景、イベントCG、立ち絵、進行数を会話行ごとに切り替えられるようにしました。
+- 指定フォルダ内の画像をアドベンチャー素材としてWebP化し、元素材PNGを `assets_source` に保存しました。
+
 ## v0.1.415
 ### English
 - Reworked the prototype adventure scene toward a visual-novel layout with closer character framing instead of forcing full-body standees into view.

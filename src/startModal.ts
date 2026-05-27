@@ -7,6 +7,7 @@ import {
   type PlayerCharacterId,
 } from "./playerCharacters";
 import { getWorldMapDailyStageId, getWorldMapStageDetail, getWorldMapUiText } from "./worldMapFeatures";
+import { getAdventureStoryLines, getAdventureStoryText } from "./adventureStory";
 
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
 const ASSET_BASE = import.meta.env.BASE_URL;
@@ -207,13 +208,16 @@ export class StartModal {
           <button type="button" class="start-world-route-next"></button>
         </div>
         <section class="start-adventure-layer" hidden role="dialog" aria-modal="true" aria-label="Adventure demo">
+          <div class="start-adventure-scene-bg" aria-hidden="true"></div>
           <div class="start-adventure-backdrop" aria-hidden="true"></div>
           <div class="start-adventure-topbar">
             <span class="start-adventure-kicker">ADVENTURE</span>
             <strong class="start-adventure-title"></strong>
+            <span class="start-adventure-progress"></span>
             <button type="button" class="start-adventure-close"></button>
           </div>
           <div class="start-adventure-stage" aria-hidden="true">
+            <img class="start-adventure-eventcg" src="" alt="" hidden />
             <img
               class="start-adventure-character start-adventure-character-main is-active"
               src="./assets/story/adventure/zannenin_maid_full.webp"
@@ -392,6 +396,7 @@ export class StartModal {
     const worldStageRail = overlay.querySelector<HTMLElement>(".start-world-rail")!;
     const adventureLayer = overlay.querySelector<HTMLElement>(".start-adventure-layer")!;
     const adventureTitle = overlay.querySelector<HTMLElement>(".start-adventure-title")!;
+    const adventureProgress = overlay.querySelector<HTMLElement>(".start-adventure-progress")!;
     const adventureCloseButton = overlay.querySelector<HTMLButtonElement>(".start-adventure-close")!;
     const adventureName = overlay.querySelector<HTMLElement>(".start-adventure-name")!;
     const adventureText = overlay.querySelector<HTMLElement>(".start-adventure-text")!;
@@ -399,6 +404,9 @@ export class StartModal {
     const adventureNextButton = overlay.querySelector<HTMLButtonElement>(".start-adventure-next")!;
     const adventureEndButton = overlay.querySelector<HTMLButtonElement>(".start-adventure-end")!;
     const adventureCharacters = Array.from(overlay.querySelectorAll<HTMLImageElement>(".start-adventure-character"));
+    const adventureMainCharacter = overlay.querySelector<HTMLImageElement>(".start-adventure-character-main")!;
+    const adventureSubCharacter = overlay.querySelector<HTMLImageElement>(".start-adventure-character-sub")!;
+    const adventureEventCg = overlay.querySelector<HTMLImageElement>(".start-adventure-eventcg")!;
     const mapBackButton = overlay.querySelector<HTMLButtonElement>(".start-map-back")!;
     const modeButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-mode]"));
     const soundButtons = Array.from(overlay.querySelectorAll<HTMLButtonElement>("[data-sound]"));
@@ -465,8 +473,8 @@ export class StartModal {
         ghostText,
       ].join(" / ");
     };
-    const getAdventureText = () => getAdventureDemoText(selectedLocale);
-    const getAdventureLines = () => getAdventureDemoLines(selectedLocale);
+    const getAdventureText = () => getAdventureStoryText(selectedLocale);
+    const getAdventureLines = () => getAdventureStoryLines(selectedLocale);
     const doesStageMatchFilter = (stageId: string) => {
       const detail = getWorldMapStageDetail(stageId);
       switch (worldMapFilter) {
@@ -539,24 +547,49 @@ export class StartModal {
       const text = getAdventureText();
       const lines = getAdventureLines();
       const line = lines[Math.min(adventureLineIndex, lines.length - 1)]!;
-      adventureTitle.textContent = text.title;
+      adventureTitle.textContent = `${text.title} / ${line.chapter}`;
+      adventureProgress.textContent = `${adventureLineIndex + 1}/${lines.length}`;
       adventureCloseButton.textContent = text.close;
       adventureCloseButton.setAttribute("aria-label", text.close);
       adventureName.textContent = line.speaker;
       adventureText.textContent = line.message;
       adventureNextButton.textContent = adventureLineIndex >= lines.length - 1 ? text.replay : text.next;
       adventureEndButton.textContent = text.backToMap;
+      if (line.background) {
+        adventureLayer.style.setProperty("--adventure-bg-image", `url("${getAssetUrl(line.background)}")`);
+      }
+      if (line.mainCharacter) {
+        adventureMainCharacter.src = getAssetUrl(line.mainCharacter);
+      }
+      if (line.subCharacter) {
+        adventureSubCharacter.src = getAssetUrl(line.subCharacter);
+      }
+      if (line.eventCg) {
+        adventureEventCg.src = getAssetUrl(line.eventCg);
+        adventureEventCg.hidden = false;
+      } else {
+        adventureEventCg.hidden = true;
+      }
       adventureCharacters.forEach((character) => {
         const isActive =
           (line.focus === "main" && character.classList.contains("start-adventure-character-main")) ||
           (line.focus === "sub" && character.classList.contains("start-adventure-character-sub"));
         character.classList.toggle("is-active", isActive);
+        character.classList.toggle("is-muted", line.focus === "none");
       });
       adventureChoices.innerHTML =
         line.choices?.map((choice) => `<button type="button">${escapeHtml(choice)}</button>`).join("") ?? "";
       adventureChoices.querySelectorAll<HTMLButtonElement>("button").forEach((button) => {
         button.addEventListener("click", () => {
-          adventureLineIndex = Math.min(adventureLineIndex + 1, lines.length - 1);
+          if (adventureLineIndex >= lines.length - 1 && button.textContent?.includes(text.backToMap.replace("へ戻る", ""))) {
+            closeAdventureScene();
+            return;
+          }
+          if (adventureLineIndex >= lines.length - 1 && button.textContent?.includes("もう一度")) {
+            adventureLineIndex = 0;
+          } else {
+            adventureLineIndex = Math.min(adventureLineIndex + 1, lines.length - 1);
+          }
           refreshAdventureScene();
           adventureNextButton.focus();
         });
