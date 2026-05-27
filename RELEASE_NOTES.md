@@ -2,6 +2,234 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.417
+### English
+- Deferred loading of the long adventure story module until the adventure scene is opened, reducing the initial boot bundle work.
+- Increased the boot-loading stall notice threshold so temporary slow first loads do not show the retry state too early.
+### Japanese
+- 長編アドベンチャーシナリオを起動時ではなく、アドベンチャーパートを開いた時に読み込むようにし、初期起動時の処理量を減らしました。
+- 一時的に初回読み込みが遅いだけの時に再読み込み表示が早く出すぎないよう、起動ローディングの時間超過判定を後ろへずらしました。
+
+## v0.1.416
+### English
+- Replaced the prototype adventure scene script with a long-form after-hours story inspired by Zannenin-san lore and the current Super Zannenin-san Land feature history.
+- Added data-driven adventure scene backgrounds, event CG switching, character-standee switching, and progress display.
+- Added processed WebP adventure story assets from the approved local image folders while preserving source PNGs under `assets_source`.
+### Japanese
+- 残念院さん情報とスーパー残念院さんランドの開発経緯を元に、閉園後の満足教を描く長編アドベンチャーシナリオへ差し替えました。
+- アドベンチャーパートで背景、イベントCG、立ち絵、進行数を会話行ごとに切り替えられるようにしました。
+- 指定フォルダ内の画像をアドベンチャー素材としてWebP化し、元素材PNGを `assets_source` に保存しました。
+
+## v0.1.415
+### English
+- Reworked the prototype adventure scene toward a visual-novel layout with closer character framing instead of forcing full-body standees into view.
+- Added raster UI assets for the adventure textbox, nameplate, top bar, and buttons so the scene no longer relies on CSS-only panels.
+### Japanese
+- おためしアドベンチャーパートを、全身表示にこだわらないバストアップ寄りのギャルゲー風レイアウトへ調整しました。
+- 会話枠、ネームプレート、トップバー、ボタンのラスターUI素材を追加し、CSSだけの板っぽい見た目を減らしました。
+
+## v0.1.414
+### English
+- Added a prototype full-screen adventure scene from the world map, with visual-novel style character art, dialogue, choices, and return controls.
+- Added the provided standee images as preserved source PNGs and runtime WebP assets.
+### Japanese
+- ワールドマップから開けるおためしの全画面アドベンチャーパートを追加し、恋愛シミュレーション風の立ち絵、会話、選択肢、戻る操作を入れました。
+- 受け取った立ち絵PNGを元素材として保存し、実行時用のWebPアセットを追加しました。
+
+## v0.1.413
+### English
+- Fixed the broken story portrait image by replacing the missing wink portrait reference with an existing blush portrait asset.
+- Audited local image and media references; no other missing local assets were found.
+### Japanese
+- ストーリー会話のウィンク表情ポートレート参照を、存在する照れ表情ポートレートへ差し替えました。
+- ローカル画像/メディア参照を洗い出し、ほかに欠落しているローカルアセットがないことを確認しました。
+
+## v0.1.412
+### English
+- Fixed the wide world-map stage confirmation dialog so it appears centered in the viewport instead of being clipped at the top.
+### Japanese
+- 横幅の広いワールドマップ画面でステージ選択確認ダイアログが上に見切れないよう、画面中央固定の表示に変更しました。
+
+## v0.1.411
+### English
+- Renamed the confusing world-map "Reward" label to "Practice" because the field describes what the stage helps the player practice.
+- Removed the inner passport frame from the wide world-map detail sidebar so scrolled content no longer appears outside the decorative frame.
+### Japanese
+- ワールドマップ詳細の「ごほうび」表示を、実態に合わせて「練習テーマ」に変更しました。
+- 横幅の広いワールドマップ詳細サイドバーから内側のパスポート枠を外し、スクロールした内容が装飾枠の外に見える状態を解消しました。
+
+## v0.1.410
+### English
+- Fixed clipping in the wide world-map right sidebar by stacking mission/gimmick details into one column and allowing chips to wrap inside the panel.
+### Japanese
+- 横幅の広いワールドマップ右サイドバーでミッション/ギミック欄が見切れないよう、詳細欄を1カラム化し、チップがパネル内で折り返すようにしました。
+
+## v0.1.409
+### English
+- Made the wide world-map view prioritize the map art by removing the large left stage-list column and folding the compact progress/stamp panel into the right sidebar.
+### Japanese
+- 横幅の広いワールドマップ画面で大きな左側ステージ一覧カラムをやめ、進行度/スタンプ帳を右サイドバーへ小さく統合してマップをより大きく表示するようにしました。
+
+## v0.1.408
+### English
+- Rebuilt the wide world-map layout into fixed left/map/right columns so the progress list and stage detail panel no longer float over the map.
+- Fixed the stage detail panel so its scrollbar can be operated on wide screens.
+### Japanese
+- 横幅の広いワールドマップ画面を左パネル、地図、右詳細の3カラム構成に組み直し、進行度リストやステージ詳細が地図に被らないようにしました。
+- 横幅の広い画面でステージ詳細パネルのスクロールバーを操作できない問題を修正しました。
+
+## v0.1.407
+### English
+- Prevented the post-clear screenshot preview from pausing the whole scene, so clear-result controls remain responsive after closing the screenshot.
+### Japanese
+- クリア後のスクリーンショット表示ではシーン全体を一時停止しないようにし、スクリーンショットを閉じた後もクリア後の操作ボタンが反応するようにしました。
+
+## v0.1.406
+### English
+- Removed the distracting cyan accent strip from the in-game HUD and constrained the player-name label so it no longer overlaps the control-mode chip.
+### Japanese
+- ゲーム中HUD左側の目立つ水色アクセント帯を消し、プレイヤー名表示が操作モードのチップに被らないよう省略表示を追加しました。
+
+## v0.1.405
+### English
+- Compacted the leaderboard dialog layout so the ranking list gets more vertical space and can show around five rows on medium desktop screens.
+### Japanese
+- ランキング画面の余白、ヘッダー、フッターを圧縮し、中間サイズのPC画面でも順位リストを5行前後見られるようにしました。
+
+## v0.1.404
+### English
+- Added a medium-viewport world-map layout that reserves a fixed 16:9 map area and moves the progress and stage-detail panels below it, preventing overlapping panels on tablet-like resolutions.
+### Japanese
+- 中間サイズの画面向けにワールドマップ専用レイアウトを追加し、16:9のマップ表示領域を確保したうえで進行度パネルとステージ詳細を下段へ逃がすようにしました。
+
+## v0.1.403
+### English
+- Removed the hazy stretched look from in-game UI text by dropping high-resolution text scaling, soft blur shadows, and thin outline strokes from the main HUD and clear-action labels.
+### Japanese
+- ゲーム内UI文字の引き伸ばしたようなモヤ感を抑えるため、メインHUDとクリア後ボタンから高解像度テキストスケール、ぼかし影、細い縁取りを外しました。
+
+## v0.1.402
+### English
+- Improved in-game UI text clarity by switching key HUD, clear-result, miss, stamp, and clear-action labels to a UI font stack with higher-resolution canvas text rendering.
+- Added DOM font smoothing so menu and overlay text renders more cleanly across screens.
+### Japanese
+- HUD、クリア結果、ミス表示、スタンプ、クリア後ボタンの文字をUI向けフォントと高解像度Canvas描画に切り替え、読みやすさを改善しました。
+- メニューやオーバーレイのDOM文字にもフォントスムージングを加え、画面全体の文字をよりクリアにしました。
+
+## v0.1.401
+### English
+- Removed remaining-time and bonus breakdown text from the clear result display so the HUD no longer overflows after clearing a stage.
+### Japanese
+- ステージクリア時の表示から残り時間とボーナス内訳を外し、クリア後HUDの文字がパネルからはみ出さないようにしました。
+
+## v0.1.400
+### English
+- Made the post-clear "To World Map" action the primary, larger CTA and moved ghost export below it as a secondary action.
+### Japanese
+- クリア後の「ワールドマップへ」を大きな主ボタンとして最上位に出し、ゴーストJSON出力などの補助操作より先に見つけやすくしました。
+
+## v0.1.399
+### English
+- Kept the world-map menu panels fixed in place while switching selected stages, so buttons no longer jump between the left and right sides mid-interaction.
+### Japanese
+- ワールドマップで選択ステージを切り替えてもメニューパネルの左右位置を固定し、操作しようとしたボタンが反対側へ逃げないようにしました。
+
+## v0.1.398
+### English
+- Reworked the boot loading screen into a polished splash-style panel and added a stalled-load retry action so the top screen no longer sits indefinitely on a plain `Loading...` card.
+- Made the boot curtain clear more defensively when the game reaches the start flow, and surfaced asset load failures during startup.
+### Japanese
+- 起動中のローディング表示を簡素な`Loading...`カードからスプラッシュ風の見た目へ更新し、読み込みが詰まった場合は再読み込みできる導線を出すようにしました。
+- ゲームが開始導線まで進んだときに起動カーテンをより確実に外し、起動時の素材読み込み失敗も画面上で分かるようにしました。
+
+## v0.1.397
+### English
+- Restyled the game UI toward a modern mobile-game look, using dark glass surfaces and soft gold accents instead of heavy old-style gold frames.
+- Updated clear-result action buttons and the UI polish report to match the newer visual direction.
+### Japanese
+- 古い金色の額縁感を抑え、満足教の金をアクセントにしたダークガラス調の今風スマホゲームUIへ全体の見た目を寄せました。
+- クリア後アクションボタンとUI改善レポートも、新しい見た目の方向性に合わせて更新しました。
+
+## v0.1.396
+### English
+- Polished 20 grouped UI areas across the world map, start flow, clear-result actions, modals, leaderboard, screenshot preview, global controls, and mobile controls.
+- Rebuilt clear-result action buttons as richer in-canvas controls and added an HTML before/after visual polish report.
+### Japanese
+- ワールドマップ、開始導線、クリア後アクション、各種モーダル、ランキング、スクリーンショット確認、グローバル操作、スマホ操作UIの外見改善を20カテゴリにまとめて実施しました。
+- クリア後の各ボタンをCanvas内のリッチな専用ボタンに作り直し、改善前後を確認できるHTMLレポートを追加しました。
+
+## v0.1.395
+### English
+- Kept clear-result action buttons in the top-right on PC controls regardless of compact HUD width, while preserving the larger bottom-center layout for mobile controls.
+### Japanese
+- クリア後のゴースト保存、ワールドマップへ戻る、スクリーンショットの各ボタンを、PC操作では画面幅に関係なく右上に表示するように戻しました。スマホ操作では押しやすい下中央表示を維持しています。
+
+## v0.1.394
+### English
+- Reserved a safe center board for the world map on larger screens so persistent progress and stage-detail panels no longer cover the current stage marker.
+- Slimmed the always-on world-map progress and stage-detail panels to protect more of the map view.
+### Japanese
+- 大きめの画面ではワールドマップを常設UIの間に収める安全な中央ボードとして表示し、進行度やステージ詳細が現在地マーカーを隠さないようにしました。
+- 常時表示される進行度パネルとステージ詳細パネルを少し細くし、マップの見える範囲を広げました。
+
+## v0.1.393
+### English
+- Improved mobile landscape UI for the world map, settings panel, stage confirmation, start panel, and in-game HUD based on a Playwright audit.
+- Added a mobile landscape UI audit document with before/after screenshots and 20 concrete findings.
+### Japanese
+- Playwrightでの確認をもとに、スマホ横画面のワールドマップ、設定パネル、ステージ確認、開始画面、プレイ中HUDの見た目と操作性を改善しました。
+- 改善前後のスクリーンショットと20件の指摘・対応内容をまとめたスマホ横画面UI監査資料を追加しました。
+
+## v0.1.392
+### English
+- Expanded the world map into a richer stage-select hub with a GPT-IMAGE2 resort-island map background, progress/stamp tracking, stage search, persistent filters, a stage rail, route guidance, next-target notes, and a map-side settings panel.
+- Moved language, control-mode, and sound choices out of the final start setup panel and into the world-map settings panel.
+### Japanese
+- GPT-IMAGE2で生成したリゾート島ワールドマップ背景を追加し、進行度・スタンプ帳、ステージ検索、保存されるフィルタ、ステージ一覧、ルートメモ、次の目的地、マップ側設定パネルを備えたステージ選択ハブに拡張しました。
+- 言語、操作モード、サウンドの選択を開始直前の画面からワールドマップ側の設定パネルへ移し、開始画面を最終確認に集中できる形にしました。
+
+## v0.1.391
+### English
+- Rebuilt the dash sprite sheet from clean complete frames so sprinting no longer shows broken frame fragments or stray transparent-color artifacts.
+### Japanese
+- ダッシュ用スプライトシートを、欠けや隣フレームの混入がないフレームから作り直し、ダッシュ中に崩れた絵や透明部分の色にじみが出ないようにしました。
+
+## v0.1.390
+### English
+- Fixed the boot loading runner animation so it only plays the 13 real walk frames instead of stepping into empty sprite-sheet slots.
+### Japanese
+- 起動ローディング中の歩きアニメーションが、空のスプライト枠まで再生してちらついていた問題を修正し、実際の13フレームだけを再生するようにしました。
+
+## v0.1.389
+### English
+- Added a boot curtain that keeps the Phaser canvas hidden until the start modal is mounted, preventing the raw game canvas or interim loading visuals from flashing before the title flow appears.
+### Japanese
+- スタートモーダルが表示されるまでPhaserキャンバスを隠す起動カーテンを追加し、タイトル導線の前に素のゲーム画面や途中の読み込み表示がちらつかないようにしました。
+
+## v0.1.388
+### English
+- Moved clear-result action buttons to a larger bottom-center layout on mobile and compact screens, making ghost export, screenshot preview, and world-map return easier to tap after clearing a stage.
+### Japanese
+- スマホモードとコンパクト表示では、クリア後の操作ボタンを大きめの画面下中央レイアウトに変更し、ゴースト保存、スクリーンショット確認、ワールドマップへ戻る操作を押しやすくしました。
+
+## v0.1.387
+### English
+- Added a CLEAR STAMP GET animation to the stage-clear result screen so earning a world-map stamp is visible immediately after reaching the goal.
+### Japanese
+- ゴール到達直後のクリア画面に「CLEAR STAMP GET」演出を追加し、ワールドマップ用スタンプを獲得したことがその場で分かるようにしました。
+
+## v0.1.386
+### English
+- Made the in-game top-left HUD more compact, moved it closer to the screen corner, and reduced its large-screen scaling so it covers less of the playfield.
+### Japanese
+- プレイ中の左上HUDを少しコンパクトにし、画面左上へ寄せました。大画面での拡大率も抑えて、プレイ画面を覆う面積を減らしました。
+
+## v0.1.385
+### English
+- Reduced initial boot-loader flicker by only showing the loading overlay for slower starts, then keeping it visible long enough to fade out cleanly if it appears.
+### Japanese
+- 初期起動ローディングのちらつきを抑えるため、短いロードではローディング画面を出さず、表示された場合も最低表示時間とフェードアウトで自然に消えるようにしました。
+
 ## v0.1.384
 ### English
 - Saved a real world-map CLEAR stamp when a stage is finished, and showed it separately from the existing visited marker on the stage passport card and map nodes.

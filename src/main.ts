@@ -112,9 +112,12 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.384";
+const DEBUG_VERSION = "v0.1.417";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
+const UI_TEXT_FONT_FAMILY = 'Meiryo, "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif';
+const UI_DISPLAY_FONT_FAMILY = 'Meiryo, "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif';
+const UI_TEXT_RESOLUTION = 1;
 const AQUA_MASCOT_STOMP_DIALOGUE_DURATION_MS = 5000;
 const STAGE_MIDPOINT_DIALOGUE_DURATION_MS = 4000;
 const STAMINA_EMPTY_DIALOGUE_DURATION_MS = 3500;
@@ -237,9 +240,12 @@ const PLAYER_BODY_HEIGHT = 164;
 const PLAYER_BODY_OFFSET_X = 134;
 
 const BOOT_LOADING_OVERLAY_ID = "boot-loading-overlay";
-const BOOT_LOADING_OVERLAY_DELAY_MS = 500;
+const BOOT_LOADING_OVERLAY_DELAY_MS = 1400;
+const BOOT_LOADING_OVERLAY_MIN_VISIBLE_MS = 720;
+const BOOT_LOADING_OVERLAY_FADE_MS = 220;
+const BOOT_LOADING_STALL_MS = 18000;
 const BOOT_LOADING_RUNNER_COLUMNS = 6;
-const BOOT_LOADING_RUNNER_ROWS = 3;
+const BOOT_LOADING_RUNNER_FRAMES = 13;
 const BOOT_LOADING_RUNNER_FRAME_MS = 90;
 const PLAYER_BODY_OFFSET_Y = 86;
 const PLAYER_CROUCH_BODY_WIDTH = 58;
@@ -271,24 +277,24 @@ const STAMINA_RECOVERY_PER_SECOND = 42;
 const CROUCH_STAMINA_RECOVERY_MULTIPLIER = 2;
 const HUD_SCALE_BASE_WIDTH = 1280;
 const HUD_SCALE_BASE_HEIGHT = 720;
-const HUD_MIN_SCALE = 1;
-const HUD_MAX_SCALE = 1.5;
+const HUD_MIN_SCALE = 0.76;
+const HUD_MAX_SCALE = 1.2;
 const HUD_PLAYER_NAME_FONT_SIZE = 14;
 const HUD_MAIN_FONT_SIZE = 13;
 const HUD_SCORE_FONT_SIZE = 16;
 const HUD_HINT_FONT_SIZE = 11;
-const HUD_PANEL_X = 18;
-const HUD_PANEL_Y = 54;
-const HUD_PANEL_WIDTH = 360;
-const HUD_PANEL_HEIGHT = 116;
-const HUD_TEXT_X = 50;
-const HUD_PLAYER_NAME_Y = 69;
-const HUD_SCORE_Y = 99;
-const HUD_TIMER_X = 218;
-const HUD_STAMINA_Y = 129;
-const HUD_STAMINA_BAR_X = 158;
-const HUD_STAMINA_BAR_Y = 139;
-const HUD_STAMINA_BAR_WIDTH = 164;
+const HUD_PANEL_X = 14;
+const HUD_PANEL_Y = 18;
+const HUD_PANEL_WIDTH = 330;
+const HUD_PANEL_HEIGHT = 104;
+const HUD_TEXT_X = 42;
+const HUD_PLAYER_NAME_Y = 33;
+const HUD_SCORE_Y = 62;
+const HUD_TIMER_X = 196;
+const HUD_STAMINA_Y = 91;
+const HUD_STAMINA_BAR_X = 142;
+const HUD_STAMINA_BAR_Y = 101;
+const HUD_STAMINA_BAR_WIDTH = 150;
 const HUD_STAMINA_BAR_HEIGHT = 12;
 const HUD_STAMINA_FILL_INSET = 4;
 const HUD_STAMINA_FILL_X = HUD_STAMINA_BAR_X + HUD_STAMINA_FILL_INSET;
@@ -299,6 +305,7 @@ const HUD_MODE_CHIP_X = HUD_PANEL_X + HUD_PANEL_WIDTH - 58;
 const HUD_MODE_CHIP_Y = HUD_PANEL_Y + 13;
 const HUD_MODE_CHIP_MIN_WIDTH = 82;
 const HUD_MODE_CHIP_HEIGHT = 28;
+const HUD_PLAYER_NAME_MAX_WIDTH = HUD_MODE_CHIP_X - HUD_MODE_CHIP_MIN_WIDTH / 2 - HUD_TEXT_X - 12;
 const HUD_COMPACT_DISPLAY_WIDTH = 760;
 const HUD_COMPACT_PLAYER_NAME_MAX_LENGTH = 12;
 const OVERHEAD_STAMINA_BAR_WIDTH = 76;
@@ -308,10 +315,12 @@ const OVERHEAD_STAMINA_FILL_HEIGHT = 4;
 const OVERHEAD_STAMINA_OFFSET_Y = 18;
 const GHOST_REPLAY_SCHEMA = "zannenin-ghost-v1";
 const GHOST_RECORD_INTERVAL_MS = 50;
-const GHOST_EXPORT_BUTTON_X = GAME_WIDTH - 168;
-const GHOST_EXPORT_BUTTON_Y = 118;
-const CLEAR_MENU_BUTTON_Y = GHOST_EXPORT_BUTTON_Y + 46;
-const CLEAR_SCREENSHOT_BUTTON_Y = CLEAR_MENU_BUTTON_Y + 46;
+const CLEAR_ACTION_DESKTOP_X = GAME_WIDTH - 168;
+const CLEAR_ACTION_DESKTOP_Y = 118;
+const CLEAR_ACTION_DESKTOP_GAP = 58;
+const CLEAR_ACTION_MOBILE_X = GAME_WIDTH / 2;
+const CLEAR_ACTION_MOBILE_Y = GAME_HEIGHT - 178;
+const CLEAR_ACTION_MOBILE_GAP = 62;
 const SHOW_CLEAR_RANK_AND_MISSIONS = true;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
@@ -323,6 +332,9 @@ const DASH_WALL_DEFAULT_KNOCKBACK_Y = -170;
 const DASH_WALL_BOUNCE_COOLDOWN_MS = 420;
 let bootLoadingRunnerTimer: number | null = null;
 let bootLoadingOverlayTimer: number | null = null;
+let bootLoadingOverlayHideTimer: number | null = null;
+let bootLoadingStallTimer: number | null = null;
+let bootLoadingOverlayShownAt = 0;
 type FullscreenTarget = HTMLElement & {
   msRequestFullscreen?: () => Promise<void> | void;
   webkitRequestFullscreen?: () => Promise<void> | void;
@@ -420,17 +432,19 @@ class PrototypeScene extends Phaser.Scene {
   private ghostRecordingActive = false;
   private ghostRecordingDisabled = false;
   private lastGhostRecordAt = -Infinity;
-  private ghostExportButton?: Phaser.GameObjects.Text;
-  private clearMenuButton?: Phaser.GameObjects.Text;
-  private clearScreenshotButton?: Phaser.GameObjects.Text;
+  private ghostExportButton?: Phaser.GameObjects.Container;
+  private clearMenuButton?: Phaser.GameObjects.Container;
+  private clearScreenshotButton?: Phaser.GameObjects.Container;
   private lastScreenshot?: CapturedGameScreenshot;
   private screenshotCapturePending = false;
   private screenshotPreviewOpen = false;
+  private screenshotPreviewPausedScene = false;
   private dashLingerUntil = -Infinity;
   private isDashActive = false;
   private lastDashWallBounceAt = -Infinity;
   private countdownOverlay?: StartCountdownOverlay;
   private finalScoreText?: Phaser.GameObjects.Text;
+  private clearStampContainer?: Phaser.GameObjects.Container;
   private missText?: Phaser.GameObjects.Text;
   private danmaku?: DanmakuOverlay;
   private minimap?: MinimapOverlay;
@@ -546,6 +560,10 @@ class PrototypeScene extends Phaser.Scene {
 
   preload() {
     setBootLoadingProgress("Loading...");
+    this.load.on("loaderror", (file: { key?: string; src?: string }) => {
+      console.warn("Asset load failed during boot.", file.key ?? file.src ?? file);
+      setBootLoadingProgress("一部の素材読み込みを再試行しています...");
+    });
     REAR_BACKGROUNDS.forEach((background) => {
       this.load.image(background.key, `${ASSET_BASE}${background.path}`);
     });
@@ -758,49 +776,66 @@ class PrototypeScene extends Phaser.Scene {
       .rectangle(HUD_PANEL_X + 14, HUD_PANEL_Y + 16, 3, HUD_PANEL_HEIGHT - 32, 0x67e8f9, 0.68)
       .setOrigin(0, 0)
       .setScrollFactor(0)
-      .setDepth(97);
+      .setDepth(97)
+      .setVisible(false);
 
     this.playerNameText = this.add
       .text(HUD_TEXT_X, HUD_PLAYER_NAME_Y, "", {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: `${HUD_PLAYER_NAME_FONT_SIZE}px`,
+        fontStyle: "700",
         color: "#e0f2fe",
+        stroke: "#03111f",
+        strokeThickness: 0,
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setDepth(100)
-      .setShadow(0, 0, "#22d3ee", 8, true, true)
+      .setShadow(0, 1, "#020617", 0, true, true)
       .setScrollFactor(0);
 
     this.scoreText = this.add
       .text(HUD_TEXT_X, HUD_SCORE_Y, "", {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: `${HUD_SCORE_FONT_SIZE}px`,
+        fontStyle: "700",
         color: "#f8fafc",
+        stroke: "#03111f",
+        strokeThickness: 0,
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setScrollFactor(0)
       .setDepth(100)
-      .setShadow(1, 1, "#020617", 2, true, true);
+      .setShadow(1, 1, "#020617", 0, true, true);
     this.updateScoreText();
 
     this.timerText = this.add
       .text(HUD_TIMER_X, HUD_SCORE_Y, "", {
-        fontFamily: "monospace",
+        fontFamily: UI_TEXT_FONT_FAMILY,
         fontSize: `${HUD_MAIN_FONT_SIZE}px`,
+        fontStyle: "700",
         color: "#fde68a",
+        stroke: "#03111f",
+        strokeThickness: 0,
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setScrollFactor(0)
       .setDepth(100)
-      .setShadow(1, 1, "#020617", 2, true, true);
+      .setShadow(1, 1, "#020617", 0, true, true);
     this.updateTimerText();
 
     this.staminaText = this.add
       .text(HUD_TEXT_X, HUD_STAMINA_Y, "", {
-        fontFamily: "monospace",
+        fontFamily: UI_TEXT_FONT_FAMILY,
         fontSize: `${HUD_MAIN_FONT_SIZE}px`,
+        fontStyle: "700",
         color: "#bbf7d0",
+        stroke: "#03111f",
+        strokeThickness: 0,
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setScrollFactor(0)
       .setDepth(100)
-      .setShadow(1, 1, "#020617", 2, true, true);
+      .setShadow(1, 1, "#020617", 0, true, true);
     this.staminaBarBack = this.add
       .rectangle(HUD_STAMINA_BAR_X, HUD_STAMINA_BAR_Y, HUD_STAMINA_BAR_WIDTH, HUD_STAMINA_BAR_HEIGHT, 0x0f172a, 0.78)
       .setOrigin(0, 0.5)
@@ -853,15 +888,17 @@ class PrototypeScene extends Phaser.Scene {
     this.controlHintBack.setDisplaySize(HUD_MODE_CHIP_MIN_WIDTH, HUD_MODE_CHIP_HEIGHT);
     this.controlHintText = this.add
       .text(HUD_MODE_CHIP_X, HUD_MODE_CHIP_Y + 7, "", {
-        fontFamily: "monospace",
+        fontFamily: UI_TEXT_FONT_FAMILY,
         fontSize: `${HUD_HINT_FONT_SIZE}px`,
+        fontStyle: "700",
         color: "#fde68a",
         align: "center",
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5, 0)
       .setScrollFactor(0)
       .setDepth(100)
-      .setShadow(1, 1, "#020617", 2, true, true);
+      .setShadow(1, 1, "#020617", 0, true, true);
     this.applyHudScale();
     this.scale.off("resize", this.handleScaleResize, this);
     this.scale.on("resize", this.handleScaleResize, this);
@@ -1184,6 +1221,7 @@ class PrototypeScene extends Phaser.Scene {
     this.clearScreenshotButton = undefined;
     this.screenshotCapturePending = false;
     this.screenshotPreviewOpen = false;
+    this.screenshotPreviewPausedScene = false;
     this.ghostRecordingFrames = [];
     this.ghostRecordingActive = false;
     this.ghostRecordingDisabled = false;
@@ -1243,6 +1281,8 @@ class PrototypeScene extends Phaser.Scene {
     this.goal = undefined;
     this.finalScoreText?.destroy();
     this.finalScoreText = undefined;
+    this.clearStampContainer?.destroy(true);
+    this.clearStampContainer = undefined;
     this.missText = undefined;
   }
 
@@ -2076,8 +2116,11 @@ class PrototypeScene extends Phaser.Scene {
   private calculateHudScale() {
     const displayWidth = this.scale.displaySize?.width ?? GAME_WIDTH;
     const displayHeight = this.scale.displaySize?.height ?? GAME_HEIGHT;
+    if (displayHeight <= 520 && displayWidth > displayHeight) {
+      return Phaser.Math.Clamp((displayHeight / HUD_SCALE_BASE_HEIGHT) * 1.35, HUD_MIN_SCALE, 0.92);
+    }
     const fitScale = Math.min(displayWidth / HUD_SCALE_BASE_WIDTH, displayHeight / HUD_SCALE_BASE_HEIGHT);
-    const targetScale = fitScale < 1 ? 1 + (1 - fitScale) * 0.85 : fitScale;
+    const targetScale = fitScale < 1 ? 1 + (1 - fitScale) * 0.35 : 1 + (fitScale - 1) * 0.28;
     return Phaser.Math.Clamp(targetScale, HUD_MIN_SCALE, HUD_MAX_SCALE);
   }
 
@@ -2162,18 +2205,42 @@ class PrototypeScene extends Phaser.Scene {
     return `${characters.slice(0, Math.max(1, maxLength - 3)).join("")}...`;
   }
 
+  private setHudTextWithinWidth(textObject: Phaser.GameObjects.Text, value: string, maxWidth: number) {
+    textObject.setText(value);
+    if (textObject.width <= maxWidth) {
+      return;
+    }
+
+    const suffix = "...";
+    const characters = Array.from(value);
+    for (let length = Math.max(1, characters.length - 1); length > 0; length -= 1) {
+      textObject.setText(`${characters.slice(0, length).join("")}${suffix}`);
+      if (textObject.width <= maxWidth) {
+        return;
+      }
+    }
+
+    textObject.setText(suffix);
+  }
+
   private updatePlayerNameText() {
     if (!this.playerNameText) {
       return;
     }
 
+    const scale = this.hudScale || 1;
+    const maxWidth = HUD_PLAYER_NAME_MAX_WIDTH * scale;
+
     if (this.usesCompactHud()) {
-      this.playerNameText.setText(this.formatCompactHudText(this.playerName || "PLAYER", HUD_COMPACT_PLAYER_NAME_MAX_LENGTH));
+      this.setHudTextWithinWidth(
+        this.playerNameText,
+        this.formatCompactHudText(this.playerName || "PLAYER", HUD_COMPACT_PLAYER_NAME_MAX_LENGTH),
+        maxWidth,
+      );
       return;
     }
 
-    const playerIdLabel = isLeaderboardPlayerId(this.leaderboardPlayerId) ? ` #${this.leaderboardPlayerId.slice(0, 8)}` : "";
-    this.playerNameText.setText(`${t(this.locale, "hud.player")}:${this.playerName}${playerIdLabel}`);
+    this.setHudTextWithinWidth(this.playerNameText, `${t(this.locale, "hud.player")}:${this.playerName || "PLAYER"}`, maxWidth);
   }
 
   private getSavedVolumeSettings() {
@@ -2787,6 +2854,12 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.screenshotPreviewOpen = true;
+    if (this.hasWon) {
+      this.screenshotPreviewPausedScene = false;
+      return;
+    }
+
+    this.screenshotPreviewPausedScene = true;
     if (this.isRunActive) {
       this.editorTimerPauseStartedAt ||= this.time.now;
     }
@@ -2801,6 +2874,12 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.screenshotPreviewOpen = false;
+    if (!this.screenshotPreviewPausedScene) {
+      this.updateTimerText();
+      return;
+    }
+
+    this.screenshotPreviewPausedScene = false;
     if (this.isRunActive && this.editorTimerPauseStartedAt !== 0) {
       this.editorTimerPausedMs += Math.max(0, this.time.now - this.editorTimerPauseStartedAt);
       this.editorTimerPauseStartedAt = this.stageEditor?.isEnabled ? this.time.now : 0;
@@ -3171,6 +3250,93 @@ class PrototypeScene extends Phaser.Scene {
     };
   }
 
+  private getClearActionButtonPosition(index: number) {
+    if (this.controlMode === "mobile") {
+      return {
+        x: CLEAR_ACTION_MOBILE_X,
+        y: CLEAR_ACTION_MOBILE_Y + CLEAR_ACTION_MOBILE_GAP * index,
+      };
+    }
+
+    return {
+      x: CLEAR_ACTION_DESKTOP_X,
+      y: CLEAR_ACTION_DESKTOP_Y + CLEAR_ACTION_DESKTOP_GAP * index,
+    };
+  }
+
+  private createClearActionButton(
+    index: number,
+    label: string,
+    theme: { accent: number; fill: number; labelColor: string },
+    onPress: () => void,
+    variant: "primary" | "secondary" = "secondary",
+  ) {
+    const position = this.getClearActionButtonPosition(index);
+    const isMobileLayout = this.controlMode === "mobile";
+    const isPrimary = variant === "primary";
+    const width = isMobileLayout ? (isPrimary ? 380 : 324) : isPrimary ? 292 : 232;
+    const height = isMobileLayout ? (isPrimary ? 62 : 46) : isPrimary ? 54 : 38;
+    const radius = isMobileLayout ? 20 : 18;
+    const container = this.add.container(position.x, position.y).setScrollFactor(0).setDepth(260).setSize(width, height);
+    const shadow = this.add.graphics();
+    shadow.fillStyle(0x020617, isPrimary ? 0.5 : 0.34);
+    shadow.fillRoundedRect(-width / 2 + 6, -height / 2 + (isPrimary ? 10 : 7), width, height, radius);
+
+    const panel = this.add.graphics();
+    panel.fillStyle(isPrimary ? 0x0b1f2d : 0x061629, isPrimary ? 0.94 : 0.82);
+    panel.fillRoundedRect(-width / 2, -height / 2, width, height, radius);
+    panel.fillStyle(theme.fill, isPrimary ? 0.42 : 0.2);
+    panel.fillRoundedRect(-width / 2 + 2, -height / 2 + 2, width - 4, height - 4, radius - 2);
+    panel.lineStyle(isPrimary ? 3 : 2, theme.accent, isPrimary ? 0.95 : 0.6);
+    panel.strokeRoundedRect(-width / 2 + 1, -height / 2 + 1, width - 2, height - 2, radius);
+    panel.lineStyle(1, 0xfff7d6, isPrimary ? 0.28 : 0.14);
+    panel.strokeRoundedRect(-width / 2 + 7, -height / 2 + 7, width - 14, height - 14, Math.max(8, radius - 6));
+    if (isPrimary) {
+      panel.lineStyle(2, 0xffffff, 0.16);
+      panel.lineBetween(-width / 2 + 24, -height / 2 + 13, width / 2 - 24, -height / 2 + 13);
+    }
+
+    const accent = this.add.graphics();
+    accent.fillStyle(theme.accent, isPrimary ? 1 : 0.84);
+    accent.fillRoundedRect(-width / 2 + 13, -height / 2 + 9, isPrimary ? 44 : 30, height - 18, 12);
+    accent.fillStyle(0xffffff, isPrimary ? 0.36 : 0.18);
+    accent.fillCircle(-width / 2 + (isPrimary ? 35 : 28), 0, isPrimary ? 7 : 5);
+
+    const text = this.add
+      .text(isPrimary ? 34 : 22, 0, label, {
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
+        fontSize: isMobileLayout ? (isPrimary ? "23px" : "18px") : isPrimary ? "18px" : "14px",
+        fontStyle: "800",
+        color: theme.labelColor,
+        stroke: "#020617",
+        strokeThickness: 0,
+        align: "center",
+        fixedWidth: width - (isPrimary ? 86 : 64),
+        resolution: UI_TEXT_RESOLUTION,
+      })
+      .setOrigin(0.5);
+
+    container.add([shadow, panel, accent, text]);
+    container
+      .setInteractive(new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height), Phaser.Geom.Rectangle.Contains)
+      .on("pointerover", () => {
+        container.setScale(1.025);
+        panel.setAlpha(1);
+        accent.setAlpha(1);
+      })
+      .on("pointerout", () => {
+        container.setScale(1);
+        panel.setAlpha(1);
+        accent.setAlpha(0.92);
+      })
+      .on("pointerdown", () => container.setScale(0.985))
+      .on("pointerup", () => {
+        container.setScale(1.025);
+        onPress();
+      });
+    return container;
+  }
+
   private showGhostExportButton() {
     this.ghostExportButton?.destroy();
     this.ghostExportButton = undefined;
@@ -3178,19 +3344,12 @@ class PrototypeScene extends Phaser.Scene {
       return;
     }
 
-    this.ghostExportButton = this.add
-      .text(GHOST_EXPORT_BUTTON_X, GHOST_EXPORT_BUTTON_Y, t(this.locale, "ghost.exportJson"), {
-        fontFamily: "monospace",
-        fontSize: "18px",
-        color: "#dcfce7",
-        backgroundColor: "#14532dcc",
-        padding: { x: 14, y: 8 },
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(210)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerup", () => this.downloadGhostReplayJson());
+    this.ghostExportButton = this.createClearActionButton(
+      1,
+      t(this.locale, "ghost.exportJson"),
+      { accent: 0xf5c76a, fill: 0x12343a, labelColor: "#fff7d6" },
+      () => this.downloadGhostReplayJson(),
+    );
   }
 
   private showScreenshotPreviewOrCapture() {
@@ -3203,19 +3362,12 @@ class PrototypeScene extends Phaser.Scene {
 
   private showClearScreenshotButton() {
     this.clearScreenshotButton?.destroy();
-    this.clearScreenshotButton = this.add
-      .text(GHOST_EXPORT_BUTTON_X, CLEAR_SCREENSHOT_BUTTON_Y, t(this.locale, "screenshot.view"), {
-        fontFamily: "monospace",
-        fontSize: "18px",
-        color: "#e0f2fe",
-        backgroundColor: "#0f172acc",
-        padding: { x: 14, y: 8 },
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(210)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerup", () => this.showScreenshotPreviewOrCapture());
+    this.clearScreenshotButton = this.createClearActionButton(
+      2,
+      t(this.locale, "screenshot.view"),
+      { accent: 0x7dd3fc, fill: 0x0d2a4a, labelColor: "#e0f2fe" },
+      () => this.showScreenshotPreviewOrCapture(),
+    );
   }
 
   private captureGameScreenshot({ preview }: { preview: boolean }) {
@@ -3264,19 +3416,13 @@ class PrototypeScene extends Phaser.Scene {
 
   private showClearMenuButton() {
     this.clearMenuButton?.destroy();
-    this.clearMenuButton = this.add
-      .text(GHOST_EXPORT_BUTTON_X, CLEAR_MENU_BUTTON_Y, t(this.locale, "menu.backToMenu"), {
-        fontFamily: "monospace",
-        fontSize: "18px",
-        color: "#e0f2fe",
-        backgroundColor: "#0f172acc",
-        padding: { x: 14, y: 8 },
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(210)
-      .setInteractive({ useHandCursor: true })
-      .on("pointerup", () => void this.returnToTitle());
+    this.clearMenuButton = this.createClearActionButton(
+      0,
+      t(this.locale, "menu.backToMenu"),
+      { accent: 0xf8d66d, fill: 0x4b2f08, labelColor: "#fff7d6" },
+      () => void this.returnToTitle(),
+      "primary",
+    );
   }
 
   private downloadGhostReplayJson() {
@@ -3970,12 +4116,14 @@ class PrototypeScene extends Phaser.Scene {
     const missLabel = t(this.locale, "hud.miss");
     const missBurst = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, missLabel, {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: "104px",
+        fontStyle: "900",
         color: "#ff003c",
         stroke: "#fff7cf",
         strokeThickness: 10,
         align: "center",
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
@@ -3984,12 +4132,14 @@ class PrototypeScene extends Phaser.Scene {
       .setShadow(0, 0, "#ff003c", 24, true, true);
     const missEchoLeft = this.add
       .text(GAME_WIDTH / 2 - 18, GAME_HEIGHT / 2 + 10, missLabel, {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: "72px",
+        fontStyle: "900",
         color: "#38bdf8",
         stroke: "#0f172a",
         strokeThickness: 8,
         align: "center",
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
@@ -3997,12 +4147,14 @@ class PrototypeScene extends Phaser.Scene {
       .setAlpha(0.58);
     const missEchoRight = this.add
       .text(GAME_WIDTH / 2 + 20, GAME_HEIGHT / 2 - 8, missLabel, {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: "72px",
+        fontStyle: "900",
         color: "#fde047",
         stroke: "#7f1d1d",
         strokeThickness: 8,
         align: "center",
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
@@ -4010,12 +4162,14 @@ class PrototypeScene extends Phaser.Scene {
       .setAlpha(0.58);
     this.missText = this.add
       .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, missLabel, {
-        fontFamily: "monospace",
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: "82px",
+        fontStyle: "900",
         color: "#ff1f4f",
         stroke: "#fff7cf",
         strokeThickness: 9,
         align: "center",
+        resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
@@ -4111,35 +4265,97 @@ class PrototypeScene extends Phaser.Scene {
     const missionResultLine = SHOW_CLEAR_RANK_AND_MISSIONS && missionLines.length ? `${missionLines.join("\n")}\n` : "";
     this.saveWorldMapClearStamp(this.currentStageId);
     this.stopGhostRecording();
-    this.timerText.setText(
-      `${t(this.locale, "hud.time")}:${this.formatTimeSeconds(remaining)}  ${t(this.locale, "hud.bonus")}:${this.formatScoreValue(timeBonus)}`,
-    );
+    this.timerText.setText("");
     this.scoreText.setText(`${t(this.locale, "hud.itemScore")}:${itemScore}`);
     this.startRainbowWinEffect();
     this.finalScoreText = this.add
       .text(
         GAME_WIDTH / 2,
         GAME_HEIGHT / 2,
-        `${clearTitle}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}\n${missionResultLine}${t(
-          this.locale,
-          "hud.timeBonus",
-        )} ${this.formatScoreValue(timeBonus)}`,
+        `${clearTitle}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}${missionResultLine ? `\n${missionResultLine.trimEnd()}` : ""}`,
         {
-          fontFamily: "monospace",
+          fontFamily: UI_DISPLAY_FONT_FAMILY,
           fontSize: missionLines.length >= 3 ? "38px" : "44px",
+          fontStyle: "800",
           color: "#f8fafc",
           stroke: "#020617",
-          strokeThickness: 2,
+          strokeThickness: 3,
           align: "center",
+          resolution: UI_TEXT_RESOLUTION,
         },
       )
       .setOrigin(0.5)
       .setScrollFactor(0)
       .setDepth(200);
+    this.showClearStampReward();
     this.showGhostExportButton();
     this.showClearMenuButton();
     this.showClearScreenshotButton();
     this.submitWinScore(finalScore, itemScore, timeBonus, remaining);
+  }
+
+  private showClearStampReward() {
+    this.clearStampContainer?.destroy(true);
+
+    const container = this.add.container(GAME_WIDTH / 2 + 278, GAME_HEIGHT / 2 - 104);
+    container.setScrollFactor(0).setDepth(235).setAlpha(0).setScale(0.34).setAngle(-18);
+
+    const stamp = this.add.graphics();
+    stamp.fillStyle(0x7f1d1d, 0.88);
+    stamp.fillRoundedRect(-118, -48, 236, 96, 14);
+    stamp.lineStyle(4, 0xfff7d6, 0.92);
+    stamp.strokeRoundedRect(-118, -48, 236, 96, 14);
+    stamp.lineStyle(2, 0xfca5a5, 0.72);
+    stamp.strokeRoundedRect(-104, -35, 208, 70, 9);
+
+    const text = this.add
+      .text(0, -4, "CLEAR STAMP\nGET!", {
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
+        fontSize: "26px",
+        fontStyle: "900",
+        color: "#fff7d6",
+        stroke: "#450a0a",
+        strokeThickness: 4,
+        align: "center",
+        lineSpacing: -3,
+        resolution: UI_TEXT_RESOLUTION,
+      })
+      .setOrigin(0.5);
+
+    const shine = this.add
+      .rectangle(-78, -54, 42, 8, 0xfef3c7, 0.78)
+      .setOrigin(0.5)
+      .setAngle(-16)
+      .setBlendMode(Phaser.BlendModes.ADD);
+
+    container.add([stamp, text, shine]);
+    this.clearStampContainer = container;
+
+    this.tweens.add({
+      targets: container,
+      alpha: 1,
+      scale: 1,
+      angle: -7,
+      duration: 360,
+      ease: "Back.Out",
+    });
+    this.tweens.add({
+      targets: container,
+      y: container.y - 10,
+      duration: 760,
+      yoyo: true,
+      repeat: 1,
+      ease: "Sine.InOut",
+      delay: 360,
+    });
+    this.tweens.add({
+      targets: shine,
+      x: 88,
+      alpha: 0,
+      duration: 680,
+      ease: "Cubic.Out",
+      delay: 180,
+    });
   }
 
   private registerRainbowPipeline() {
@@ -4181,36 +4397,41 @@ document.addEventListener("contextmenu", (event) => {
 
 initializePwaInstall();
 registerServiceWorker();
+document.body.classList.add("is-game-booting");
 void startGame();
 
 async function startGame() {
-  const reloadRequested = await ensureLatestClientVersion(DEBUG_VERSION);
-  if (reloadRequested) {
-    return;
-  }
+  try {
+    const reloadRequested = await ensureLatestClientVersion(DEBUG_VERSION);
+    if (reloadRequested) {
+      return;
+    }
 
-  showBootLoadingOverlay();
+    showBootLoadingOverlay();
 
-  new Phaser.Game({
-    type: Phaser.AUTO,
-    parent: "game",
-    width: GAME_WIDTH,
-    height: GAME_HEIGHT,
-    pixelArt: true,
-    backgroundColor: "#172033",
-    scale: {
-      mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
-    },
-    physics: {
-      default: "arcade",
-      arcade: {
-        gravity: { x: 0, y: 1400 },
-        debug: false,
+    new Phaser.Game({
+      type: Phaser.AUTO,
+      parent: "game",
+      width: GAME_WIDTH,
+      height: GAME_HEIGHT,
+      pixelArt: true,
+      backgroundColor: "#172033",
+      scale: {
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH,
       },
-    },
-    scene: PrototypeScene,
-  });
+      physics: {
+        default: "arcade",
+        arcade: {
+          gravity: { x: 0, y: 1400 },
+          debug: false,
+        },
+      },
+      scene: PrototypeScene,
+    });
+  } catch (error) {
+    showBootLoadingFailure(error);
+  }
 }
 
 function registerServiceWorker() {
@@ -4230,6 +4451,11 @@ function showBootLoadingOverlay() {
     window.clearTimeout(bootLoadingOverlayTimer);
     bootLoadingOverlayTimer = null;
   }
+  if (bootLoadingOverlayHideTimer !== null) {
+    window.clearTimeout(bootLoadingOverlayHideTimer);
+    bootLoadingOverlayHideTimer = null;
+  }
+  clearBootLoadingStallTimer();
   const existing = document.getElementById(BOOT_LOADING_OVERLAY_ID);
   if (existing) {
     existing.remove();
@@ -4246,8 +4472,11 @@ function showBootLoadingOverlayNow() {
   overlay.id = BOOT_LOADING_OVERLAY_ID;
   overlay.innerHTML = `
     <div class="boot-loading-panel" role="status" aria-live="polite" aria-label="Loading game">
+      <div class="boot-loading-brand">ZANNENIN LAND</div>
       <div class="boot-loading-runner" data-boot-loading-runner></div>
+      <div class="boot-loading-meter" aria-hidden="true"><span></span></div>
       <p class="boot-loading-text" data-boot-loading-text>Loading...</p>
+      <div class="boot-loading-actions" data-boot-loading-actions hidden></div>
     </div>
   `;
   const runner = overlay.querySelector<HTMLDivElement>("[data-boot-loading-runner]");
@@ -4255,7 +4484,10 @@ function showBootLoadingOverlayNow() {
     runner.style.backgroundImage = `url('${ASSET_BASE}assets/sprites/player_walk_13_6x3_320x260.webp')`;
     startBootLoadingRunner(runner);
   }
+  bootLoadingOverlayShownAt = performance.now();
   document.body.appendChild(overlay);
+  window.requestAnimationFrame(() => overlay.classList.add("is-visible"));
+  scheduleBootLoadingStallNotice();
 }
 
 function setBootLoadingProgress(text: string) {
@@ -4267,17 +4499,85 @@ function setBootLoadingProgress(text: string) {
 }
 
 function hideBootLoadingOverlay() {
+  document.body.classList.remove("is-game-booting");
   if (bootLoadingOverlayTimer !== null) {
     window.clearTimeout(bootLoadingOverlayTimer);
     bootLoadingOverlayTimer = null;
   }
-  stopBootLoadingRunner();
-  document.getElementById(BOOT_LOADING_OVERLAY_ID)?.remove();
+  if (bootLoadingOverlayHideTimer !== null) {
+    window.clearTimeout(bootLoadingOverlayHideTimer);
+    bootLoadingOverlayHideTimer = null;
+  }
+  clearBootLoadingStallTimer();
+  const overlay = document.getElementById(BOOT_LOADING_OVERLAY_ID);
+  if (!overlay) {
+    stopBootLoadingRunner();
+    return;
+  }
+  const visibleElapsedMs = performance.now() - bootLoadingOverlayShownAt;
+  const delayMs = Math.max(0, BOOT_LOADING_OVERLAY_MIN_VISIBLE_MS - visibleElapsedMs);
+  bootLoadingOverlayHideTimer = window.setTimeout(() => {
+    bootLoadingOverlayHideTimer = null;
+    overlay.classList.add("is-exiting");
+    window.setTimeout(() => {
+      stopBootLoadingRunner();
+      overlay.remove();
+    }, BOOT_LOADING_OVERLAY_FADE_MS);
+  }, delayMs);
+}
+
+function clearBootLoadingStallTimer() {
+  if (bootLoadingStallTimer !== null) {
+    window.clearTimeout(bootLoadingStallTimer);
+    bootLoadingStallTimer = null;
+  }
+}
+
+function scheduleBootLoadingStallNotice() {
+  clearBootLoadingStallTimer();
+  bootLoadingStallTimer = window.setTimeout(() => {
+    bootLoadingStallTimer = null;
+    showBootLoadingStallNotice("読み込みに時間がかかっています");
+  }, BOOT_LOADING_STALL_MS);
+}
+
+function showBootLoadingStallNotice(message: string) {
+  const overlay = document.getElementById(BOOT_LOADING_OVERLAY_ID);
+  if (!overlay) {
+    return;
+  }
+  overlay.classList.add("is-stalled");
+  setBootLoadingProgress(message);
+  const actions = overlay.querySelector<HTMLDivElement>("[data-boot-loading-actions]");
+  if (!actions) {
+    return;
+  }
+  actions.hidden = false;
+  actions.innerHTML = "";
+  const reloadButton = document.createElement("button");
+  reloadButton.type = "button";
+  reloadButton.className = "boot-loading-retry";
+  reloadButton.textContent = "再読み込み";
+  reloadButton.addEventListener("click", () => window.location.reload());
+  actions.appendChild(reloadButton);
+}
+
+function showBootLoadingFailure(error: unknown) {
+  console.error("Game boot failed.", error);
+  if (bootLoadingOverlayTimer !== null) {
+    window.clearTimeout(bootLoadingOverlayTimer);
+    bootLoadingOverlayTimer = null;
+  }
+  if (!document.getElementById(BOOT_LOADING_OVERLAY_ID)) {
+    showBootLoadingOverlayNow();
+  }
+  document.body.classList.remove("is-game-booting");
+  clearBootLoadingStallTimer();
+  showBootLoadingStallNotice("読み込みに失敗しました");
 }
 
 function startBootLoadingRunner(runner: HTMLDivElement) {
   stopBootLoadingRunner();
-  const totalFrames = BOOT_LOADING_RUNNER_COLUMNS * BOOT_LOADING_RUNNER_ROWS;
   let frame = 0;
   const setFrame = (frameIndex: number) => {
     const column = frameIndex % BOOT_LOADING_RUNNER_COLUMNS;
@@ -4286,7 +4586,7 @@ function startBootLoadingRunner(runner: HTMLDivElement) {
   };
   setFrame(0);
   bootLoadingRunnerTimer = window.setInterval(() => {
-    frame = (frame + 1) % totalFrames;
+    frame = (frame + 1) % BOOT_LOADING_RUNNER_FRAMES;
     setFrame(frame);
   }, BOOT_LOADING_RUNNER_FRAME_MS);
 }

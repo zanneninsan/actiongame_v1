@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UI外見改善レポート v0.1.397</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --panel: #0d2036;
+      --line: rgba(184, 233, 255, 0.24);
+      --gold: #f5c76a;
+      --sky: #b8e9ff;
+      --text: #f8fafc;
+      --muted: #9fb7d8;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 50% 0%, #14385a, var(--bg) 42%, #020617 100%);
+      color: var(--text);
+      font-family: "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif;
+      line-height: 1.7;
+    }
+    main {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 34px 0 48px;
+    }
+    header {
+      padding: 26px 28px;
+      border: 1px solid rgba(245, 199, 106, 0.34);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(13, 32, 54, 0.92), rgba(2, 6, 23, 0.92));
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.34);
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 8px; color: #fff7d6; font-size: clamp(26px, 4vw, 40px); }
+    h2 { margin: 34px 0 14px; color: var(--gold); font-size: 24px; }
+    h3 { margin-bottom: 8px; color: #fff7d6; font-size: 18px; }
+    a { color: var(--sky); }
+    .lead { margin-bottom: 0; color: var(--sky); font-weight: 700; }
+    .shots {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+    figure {
+      margin: 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(2, 6, 23, 0.48);
+    }
+    figure img {
+      width: 100%;
+      display: block;
+      border-radius: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    figcaption {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .item {
+      min-height: 180px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: linear-gradient(180deg, rgba(13, 32, 54, 0.82), rgba(2, 6, 23, 0.76));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    .item .no {
+      display: inline-grid;
+      place-items: center;
+      min-width: 32px;
+      height: 24px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(245, 199, 106, 0.46);
+      border-radius: 999px;
+      color: var(--gold);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .before,
+    .after {
+      display: grid;
+      gap: 4px;
+      margin: 10px 0 0;
+      padding: 10px 12px;
+      border-radius: 9px;
+      background: rgba(2, 6, 23, 0.46);
+    }
+    .before strong,
+    .after strong {
+      color: var(--sky);
+      font-size: 12px;
+    }
+    .after {
+      border: 1px solid rgba(134, 239, 172, 0.22);
+    }
+    .after strong { color: #86efac; }
+    @media (max-width: 760px) {
+      .shots,
+      .grid { grid-template-columns: 1fr; }
+      main { width: min(100% - 20px, 1180px); }
+      header { padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>UI外見改善レポート v0.1.397</h1>
+      <p class="lead">似た修正は個別件数にせず、20カテゴリにまとめた。v0.1.397では古い金額縁の印象を抑え、満足教の金をアクセントにした今風スマホゲームUIへ全体を寄せた。</p>
+    </header>
+
+    <section>
+      <h2>代表スクリーンショット</h2>
+      <div class="shots">
+        <figure>
+          <img src="ui-visual-polish/screenshots/before-world-map.png" alt="改善前のワールドマップ" />
+          <figcaption>改善前: ボタンやパネルは機能するが、平板な枠と暗い箱が多く、情報の重みが近かった。</figcaption>
+        </figure>
+        <figure>
+          <img src="ui-visual-polish/screenshots/after-world-map.png" alt="改善後のワールドマップ" />
+          <figcaption>改善後: パネル、ボタン、入力、一覧の質感を揃え、選択中の情報が読みやすいようにした。</figcaption>
+        </figure>
+        <figure>
+          <img src="ui-visual-polish/screenshots/before-confirm.png" alt="改善前の確認周辺" />
+          <figcaption>改善前: 確認やステージ情報の階層が弱く、背景との分離も薄かった。</figcaption>
+        </figure>
+        <figure>
+          <img src="ui-visual-polish/screenshots/after-mobile-landscape.png" alt="改善後のスマホ横画面" />
+          <figcaption>改善後: スマホ横画面では常設パネルの詳細を畳み、マップを読む領域を優先した。</figcaption>
+        </figure>
+        <figure>
+          <img src="ui-visual-polish/screenshots/after-start-dialog.png" alt="モダン化後の開始確認画面" />
+          <figcaption>追加改善: 開始直前の画面は巨大な額縁から、内容量に合うコンパクトなダークガラスカードへ変更した。</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section>
+      <h2>20カテゴリの改善内容</h2>
+      <div class="grid">
+        <article class="item"><span class="no">01</span><h3>クリア後アクションボタン</h3><p class="before"><strong>Before</strong>Phaserのテキストに背景色を付けた直線的な見た目だった。</p><p class="after"><strong>After</strong>角丸パネル、内枠、アクセントバー、押下演出を持つ専用Canvasボタンに変更。</p></article>
+        <article class="item"><span class="no">02</span><h3>共通ボタンの手触り</h3><p class="before"><strong>Before</strong>hoverやpressが薄く、押せるものと飾りの差が弱かった。</p><p class="after"><strong>After</strong>浮き上がり、押し込み、発光を共通化して操作可能感を強化。</p></article>
+        <article class="item"><span class="no">03</span><h3>モーダルの質感</h3><p class="before"><strong>Before</strong>黒い面に枠が乗る印象で、ゲーム世界の素材感が弱かった。</p><p class="after"><strong>After</strong>ガラス調の奥行き、内側ハイライト、控えめなぼかしを追加。</p></article>
+        <article class="item"><span class="no">04</span><h3>ワールドマップの額装</h3><p class="before"><strong>Before</strong>マップ画像とUIパネルの境界が単調だった。</p><p class="after"><strong>After</strong>マップボードの外枠、内側の光、下方向のシェードを強化。</p></article>
+        <article class="item"><span class="no">05</span><h3>ワールドマップ上部ツールバー</h3><p class="before"><strong>Before</strong>並んだボタンが板状で、現在のゲームテーマに馴染み切っていなかった。</p><p class="after"><strong>After</strong>押下・hoverの統一演出と軽い影で、ゲーム内操作ボタンらしくした。</p></article>
+        <article class="item"><span class="no">06</span><h3>進行度/スタンプ帳</h3><p class="before"><strong>Before</strong>情報が等間隔に積まれ、進行度の見せ場が弱かった。</p><p class="after"><strong>After</strong>進行度部分を軽く区切り、バーの発光と背景階層を調整。</p></article>
+        <article class="item"><span class="no">07</span><h3>メーター表現</h3><p class="before"><strong>Before</strong>細いバーがUIの中に埋もれやすかった。</p><p class="after"><strong>After</strong>高さ、内側影、グラデーションを調整して状態表示として読めるようにした。</p></article>
+        <article class="item"><span class="no">08</span><h3>検索欄と入力欄</h3><p class="before"><strong>Before</strong>入力欄が板画像に頼っていて、フォーカス状態が弱かった。</p><p class="after"><strong>After</strong>内側影、境界線、フォーカスリングを追加。</p></article>
+        <article class="item"><span class="no">09</span><h3>フィルタチップ</h3><p class="before"><strong>Before</strong>小さなタグが並ぶだけで、選択中の気持ちよさが弱かった。</p><p class="after"><strong>After</strong>内側ハイライトと選択中の発光を足し、押せるチップとして整理。</p></article>
+        <article class="item"><span class="no">10</span><h3>ステージ一覧レール</h3><p class="before"><strong>Before</strong>行がただの暗い箱で、視線の入口が少なかった。</p><p class="after"><strong>After</strong>左アクセントバー、行背景、選択中の光を追加。副作用で潰れた文字高も修正。</p></article>
+        <article class="item"><span class="no">11</span><h3>ステージパスポートカード</h3><p class="before"><strong>Before</strong>情報量の多い透明カードで、背景に沈みやすかった。</p><p class="after"><strong>After</strong>背景階層とタイトル発光を調整し、スマホ横では詳細を畳んだ。</p></article>
+        <article class="item"><span class="no">12</span><h3>ステージ確認ダイアログ</h3><p class="before"><strong>Before</strong>横長素材に文字とボタンが置かれているだけに見えた。</p><p class="after"><strong>After</strong>枠、内側光、STAGEラベルを足して、決定前の演出として独立させた。</p></article>
+        <article class="item"><span class="no">13</span><h3>マップノードとラベル</h3><p class="before"><strong>Before</strong>ノードは見えるが、マップ上の駒としての浮遊感が弱かった。</p><p class="after"><strong>After</strong>影、外周光、ラベル枠を足し、マップ上の選択対象として読みやすくした。</p></article>
+        <article class="item"><span class="no">14</span><h3>開始画面の項目行</h3><p class="before"><strong>Before</strong>入力行がただ並び、フォームっぽさが強かった。</p><p class="after"><strong>After</strong>行背景と薄い枠を足し、ゲーム内の設定札として見えるようにした。</p></article>
+        <article class="item"><span class="no">15</span><h3>ゴースト読込パネル</h3><p class="before"><strong>Before</strong>ファイル読込とランキングゴーストが混ざって見えた。</p><p class="after"><strong>After</strong>パネル化して詳細設定のまとまりを作り、開始画面の密度を整理。</p></article>
+        <article class="item"><span class="no">16</span><h3>スクリーンショットモーダル</h3><p class="before"><strong>Before</strong>プレビュー画像が矩形で置かれ、保存画面の特別感が薄かった。</p><p class="after"><strong>After</strong>画像枠、影、モーダル背景を整え、撮影結果を主役にした。</p></article>
+        <article class="item"><span class="no">17</span><h3>ランキング表</h3><p class="before"><strong>Before</strong>表の行が装飾はあるが同じ重さに見えた。</p><p class="after"><strong>After</strong>表面、行影、現在スコアの発光を足して順位情報の階層を強化。</p></article>
+        <article class="item"><span class="no">18</span><h3>ランキング下部とアカウント導線</h3><p class="before"><strong>Before</strong>Google連携や共有がUIの一部として馴染み切っていなかった。</p><p class="after"><strong>After</strong>共通ボタン演出とパネル質感を適用し、ランキング画面内の導線に統一。</p></article>
+        <article class="item"><span class="no">19</span><h3>グローバルUI</h3><p class="before"><strong>Before</strong>右上の小ボタンが個別に浮き、ゲーム画面上で少し素っ気なかった。</p><p class="after"><strong>After</strong>薄い背景トレイとアイコン影を足し、邪魔しない操作群としてまとめた。</p></article>
+        <article class="item"><span class="no">20</span><h3>スマホ操作UI</h3><p class="before"><strong>Before</strong>仮想ボタンが機能優先で、画面上の質感が他UIと離れていた。</p><p class="after"><strong>After</strong>ジョイスティック、ボタン、レイアウトパネルに同系統の透明感と発光を適用。</p></article>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

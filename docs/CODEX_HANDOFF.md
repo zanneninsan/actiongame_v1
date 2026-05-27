@@ -4,6 +4,8 @@ This file is the detailed context packet for future Codex sessions. Read it once
 
 For the No1-No20 feature/backlog handoff, also read `docs/NO1_20_HANDOFF.md`.
 
+For the current long UI/gameplay polish thread and the user's taste/workflow expectations, also read `docs/THREAD_HANDOFF_2026-05-25.md`.
+
 ## Project
 
 - Browser-playable 2D side-scrolling dot/pixel action game.
