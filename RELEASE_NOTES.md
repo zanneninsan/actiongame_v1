@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.419
+### English
+- Fixed mobile first-run control setup so the layout editor appears whenever no saved button layout exists, even if an older setup-complete flag remains in storage.
+### Japanese
+- 保存済みのスマホ操作ボタン配置が無い場合は、古い初回設定済みフラグが残っていても配置調整画面を必ず出すようにしました。
+
 ## v0.1.418
 ### English
 - Compact the world-map progress panel on short landscape screens so it no longer covers the lower-right map area with search and filter controls.

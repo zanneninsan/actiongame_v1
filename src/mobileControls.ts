@@ -947,7 +947,10 @@ function setMobileControlsHintSeen() {
 
 export function shouldShowMobileControlsLayoutSetup() {
   try {
-    return window.localStorage.getItem(MOBILE_CONTROLS_LAYOUT_SETUP_STORAGE_KEY) !== "1";
+    return (
+      window.localStorage.getItem(MOBILE_CONTROLS_LAYOUT_SETUP_STORAGE_KEY) !== "1" ||
+      !window.localStorage.getItem(MOBILE_CONTROLS_LAYOUT_STORAGE_KEY)
+    );
   } catch {
     return true;
   }
