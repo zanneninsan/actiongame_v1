@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.417";
+const DEBUG_VERSION = "v0.1.418";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const UI_TEXT_FONT_FAMILY = 'Meiryo, "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif';
@@ -319,8 +319,8 @@ const CLEAR_ACTION_DESKTOP_X = GAME_WIDTH - 168;
 const CLEAR_ACTION_DESKTOP_Y = 118;
 const CLEAR_ACTION_DESKTOP_GAP = 58;
 const CLEAR_ACTION_MOBILE_X = GAME_WIDTH / 2;
-const CLEAR_ACTION_MOBILE_Y = GAME_HEIGHT - 178;
-const CLEAR_ACTION_MOBILE_GAP = 62;
+const CLEAR_ACTION_MOBILE_Y = GAME_HEIGHT - 214;
+const CLEAR_ACTION_MOBILE_GAP = 82;
 const SHOW_CLEAR_RANK_AND_MISSIONS = true;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
@@ -3274,9 +3274,9 @@ class PrototypeScene extends Phaser.Scene {
     const position = this.getClearActionButtonPosition(index);
     const isMobileLayout = this.controlMode === "mobile";
     const isPrimary = variant === "primary";
-    const width = isMobileLayout ? (isPrimary ? 380 : 324) : isPrimary ? 292 : 232;
-    const height = isMobileLayout ? (isPrimary ? 62 : 46) : isPrimary ? 54 : 38;
-    const radius = isMobileLayout ? 20 : 18;
+    const width = isMobileLayout ? (isPrimary ? 380 : 348) : isPrimary ? 292 : 232;
+    const height = isMobileLayout ? (isPrimary ? 84 : 76) : isPrimary ? 54 : 38;
+    const radius = isMobileLayout ? 22 : 18;
     const container = this.add.container(position.x, position.y).setScrollFactor(0).setDepth(260).setSize(width, height);
     const shadow = this.add.graphics();
     shadow.fillStyle(0x020617, isPrimary ? 0.5 : 0.34);
@@ -3305,7 +3305,7 @@ class PrototypeScene extends Phaser.Scene {
     const text = this.add
       .text(isPrimary ? 34 : 22, 0, label, {
         fontFamily: UI_DISPLAY_FONT_FAMILY,
-        fontSize: isMobileLayout ? (isPrimary ? "23px" : "18px") : isPrimary ? "18px" : "14px",
+        fontSize: isMobileLayout ? (isPrimary ? "24px" : "19px") : isPrimary ? "18px" : "14px",
         fontStyle: "800",
         color: theme.labelColor,
         stroke: "#020617",

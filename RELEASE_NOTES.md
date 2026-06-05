@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.418
+### English
+- Compact the world-map progress panel on short landscape screens so it no longer covers the lower-right map area with search and filter controls.
+- Enlarged and repositioned the mobile clear-result action buttons so the world-map route and screenshot controls remain easier to tap in landscape play.
+### Japanese
+- 横画面の高さが低い時はワールドマップの進行度パネルを小さくまとめ、検索やフィルタで右下のマップ領域を覆わないようにしました。
+- モバイル操作時のクリア結果ボタンを大きくして配置を調整し、横画面でもワールドマップへ戻る導線やスクリーンショット操作を押しやすくしました。
+
 ## v0.1.417
 ### English
 - Deferred loading of the long adventure story module until the adventure scene is opened, reducing the initial boot bundle work.

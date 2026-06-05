@@ -3057,10 +3057,12 @@ body.is-mobile-controls-active canvas {
   .start-world-map-dashboard {
     left: auto;
     right: 16px;
-    bottom: 46px;
-    width: min(360px, calc(52% - 24px));
-    gap: 5px;
-    padding: 9px;
+    top: 12px;
+    bottom: auto;
+    width: min(238px, calc(100% - 304px));
+    min-height: 0;
+    gap: 0;
+    padding: 7px 10px;
   }
 
   .start-world-map-panel.is-stage-card-left .start-world-map-dashboard {
@@ -3068,18 +3070,24 @@ body.is-mobile-controls-active canvas {
     right: 16px;
   }
 
-  .start-world-progress-card,
-  .start-world-search {
+  .start-world-progress-card {
     grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+    gap: 2px 8px;
   }
 
-  .start-world-filter-row {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-  }
-
-  .start-world-rail {
+  .start-world-map-dashboard .start-world-search,
+  .start-world-map-dashboard .start-world-filter-row,
+  .start-world-map-dashboard .start-world-rail {
     display: none;
+  }
+
+  .start-world-progress-label,
+  .start-world-progress-value {
+    font-size: 11px;
+  }
+
+  .start-world-progress-meter {
+    height: 6px;
   }
 
   .start-world-settings-panel {
