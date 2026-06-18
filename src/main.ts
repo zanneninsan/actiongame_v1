@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.420";
+const DEBUG_VERSION = "v0.1.421";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -3280,6 +3280,7 @@ class PrototypeScene extends Phaser.Scene {
     const height = isMobileLayout ? (isPrimary ? 84 : 76) : isPrimary ? 54 : 38;
     const radius = isMobileLayout ? 22 : 18;
     const container = this.add.container(position.x, position.y).setScrollFactor(0).setDepth(260).setSize(width, height);
+    const hitZone = this.add.zone(0, 0, width, height).setOrigin(0.5).setInteractive({ useHandCursor: true });
     const shadow = this.add.graphics();
     shadow.fillStyle(0x020617, isPrimary ? 0.5 : 0.34);
     shadow.fillRoundedRect(-width / 2 + 6, -height / 2 + (isPrimary ? 10 : 7), width, height, radius);
@@ -3318,9 +3319,8 @@ class PrototypeScene extends Phaser.Scene {
       })
       .setOrigin(0.5);
 
-    container.add([shadow, panel, accent, text]);
-    container
-      .setInteractive(new Phaser.Geom.Rectangle(-width / 2, -height / 2, width, height), Phaser.Geom.Rectangle.Contains)
+    container.add([hitZone, shadow, panel, accent, text]);
+    hitZone
       .on("pointerover", () => {
         container.setScale(1.025);
         panel.setAlpha(1);
@@ -4302,12 +4302,12 @@ class PrototypeScene extends Phaser.Scene {
 
     const container = this.add.container(0, 0).setScrollFactor(0).setDepth(220).setAlpha(0);
     const shade = this.add
-      .rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x020617, 0.66)
+      .rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x07111f, 1)
       .setOrigin(0.5)
       .setInteractive();
     const panel = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 10, RESULT_PANEL_TEXTURE_KEY);
     const panelScale = Math.min(1070 / panel.width, 590 / panel.height);
-    panel.setScale(panelScale);
+    panel.setScale(panelScale * 0.985);
 
     const title = this.add
       .text(GAME_WIDTH / 2, 148, t(this.locale, "result.stageClear"), {
@@ -4346,6 +4346,7 @@ class PrototypeScene extends Phaser.Scene {
         resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5);
+    rankText.setScale(0.94);
 
     const scoreBlock = this.createResultMetricBlock(416, 368, t(this.locale, "hud.score"), this.formatScoreValue(finalScore), 0xef5f83);
     const timeBlock = this.createResultMetricBlock(864, 368, t(this.locale, "result.timeLeft"), `${this.formatTimeSeconds(remaining)}s`, 0x14b8a6);
@@ -4416,19 +4417,15 @@ class PrototypeScene extends Phaser.Scene {
     });
     this.tweens.add({
       targets: panel,
-      scale: panelScale * 1.015,
-      duration: 900,
-      yoyo: true,
-      repeat: -1,
-      ease: "Sine.InOut",
+      scale: panelScale,
+      duration: 380,
+      ease: "Cubic.Out",
     });
     this.tweens.add({
       targets: rankText,
-      scale: 1.04,
-      duration: 680,
-      yoyo: true,
-      repeat: -1,
-      ease: "Sine.InOut",
+      scale: 1,
+      duration: 420,
+      ease: "Back.Out",
     });
   }
 
@@ -4472,14 +4469,12 @@ class PrototypeScene extends Phaser.Scene {
     sparkle.fillTriangle(18, 0, 5, -8, 5, 8);
     sparkle.fillStyle(0xffffff, 0.92);
     sparkle.fillCircle(0, 0, 5);
+    sparkle.setAlpha(0);
     this.tweens.add({
       targets: sparkle,
-      alpha: 0.42,
-      scale: 0.82,
-      duration: 640,
-      yoyo: true,
-      repeat: -1,
-      ease: "Sine.InOut",
+      alpha: 1,
+      duration: 260,
+      ease: "Sine.Out",
       delay,
     });
     return sparkle;

@@ -2,6 +2,16 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.421
+### English
+- Made the clear-result screen fully cover the stage instead of leaving gameplay visible behind it.
+- Expanded clear-result action button hit areas to match the full visible button shapes.
+- Removed continuous result-screen pulsing so the clear result settles after its entrance animation.
+### Japanese
+- クリア時のリザルト画面でステージ背景が見えないよう、画面全体を完全に覆う表示にしました。
+- クリア後の操作ボタンの当たり判定を、文字部分ではなく見た目のボタン全体に合わせました。
+- リザルト画面の常時ゆらぎをやめ、登場演出後は静止して見られるようにしました。
+
 ## v0.1.420
 ### English
 - Added a cute in-canvas stage-clear result screen with generated raster artwork, score details, remaining time, rank, and mission results.
