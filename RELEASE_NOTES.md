@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.420
+### English
+- Added a cute in-canvas stage-clear result screen with generated raster artwork, score details, remaining time, rank, and mission results.
+- Replaced the plain centered clear text so stage clears now transition into a dedicated result presentation while keeping the existing action buttons available.
+### Japanese
+- GPT Image 2で作成したラスター素材を使い、スコア詳細、残り時間、ランク、ミッション結果を表示する可愛いキャンバス内リザルト画面を追加しました。
+- クリア時の中央テキストだけの表示をやめ、既存の操作ボタンは残したまま専用のリザルト演出へ切り替わるようにしました。
+
 ## v0.1.419
 ### English
 - Fixed mobile first-run control setup so the layout editor appears whenever no saved button layout exists, even if an older setup-complete flag remains in storage.

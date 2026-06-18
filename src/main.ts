@@ -112,9 +112,10 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.419";
+const DEBUG_VERSION = "v0.1.420";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
+const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
 const UI_TEXT_FONT_FAMILY = 'Meiryo, "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif';
 const UI_DISPLAY_FONT_FAMILY = 'Meiryo, "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif';
 const UI_TEXT_RESOLUTION = 1;
@@ -443,7 +444,7 @@ class PrototypeScene extends Phaser.Scene {
   private isDashActive = false;
   private lastDashWallBounceAt = -Infinity;
   private countdownOverlay?: StartCountdownOverlay;
-  private finalScoreText?: Phaser.GameObjects.Text;
+  private resultScreenContainer?: Phaser.GameObjects.Container;
   private clearStampContainer?: Phaser.GameObjects.Container;
   private missText?: Phaser.GameObjects.Text;
   private danmaku?: DanmakuOverlay;
@@ -609,6 +610,7 @@ class PrototypeScene extends Phaser.Scene {
     });
     this.createPixelTexture("platform-hitbox", 1, 1, 0xffffff, 0xffffff);
     this.load.image(GOAL_TEXTURE_KEY, `${ASSET_BASE}assets/stage_objects/goal_gate.webp`);
+    this.load.image(RESULT_PANEL_TEXTURE_KEY, `${ASSET_BASE}assets/ui/result_screen/result_panel.webp`);
     this.load.audio("game-bgm", `${ASSET_BASE}assets/audio/gamebgm_default.mp3`);
     this.load.audio("item-pickup", `${ASSET_BASE}assets/audio/item_pickup.wav`);
     this.load.audio("player-jump-sfx", `${ASSET_BASE}assets/audio/player_jump.wav`);
@@ -1279,8 +1281,8 @@ class PrototypeScene extends Phaser.Scene {
     this.dashWalls = undefined;
     this.enemiesGroup = undefined;
     this.goal = undefined;
-    this.finalScoreText?.destroy();
-    this.finalScoreText = undefined;
+    this.resultScreenContainer?.destroy(true);
+    this.resultScreenContainer = undefined;
     this.clearStampContainer?.destroy(true);
     this.clearStampContainer = undefined;
     this.missText = undefined;
@@ -4261,37 +4263,226 @@ class PrototypeScene extends Phaser.Scene {
     const finalScore = this.roundScoreValue(itemScore + timeBonus);
     const clearRank = this.rewards?.getClearRank(finalScore, remaining, GAME_TIME_MS) ?? "C";
     const missionLines = this.getClearMissionLines(remaining, GAME_TIME_MS);
-    const clearTitle = SHOW_CLEAR_RANK_AND_MISSIONS ? `${t(this.locale, "hud.clear")}  ${clearRank}` : t(this.locale, "hud.clear");
-    const missionResultLine = SHOW_CLEAR_RANK_AND_MISSIONS && missionLines.length ? `${missionLines.join("\n")}\n` : "";
     this.saveWorldMapClearStamp(this.currentStageId);
     this.stopGhostRecording();
     this.timerText.setText("");
     this.scoreText.setText(`${t(this.locale, "hud.itemScore")}:${itemScore}`);
     this.startRainbowWinEffect();
-    this.finalScoreText = this.add
-      .text(
-        GAME_WIDTH / 2,
-        GAME_HEIGHT / 2,
-        `${clearTitle}\n${t(this.locale, "hud.score")} ${this.formatScoreValue(finalScore)}${missionResultLine ? `\n${missionResultLine.trimEnd()}` : ""}`,
-        {
-          fontFamily: UI_DISPLAY_FONT_FAMILY,
-          fontSize: missionLines.length >= 3 ? "38px" : "44px",
-          fontStyle: "800",
-          color: "#f8fafc",
-          stroke: "#020617",
-          strokeThickness: 3,
-          align: "center",
-          resolution: UI_TEXT_RESOLUTION,
-        },
-      )
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(200);
+    this.showClearResultScreen({
+      finalScore,
+      itemScore,
+      timeBonus,
+      remaining,
+      clearRank,
+      missionLines,
+    });
     this.showClearStampReward();
     this.showGhostExportButton();
     this.showClearMenuButton();
     this.showClearScreenshotButton();
     this.submitWinScore(finalScore, itemScore, timeBonus, remaining);
+  }
+
+  private showClearResultScreen({
+    finalScore,
+    itemScore,
+    timeBonus,
+    remaining,
+    clearRank,
+    missionLines,
+  }: {
+    finalScore: number;
+    itemScore: number;
+    timeBonus: number;
+    remaining: number;
+    clearRank: string;
+    missionLines: string[];
+  }) {
+    this.resultScreenContainer?.destroy(true);
+
+    const container = this.add.container(0, 0).setScrollFactor(0).setDepth(220).setAlpha(0);
+    const shade = this.add
+      .rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x020617, 0.66)
+      .setOrigin(0.5)
+      .setInteractive();
+    const panel = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 10, RESULT_PANEL_TEXTURE_KEY);
+    const panelScale = Math.min(1070 / panel.width, 590 / panel.height);
+    panel.setScale(panelScale);
+
+    const title = this.add
+      .text(GAME_WIDTH / 2, 148, t(this.locale, "result.stageClear"), {
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
+        fontSize: "42px",
+        fontStyle: "900",
+        color: "#6f2741",
+        stroke: "#fff3d0",
+        strokeThickness: 5,
+        align: "center",
+        resolution: UI_TEXT_RESOLUTION,
+      })
+      .setOrigin(0.5);
+
+    const stageName = this.add
+      .text(GAME_WIDTH / 2, 198, resolveStageName(this.editorStage.name, this.locale), {
+        fontFamily: UI_TEXT_FONT_FAMILY,
+        fontSize: "21px",
+        fontStyle: "800",
+        color: "#6b4a34",
+        align: "center",
+        fixedWidth: 680,
+        resolution: UI_TEXT_RESOLUTION,
+      })
+      .setOrigin(0.5);
+
+    const rankText = this.add
+      .text(GAME_WIDTH / 2, 268, `${t(this.locale, "result.rank")} ${clearRank}`, {
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
+        fontSize: "66px",
+        fontStyle: "900",
+        color: "#ef5f83",
+        stroke: "#fff8dc",
+        strokeThickness: 7,
+        align: "center",
+        resolution: UI_TEXT_RESOLUTION,
+      })
+      .setOrigin(0.5);
+
+    const scoreBlock = this.createResultMetricBlock(416, 368, t(this.locale, "hud.score"), this.formatScoreValue(finalScore), 0xef5f83);
+    const timeBlock = this.createResultMetricBlock(864, 368, t(this.locale, "result.timeLeft"), `${this.formatTimeSeconds(remaining)}s`, 0x14b8a6);
+
+    const detailText = this.add
+      .text(
+        GAME_WIDTH / 2,
+        438,
+        `${t(this.locale, "hud.itemScore")}  ${this.formatScoreValue(itemScore)}    ${t(
+          this.locale,
+          "hud.timeBonus",
+        )}  ${this.formatScoreValue(timeBonus)}`,
+        {
+          fontFamily: UI_TEXT_FONT_FAMILY,
+          fontSize: "21px",
+          fontStyle: "800",
+          color: "#7c4a32",
+          align: "center",
+          fixedWidth: 760,
+          resolution: UI_TEXT_RESOLUTION,
+        },
+      )
+      .setOrigin(0.5);
+
+    const missionTitle = this.add
+      .text(GAME_WIDTH / 2, 492, t(this.locale, "result.missions"), {
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
+        fontSize: "22px",
+        fontStyle: "900",
+        color: "#92513a",
+        align: "center",
+        resolution: UI_TEXT_RESOLUTION,
+      })
+      .setOrigin(0.5);
+    const missionSummary =
+      SHOW_CLEAR_RANK_AND_MISSIONS && missionLines.length > 0
+        ? missionLines.map((line) => line.replace(/^OK /, "* ").replace(/^-- /, "- ")).join("\n")
+        : t(this.locale, "result.noMissions");
+    const missions = this.add
+      .text(GAME_WIDTH / 2, 538, missionSummary, {
+        fontFamily: UI_TEXT_FONT_FAMILY,
+        fontSize: missionLines.length >= 3 ? "18px" : "20px",
+        fontStyle: "800",
+        color: "#5f4635",
+        align: "center",
+        fixedWidth: 820,
+        wordWrap: { width: 820, useAdvancedWrap: true },
+        lineSpacing: 4,
+        resolution: UI_TEXT_RESOLUTION,
+      })
+      .setOrigin(0.5);
+
+    const sparkles = [
+      this.createResultSparkle(296, 196, 0xffc4d6, 0),
+      this.createResultSparkle(988, 208, 0x86efac, 120),
+      this.createResultSparkle(320, 538, 0xfacc15, 240),
+      this.createResultSparkle(958, 520, 0x7dd3fc, 360),
+    ];
+
+    container.add([shade, panel, title, stageName, rankText, scoreBlock, timeBlock, detailText, missionTitle, missions, ...sparkles]);
+    this.resultScreenContainer = container;
+
+    this.tweens.add({
+      targets: container,
+      alpha: 1,
+      duration: 280,
+      ease: "Sine.Out",
+    });
+    this.tweens.add({
+      targets: panel,
+      scale: panelScale * 1.015,
+      duration: 900,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.InOut",
+    });
+    this.tweens.add({
+      targets: rankText,
+      scale: 1.04,
+      duration: 680,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.InOut",
+    });
+  }
+
+  private createResultMetricBlock(x: number, y: number, label: string, value: string, accentColor: number) {
+    const container = this.add.container(x, y);
+    const back = this.add.graphics();
+    back.fillStyle(0xffffff, 0.48);
+    back.fillRoundedRect(-158, -42, 316, 84, 22);
+    back.lineStyle(3, accentColor, 0.7);
+    back.strokeRoundedRect(-158, -42, 316, 84, 22);
+    const labelText = this.add
+      .text(0, -18, label, {
+        fontFamily: UI_TEXT_FONT_FAMILY,
+        fontSize: "18px",
+        fontStyle: "900",
+        color: "#7c4a32",
+        align: "center",
+        resolution: UI_TEXT_RESOLUTION,
+      })
+      .setOrigin(0.5);
+    const valueText = this.add
+      .text(0, 14, value, {
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
+        fontSize: "28px",
+        fontStyle: "900",
+        color: "#3b2440",
+        align: "center",
+        resolution: UI_TEXT_RESOLUTION,
+      })
+      .setOrigin(0.5);
+    container.add([back, labelText, valueText]);
+    return container;
+  }
+
+  private createResultSparkle(x: number, y: number, color: number, delay: number) {
+    const sparkle = this.add.graphics({ x, y });
+    sparkle.fillStyle(color, 0.86);
+    sparkle.fillTriangle(0, -18, 8, -5, -8, -5);
+    sparkle.fillTriangle(0, 18, 8, 5, -8, 5);
+    sparkle.fillTriangle(-18, 0, -5, -8, -5, 8);
+    sparkle.fillTriangle(18, 0, 5, -8, 5, 8);
+    sparkle.fillStyle(0xffffff, 0.92);
+    sparkle.fillCircle(0, 0, 5);
+    this.tweens.add({
+      targets: sparkle,
+      alpha: 0.42,
+      scale: 0.82,
+      duration: 640,
+      yoyo: true,
+      repeat: -1,
+      ease: "Sine.InOut",
+      delay,
+    });
+    return sparkle;
   }
 
   private showClearStampReward() {
