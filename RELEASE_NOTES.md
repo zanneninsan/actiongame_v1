@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.422
+### English
+- Removed the collapsed global menu drawer from hit testing on compact/mobile layouts so touch controls cannot accidentally tap hidden menu items.
+### Japanese
+- スマホ向けの折りたたみメニューを閉じている時は完全に非表示にし、ジャンプボタンなどのタッチ操作で隠れたメニュー項目が誤タップされないようにしました。
+
 ## v0.1.421
 ### English
 - Made the clear-result screen fully cover the stage instead of leaving gameplay visible behind it.

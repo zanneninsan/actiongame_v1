@@ -44,7 +44,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
       options.locale,
       "aria.globalMenu",
     )}" aria-controls="global-ui-drawer" aria-expanded="false">&#9776;</button>
-    <div id="global-ui-drawer" class="global-ui-drawer">
+    <div id="global-ui-drawer" class="global-ui-drawer" hidden>
       <span id="player-position-label" hidden>POS --,--</span>
       <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(options.locale, "aria.toggleCollision")}">HIT</button>
       <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(options.locale, "aria.rearBackground")}">RB1</button>
@@ -116,6 +116,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
 
   const bgmToggle = document.getElementById("bgm-toggle") as HTMLButtonElement;
   const globalMenuToggle = document.getElementById("global-menu-toggle") as HTMLButtonElement;
+  const globalMenuDrawer = document.getElementById("global-ui-drawer") as HTMLDivElement;
   const collisionDebugToggle = document.getElementById("collision-debug-toggle") as HTMLButtonElement;
   const rearDebugToggle = document.getElementById("rear-debug-toggle") as HTMLButtonElement;
   const midgroundDebugToggle = document.getElementById("midground-debug-toggle") as HTMLButtonElement;
@@ -133,6 +134,7 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   const modeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-options-mode]"));
   const danmakuModeSelect = document.getElementById("danmaku-mode-select") as HTMLSelectElement;
   const setGlobalMenuOpen = (open: boolean) => {
+    globalMenuDrawer.hidden = !open;
     document.body.classList.toggle("is-global-menu-open", open);
     globalMenuToggle.setAttribute("aria-expanded", String(open));
   };

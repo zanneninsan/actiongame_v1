@@ -3894,6 +3894,11 @@ body.is-screenshot-modal-open #mobile-controls {
   gap: 8px;
 }
 
+.global-ui-drawer[hidden] {
+  display: none !important;
+  pointer-events: none !important;
+}
+
 #version-label {
   color: #cbd5e1;
   font-family: monospace;
