@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.423
+### English
+- Rebuilt the in-game global menu as Phaser canvas game objects, leaving only the settings dialog as DOM UI.
+- The collapsed menu now has no hidden DOM buttons or drawer hit area, preventing mobile touch controls from accidentally triggering menu items.
+### Japanese
+- ゲーム中の右上メニューをPhaserキャンバス上のゲームオブジェクトとして作り直し、DOM UIは設定ダイアログだけに残しました。
+- 折りたたみ時に隠れたDOMボタンやドロワーの当たり判定が残らないため、スマホ操作ボタンでメニュー項目が誤タップされないようになりました。
+
 ## v0.1.422
 ### English
 - Removed the collapsed global menu drawer from hit testing on compact/mobile layouts so touch controls cannot accidentally tap hidden menu items.

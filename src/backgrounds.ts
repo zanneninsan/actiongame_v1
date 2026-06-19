@@ -63,9 +63,13 @@ export class BackgroundController {
       return;
     }
     const background = this.getCurrentRearBackground();
-    toggleButton.textContent = `RB${this.rearBackgroundIndex + 1}`;
+    toggleButton.textContent = this.getRearDebugLabel();
     toggleButton.title = background.path;
     toggleButton.setAttribute("aria-label", `Switch rear background. Current: ${background.label}`);
+  }
+
+  getRearDebugLabel() {
+    return `RB${this.rearBackgroundIndex + 1}`;
   }
 
   cycleMidgroundBackground(toggleButton?: HTMLButtonElement) {
@@ -81,9 +85,13 @@ export class BackgroundController {
       return;
     }
     const background = this.getCurrentMidgroundBackground();
-    toggleButton.textContent = `MG${this.midgroundBackgroundIndex + 1}`;
+    toggleButton.textContent = this.getMidgroundDebugLabel();
     toggleButton.title = background.path;
     toggleButton.setAttribute("aria-label", `Switch midground background. Current: ${background.label}`);
+  }
+
+  getMidgroundDebugLabel() {
+    return `MG${this.midgroundBackgroundIndex + 1}`;
   }
 
   private createRearBackground() {

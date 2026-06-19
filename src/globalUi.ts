@@ -2,11 +2,7 @@ import { isLocale, LOCALE_OPTIONS, t, type Locale } from "./i18n";
 import type { DanmakuMode } from "./danmaku";
 import type { ControlMode } from "./startModal";
 
-const getPlayerSpecUrl = (locale: Locale) =>
-  `${import.meta.env.BASE_URL}player-spec/index.html?lang=${encodeURIComponent(locale)}`;
-
 type GlobalUiOptions = {
-  version: string;
   locale: Locale;
   bgmVolumePercent: number;
   seVolumePercent: number;
@@ -14,63 +10,14 @@ type GlobalUiOptions = {
   controlMode: ControlMode;
   danmakuEnabled: boolean;
   danmakuMode: DanmakuMode;
-  collisionDebugEnabled: boolean;
-  onCollisionToggle: (button: HTMLButtonElement) => void;
-  onRearBackgroundToggle: (button: HTMLButtonElement) => void;
-  onMidgroundBackgroundToggle: (button: HTMLButtonElement) => void;
-  updateRearBackgroundToggle: (button: HTMLButtonElement) => void;
-  updateMidgroundBackgroundToggle: (button: HTMLButtonElement) => void;
   onSoundChange: (bgmVolumePercent: number, seVolumePercent: number, muted: boolean) => void;
   onControlModeChange: (mode: ControlMode) => void;
   onDanmakuModeChange: (mode: DanmakuMode) => void;
   onLocaleChange: (locale: Locale) => void;
-  onLeaderboardOpen: () => void;
-  onAccountOpen: () => void;
-  onReturnToTitle: () => void;
-  onScreenshotOpen: () => void;
-  mobileLayoutAvailable: boolean;
-  onMobileLayoutOpen: () => void;
 };
 
 export const createGlobalUI = (options: GlobalUiOptions) => {
   removeGlobalUI();
-
-  const uiContainer = document.createElement("div");
-  uiContainer.id = "global-ui";
-  uiContainer.innerHTML = `
-    <span id="version-label">${options.version}</span>
-    <button id="screenshot-toggle" class="ui-button screenshot-quick-toggle" type="button" aria-label="${t(options.locale, "aria.screenshot")}">📷</button>
-    <button id="global-menu-toggle" class="ui-button global-menu-toggle" type="button" aria-label="${t(
-      options.locale,
-      "aria.globalMenu",
-    )}" aria-controls="global-ui-drawer" aria-expanded="false">&#9776;</button>
-    <div id="global-ui-drawer" class="global-ui-drawer" hidden>
-      <span id="player-position-label" hidden>POS --,--</span>
-      <button id="collision-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(options.locale, "aria.toggleCollision")}">HIT</button>
-      <button id="rear-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(options.locale, "aria.rearBackground")}">RB1</button>
-      <button id="midground-debug-toggle" class="ui-button debug-toggle" type="button" aria-label="${t(options.locale, "aria.midgroundBackground")}">MG1</button>
-      <button id="leaderboard-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.leaderboard")}">&#127942;</button>
-      <button id="account-toggle" class="ui-button account-toggle" type="button" aria-label="${t(
-        options.locale,
-        "aria.account",
-      )}">${t(options.locale, "global.accountShort")}</button>
-      <button id="player-spec-toggle" class="ui-button spec-toggle" type="button" aria-label="${t(
-        options.locale,
-        "aria.playerSpec",
-      )}">${t(options.locale, "global.playerSpecShort")}</button>
-      <button id="title-toggle" class="ui-button title-toggle" type="button" aria-label="${t(
-        options.locale,
-        "aria.returnToTitle",
-      )}">${t(options.locale, "global.titleShort")}</button>
-      <button id="mobile-layout-toggle" class="ui-button mobile-layout-toggle" type="button" aria-label="${t(
-        options.locale,
-        "aria.mobileLayout",
-      )}"${options.mobileLayoutAvailable ? "" : " hidden"}>${t(options.locale, "global.mobileLayoutShort")}</button>
-      <button id="bgm-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.toggleSound")}">&#128266;</button>
-      <button id="options-toggle" class="ui-button" type="button" aria-label="${t(options.locale, "aria.options")}">&#9881;&#65039;</button>
-    </div>
-  `;
-  document.body.appendChild(uiContainer);
 
   const selectedDanmakuMode: DanmakuMode = options.danmakuEnabled ? options.danmakuMode : "none";
   const optionsModal = document.createElement("div");
@@ -114,31 +61,12 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   `;
   document.body.appendChild(optionsModal);
 
-  const bgmToggle = document.getElementById("bgm-toggle") as HTMLButtonElement;
-  const globalMenuToggle = document.getElementById("global-menu-toggle") as HTMLButtonElement;
-  const globalMenuDrawer = document.getElementById("global-ui-drawer") as HTMLDivElement;
-  const collisionDebugToggle = document.getElementById("collision-debug-toggle") as HTMLButtonElement;
-  const rearDebugToggle = document.getElementById("rear-debug-toggle") as HTMLButtonElement;
-  const midgroundDebugToggle = document.getElementById("midground-debug-toggle") as HTMLButtonElement;
-  const screenshotToggle = document.getElementById("screenshot-toggle") as HTMLButtonElement;
-  const leaderboardToggle = document.getElementById("leaderboard-toggle") as HTMLButtonElement;
-  const accountToggle = document.getElementById("account-toggle") as HTMLButtonElement;
-  const playerSpecToggle = document.getElementById("player-spec-toggle") as HTMLButtonElement;
-  const titleToggle = document.getElementById("title-toggle") as HTMLButtonElement;
-  const mobileLayoutToggle = document.getElementById("mobile-layout-toggle") as HTMLButtonElement;
-  const optionsToggle = document.getElementById("options-toggle") as HTMLButtonElement;
   const optionsClose = document.getElementById("options-close") as HTMLButtonElement;
   const bgmVolumeSlider = document.getElementById("bgm-volume-slider") as HTMLInputElement;
   const seVolumeSlider = document.getElementById("se-volume-slider") as HTMLInputElement;
   const languageSelect = document.getElementById("language-select") as HTMLSelectElement;
   const modeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>("[data-options-mode]"));
   const danmakuModeSelect = document.getElementById("danmaku-mode-select") as HTMLSelectElement;
-  const setGlobalMenuOpen = (open: boolean) => {
-    globalMenuDrawer.hidden = !open;
-    document.body.classList.toggle("is-global-menu-open", open);
-    globalMenuToggle.setAttribute("aria-expanded", String(open));
-  };
-  const closeGlobalMenu = () => setGlobalMenuOpen(false);
 
   let currentBgmVolumePercent = options.bgmVolumePercent;
   let currentSeVolumePercent = options.seVolumePercent;
@@ -157,69 +85,10 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
       button.classList.toggle("is-selected", selected);
       button.setAttribute("aria-pressed", String(selected));
     });
-    mobileLayoutToggle.hidden = !(currentControlMode === "mobile" && options.mobileLayoutAvailable);
   };
 
   setGlobalSoundUI(currentBgmVolumePercent, currentSeVolumePercent, currentMuted);
   updateControlModeUI();
-  collisionDebugToggle.classList.toggle("is-active", options.collisionDebugEnabled);
-  options.updateRearBackgroundToggle(rearDebugToggle);
-  options.updateMidgroundBackgroundToggle(midgroundDebugToggle);
-
-  globalMenuToggle.addEventListener("click", () => setGlobalMenuOpen(!document.body.classList.contains("is-global-menu-open")));
-  collisionDebugToggle.addEventListener("click", () => {
-    options.onCollisionToggle(collisionDebugToggle);
-    closeGlobalMenu();
-  });
-  rearDebugToggle.addEventListener("click", () => {
-    options.onRearBackgroundToggle(rearDebugToggle);
-    closeGlobalMenu();
-  });
-  midgroundDebugToggle.addEventListener("click", () => {
-    options.onMidgroundBackgroundToggle(midgroundDebugToggle);
-    closeGlobalMenu();
-  });
-  screenshotToggle.addEventListener("click", () => {
-    options.onScreenshotOpen();
-    closeGlobalMenu();
-  });
-  leaderboardToggle.addEventListener("click", () => {
-    options.onLeaderboardOpen();
-    closeGlobalMenu();
-  });
-  accountToggle.addEventListener("click", () => {
-    options.onAccountOpen();
-    closeGlobalMenu();
-  });
-  playerSpecToggle.addEventListener("click", () => {
-    window.open(getPlayerSpecUrl(options.locale), "_blank", "noopener");
-    closeGlobalMenu();
-  });
-  titleToggle.addEventListener("click", () => {
-    options.onReturnToTitle();
-    closeGlobalMenu();
-  });
-  mobileLayoutToggle.addEventListener("click", () => {
-    options.onMobileLayoutOpen();
-    closeGlobalMenu();
-  });
-
-  bgmToggle.addEventListener("click", () => {
-    const currentBgmVolume = parseInt(bgmVolumeSlider.value, 10);
-    const currentSeVolume = parseInt(seVolumeSlider.value, 10);
-    if (currentBgmVolume === 0 && currentSeVolume === 0) {
-      changeSound(50, 50, false);
-    } else {
-      changeSound(currentBgmVolume, currentSeVolume, !currentMuted);
-    }
-    closeGlobalMenu();
-  });
-
-  optionsToggle.addEventListener("click", () => {
-    optionsModal.style.display = "grid";
-    document.body.classList.add("is-options-modal-open");
-    closeGlobalMenu();
-  });
 
   optionsClose.addEventListener("click", () => {
     optionsModal.style.display = "none";
@@ -275,11 +144,9 @@ export const createGlobalUI = (options: GlobalUiOptions) => {
   optionsModal.addEventListener("keyup", (event) => event.stopPropagation());
   optionsModal.addEventListener("keypress", (event) => event.stopPropagation());
   optionsModal.addEventListener("pointerdown", (event) => event.stopPropagation());
-  uiContainer.addEventListener("pointerdown", (event) => event.stopPropagation());
 };
 
 export const removeGlobalUI = () => {
-  document.getElementById("global-ui")?.remove();
   document.getElementById("options-modal")?.remove();
   document.getElementById("account-modal")?.remove();
   document.getElementById("screenshot-modal")?.remove();
@@ -292,19 +159,16 @@ export const removeGlobalUI = () => {
   );
 };
 
-export const setPlayerPositionDebugUI = (enabled: boolean, x: number, y: number) => {
-  const positionLabel = document.getElementById("player-position-label") as HTMLSpanElement | null;
-  if (!positionLabel) {
+export const openGlobalOptionsModal = () => {
+  const optionsModal = document.getElementById("options-modal");
+  if (!optionsModal) {
     return;
   }
-  positionLabel.hidden = !enabled;
-  if (enabled) {
-    positionLabel.textContent = `POS ${Math.round(x)}, ${Math.round(y)}`;
-  }
+  optionsModal.style.display = "grid";
+  document.body.classList.add("is-options-modal-open");
 };
 
 export const setGlobalSoundUI = (bgmVolumePercent: number, seVolumePercent: number, muted: boolean) => {
-  const bgmToggle = document.getElementById("bgm-toggle") as HTMLButtonElement | null;
   const bgmVolumeSlider = document.getElementById("bgm-volume-slider") as HTMLInputElement | null;
   const seVolumeSlider = document.getElementById("se-volume-slider") as HTMLInputElement | null;
   if (bgmVolumeSlider) {
@@ -312,8 +176,5 @@ export const setGlobalSoundUI = (bgmVolumePercent: number, seVolumePercent: numb
   }
   if (seVolumeSlider) {
     seVolumeSlider.value = String(seVolumePercent);
-  }
-  if (bgmToggle) {
-    bgmToggle.innerHTML = muted || (bgmVolumePercent === 0 && seVolumePercent === 0) ? "&#128263;" : "&#128266;";
   }
 };

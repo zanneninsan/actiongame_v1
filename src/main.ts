@@ -54,9 +54,9 @@ import {
 import { BackgroundController } from "./backgrounds";
 import {
   createGlobalUI as createGlobalUIElements,
+  openGlobalOptionsModal,
   removeGlobalUI as removeGlobalUIElements,
   setGlobalSoundUI,
-  setPlayerPositionDebugUI,
 } from "./globalUi";
 import {
   MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT,
@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.422";
+const DEBUG_VERSION = "v0.1.423";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -436,6 +436,11 @@ class PrototypeScene extends Phaser.Scene {
   private ghostExportButton?: Phaser.GameObjects.Container;
   private clearMenuButton?: Phaser.GameObjects.Container;
   private clearScreenshotButton?: Phaser.GameObjects.Container;
+  private canvasGlobalUiContainer?: Phaser.GameObjects.Container;
+  private canvasGlobalDrawer?: Phaser.GameObjects.Container;
+  private canvasGlobalMenuOpen = false;
+  private canvasGlobalSoundText?: Phaser.GameObjects.Text;
+  private canvasGlobalPositionText?: Phaser.GameObjects.Text;
   private lastScreenshot?: CapturedGameScreenshot;
   private screenshotCapturePending = false;
   private screenshotPreviewOpen = false;
@@ -2299,6 +2304,7 @@ class PrototypeScene extends Phaser.Scene {
 
   private refreshGlobalSoundUI() {
     setGlobalSoundUI(this.bgmVolumePercent, this.seVolumePercent, this.soundMuted);
+    this.refreshCanvasGlobalSoundUI();
   }
 
   private setBgmVolume() {
@@ -2805,7 +2811,6 @@ class PrototypeScene extends Phaser.Scene {
 
   private createGlobalUI() {
     createGlobalUIElements({
-      version: DEBUG_VERSION,
       locale: this.locale,
       bgmVolumePercent: this.bgmVolumePercent,
       seVolumePercent: this.seVolumePercent,
@@ -2813,16 +2818,6 @@ class PrototypeScene extends Phaser.Scene {
       controlMode: this.controlMode,
       danmakuEnabled: this.danmakuEnabled,
       danmakuMode: this.danmakuMode,
-      collisionDebugEnabled: this.collisionDebugEnabled,
-      onCollisionToggle: (button) => {
-        this.collisionDebugEnabled = !this.collisionDebugEnabled;
-        button.classList.toggle("is-active", this.collisionDebugEnabled);
-        this.updateCollisionDebug();
-      },
-      onRearBackgroundToggle: (button) => this.backgrounds?.cycleRearBackground(button),
-      onMidgroundBackgroundToggle: (button) => this.backgrounds?.cycleMidgroundBackground(button),
-      updateRearBackgroundToggle: (button) => this.backgrounds?.updateRearDebugToggle(button),
-      updateMidgroundBackgroundToggle: (button) => this.backgrounds?.updateMidgroundDebugToggle(button),
       onSoundChange: (bgmVolumePercent, seVolumePercent, muted) => {
         this.bgmVolumePercent = bgmVolumePercent;
         this.seVolumePercent = seVolumePercent;
@@ -2836,18 +2831,236 @@ class PrototypeScene extends Phaser.Scene {
         this.createStageEditor(this.stageEditor?.isEnabled ?? false);
         this.createGlobalUI();
       },
-      onLeaderboardOpen: () => this.showLeaderboard(),
-      onAccountOpen: () => this.showAccount(),
-      onReturnToTitle: () => void this.returnToTitle(),
-      onScreenshotOpen: () => this.captureGameScreenshot({ preview: true }),
-      mobileLayoutAvailable: this.setupComplete && !this.startModal,
-      onMobileLayoutOpen: () => window.dispatchEvent(new Event(MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT)),
     });
+    this.createCanvasGlobalUI();
   }
 
   private removeGlobalUI() {
+    this.canvasGlobalUiContainer?.destroy(true);
+    this.canvasGlobalUiContainer = undefined;
+    this.canvasGlobalDrawer?.destroy(true);
+    this.canvasGlobalDrawer = undefined;
+    this.canvasGlobalMenuOpen = false;
+    this.canvasGlobalSoundText = undefined;
+    this.canvasGlobalPositionText = undefined;
     removeGlobalUIElements();
     removeScreenshotPreview();
+  }
+
+  private createCanvasGlobalUI() {
+    this.canvasGlobalUiContainer?.destroy(true);
+    this.canvasGlobalDrawer?.destroy(true);
+    this.canvasGlobalDrawer = undefined;
+    this.canvasGlobalSoundText = undefined;
+    this.canvasGlobalPositionText = undefined;
+
+    const container = this.add.container(0, 0).setScrollFactor(0).setDepth(520);
+    const versionText = this.add
+      .text(GAME_WIDTH - 184, 36, DEBUG_VERSION, {
+        fontFamily: UI_TEXT_FONT_FAMILY,
+        fontSize: "16px",
+        fontStyle: "800",
+        color: "#dbeafe",
+        stroke: "#020617",
+        strokeThickness: 3,
+        resolution: UI_TEXT_RESOLUTION,
+      })
+      .setOrigin(1, 0.5);
+    const screenshotButton = this.createCanvasGlobalButton(GAME_WIDTH - 124, 36, "CAM", () => {
+      this.captureGameScreenshot({ preview: true });
+      this.setCanvasGlobalMenuOpen(false);
+    }, { width: 52, fontSize: 14 });
+    const menuButton = this.createCanvasGlobalButton(GAME_WIDTH - 58, 36, "MENU", () => {
+      this.setCanvasGlobalMenuOpen(!this.canvasGlobalMenuOpen);
+    }, { width: 58, fontSize: 12, active: this.canvasGlobalMenuOpen });
+
+    container.add([versionText, screenshotButton, menuButton]);
+    this.canvasGlobalUiContainer = container;
+    if (this.canvasGlobalMenuOpen) {
+      this.createCanvasGlobalDrawer();
+    }
+  }
+
+  private createCanvasGlobalDrawer() {
+    this.canvasGlobalDrawer?.destroy(true);
+    this.canvasGlobalSoundText = undefined;
+    this.canvasGlobalPositionText = undefined;
+
+    const drawer = this.add.container(GAME_WIDTH - 174, 92).setScrollFactor(0).setDepth(519);
+    const buttonSize = 46;
+    const gap = 8;
+    const columns = 3;
+    const rows = this.setupComplete && !this.startModal && this.controlMode === "mobile" ? 4 : 3;
+    const width = columns * buttonSize + (columns - 1) * gap + 24;
+    const height = rows * buttonSize + (rows - 1) * gap + 28 + (this.collisionDebugEnabled ? 30 : 0);
+    const panel = this.add.graphics();
+    panel.fillStyle(0x020617, 0.9);
+    panel.fillRoundedRect(-width + 8, -18, width, height, 10);
+    panel.lineStyle(2, 0x7dd3fc, 0.42);
+    panel.strokeRoundedRect(-width + 8, -18, width, height, 10);
+    drawer.add(panel);
+
+    const addButton = (index: number, label: string, onPress: () => void, options: { fontSize?: number; active?: boolean } = {}) => {
+      const col = index % columns;
+      const row = Math.floor(index / columns);
+      const x = -width + 30 + col * (buttonSize + gap);
+      const y = 12 + row * (buttonSize + gap);
+      const button = this.createCanvasGlobalButton(x, y, label, onPress, {
+        width: buttonSize,
+        height: buttonSize,
+        fontSize: options.fontSize ?? 12,
+        active: options.active,
+      });
+      drawer.add(button);
+      return button;
+    };
+
+    addButton(
+      0,
+      "HIT",
+      () => {
+        this.collisionDebugEnabled = !this.collisionDebugEnabled;
+        this.updateCollisionDebug();
+        this.refreshCanvasGlobalDrawer();
+      },
+      { active: this.collisionDebugEnabled },
+    );
+    addButton(1, this.backgrounds?.getRearDebugLabel() ?? "RB1", () => {
+      this.backgrounds?.cycleRearBackground();
+      this.refreshCanvasGlobalDrawer();
+    });
+    addButton(2, this.backgrounds?.getMidgroundDebugLabel() ?? "MG1", () => {
+      this.backgrounds?.cycleMidgroundBackground();
+      this.refreshCanvasGlobalDrawer();
+    });
+    addButton(3, "LB", () => {
+      this.showLeaderboard();
+      this.setCanvasGlobalMenuOpen(false);
+    });
+    addButton(4, t(this.locale, "global.accountShort"), () => {
+      this.showAccount();
+      this.setCanvasGlobalMenuOpen(false);
+    }, { fontSize: 10 });
+    addButton(5, t(this.locale, "global.playerSpecShort"), () => {
+      window.open(`${ASSET_BASE}player-spec/index.html?lang=${encodeURIComponent(this.locale)}`, "_blank", "noopener");
+      this.setCanvasGlobalMenuOpen(false);
+    }, { fontSize: 9 });
+    addButton(6, t(this.locale, "global.titleShort"), () => {
+      void this.returnToTitle();
+      this.setCanvasGlobalMenuOpen(false);
+    }, { fontSize: 15 });
+    const soundButton = addButton(7, this.getCanvasGlobalSoundLabel(), () => {
+      if (this.bgmVolumePercent === 0 && this.seVolumePercent === 0) {
+        this.bgmVolumePercent = 50;
+        this.seVolumePercent = 50;
+        this.soundMuted = false;
+      } else {
+        this.soundMuted = !this.soundMuted;
+      }
+      this.applySoundSettings();
+      this.refreshCanvasGlobalDrawer();
+    }, { fontSize: 10 });
+    this.canvasGlobalSoundText = soundButton.getByName("label") as Phaser.GameObjects.Text | undefined;
+    addButton(8, "OPT", () => {
+      openGlobalOptionsModal();
+      this.setCanvasGlobalMenuOpen(false);
+    }, { fontSize: 11 });
+    if (this.setupComplete && !this.startModal && this.controlMode === "mobile") {
+      addButton(9, t(this.locale, "global.mobileLayoutShort"), () => {
+        window.dispatchEvent(new Event(MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT));
+        this.setCanvasGlobalMenuOpen(false);
+      }, { fontSize: 9 });
+    }
+
+    if (this.collisionDebugEnabled) {
+      this.canvasGlobalPositionText = this.add
+        .text(-width / 2 + 4, height - 26, `POS ${Math.round(this.player.x)}, ${Math.round(this.player.y)}`, {
+          fontFamily: UI_TEXT_FONT_FAMILY,
+          fontSize: "12px",
+          fontStyle: "800",
+          color: "#fef3c7",
+          stroke: "#020617",
+          strokeThickness: 3,
+          align: "center",
+          fixedWidth: width - 24,
+          resolution: UI_TEXT_RESOLUTION,
+        })
+        .setOrigin(0.5);
+      drawer.add(this.canvasGlobalPositionText);
+    }
+
+    this.canvasGlobalDrawer = drawer;
+  }
+
+  private createCanvasGlobalButton(
+    x: number,
+    y: number,
+    label: string,
+    onPress: () => void,
+    options: { width?: number; height?: number; fontSize?: number; active?: boolean } = {},
+  ) {
+    const width = options.width ?? 44;
+    const height = options.height ?? 44;
+    const container = this.add.container(x, y);
+    const zone = this.add.zone(0, 0, width, height).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    const back = this.add.graphics();
+    const fill = options.active ? 0x193a52 : 0x071526;
+    const line = options.active ? 0xfacc15 : 0x7dd3fc;
+    back.fillStyle(0x020617, 0.38);
+    back.fillRoundedRect(-width / 2 + 4, -height / 2 + 5, width, height, 10);
+    back.fillStyle(fill, 0.88);
+    back.fillRoundedRect(-width / 2, -height / 2, width, height, 10);
+    back.lineStyle(2, line, options.active ? 0.88 : 0.46);
+    back.strokeRoundedRect(-width / 2 + 1, -height / 2 + 1, width - 2, height - 2, 10);
+    const text = this.add
+      .text(0, 0, label, {
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
+        fontSize: `${options.fontSize ?? 14}px`,
+        fontStyle: "900",
+        color: options.active ? "#fff7d6" : "#e0f2fe",
+        align: "center",
+        fixedWidth: width - 8,
+        resolution: UI_TEXT_RESOLUTION,
+      })
+      .setName("label")
+      .setOrigin(0.5);
+    container.add([zone, back, text]);
+    zone
+      .on("pointerover", () => container.setScale(1.04))
+      .on("pointerout", () => container.setScale(1))
+      .on("pointerdown", () => container.setScale(0.96))
+      .on("pointerup", () => {
+        container.setScale(1.04);
+        onPress();
+      });
+    return container;
+  }
+
+  private setCanvasGlobalMenuOpen(open: boolean) {
+    this.canvasGlobalMenuOpen = open;
+    this.createCanvasGlobalUI();
+  }
+
+  private refreshCanvasGlobalDrawer() {
+    if (!this.canvasGlobalMenuOpen) {
+      return;
+    }
+    this.createCanvasGlobalDrawer();
+  }
+
+  private getCanvasGlobalSoundLabel() {
+    return this.soundMuted || (this.bgmVolumePercent === 0 && this.seVolumePercent === 0) ? "MUTE" : "SND";
+  }
+
+  private refreshCanvasGlobalSoundUI() {
+    this.canvasGlobalSoundText?.setText(this.getCanvasGlobalSoundLabel());
+  }
+
+  private updateCanvasPositionDebugUI() {
+    if (!this.canvasGlobalPositionText || !this.collisionDebugEnabled) {
+      return;
+    }
+    this.canvasGlobalPositionText.setText(`POS ${Math.round(this.player.x)}, ${Math.round(this.player.y)}`);
   }
 
   private pauseForScreenshotPreview() {
@@ -3592,12 +3805,11 @@ class PrototypeScene extends Phaser.Scene {
 
   private updateCollisionDebug() {
     if (!this.player) {
-      setPlayerPositionDebugUI(false, 0, 0);
       this.collisionDebugGraphics?.clear();
       return;
     }
 
-    setPlayerPositionDebugUI(this.collisionDebugEnabled, this.player.x, this.player.y);
+    this.updateCanvasPositionDebugUI();
     if (!this.collisionDebugGraphics) {
       return;
     }
