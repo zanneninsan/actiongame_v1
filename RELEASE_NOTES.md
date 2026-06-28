@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.424
+### English
+- Added the current game version to the world map dashboard.
+- Added a manual world-map version check and update button so players can choose when to reload into a newer deployed version.
+### Japanese
+- ワールドマップのダッシュボードに現在のゲームバージョンを表示するようにしました。
+- ワールドマップから最新バージョンを手動確認し、新しいバージョンがある時だけ任意で更新できるボタンを追加しました。
+
 ## v0.1.423
 ### English
 - Rebuilt the in-game global menu as Phaser canvas game objects, leaving only the settings dialog as DOM UI.

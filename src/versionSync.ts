@@ -4,6 +4,12 @@ type LatestVersionPayload = {
   version?: string;
 };
 
+export type ClientVersionStatus = {
+  currentVersion: string;
+  latestVersion: string;
+  updateAvailable: boolean;
+};
+
 function parseVersion(version: string): number[] | null {
   const match = version.trim().match(/^v?(\d+(?:\.\d+)*)$/i);
   if (!match) {
@@ -33,32 +39,49 @@ function isNewerVersion(candidate: string, current: string): boolean {
   return false;
 }
 
+export async function checkLatestClientVersion(currentVersion: string): Promise<ClientVersionStatus | undefined> {
+  const response = await fetch(`${import.meta.env.BASE_URL}version.json?ts=${Date.now()}`, {
+    cache: "no-store",
+    headers: {
+      "cache-control": "no-cache",
+    },
+  });
+  if (!response.ok) {
+    return undefined;
+  }
+
+  const payload = (await response.json()) as LatestVersionPayload;
+  const latestVersion = typeof payload.version === "string" ? payload.version.trim() : "";
+  if (!latestVersion) {
+    return undefined;
+  }
+
+  return {
+    currentVersion,
+    latestVersion,
+    updateAvailable: isNewerVersion(latestVersion, currentVersion),
+  };
+}
+
+export function reloadToLatestClientVersion(latestVersion: string) {
+  sessionStorage.setItem(VERSION_CHECK_RELOAD_KEY, latestVersion);
+  window.location.reload();
+}
+
 export async function ensureLatestClientVersion(currentVersion: string): Promise<boolean> {
   try {
-    const response = await fetch(`${import.meta.env.BASE_URL}version.json?ts=${Date.now()}`, {
-      cache: "no-store",
-      headers: {
-        "cache-control": "no-cache",
-      },
-    });
-    if (!response.ok) {
-      return false;
-    }
-
-    const payload = (await response.json()) as LatestVersionPayload;
-    const latestVersion = typeof payload.version === "string" ? payload.version.trim() : "";
-    if (!latestVersion || !isNewerVersion(latestVersion, currentVersion)) {
+    const status = await checkLatestClientVersion(currentVersion);
+    if (!status?.updateAvailable) {
       sessionStorage.removeItem(VERSION_CHECK_RELOAD_KEY);
       return false;
     }
 
     const lastReloadTarget = sessionStorage.getItem(VERSION_CHECK_RELOAD_KEY) ?? "";
-    if (lastReloadTarget === latestVersion) {
+    if (lastReloadTarget === status.latestVersion) {
       return false;
     }
 
-    sessionStorage.setItem(VERSION_CHECK_RELOAD_KEY, latestVersion);
-    window.location.reload();
+    reloadToLatestClientVersion(status.latestVersion);
     return true;
   } catch (error) {
     console.warn("Latest version check failed.", error);

@@ -7,6 +7,7 @@ import {
   type PlayerCharacterId,
 } from "./playerCharacters";
 import { getWorldMapDailyStageId, getWorldMapStageDetail, getWorldMapUiText } from "./worldMapFeatures";
+import { checkLatestClientVersion, reloadToLatestClientVersion } from "./versionSync";
 import type { AdventureStoryLine } from "./adventureStory";
 
 const GAME_LAYOUT_REFRESH_EVENT = "actiongame:refresh-layout";
@@ -65,6 +66,7 @@ type StartModalOptions = {
   stageId: string;
   stageOptions: StageOption[];
   soundOn: boolean;
+  appVersion: string;
   skipSplashIntro?: boolean;
   locale: Locale;
   accountStatus?: StartAccountStatus;
@@ -247,6 +249,12 @@ export class StartModal {
             <span class="start-world-progress-label"></span>
             <strong class="start-world-progress-value"></strong>
             <i class="start-world-progress-meter"><b></b></i>
+            <span class="start-world-progress-label start-world-version-label"></span>
+            <strong class="start-world-progress-value start-world-version-value"></strong>
+            <div class="start-world-filter-row">
+              <button type="button" class="start-world-version-action"></button>
+            </div>
+            <em class="start-world-rail-empty start-world-version-status"></em>
           </div>
           <label class="start-world-search">
             <span></span>
@@ -393,6 +401,10 @@ export class StartModal {
     const worldProgressLabel = overlay.querySelector<HTMLElement>(".start-world-progress-label")!;
     const worldProgressValue = overlay.querySelector<HTMLElement>(".start-world-progress-value")!;
     const worldProgressMeter = overlay.querySelector<HTMLElement>(".start-world-progress-meter b")!;
+    const worldVersionLabel = overlay.querySelector<HTMLElement>(".start-world-version-label")!;
+    const worldVersionValue = overlay.querySelector<HTMLElement>(".start-world-version-value")!;
+    const worldVersionAction = overlay.querySelector<HTMLButtonElement>(".start-world-version-action")!;
+    const worldVersionStatus = overlay.querySelector<HTMLElement>(".start-world-version-status")!;
     const worldSearchLabel = overlay.querySelector<HTMLElement>(".start-world-search span")!;
     const worldSearchInput = overlay.querySelector<HTMLInputElement>(".start-world-search-input")!;
     const worldFilterRow = overlay.querySelector<HTMLElement>(".start-world-filter-row")!;
@@ -443,6 +455,10 @@ export class StartModal {
     let worldMoveTimers: number[] = [];
     let leaderboardGhostCount: number | undefined;
     let favoriteStageId = getStorageValue(WORLD_MAP_FAVORITE_STAGE_KEY);
+    let worldVersionLatest = this.options.appVersion;
+    let worldVersionChecking = false;
+    let worldVersionUpdateAvailable = false;
+    let worldVersionCheckFailed = false;
     const dailyStageId = getWorldMapDailyStageId(this.options.stageOptions.map((option) => option.id));
     let worldMapFilter = normalizeWorldMapFilter(getStorageValue(WORLD_MAP_FILTER_STORAGE_KEY));
     let worldSearchQuery = "";
@@ -550,6 +566,58 @@ export class StartModal {
 
     const renderStars = (rating: number) =>
       Array.from({ length: 5 }, (_, index) => `<span class="${index < rating ? "is-filled" : ""}">★</span>`).join("");
+
+    const refreshWorldVersionCard = () => {
+      const extra = getExtraText();
+      worldVersionLabel.textContent = extra.versionLabel;
+      worldVersionValue.textContent = worldVersionUpdateAvailable
+        ? `${this.options.appVersion} -> ${worldVersionLatest}`
+        : this.options.appVersion;
+      worldVersionAction.disabled = worldVersionChecking;
+      worldVersionAction.textContent = worldVersionChecking
+        ? extra.versionChecking
+        : worldVersionUpdateAvailable
+          ? extra.versionUpdate
+          : extra.versionCheck;
+      worldVersionAction.title = worldVersionUpdateAvailable ? extra.versionUpdateTitle : extra.versionCheckTitle;
+      worldVersionAction.setAttribute("aria-label", worldVersionAction.title);
+      worldVersionStatus.textContent = worldVersionChecking
+        ? extra.versionCheckingStatus
+        : worldVersionUpdateAvailable
+          ? extra.versionAvailable.replace("{version}", worldVersionLatest)
+          : worldVersionCheckFailed
+            ? extra.versionCheckFailed
+            : extra.versionLatest;
+      worldVersionAction.classList.toggle("is-selected", worldVersionUpdateAvailable);
+    };
+
+    const checkWorldVersion = async () => {
+      if (worldVersionChecking) {
+        return;
+      }
+      worldVersionChecking = true;
+      worldVersionCheckFailed = false;
+      refreshWorldVersionCard();
+      try {
+        const status = await checkLatestClientVersion(this.options.appVersion);
+        if (!status) {
+          worldVersionCheckFailed = true;
+          worldVersionUpdateAvailable = false;
+          worldVersionLatest = this.options.appVersion;
+          return;
+        }
+        worldVersionLatest = status.latestVersion;
+        worldVersionUpdateAvailable = status.updateAvailable;
+      } catch (error) {
+        console.warn("World-map version check failed.", error);
+        worldVersionCheckFailed = true;
+        worldVersionUpdateAvailable = false;
+        worldVersionLatest = this.options.appVersion;
+      } finally {
+        worldVersionChecking = false;
+        refreshWorldVersionCard();
+      }
+    };
 
     const refreshWorldSettingsPanel = () => {
       const extra = getExtraText();
@@ -704,6 +772,7 @@ export class StartModal {
       worldProgressLabel.textContent = `${extra.progress} / ${extra.stamps}`;
       worldProgressValue.textContent = `${clearedCount}/${this.options.stageOptions.length} CLEAR · ${visitedCount} ${extra.visits}`;
       worldProgressMeter.style.width = `${progress.toFixed(2)}%`;
+      refreshWorldVersionCard();
       worldSearchLabel.textContent = extra.search;
       worldSearchInput.placeholder = extra.searchPlaceholder;
       worldSearchInput.value = worldSearchQuery;
@@ -1090,6 +1159,7 @@ export class StartModal {
       this.titleDismissTimer = window.setTimeout(() => {
         titleScreen.classList.add("is-dismissed");
         this.titleDismissTimer = undefined;
+        void checkWorldVersion();
         worldMapNodes.find((node) => node.dataset.stageId === selectedStageId)?.focus();
       }, 820);
     };
@@ -1398,6 +1468,13 @@ export class StartModal {
       worldMapPanel.classList.remove("is-settings-open");
       worldSettingsToggle.focus();
     });
+    worldVersionAction.addEventListener("click", () => {
+      if (worldVersionUpdateAvailable && worldVersionLatest) {
+        reloadToLatestClientVersion(worldVersionLatest);
+        return;
+      }
+      void checkWorldVersion();
+    });
     worldSearchInput.addEventListener("input", () => {
       worldSearchQuery = worldSearchInput.value;
       refreshWorldMap();
@@ -1581,6 +1658,9 @@ export class StartModal {
     refreshSound();
     refreshCharacterSelection();
     refreshWorldMap();
+    if (this.titleScreenDismissed) {
+      void checkWorldVersion();
+    }
     refreshAccount();
     refreshInstallPanel();
     void loadGhostOptions();
@@ -1703,6 +1783,16 @@ function getWorldMapExtraText(locale: Locale) {
     settingsTitle: "マップ設定",
     closeSettings: "設定を閉じる",
     settingsNote: "言語・操作・サウンドはここで変更できます。ステージ開始前の画面は最終確認に絞りました。",
+    versionLabel: "ゲームバージョン",
+    versionCheck: "確認",
+    versionChecking: "確認中",
+    versionUpdate: "更新",
+    versionCheckTitle: "最新バージョンを確認",
+    versionUpdateTitle: "新しいバージョンへ更新",
+    versionLatest: "最新です",
+    versionCheckingStatus: "最新バージョンを確認しています...",
+    versionAvailable: "{version} に更新できます",
+    versionCheckFailed: "確認できませんでした",
     filters: "ステージフィルタ",
     search: "さがす",
     searchPlaceholder: "ステージ名・エリア・ギミック",
@@ -1743,6 +1833,16 @@ function getWorldMapExtraText(locale: Locale) {
     settingsTitle: "Map Settings",
     closeSettings: "Close settings",
     settingsNote: "Language, controls, and sound now live on the map. The start panel stays focused on final run setup.",
+    versionLabel: "Game version",
+    versionCheck: "Check",
+    versionChecking: "Checking",
+    versionUpdate: "Update",
+    versionCheckTitle: "Check latest version",
+    versionUpdateTitle: "Update to the latest version",
+    versionLatest: "Up to date",
+    versionCheckingStatus: "Checking latest version...",
+    versionAvailable: "{version} is available",
+    versionCheckFailed: "Could not check",
     filters: "Stage filters",
     search: "Search",
     searchPlaceholder: "Stage, area, gimmick",

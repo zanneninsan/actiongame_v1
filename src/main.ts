@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.423";
+const DEBUG_VERSION = "v0.1.424";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -1742,6 +1742,7 @@ class PrototypeScene extends Phaser.Scene {
       stageOptions: this.getStageOptions(),
       locale: this.locale,
       soundOn: !this.soundMuted && (this.bgmVolumePercent > 0 || this.seVolumePercent > 0),
+      appVersion: DEBUG_VERSION,
       skipSplashIntro: this.skipSplashIntroOnNextStartModal,
       accountStatus: this.getStartAccountStatus(),
       onLocaleChange: (locale) => this.setLocale(locale),
