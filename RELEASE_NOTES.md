@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.369
+### English
+- Replaced the Shift-run dash animation with a 14-frame sprite sheet assembled from the selected normalized video reference frames.
+### Japanese
+- 選抜した正規化済み動画フレームを結合した14フレームのスプライトシートに、Shift 走行用ダッシュモーションを差し替えました。
+
 ## v0.1.368
 ### English
 - Added a local arm-readability pass to the Shift-run dash sprite so the forward and rear arm swings stay visible instead of blending into the outfit.
