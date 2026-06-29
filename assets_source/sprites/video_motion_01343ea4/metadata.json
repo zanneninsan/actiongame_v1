@@ -1,0 +1,75 @@
+{
+  "source_video": "C:\\Users\\JSL_SERVER1\\Downloads\\01343ea4-0a23-40f5-ab5b-72934f08406d.mp4",
+  "source_frame_size": [
+    1280,
+    720
+  ],
+  "source_fps": 24,
+  "frame_count": 121,
+  "output_frame_size": [
+    320,
+    260
+  ],
+  "sheet_grid": {
+    "columns": 11,
+    "rows": 11
+  },
+  "sheet_paths": {
+    "png": "assets_source\\sprites\\video_motion_01343ea4\\video_motion_01343ea4_121_11x11_320x260.png",
+    "webp": "assets_source\\sprites\\video_motion_01343ea4\\video_motion_01343ea4_121_11x11_320x260.webp",
+    "preview_sheet": "assets_source\\sprites\\video_motion_01343ea4\\video_motion_01343ea4_121_preview_sheet.png",
+    "preview_gif": "assets_source\\sprites\\video_motion_01343ea4\\video_motion_01343ea4_121_preview.gif"
+  },
+  "intermediate_dirs": {
+    "raw": "assets_source\\sprites\\video_motion_01343ea4\\frames_raw",
+    "transparent": "assets_source\\sprites\\video_motion_01343ea4\\frames_transparent",
+    "cropped": "assets_source\\sprites\\video_motion_01343ea4\\frames_cropped",
+    "normalized": "assets_source\\sprites\\video_motion_01343ea4\\frames_normalized"
+  },
+  "transparency": {
+    "method": "border-connected near-white removal only",
+    "predicate": "min(R,G,B) >= 238 and max(R,G,B)-min(R,G,B) <= 18",
+    "safety_bias": "preserve subject pixels; no global white deletion; no partial alpha matte"
+  },
+  "normalization": {
+    "anchor": "bottom-center",
+    "anchor_xy": [
+      160,
+      250
+    ],
+    "global_scale": 0.3495440729483283,
+    "max_source_content_size_after_crop": [
+      419,
+      658
+    ],
+    "max_draw_size": [
+      290,
+      230
+    ]
+  },
+  "bbox_samples": {
+    "first": [
+      398,
+      54,
+      779,
+      687
+    ],
+    "middle": [
+      419,
+      35,
+      837,
+      687
+    ],
+    "last": [
+      413,
+      41,
+      787,
+      687
+    ]
+  },
+  "removed_background_pixels": {
+    "min": 792676,
+    "max": 809187,
+    "average": 803342.7685950414
+  }
+}
