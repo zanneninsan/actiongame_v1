@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.428";
+const DEBUG_VERSION = "v0.1.429";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -4518,8 +4518,7 @@ class PrototypeScene extends Phaser.Scene {
     const container = this.add.container(0, 0).setScrollFactor(0).setDepth(220).setAlpha(0);
     const shade = this.add
       .rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x07111f, 1)
-      .setOrigin(0.5)
-      .setInteractive();
+      .setOrigin(0.5);
     const panel = this.add.image(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 10, RESULT_PANEL_TEXTURE_KEY);
     const panelScale = Math.min(1070 / panel.width, 590 / panel.height);
     panel.setScale(panelScale * 0.985);

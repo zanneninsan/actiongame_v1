@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.429
+### English
+- Fixed the clear-result backdrop so it no longer captures canvas input, keeping the world-map, menu, screenshot, and ghost export buttons clickable after clearing a stage.
+### Japanese
+- ステージクリア後のリザルト背景がキャンバス入力を奪わないようにし、ワールドマップへ戻る、メニュー、スクリーンショット、ゴーストJSON出力などのボタンを押せるようにしました。
+
 ## v0.1.428
 ### English
 - Rebuilt the mobile touch controls and layout editor as Phaser canvas objects so normal play no longer creates a DOM mobile-controls layer.
