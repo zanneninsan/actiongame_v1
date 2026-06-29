@@ -8,7 +8,7 @@ const MAP_PADDING = 10;
 const MAP_X = 926;
 const MAP_Y = 74;
 const MAP_VIEW_MULTIPLIER = 5;
-const MAP_UPDATE_INTERVAL_MS = 120;
+const MAP_UPDATE_INTERVAL_MS = 250;
 
 type PlayerSprite = Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 

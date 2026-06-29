@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.426
+### English
+- Reduced minimap redraw frequency to 4 times per second to lower gameplay rendering cost on slower devices.
+### Japanese
+- 低スペック環境での描画負荷を下げるため、ミニマップの再描画頻度を秒間4回に抑えました。
+
 ## v0.1.425
 ### English
 - Fixed the test-data reset so all app-owned `actiongame_` local storage entries are cleared, including mobile control layout and first-run setup flags.
