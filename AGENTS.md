@@ -8,7 +8,7 @@
 - On Windows, use `npm.cmd`, `npx.cmd`, and `firebase.cmd` instead of `npm`, `npx`, and `firebase` to avoid PowerShell `.ps1` execution-policy failures.
 - Before build/dev/deploy commands, only if root `node_modules` is missing, run `npm.cmd ci`.
 - Before Firebase deploy, only if `functions/node_modules` is missing, run `npm.cmd --prefix functions ci`.
-- Do not install Playwright by default. Only install or use it when a task explicitly needs Playwright.
+- Do not install Playwright by default. When browser reproduction, visual checks, or pointer/input verification are needed and Playwright is missing, install `@playwright/test` with `npm.cmd install -D @playwright/test` and install the required browser with `npx.cmd playwright install <browser>` before testing.
 - For stage layout changes, start with `src/stages.ts`.
 - For stage rendering behavior, start with `src/stageRenderer.ts`.
 - For enemy behavior, start with `src/enemies.ts`; use `src/stages.ts` for enemy placement.
