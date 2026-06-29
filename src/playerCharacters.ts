@@ -54,7 +54,7 @@ export const PLAYER_CHARACTERS: PlayerCharacterDefinition[] = [
       idle: sheet("assets/sprites/player_idle_8_320x260.webp", 8),
       longidle: sheet("assets/sprites/player_longidle_320x260.webp", 29),
       walk: sheet("assets/sprites/player_walk_13_320x260.webp", 13),
-      dash: sheet("assets/sprites/player_dash_video_selected_14_320x260.webp", 14),
+      dash: sheet("assets/sprites/player_dash_video_selected_14_320x260_scale0895.webp", 14),
       jump: sheet("assets/sprites/player_jump_15_320x260.webp", 15),
       crouch: sheet("assets/sprites/player_crouch_27_9x3_320x260.webp", 27),
       defeat: sheet("assets/sprites/player_defeat_8_320x260.webp", 8),

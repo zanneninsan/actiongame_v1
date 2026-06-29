@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.440
+### English
+- Rescaled the 14-frame video-reference dash sprite sheet to match the idle, walk, and jump sprite proportions while keeping bottom-center foot alignment.
+### Japanese
+- 14フレームの動画由来ダッシュスプライトを縮小し、待機、歩き、ジャンプのスプライト比率に近づけつつ、足元の位置を中央下揃えで統一しました。
+
 ## v0.1.439
 ### English
 - Rebuilt story dialogue bubbles as Phaser game objects so mobile controls keep receiving gameplay input while dialogue is visible.

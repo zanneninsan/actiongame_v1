@@ -1,0 +1,22 @@
+source=assets_source/sprites/player_dash_video_selected/player_dash_video_selected_14_320x260.png
+runtime_asset=public/assets/sprites/player_dash_video_selected_14_320x260_scale0895.webp
+frame_count=14
+frame_size=320x260
+scale=0.895
+anchor=bottom-center
+bottom_margin=10
+alpha_threshold=12
+frame_01: in_bbox=(93, 27, 226, 249) in_size=(133, 222) out_size=(119, 199) out_bbox=(100, 51, 219, 250)
+frame_02: in_bbox=(97, 27, 224, 249) in_size=(127, 222) out_size=(114, 199) out_bbox=(103, 51, 217, 250)
+frame_03: in_bbox=(97, 30, 223, 249) in_size=(126, 219) out_size=(113, 196) out_bbox=(103, 54, 216, 250)
+frame_04: in_bbox=(91, 22, 228, 249) in_size=(137, 227) out_size=(123, 203) out_bbox=(98, 47, 221, 250)
+frame_05: in_bbox=(97, 22, 223, 249) in_size=(126, 227) out_size=(113, 203) out_bbox=(103, 47, 216, 250)
+frame_06: in_bbox=(96, 23, 224, 249) in_size=(128, 226) out_size=(115, 202) out_bbox=(102, 48, 217, 250)
+frame_07: in_bbox=(96, 27, 224, 249) in_size=(128, 222) out_size=(115, 199) out_bbox=(102, 51, 217, 250)
+frame_08: in_bbox=(96, 25, 224, 249) in_size=(128, 224) out_size=(115, 200) out_bbox=(102, 50, 217, 250)
+frame_09: in_bbox=(99, 24, 220, 249) in_size=(121, 225) out_size=(108, 201) out_bbox=(106, 49, 214, 250)
+frame_10: in_bbox=(97, 31, 222, 249) in_size=(125, 218) out_size=(112, 195) out_bbox=(104, 55, 216, 250)
+frame_11: in_bbox=(88, 23, 232, 249) in_size=(144, 226) out_size=(129, 202) out_bbox=(95, 48, 224, 250)
+frame_12: in_bbox=(97, 22, 224, 249) in_size=(127, 227) out_size=(114, 203) out_bbox=(103, 47, 217, 250)
+frame_13: in_bbox=(96, 28, 224, 249) in_size=(128, 221) out_size=(115, 198) out_bbox=(102, 52, 217, 250)
+frame_14: in_bbox=(91, 27, 229, 249) in_size=(138, 222) out_size=(124, 199) out_bbox=(98, 51, 222, 250)
