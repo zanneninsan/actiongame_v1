@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.436
+### English
+- Integrated the selected 14-frame normalized video-reference dash sprite sheet into the latest main branch as the Shift-run dash animation.
+### Japanese
+- 最新の main ブランチに、選抜した正規化済み動画フレーム由来の14フレームスプライトシートを Shift 走行用ダッシュモーションとして統合しました。
+
 ## v0.1.435
 ### English
 - Removed the global pixelated scaling from the Phaser canvas so backgrounds, HUD text, and generated UI icons render smoothly when the game is scaled.
