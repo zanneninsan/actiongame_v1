@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.432
+### English
+- Added generated fantasy-style menu icon assets for settings, rankings, screenshots, and returning to the world map.
+### Japanese
+- 設定、ランキング、スクリーンショット、ワールドマップへ戻る操作向けに、生成したファンタジー調のメニューアイコン素材を追加しました。
+
 ## v0.1.431
 ### English
 - Cleaned up the in-canvas debug menu layout and temporarily hid the rear and midground background cycling buttons.
