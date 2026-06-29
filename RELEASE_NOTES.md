@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.425
+### English
+- Fixed the test-data reset so all app-owned `actiongame_` local storage entries are cleared, including mobile control layout and first-run setup flags.
+### Japanese
+- テストデータ削除時に、スマホ操作ボタンの配置や初回設定済みフラグを含む `actiongame_` から始まるローカル保存データをまとめて削除するようにしました。
+
 ## v0.1.424
 ### English
 - Added the current game version to the world map dashboard.

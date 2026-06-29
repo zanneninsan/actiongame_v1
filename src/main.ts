@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.424";
+const DEBUG_VERSION = "v0.1.425";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -1861,12 +1861,15 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private clearLeaderboardLocalTestData() {
-    for (const key of [LEADERBOARD_PLAYER_ID_STORAGE_KEY, LOCALE_STORAGE_KEY, TITLE_SOUND_CONFIRM_STORAGE_KEY]) {
-      try {
+    try {
+      const appLocalStorageKeys = Array.from({ length: window.localStorage.length }, (_, index) => window.localStorage.key(index)).filter(
+        (key): key is string => Boolean(key?.startsWith("actiongame_")),
+      );
+      for (const key of appLocalStorageKeys) {
         window.localStorage.removeItem(key);
-      } catch {
-        // Ignore local storage failures; this action is best-effort cleanup for testing.
       }
+    } catch {
+      // Ignore local storage failures; this action is best-effort cleanup for testing.
     }
 
     for (const key of [
