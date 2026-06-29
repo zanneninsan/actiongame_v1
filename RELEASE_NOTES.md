@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.438
+### English
+- Matched the top-right MENU button height to the camera button so the canvas menu controls share a consistent size.
+### Japanese
+- 右上のMENUボタンの高さをカメラボタンと揃え、キャンバス内メニュー操作のサイズ感を統一しました。
+
 ## v0.1.437
 ### English
 - Replaced the generated menu icons with simpler, cleaner silhouettes so they remain readable inside small in-canvas buttons.

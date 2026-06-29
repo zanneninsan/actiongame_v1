@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.437";
+const DEBUG_VERSION = "v0.1.438";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -2885,7 +2885,7 @@ class PrototypeScene extends Phaser.Scene {
     }, { width: 58, height: 58, fontSize: 14, iconKey: MENU_ICON_SCREENSHOT_KEY, iconSize: 46, iconOnly: true });
     const menuButton = this.createCanvasGlobalButton(GAME_WIDTH - 58, 36, "MENU", () => {
       this.setCanvasGlobalMenuOpen(!this.canvasGlobalMenuOpen);
-    }, { width: 58, fontSize: 12, active: this.canvasGlobalMenuOpen });
+    }, { width: 58, height: 58, fontSize: 12, active: this.canvasGlobalMenuOpen });
 
     container.add([versionText, screenshotButton, menuButton]);
     this.canvasGlobalUiContainer = container;
