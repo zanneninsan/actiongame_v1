@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.430";
+const DEBUG_VERSION = "v0.1.431";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -2891,11 +2891,94 @@ class PrototypeScene extends Phaser.Scene {
     this.canvasGlobalSoundText = undefined;
     this.canvasGlobalPositionText = undefined;
 
-    const drawer = this.add.container(GAME_WIDTH - 174, 92).setScrollFactor(0).setDepth(519);
+    const drawer = this.add.container(GAME_WIDTH - 16, 92).setScrollFactor(0).setDepth(519);
     const buttonSize = 46;
     const gap = 8;
     const columns = 3;
-    const rows = this.setupComplete && !this.startModal && this.controlMode === "mobile" ? 4 : 3;
+    const buttonDefinitions: Array<{
+      label: string;
+      onPress: () => void;
+      fontSize?: number;
+      active?: boolean;
+      soundLabel?: boolean;
+    }> = [
+      {
+        label: "HIT",
+        onPress: () => {
+          this.collisionDebugEnabled = !this.collisionDebugEnabled;
+          this.updateCollisionDebug();
+          this.refreshCanvasGlobalDrawer();
+        },
+        active: this.collisionDebugEnabled,
+      },
+      {
+        label: "LB",
+        onPress: () => {
+          this.showLeaderboard();
+          this.setCanvasGlobalMenuOpen(false);
+        },
+      },
+      {
+        label: t(this.locale, "global.accountShort"),
+        onPress: () => {
+          this.showAccount();
+          this.setCanvasGlobalMenuOpen(false);
+        },
+        fontSize: 10,
+      },
+      {
+        label: t(this.locale, "global.playerSpecShort"),
+        onPress: () => {
+          window.open(`${ASSET_BASE}player-spec/index.html?lang=${encodeURIComponent(this.locale)}`, "_blank", "noopener");
+          this.setCanvasGlobalMenuOpen(false);
+        },
+        fontSize: 9,
+      },
+      {
+        label: t(this.locale, "global.titleShort"),
+        onPress: () => {
+          void this.returnToTitle();
+          this.setCanvasGlobalMenuOpen(false);
+        },
+        fontSize: 15,
+      },
+      {
+        label: this.getCanvasGlobalSoundLabel(),
+        onPress: () => {
+          if (this.bgmVolumePercent === 0 && this.seVolumePercent === 0) {
+            this.bgmVolumePercent = 50;
+            this.seVolumePercent = 50;
+            this.soundMuted = false;
+          } else {
+            this.soundMuted = !this.soundMuted;
+          }
+          this.applySoundSettings();
+          this.refreshCanvasGlobalDrawer();
+        },
+        fontSize: 10,
+        soundLabel: true,
+      },
+      {
+        label: "OPT",
+        onPress: () => {
+          openGlobalOptionsModal();
+          this.setCanvasGlobalMenuOpen(false);
+        },
+        fontSize: 11,
+      },
+    ];
+    if (this.setupComplete && !this.startModal && this.controlMode === "mobile") {
+      buttonDefinitions.push({
+        label: t(this.locale, "global.mobileLayoutShort"),
+        onPress: () => {
+          window.dispatchEvent(new Event(MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT));
+          this.setCanvasGlobalMenuOpen(false);
+        },
+        fontSize: 9,
+      });
+    }
+
+    const rows = Math.max(1, Math.ceil(buttonDefinitions.length / columns));
     const width = columns * buttonSize + (columns - 1) * gap + 24;
     const height = rows * buttonSize + (rows - 1) * gap + 28 + (this.collisionDebugEnabled ? 30 : 0);
     const panel = this.add.graphics();
@@ -2920,62 +3003,15 @@ class PrototypeScene extends Phaser.Scene {
       return button;
     };
 
-    addButton(
-      0,
-      "HIT",
-      () => {
-        this.collisionDebugEnabled = !this.collisionDebugEnabled;
-        this.updateCollisionDebug();
-        this.refreshCanvasGlobalDrawer();
-      },
-      { active: this.collisionDebugEnabled },
-    );
-    addButton(1, this.backgrounds?.getRearDebugLabel() ?? "RB1", () => {
-      this.backgrounds?.cycleRearBackground();
-      this.refreshCanvasGlobalDrawer();
-    });
-    addButton(2, this.backgrounds?.getMidgroundDebugLabel() ?? "MG1", () => {
-      this.backgrounds?.cycleMidgroundBackground();
-      this.refreshCanvasGlobalDrawer();
-    });
-    addButton(3, "LB", () => {
-      this.showLeaderboard();
-      this.setCanvasGlobalMenuOpen(false);
-    });
-    addButton(4, t(this.locale, "global.accountShort"), () => {
-      this.showAccount();
-      this.setCanvasGlobalMenuOpen(false);
-    }, { fontSize: 10 });
-    addButton(5, t(this.locale, "global.playerSpecShort"), () => {
-      window.open(`${ASSET_BASE}player-spec/index.html?lang=${encodeURIComponent(this.locale)}`, "_blank", "noopener");
-      this.setCanvasGlobalMenuOpen(false);
-    }, { fontSize: 9 });
-    addButton(6, t(this.locale, "global.titleShort"), () => {
-      void this.returnToTitle();
-      this.setCanvasGlobalMenuOpen(false);
-    }, { fontSize: 15 });
-    const soundButton = addButton(7, this.getCanvasGlobalSoundLabel(), () => {
-      if (this.bgmVolumePercent === 0 && this.seVolumePercent === 0) {
-        this.bgmVolumePercent = 50;
-        this.seVolumePercent = 50;
-        this.soundMuted = false;
-      } else {
-        this.soundMuted = !this.soundMuted;
+    buttonDefinitions.forEach((definition, index) => {
+      const button = addButton(index, definition.label, definition.onPress, {
+        fontSize: definition.fontSize,
+        active: definition.active,
+      });
+      if (definition.soundLabel) {
+        this.canvasGlobalSoundText = button.getByName("label") as Phaser.GameObjects.Text | undefined;
       }
-      this.applySoundSettings();
-      this.refreshCanvasGlobalDrawer();
-    }, { fontSize: 10 });
-    this.canvasGlobalSoundText = soundButton.getByName("label") as Phaser.GameObjects.Text | undefined;
-    addButton(8, "OPT", () => {
-      openGlobalOptionsModal();
-      this.setCanvasGlobalMenuOpen(false);
-    }, { fontSize: 11 });
-    if (this.setupComplete && !this.startModal && this.controlMode === "mobile") {
-      addButton(9, t(this.locale, "global.mobileLayoutShort"), () => {
-        window.dispatchEvent(new Event(MOBILE_CONTROLS_LAYOUT_REQUEST_EVENT));
-        this.setCanvasGlobalMenuOpen(false);
-      }, { fontSize: 9 });
-    }
+    });
 
     if (this.collisionDebugEnabled) {
       this.canvasGlobalPositionText = this.add

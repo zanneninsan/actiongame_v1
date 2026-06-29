@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.431
+### English
+- Cleaned up the in-canvas debug menu layout and temporarily hid the rear and midground background cycling buttons.
+### Japanese
+- キャンバス内デバッグメニューの配置を整え、背景奥側と中景の切り替えボタンを一時的に非表示にしました。
+
 ## v0.1.430
 ### English
 - Kept the mobile canvas layout locked after stage clear while removing the touch controls, preventing clear-result buttons from becoming untappable due to a shifted canvas.
