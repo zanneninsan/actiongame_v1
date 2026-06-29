@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.427";
+const DEBUG_VERSION = "v0.1.428";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -2609,7 +2609,7 @@ class PrototypeScene extends Phaser.Scene {
     this.removeMobileControls();
     document.body.classList.add("is-mobile-controls-active");
 
-    this.mobileControlCleanup = createMobileControlElements({
+    this.mobileControlCleanup = createMobileControlElements(this, {
       locale: this.locale,
       onInputChange: (key, pressed) => {
         this.mobileInput[key] = pressed;
@@ -2631,7 +2631,6 @@ class PrototypeScene extends Phaser.Scene {
     this.mobileControlCleanup.forEach((cleanup) => cleanup());
     this.mobileControlCleanup = [];
     document.body.classList.remove("is-mobile-controls-active");
-    document.getElementById("mobile-controls")?.remove();
     this.removeMobileFullscreenRecovery();
   }
 

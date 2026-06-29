@@ -2,6 +2,14 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.428
+### English
+- Rebuilt the mobile touch controls and layout editor as Phaser canvas objects so normal play no longer creates a DOM mobile-controls layer.
+- Kept saved mobile control layouts compatible while preserving multi-touch input across joystick, jump, dash, restart, and fullscreen controls.
+### Japanese
+- スマホ操作ボタンと配置編集画面をPhaserキャンバス上のオブジェクトとして作り直し、通常プレイ中にDOMのモバイル操作レイヤーを作らないようにしました。
+- 保存済みのスマホ操作ボタン配置を引き続き使えるようにしつつ、ジョイスティック、ジャンプ、ダッシュ、リスタート、全画面のマルチタッチ入力を維持しました。
+
 ## v0.1.427
 ### English
 - Prevented saved mobile control layouts from covering the in-canvas CAM and MENU buttons after returning from fullscreen or changing orientation.
