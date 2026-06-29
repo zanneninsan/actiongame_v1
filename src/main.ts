@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.434";
+const DEBUG_VERSION = "v0.1.435";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -4910,7 +4910,9 @@ async function startGame() {
       parent: "game",
       width: GAME_WIDTH,
       height: GAME_HEIGHT,
-      pixelArt: true,
+      pixelArt: false,
+      antialias: true,
+      roundPixels: false,
       backgroundColor: "#172033",
       scale: {
         mode: Phaser.Scale.FIT,

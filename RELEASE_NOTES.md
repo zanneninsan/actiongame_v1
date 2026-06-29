@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.435
+### English
+- Removed the global pixelated scaling from the Phaser canvas so backgrounds, HUD text, and generated UI icons render smoothly when the game is scaled.
+### Japanese
+- Phaserキャンバス全体にかかっていたピクセル拡大表示を外し、画面拡大時の背景、HUD文字、生成UIアイコンのガビつきを抑えました。
+
 ## v0.1.434
 ### English
 - Cleaned up the in-canvas icon menu by centering the drawer grid, removing cramped labels from icon buttons, and increasing icon button spacing.
