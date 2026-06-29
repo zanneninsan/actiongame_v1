@@ -112,10 +112,14 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.432";
+const DEBUG_VERSION = "v0.1.433";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
+const MENU_ICON_SETTINGS_KEY = "ui-menu-icon-settings";
+const MENU_ICON_RANKING_KEY = "ui-menu-icon-ranking";
+const MENU_ICON_SCREENSHOT_KEY = "ui-menu-icon-screenshot";
+const MENU_ICON_WORLD_MAP_KEY = "ui-menu-icon-world-map";
 const UI_TEXT_FONT_FAMILY = 'Meiryo, "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif';
 const UI_DISPLAY_FONT_FAMILY = 'Meiryo, "Yu Gothic", "Hiragino Kaku Gothic ProN", sans-serif';
 const UI_TEXT_RESOLUTION = 1;
@@ -616,6 +620,10 @@ class PrototypeScene extends Phaser.Scene {
     this.createPixelTexture("platform-hitbox", 1, 1, 0xffffff, 0xffffff);
     this.load.image(GOAL_TEXTURE_KEY, `${ASSET_BASE}assets/stage_objects/goal_gate.webp`);
     this.load.image(RESULT_PANEL_TEXTURE_KEY, `${ASSET_BASE}assets/ui/result_screen/result_panel.webp`);
+    this.load.image(MENU_ICON_SETTINGS_KEY, `${ASSET_BASE}assets/ui/menu_icons/settings_gear.webp`);
+    this.load.image(MENU_ICON_RANKING_KEY, `${ASSET_BASE}assets/ui/menu_icons/ranking_trophy.webp`);
+    this.load.image(MENU_ICON_SCREENSHOT_KEY, `${ASSET_BASE}assets/ui/menu_icons/screenshot_camera.webp`);
+    this.load.image(MENU_ICON_WORLD_MAP_KEY, `${ASSET_BASE}assets/ui/menu_icons/world_map.webp`);
     this.load.audio("game-bgm", `${ASSET_BASE}assets/audio/gamebgm_default.mp3`);
     this.load.audio("item-pickup", `${ASSET_BASE}assets/audio/item_pickup.wav`);
     this.load.audio("player-jump-sfx", `${ASSET_BASE}assets/audio/player_jump.wav`);
@@ -2874,7 +2882,7 @@ class PrototypeScene extends Phaser.Scene {
     const screenshotButton = this.createCanvasGlobalButton(GAME_WIDTH - 124, 36, "CAM", () => {
       this.captureGameScreenshot({ preview: true });
       this.setCanvasGlobalMenuOpen(false);
-    }, { width: 52, fontSize: 14 });
+    }, { width: 52, fontSize: 14, iconKey: MENU_ICON_SCREENSHOT_KEY, iconSize: 34 });
     const menuButton = this.createCanvasGlobalButton(GAME_WIDTH - 58, 36, "MENU", () => {
       this.setCanvasGlobalMenuOpen(!this.canvasGlobalMenuOpen);
     }, { width: 58, fontSize: 12, active: this.canvasGlobalMenuOpen });
@@ -2901,6 +2909,8 @@ class PrototypeScene extends Phaser.Scene {
       fontSize?: number;
       active?: boolean;
       soundLabel?: boolean;
+      iconKey?: string;
+      iconSize?: number;
     }> = [
       {
         label: "HIT",
@@ -2917,6 +2927,7 @@ class PrototypeScene extends Phaser.Scene {
           this.showLeaderboard();
           this.setCanvasGlobalMenuOpen(false);
         },
+        iconKey: MENU_ICON_RANKING_KEY,
       },
       {
         label: t(this.locale, "global.accountShort"),
@@ -2941,6 +2952,7 @@ class PrototypeScene extends Phaser.Scene {
           this.setCanvasGlobalMenuOpen(false);
         },
         fontSize: 15,
+        iconKey: MENU_ICON_WORLD_MAP_KEY,
       },
       {
         label: this.getCanvasGlobalSoundLabel(),
@@ -2965,6 +2977,7 @@ class PrototypeScene extends Phaser.Scene {
           this.setCanvasGlobalMenuOpen(false);
         },
         fontSize: 11,
+        iconKey: MENU_ICON_SETTINGS_KEY,
       },
     ];
     if (this.setupComplete && !this.startModal && this.controlMode === "mobile") {
@@ -2988,7 +3001,12 @@ class PrototypeScene extends Phaser.Scene {
     panel.strokeRoundedRect(-width + 8, -18, width, height, 10);
     drawer.add(panel);
 
-    const addButton = (index: number, label: string, onPress: () => void, options: { fontSize?: number; active?: boolean } = {}) => {
+    const addButton = (
+      index: number,
+      label: string,
+      onPress: () => void,
+      options: { fontSize?: number; active?: boolean; iconKey?: string; iconSize?: number } = {},
+    ) => {
       const col = index % columns;
       const row = Math.floor(index / columns);
       const x = -width + 30 + col * (buttonSize + gap);
@@ -2998,6 +3016,8 @@ class PrototypeScene extends Phaser.Scene {
         height: buttonSize,
         fontSize: options.fontSize ?? 12,
         active: options.active,
+        iconKey: options.iconKey,
+        iconSize: options.iconSize,
       });
       drawer.add(button);
       return button;
@@ -3007,6 +3027,8 @@ class PrototypeScene extends Phaser.Scene {
       const button = addButton(index, definition.label, definition.onPress, {
         fontSize: definition.fontSize,
         active: definition.active,
+        iconKey: definition.iconKey,
+        iconSize: definition.iconSize,
       });
       if (definition.soundLabel) {
         this.canvasGlobalSoundText = button.getByName("label") as Phaser.GameObjects.Text | undefined;
@@ -3038,7 +3060,7 @@ class PrototypeScene extends Phaser.Scene {
     y: number,
     label: string,
     onPress: () => void,
-    options: { width?: number; height?: number; fontSize?: number; active?: boolean } = {},
+    options: { width?: number; height?: number; fontSize?: number; active?: boolean; iconKey?: string; iconSize?: number } = {},
   ) {
     const width = options.width ?? 44;
     const height = options.height ?? 44;
@@ -3053,10 +3075,16 @@ class PrototypeScene extends Phaser.Scene {
     back.fillRoundedRect(-width / 2, -height / 2, width, height, 10);
     back.lineStyle(2, line, options.active ? 0.88 : 0.46);
     back.strokeRoundedRect(-width / 2 + 1, -height / 2 + 1, width - 2, height - 2, 10);
+    const icon = options.iconKey
+      ? this.add
+          .image(0, height >= 52 ? -4 : -2, options.iconKey)
+          .setDisplaySize(options.iconSize ?? Math.min(width, height) * 0.72, options.iconSize ?? Math.min(width, height) * 0.72)
+      : undefined;
+    const textY = icon ? height / 2 - 9 : 0;
     const text = this.add
-      .text(0, 0, label, {
+      .text(0, textY, label, {
         fontFamily: UI_DISPLAY_FONT_FAMILY,
-        fontSize: `${options.fontSize ?? 14}px`,
+        fontSize: `${icon ? Math.min(options.fontSize ?? 10, 10) : options.fontSize ?? 14}px`,
         fontStyle: "900",
         color: options.active ? "#fff7d6" : "#e0f2fe",
         align: "center",
@@ -3065,7 +3093,7 @@ class PrototypeScene extends Phaser.Scene {
       })
       .setName("label")
       .setOrigin(0.5);
-    container.add([zone, back, text]);
+    container.add(icon ? [zone, back, icon, text] : [zone, back, text]);
     zone
       .on("pointerover", () => container.setScale(1.04))
       .on("pointerout", () => container.setScale(1))
@@ -3526,6 +3554,7 @@ class PrototypeScene extends Phaser.Scene {
     theme: { accent: number; fill: number; labelColor: string },
     onPress: () => void,
     variant: "primary" | "secondary" = "secondary",
+    options: { iconKey?: string; iconSize?: number } = {},
   ) {
     const position = this.getClearActionButtonPosition(index);
     const isMobileLayout = this.controlMode === "mobile";
@@ -3559,8 +3588,15 @@ class PrototypeScene extends Phaser.Scene {
     accent.fillStyle(0xffffff, isPrimary ? 0.36 : 0.18);
     accent.fillCircle(-width / 2 + (isPrimary ? 35 : 28), 0, isPrimary ? 7 : 5);
 
+    const icon = options.iconKey
+      ? this.add
+          .image(-width / 2 + (isPrimary ? 38 : 30), 0, options.iconKey)
+          .setDisplaySize(options.iconSize ?? (isPrimary ? 48 : 34), options.iconSize ?? (isPrimary ? 48 : 34))
+      : undefined;
+    const textX = options.iconKey ? (isPrimary ? 56 : 42) : isPrimary ? 34 : 22;
+    const textWidth = width - (options.iconKey ? (isPrimary ? 130 : 104) : isPrimary ? 86 : 64);
     const text = this.add
-      .text(isPrimary ? 34 : 22, 0, label, {
+      .text(textX, 0, label, {
         fontFamily: UI_DISPLAY_FONT_FAMILY,
         fontSize: isMobileLayout ? (isPrimary ? "24px" : "19px") : isPrimary ? "18px" : "14px",
         fontStyle: "800",
@@ -3568,12 +3604,12 @@ class PrototypeScene extends Phaser.Scene {
         stroke: "#020617",
         strokeThickness: 0,
         align: "center",
-        fixedWidth: width - (isPrimary ? 86 : 64),
+        fixedWidth: textWidth,
         resolution: UI_TEXT_RESOLUTION,
       })
       .setOrigin(0.5);
 
-    container.add([hitZone, shadow, panel, accent, text]);
+    container.add(icon ? [hitZone, shadow, panel, accent, icon, text] : [hitZone, shadow, panel, accent, text]);
     hitZone
       .on("pointerover", () => {
         container.setScale(1.025);
@@ -3623,6 +3659,8 @@ class PrototypeScene extends Phaser.Scene {
       t(this.locale, "screenshot.view"),
       { accent: 0x7dd3fc, fill: 0x0d2a4a, labelColor: "#e0f2fe" },
       () => this.showScreenshotPreviewOrCapture(),
+      "secondary",
+      { iconKey: MENU_ICON_SCREENSHOT_KEY },
     );
   }
 
@@ -3678,6 +3716,7 @@ class PrototypeScene extends Phaser.Scene {
       { accent: 0xf8d66d, fill: 0x4b2f08, labelColor: "#fff7d6" },
       () => void this.returnToTitle(),
       "primary",
+      { iconKey: MENU_ICON_WORLD_MAP_KEY },
     );
   }
 

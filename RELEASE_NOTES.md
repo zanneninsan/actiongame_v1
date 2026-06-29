@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.433
+### English
+- Wired the generated menu icons into the in-canvas camera, ranking, settings, world-map return, and clear-result action buttons.
+### Japanese
+- 生成したメニューアイコンを、キャンバス内のカメラ、ランキング、設定、ワールドマップへ戻る操作、クリア後の操作ボタンに組み込みました。
+
 ## v0.1.432
 ### English
 - Added generated fantasy-style menu icon assets for settings, rankings, screenshots, and returning to the world map.
