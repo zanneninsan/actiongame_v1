@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.437
+### English
+- Replaced the generated menu icons with simpler, cleaner silhouettes so they remain readable inside small in-canvas buttons.
+### Japanese
+- 生成メニューアイコンを、装飾を抑えたシンプルなシルエットに差し替え、小さなキャンバス内ボタンでも読みやすくしました。
+
 ## v0.1.436
 ### English
 - Integrated the selected 14-frame normalized video-reference dash sprite sheet into the latest main branch as the Shift-run dash animation.
