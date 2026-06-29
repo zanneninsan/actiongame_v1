@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.429
+### English
+- Integrated the selected 14-frame normalized video reference dash sprite sheet as the Shift-run dash animation on top of the latest main branch.
+### Japanese
+- 最新の main ブランチに、選抜した正規化済み動画フレーム由来の14フレームスプライトシートを Shift 走行用ダッシュモーションとして統合しました。
+
 ## v0.1.428
 ### English
 - Rebuilt the mobile touch controls and layout editor as Phaser canvas objects so normal play no longer creates a DOM mobile-controls layer.

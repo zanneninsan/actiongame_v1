@@ -1,0 +1,6 @@
+source_dir=assets_source\sprites\video_motion_01343ea4\frames_normalized_selected
+frame_count=14
+frame_size=320x260
+layout=horizontal strip 14x1
+runtime_asset=public\assets\sprites\player_dash_video_selected_14_320x260.webp
+source_frames=frame_0034.png,frame_0035.png,frame_0036.png,frame_0037.png,frame_0038.png,frame_0039.png,frame_0040.png,frame_0041.png,frame_0042.png,frame_0043.png,frame_0045.png,frame_0046.png,frame_0048.png,frame_0049.png
