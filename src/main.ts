@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.429";
+const DEBUG_VERSION = "v0.1.430";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -2627,10 +2627,12 @@ class PrototypeScene extends Phaser.Scene {
     this.refreshMobileFullscreenRecovery();
   }
 
-  private removeMobileControls() {
+  private removeMobileControls({ keepCanvasLayout = false }: { keepCanvasLayout?: boolean } = {}) {
     this.mobileControlCleanup.forEach((cleanup) => cleanup());
     this.mobileControlCleanup = [];
-    document.body.classList.remove("is-mobile-controls-active");
+    if (!keepCanvasLayout) {
+      document.body.classList.remove("is-mobile-controls-active");
+    }
     this.removeMobileFullscreenRecovery();
   }
 
@@ -4469,7 +4471,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.hasWon = true;
-    this.removeMobileControls();
+    this.removeMobileControls({ keepCanvasLayout: this.controlMode === "mobile" });
     this.mobileInput = { w: false, a: false, s: false, d: false, shift: false };
     this.mobileJumpQueued = false;
     const remaining = this.getRemainingMilliseconds();

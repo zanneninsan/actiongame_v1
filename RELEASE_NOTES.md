@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.430
+### English
+- Kept the mobile canvas layout locked after stage clear while removing the touch controls, preventing clear-result buttons from becoming untappable due to a shifted canvas.
+### Japanese
+- ステージクリア時にタッチ操作ボタンだけを消し、スマホ用のキャンバス配置は維持するようにして、キャンバス位置のズレでリザルト画面のボタンが押せなくなる問題を修正しました。
+
 ## v0.1.429
 ### English
 - Fixed the clear-result backdrop so it no longer captures canvas input, keeping the world-map, menu, screenshot, and ghost export buttons clickable after clearing a stage.
