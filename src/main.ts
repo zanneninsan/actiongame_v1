@@ -112,7 +112,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.433";
+const DEBUG_VERSION = "v0.1.434";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -2882,7 +2882,7 @@ class PrototypeScene extends Phaser.Scene {
     const screenshotButton = this.createCanvasGlobalButton(GAME_WIDTH - 124, 36, "CAM", () => {
       this.captureGameScreenshot({ preview: true });
       this.setCanvasGlobalMenuOpen(false);
-    }, { width: 52, fontSize: 14, iconKey: MENU_ICON_SCREENSHOT_KEY, iconSize: 34 });
+    }, { width: 58, height: 58, fontSize: 14, iconKey: MENU_ICON_SCREENSHOT_KEY, iconSize: 46, iconOnly: true });
     const menuButton = this.createCanvasGlobalButton(GAME_WIDTH - 58, 36, "MENU", () => {
       this.setCanvasGlobalMenuOpen(!this.canvasGlobalMenuOpen);
     }, { width: 58, fontSize: 12, active: this.canvasGlobalMenuOpen });
@@ -2900,9 +2900,10 @@ class PrototypeScene extends Phaser.Scene {
     this.canvasGlobalPositionText = undefined;
 
     const drawer = this.add.container(GAME_WIDTH - 16, 92).setScrollFactor(0).setDepth(519);
-    const buttonSize = 46;
+    const buttonSize = 60;
     const gap = 8;
     const columns = 3;
+    const drawerPadding = 14;
     const buttonDefinitions: Array<{
       label: string;
       onPress: () => void;
@@ -2911,6 +2912,7 @@ class PrototypeScene extends Phaser.Scene {
       soundLabel?: boolean;
       iconKey?: string;
       iconSize?: number;
+      iconOnly?: boolean;
     }> = [
       {
         label: "HIT",
@@ -2928,6 +2930,7 @@ class PrototypeScene extends Phaser.Scene {
           this.setCanvasGlobalMenuOpen(false);
         },
         iconKey: MENU_ICON_RANKING_KEY,
+        iconOnly: true,
       },
       {
         label: t(this.locale, "global.accountShort"),
@@ -2953,6 +2956,7 @@ class PrototypeScene extends Phaser.Scene {
         },
         fontSize: 15,
         iconKey: MENU_ICON_WORLD_MAP_KEY,
+        iconOnly: true,
       },
       {
         label: this.getCanvasGlobalSoundLabel(),
@@ -2978,6 +2982,7 @@ class PrototypeScene extends Phaser.Scene {
         },
         fontSize: 11,
         iconKey: MENU_ICON_SETTINGS_KEY,
+        iconOnly: true,
       },
     ];
     if (this.setupComplete && !this.startModal && this.controlMode === "mobile") {
@@ -2992,8 +2997,10 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     const rows = Math.max(1, Math.ceil(buttonDefinitions.length / columns));
-    const width = columns * buttonSize + (columns - 1) * gap + 24;
-    const height = rows * buttonSize + (rows - 1) * gap + 28 + (this.collisionDebugEnabled ? 30 : 0);
+    const contentWidth = columns * buttonSize + (columns - 1) * gap;
+    const contentHeight = rows * buttonSize + (rows - 1) * gap;
+    const width = contentWidth + drawerPadding * 2;
+    const height = contentHeight + drawerPadding * 2 + (this.collisionDebugEnabled ? 30 : 0);
     const panel = this.add.graphics();
     panel.fillStyle(0x020617, 0.9);
     panel.fillRoundedRect(-width + 8, -18, width, height, 10);
@@ -3005,12 +3012,12 @@ class PrototypeScene extends Phaser.Scene {
       index: number,
       label: string,
       onPress: () => void,
-      options: { fontSize?: number; active?: boolean; iconKey?: string; iconSize?: number } = {},
+      options: { fontSize?: number; active?: boolean; iconKey?: string; iconSize?: number; iconOnly?: boolean } = {},
     ) => {
       const col = index % columns;
       const row = Math.floor(index / columns);
-      const x = -width + 30 + col * (buttonSize + gap);
-      const y = 12 + row * (buttonSize + gap);
+      const x = -width + 8 + drawerPadding + buttonSize / 2 + col * (buttonSize + gap);
+      const y = -18 + drawerPadding + buttonSize / 2 + row * (buttonSize + gap);
       const button = this.createCanvasGlobalButton(x, y, label, onPress, {
         width: buttonSize,
         height: buttonSize,
@@ -3018,6 +3025,7 @@ class PrototypeScene extends Phaser.Scene {
         active: options.active,
         iconKey: options.iconKey,
         iconSize: options.iconSize,
+        iconOnly: options.iconOnly,
       });
       drawer.add(button);
       return button;
@@ -3029,6 +3037,7 @@ class PrototypeScene extends Phaser.Scene {
         active: definition.active,
         iconKey: definition.iconKey,
         iconSize: definition.iconSize,
+        iconOnly: definition.iconOnly,
       });
       if (definition.soundLabel) {
         this.canvasGlobalSoundText = button.getByName("label") as Phaser.GameObjects.Text | undefined;
@@ -3060,7 +3069,15 @@ class PrototypeScene extends Phaser.Scene {
     y: number,
     label: string,
     onPress: () => void,
-    options: { width?: number; height?: number; fontSize?: number; active?: boolean; iconKey?: string; iconSize?: number } = {},
+    options: {
+      width?: number;
+      height?: number;
+      fontSize?: number;
+      active?: boolean;
+      iconKey?: string;
+      iconSize?: number;
+      iconOnly?: boolean;
+    } = {},
   ) {
     const width = options.width ?? 44;
     const height = options.height ?? 44;
@@ -3077,23 +3094,25 @@ class PrototypeScene extends Phaser.Scene {
     back.strokeRoundedRect(-width / 2 + 1, -height / 2 + 1, width - 2, height - 2, 10);
     const icon = options.iconKey
       ? this.add
-          .image(0, height >= 52 ? -4 : -2, options.iconKey)
-          .setDisplaySize(options.iconSize ?? Math.min(width, height) * 0.72, options.iconSize ?? Math.min(width, height) * 0.72)
+          .image(0, options.iconOnly ? 0 : height >= 52 ? -4 : -2, options.iconKey)
+          .setDisplaySize(options.iconSize ?? Math.min(width, height) * (options.iconOnly ? 0.78 : 0.72), options.iconSize ?? Math.min(width, height) * (options.iconOnly ? 0.78 : 0.72))
       : undefined;
     const textY = icon ? height / 2 - 9 : 0;
-    const text = this.add
-      .text(0, textY, label, {
-        fontFamily: UI_DISPLAY_FONT_FAMILY,
-        fontSize: `${icon ? Math.min(options.fontSize ?? 10, 10) : options.fontSize ?? 14}px`,
-        fontStyle: "900",
-        color: options.active ? "#fff7d6" : "#e0f2fe",
-        align: "center",
-        fixedWidth: width - 8,
-        resolution: UI_TEXT_RESOLUTION,
-      })
-      .setName("label")
-      .setOrigin(0.5);
-    container.add(icon ? [zone, back, icon, text] : [zone, back, text]);
+    const text = options.iconOnly
+      ? undefined
+      : this.add
+          .text(0, textY, label, {
+            fontFamily: UI_DISPLAY_FONT_FAMILY,
+            fontSize: `${icon ? Math.min(options.fontSize ?? 10, 10) : options.fontSize ?? 14}px`,
+            fontStyle: "900",
+            color: options.active ? "#fff7d6" : "#e0f2fe",
+            align: "center",
+            fixedWidth: width - 8,
+            resolution: UI_TEXT_RESOLUTION,
+          })
+          .setName("label")
+          .setOrigin(0.5);
+    container.add([zone, back, ...(icon ? [icon] : []), ...(text ? [text] : [])]);
     zone
       .on("pointerover", () => container.setScale(1.04))
       .on("pointerout", () => container.setScale(1))

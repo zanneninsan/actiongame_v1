@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.434
+### English
+- Cleaned up the in-canvas icon menu by centering the drawer grid, removing cramped labels from icon buttons, and increasing icon button spacing.
+### Japanese
+- キャンバス内アイコンメニューのグリッドを中央に整え、アイコンボタンから窮屈な文字を外し、ボタン間と外側の余白を見直しました。
+
 ## v0.1.433
 ### English
 - Wired the generated menu icons into the in-canvas camera, ranking, settings, world-map return, and clear-result action buttons.
