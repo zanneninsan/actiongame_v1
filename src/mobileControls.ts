@@ -32,6 +32,15 @@ const MOBILE_CONTROL_SCALE_MAX = 1.45;
 const MOBILE_CONTROL_SCALE_STEP = 5;
 const MOBILE_CONTROL_SCALE_DEFAULT = 1;
 const MOBILE_CONTROLS_LAYOUT_STORAGE_VERSION = 3;
+const GAME_CANVAS_WIDTH = 1280;
+const GAME_CANVAS_HEIGHT = 720;
+const CANVAS_GLOBAL_HUD_SAFE_MARGIN = 10;
+const CANVAS_GLOBAL_HUD_RESERVED_RECT = {
+  left: 1130,
+  top: 14,
+  right: 1251,
+  bottom: 58,
+} as const;
 
 type MobileControlLayoutId =
   | "joystick"
@@ -210,6 +219,7 @@ export const createMobileControls = (options: MobileControlsOptions) => {
     controls.classList.remove("is-layout-editing", "is-layout-setup-open");
     storedLayout = captureMobileControlsLayout(controls);
     applyMobileControlsLayout(controls, storedLayout);
+    storedLayout = captureMobileControlsLayout(controls);
     saveMobileControlsLayout(storedLayout);
     setMobileControlsLayoutSetupSeen();
     if (scaleRange) {
@@ -709,6 +719,89 @@ const captureMobileControlsLayout = (controls: HTMLDivElement): MobileControlLay
   return layout;
 };
 
+type ViewportRect = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+};
+
+const doRectsOverlap = (a: ViewportRect, b: ViewportRect) =>
+  a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+
+const getCanvasGlobalHudReservedRect = (controlsRect: DOMRect): ViewportRect | undefined => {
+  const canvas = document.querySelector<HTMLCanvasElement>("#game canvas");
+  const canvasRect = canvas?.getBoundingClientRect();
+  if (!canvasRect || canvasRect.width <= 0 || canvasRect.height <= 0) {
+    return undefined;
+  }
+
+  const left =
+    canvasRect.left +
+    (CANVAS_GLOBAL_HUD_RESERVED_RECT.left / GAME_CANVAS_WIDTH) * canvasRect.width -
+    CANVAS_GLOBAL_HUD_SAFE_MARGIN;
+  const top =
+    canvasRect.top +
+    (CANVAS_GLOBAL_HUD_RESERVED_RECT.top / GAME_CANVAS_HEIGHT) * canvasRect.height -
+    CANVAS_GLOBAL_HUD_SAFE_MARGIN;
+  const right =
+    canvasRect.left +
+    (CANVAS_GLOBAL_HUD_RESERVED_RECT.right / GAME_CANVAS_WIDTH) * canvasRect.width +
+    CANVAS_GLOBAL_HUD_SAFE_MARGIN;
+  const bottom =
+    canvasRect.top +
+    (CANVAS_GLOBAL_HUD_RESERVED_RECT.bottom / GAME_CANVAS_HEIGHT) * canvasRect.height +
+    CANVAS_GLOBAL_HUD_SAFE_MARGIN;
+
+  return {
+    left: Math.max(controlsRect.left + MOBILE_LAYOUT_EDGE_PADDING, left),
+    top: Math.max(controlsRect.top + MOBILE_LAYOUT_EDGE_PADDING, top),
+    right: Math.min(controlsRect.right - MOBILE_LAYOUT_EDGE_PADDING, right),
+    bottom: Math.min(controlsRect.bottom - MOBILE_LAYOUT_EDGE_PADDING, bottom),
+  };
+};
+
+const avoidCanvasGlobalHud = (
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  controlsRect: DOMRect,
+): { x: number; y: number } => {
+  if (controlsRect.width <= 0 || controlsRect.height <= 0) {
+    return { x, y };
+  }
+  const reservedRect = getCanvasGlobalHudReservedRect(controlsRect);
+  if (!reservedRect) {
+    return { x, y };
+  }
+
+  const controlRect = {
+    left: controlsRect.left + x,
+    top: controlsRect.top + y,
+    right: controlsRect.left + x + width,
+    bottom: controlsRect.top + y + height,
+  };
+  if (!doRectsOverlap(controlRect, reservedRect)) {
+    return { x, y };
+  }
+
+  const minX = MOBILE_LAYOUT_EDGE_PADDING;
+  const minY = MOBILE_LAYOUT_EDGE_PADDING;
+  const maxX = Math.max(minX, controlsRect.width - width - MOBILE_LAYOUT_EDGE_PADDING);
+  const maxY = Math.max(minY, controlsRect.height - height - MOBILE_LAYOUT_EDGE_PADDING);
+  const belowReservedY = reservedRect.bottom - controlsRect.top + MOBILE_LAYOUT_EDGE_PADDING;
+  if (belowReservedY <= maxY) {
+    return { x, y: Math.min(maxY, Math.max(minY, belowReservedY)) };
+  }
+
+  const leftOfReservedX = reservedRect.left - controlsRect.left - width - MOBILE_LAYOUT_EDGE_PADDING;
+  return {
+    x: Math.min(maxX, Math.max(minX, leftOfReservedX)),
+    y: Math.min(maxY, Math.max(minY, y)),
+  };
+};
+
 const applyMobileControlsLayout = (controls: HTMLDivElement, layout: MobileControlLayout) => {
   const controlsRect = controls.getBoundingClientRect();
   if (controlsRect.width <= 0 || controlsRect.height <= 0) {
@@ -721,16 +814,19 @@ const applyMobileControlsLayout = (controls: HTMLDivElement, layout: MobileContr
     if (!position) {
       return;
     }
+    const nextScale = clampMobileControlScale(position.scale);
+    button.style.setProperty(MOBILE_CONTROL_SCALE_CSS_VAR, `${nextScale}`);
+    button.dataset.layoutScale = `${nextScale}`;
     const buttonRect = button.getBoundingClientRect();
     const maxX = Math.max(MOBILE_LAYOUT_EDGE_PADDING, controlsRect.width - buttonRect.width - MOBILE_LAYOUT_EDGE_PADDING);
     const maxY = Math.max(MOBILE_LAYOUT_EDGE_PADDING, controlsRect.height - buttonRect.height - MOBILE_LAYOUT_EDGE_PADDING);
     const nextX = Math.min(maxX, Math.max(MOBILE_LAYOUT_EDGE_PADDING, position.x * controlsRect.width));
     const nextY = Math.min(maxY, Math.max(MOBILE_LAYOUT_EDGE_PADDING, position.y * controlsRect.height));
-    button.style.left = `${nextX}px`;
-    button.style.top = `${nextY}px`;
-    const nextScale = clampMobileControlScale(position.scale);
-    button.style.setProperty(MOBILE_CONTROL_SCALE_CSS_VAR, `${nextScale}`);
-    button.dataset.layoutScale = `${nextScale}`;
+    const adjustedPosition = controls.classList.contains("is-layout-editing")
+      ? { x: nextX, y: nextY }
+      : avoidCanvasGlobalHud(nextX, nextY, buttonRect.width, buttonRect.height, controlsRect);
+    button.style.left = `${adjustedPosition.x}px`;
+    button.style.top = `${adjustedPosition.y}px`;
   });
 };
 

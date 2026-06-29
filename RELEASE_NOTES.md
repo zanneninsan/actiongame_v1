@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.427
+### English
+- Prevented saved mobile control layouts from covering the in-canvas CAM and MENU buttons after returning from fullscreen or changing orientation.
+### Japanese
+- フルスクリーン解除や画面向き変更の後でも、保存済みのスマホ操作ボタン配置がキャンバス内のCAM/MENUボタンを覆わないようにしました。
+
 ## v0.1.426
 ### English
 - Reduced minimap redraw frequency to 4 times per second to lower gameplay rendering cost on slower devices.
