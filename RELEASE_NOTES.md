@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.441
+### English
+- Added a compact story dialogue frame and reduced in-game dialogue bubble width to about two-thirds of the previous size to avoid blocking the playfield.
+### Japanese
+- コンパクトなストーリー吹き出しフレームを追加し、ゲーム内吹き出しの横幅を従来の約3分の2に抑えてプレイ画面を塞ぎにくくしました。
+
 ## v0.1.440
 ### English
 - Rescaled the 14-frame video-reference dash sprite sheet to match the idle, walk, and jump sprite proportions while keeping bottom-center foot alignment.

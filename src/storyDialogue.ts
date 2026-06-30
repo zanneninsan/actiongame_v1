@@ -26,13 +26,13 @@ export type StoryDialogueController = {
 
 const ASSET_BASE = import.meta.env.BASE_URL;
 export const STORY_DIALOGUE_FRAME_TEXTURE_KEY = "story-dialogue-frame";
-const FRAME_ASPECT_RATIO = 417 / 1931;
+const FRAME_ASPECT_RATIO = 417 / 1287;
 const GAME_DESIGN_WIDTH = 1280;
 const DEFAULT_DIALOGUE_LEFT = 12;
 const DEFAULT_DIALOGUE_TOP = 96;
-const DEFAULT_DIALOGUE_WIDTH = 656;
+const DEFAULT_DIALOGUE_WIDTH = 437;
 const MIN_DIALOGUE_WIDTH = 176;
-const DEFAULT_DIALOGUE_FONT_SIZE = 18;
+const DEFAULT_DIALOGUE_FONT_SIZE = 17;
 const MIN_DIALOGUE_FONT_SIZE = 10;
 const TV_SWITCH_IN_MS = 520;
 const TV_SWITCH_OUT_MS = 420;
@@ -78,7 +78,7 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
       fontStyle: "900",
       color: "#f5c76a",
       align: "left",
-      fixedWidth: layout.width * 0.25,
+      fixedWidth: layout.width * 0.24,
       resolution: 2,
     })
     .setOrigin(0, 0.5);
@@ -93,8 +93,8 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
       fontStyle: "900",
       color: "#f8fafc",
       align: "left",
-      fixedWidth: layout.width * 0.665,
-      wordWrap: { width: layout.width * 0.665, useAdvancedWrap: true },
+      fixedWidth: layout.width * 0.56,
+      wordWrap: { width: layout.width * 0.56, useAdvancedWrap: true },
       resolution: 2,
     })
     .setOrigin(0, 0);
@@ -116,7 +116,7 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
   const setLine = (line: StoryDialogueLine) => {
     const portraitKey = getStoryDialogueTextureKey(line.portraitUrl);
     portrait.setTexture(scene.textures.exists(portraitKey) ? portraitKey : STORY_DIALOGUE_FRAME_TEXTURE_KEY);
-    portrait.setDisplaySize(layout.width * 0.152, layout.height * 0.675);
+    portrait.setDisplaySize(layout.width * 0.23, layout.height * 0.675);
     namePlate.setText(line.characterName);
     message.setText(line.message);
   };
@@ -184,16 +184,16 @@ function placeElements(
   nextZone: Phaser.GameObjects.Zone,
 ) {
   portrait.setPosition(layout.width * 0.032, layout.height * 0.145);
-  portrait.setDisplaySize(layout.width * 0.152, layout.height * 0.675);
+  portrait.setDisplaySize(layout.width * 0.23, layout.height * 0.675);
 
-  namePlate.setPosition(layout.width * 0.253, layout.height * 0.172);
+  namePlate.setPosition(layout.width * 0.34, layout.height * 0.172);
   namePlate.setFontSize(layout.fontSize);
   namePlate.setFixedSize(layout.width * 0.24, layout.height * 0.135);
 
-  message.setPosition(layout.width * 0.238, layout.height * 0.34);
+  message.setPosition(layout.width * 0.34, layout.height * 0.34);
   message.setFontSize(layout.fontSize);
-  message.setFixedSize(layout.width * 0.665, 0);
-  message.setWordWrapWidth(layout.width * 0.665, true);
+  message.setFixedSize(layout.width * 0.56, 0);
+  message.setWordWrapWidth(layout.width * 0.56, true);
 
   nextZone.setPosition(layout.width * 0.872, layout.height * 0.595);
   nextZone.setSize(layout.width * 0.08, layout.height * 0.22);

@@ -115,7 +115,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.440";
+const DEBUG_VERSION = "v0.1.441";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -627,7 +627,7 @@ class PrototypeScene extends Phaser.Scene {
     this.load.image(MENU_ICON_RANKING_KEY, `${ASSET_BASE}assets/ui/menu_icons/ranking_trophy.webp`);
     this.load.image(MENU_ICON_SCREENSHOT_KEY, `${ASSET_BASE}assets/ui/menu_icons/screenshot_camera.webp`);
     this.load.image(MENU_ICON_WORLD_MAP_KEY, `${ASSET_BASE}assets/ui/menu_icons/world_map.webp`);
-    this.load.image(STORY_DIALOGUE_FRAME_TEXTURE_KEY, `${ASSET_BASE}assets/story/dialogue_frame.webp`);
+    this.load.image(STORY_DIALOGUE_FRAME_TEXTURE_KEY, `${ASSET_BASE}assets/story/dialogue_frame_compact.webp`);
     const storyDialoguePortraitUrls = new Set<string>();
     Object.values(FIXED_STORY_DIALOGUES).forEach((dialogue) => storyDialoguePortraitUrls.add(dialogue.portraitUrl));
     Object.values(STAGES).forEach((stage) => {
