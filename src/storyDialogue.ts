@@ -34,6 +34,7 @@ const DEFAULT_DIALOGUE_WIDTH = 437;
 const MIN_DIALOGUE_WIDTH = 176;
 const DEFAULT_DIALOGUE_FONT_SIZE = 17;
 const MIN_DIALOGUE_FONT_SIZE = 10;
+const NAME_PLATE_FONT_SIZE = 13;
 const TV_SWITCH_IN_MS = 520;
 const TV_SWITCH_OUT_MS = 420;
 const STORY_DIALOGUE_DEPTH = 240;
@@ -74,16 +75,16 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
     .text(0, 0, "", {
       fontFamily:
         '"Microsoft YaHei", "Microsoft JhengHei", SimHei, SimSun, "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "Noto Sans CJK KR", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif',
-      fontSize: `${layout.fontSize}px`,
+      fontSize: `${NAME_PLATE_FONT_SIZE}px`,
       fontStyle: "900",
       color: "#f5c76a",
       align: "left",
-      fixedWidth: layout.width * 0.24,
-      resolution: 2,
+      fixedWidth: layout.width * 0.3,
+      resolution: 4,
     })
     .setOrigin(0, 0.5);
   namePlate.setLineSpacing(0);
-  namePlate.setShadow(0, 2, "rgba(0, 0, 0, 0.86)", 0, true, true);
+  namePlate.setShadow(0, 1, "rgba(0, 0, 0, 0.86)", 0, true, true);
 
   const message = scene.add
     .text(0, 0, "", {
@@ -187,8 +188,8 @@ function placeElements(
   portrait.setDisplaySize(layout.width * 0.23, layout.height * 0.675);
 
   namePlate.setPosition(layout.width * 0.34, layout.height * 0.172);
-  namePlate.setFontSize(layout.fontSize);
-  namePlate.setFixedSize(layout.width * 0.24, layout.height * 0.135);
+  namePlate.setFontSize(NAME_PLATE_FONT_SIZE);
+  namePlate.setFixedSize(layout.width * 0.3, layout.height * 0.16);
 
   message.setPosition(layout.width * 0.34, layout.height * 0.34);
   message.setFontSize(layout.fontSize);

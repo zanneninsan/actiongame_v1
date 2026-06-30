@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.442
+### English
+- Tightened the compact story dialogue nameplate text so Japanese names fit cleanly and render with a higher-resolution label.
+### Japanese
+- コンパクトなストーリー吹き出しの名前欄を調整し、日本語名が収まりやすく、より高解像度で表示されるようにしました。
+
 ## v0.1.441
 ### English
 - Added a compact story dialogue frame and reduced in-game dialogue bubble width to about two-thirds of the previous size to avoid blocking the playfield.
