@@ -20,7 +20,10 @@ import { StartModal, TITLE_SOUND_CONFIRM_STORAGE_KEY, type ControlMode, type Sta
 import { StageEditor } from "./stageEditor";
 import { resolveStageConstants, type ResolvedStageConstants } from "./stageConstants";
 import {
+  STORY_DIALOGUE_FRAME_TEXTURE_KEY,
   createStoryDialogue,
+  getStoryDialogueTextureKey,
+  resolveStoryDialoguePortraitUrl,
   resolveStoryDialogueLines,
   type StoryDialogueController,
   type StoryDialogueLine,
@@ -112,7 +115,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.438";
+const DEBUG_VERSION = "v0.1.439";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -624,6 +627,21 @@ class PrototypeScene extends Phaser.Scene {
     this.load.image(MENU_ICON_RANKING_KEY, `${ASSET_BASE}assets/ui/menu_icons/ranking_trophy.webp`);
     this.load.image(MENU_ICON_SCREENSHOT_KEY, `${ASSET_BASE}assets/ui/menu_icons/screenshot_camera.webp`);
     this.load.image(MENU_ICON_WORLD_MAP_KEY, `${ASSET_BASE}assets/ui/menu_icons/world_map.webp`);
+    this.load.image(STORY_DIALOGUE_FRAME_TEXTURE_KEY, `${ASSET_BASE}assets/story/dialogue_frame.webp`);
+    const storyDialoguePortraitUrls = new Set<string>();
+    Object.values(FIXED_STORY_DIALOGUES).forEach((dialogue) => storyDialoguePortraitUrls.add(dialogue.portraitUrl));
+    Object.values(STAGES).forEach((stage) => {
+      const stageDialogues = [
+        ...(stage.storyDialogue ? [stage.storyDialogue] : []),
+        ...(stage.storyDialogues ?? []),
+      ];
+      stageDialogues.forEach((dialogue) => {
+        dialogue.lines.forEach((line) => storyDialoguePortraitUrls.add(resolveStoryDialoguePortraitUrl(line.portraitPath)));
+      });
+    });
+    storyDialoguePortraitUrls.forEach((url) => {
+      this.load.image(getStoryDialogueTextureKey(url), url);
+    });
     this.load.audio("game-bgm", `${ASSET_BASE}assets/audio/gamebgm_default.mp3`);
     this.load.audio("item-pickup", `${ASSET_BASE}assets/audio/item_pickup.wav`);
     this.load.audio("player-jump-sfx", `${ASSET_BASE}assets/audio/player_jump.wav`);
@@ -1532,6 +1550,7 @@ class PrototypeScene extends Phaser.Scene {
     }
 
     this.storyDialogue = createStoryDialogue({
+      scene: this,
       lines: nextDialogue.lines,
       locale: this.locale,
     });

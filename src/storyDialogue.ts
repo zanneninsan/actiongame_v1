@@ -1,3 +1,4 @@
+import Phaser from "phaser";
 import type { Locale } from "./i18n";
 import { resolveStageText, type StageStoryDialogue } from "./assets";
 
@@ -8,8 +9,8 @@ export type StoryDialogueLine = {
 };
 
 export type StoryDialogueOptions = {
+  scene: Phaser.Scene;
   lines: StoryDialogueLine[];
-  root?: HTMLElement;
   width?: number;
   top?: number;
   left?: number;
@@ -24,9 +25,9 @@ export type StoryDialogueController = {
 };
 
 const ASSET_BASE = import.meta.env.BASE_URL;
+export const STORY_DIALOGUE_FRAME_TEXTURE_KEY = "story-dialogue-frame";
 const FRAME_ASPECT_RATIO = 417 / 1931;
 const GAME_DESIGN_WIDTH = 1280;
-const GAME_DESIGN_HEIGHT = 720;
 const DEFAULT_DIALOGUE_LEFT = 12;
 const DEFAULT_DIALOGUE_TOP = 96;
 const DEFAULT_DIALOGUE_WIDTH = 656;
@@ -35,190 +36,89 @@ const DEFAULT_DIALOGUE_FONT_SIZE = 18;
 const MIN_DIALOGUE_FONT_SIZE = 10;
 const TV_SWITCH_IN_MS = 520;
 const TV_SWITCH_OUT_MS = 420;
+const STORY_DIALOGUE_DEPTH = 240;
 const HUD_GUARD_LEFT = 12;
 const HUD_GUARD_TOP = 12;
 const HUD_GUARD_WIDTH = 430;
 const HUD_GUARD_HEIGHT = 156;
 const HUD_GUARD_MARGIN = 10;
 
+export const resolveStoryDialoguePortraitUrl = (path: string) =>
+  /^https?:\/\//.test(path) || path.startsWith("/") ? path : `${ASSET_BASE}${path}`;
+
+export const getStoryDialogueTextureKey = (url: string) => `story-dialogue-portrait-${url.replace(/[^a-zA-Z0-9]/g, "_")}`;
+
 export const resolveStoryDialogueLines = (storyDialogue: StageStoryDialogue, locale: Locale): StoryDialogueLine[] =>
   storyDialogue.lines.map((line) => ({
     characterName: resolveStageText(line.characterName, locale),
     message: resolveStageText(line.message, locale),
-    portraitUrl: resolvePortraitUrl(line.portraitPath),
+    portraitUrl: resolveStoryDialoguePortraitUrl(line.portraitPath),
   }));
 
 export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogueController {
-  const root = options.root ?? document.body;
+  const scene = options.scene;
   const lines = [...options.lines];
-  const locale = options.locale ?? "en";
   let currentIndex = 0;
+  let isRemoving = false;
 
   document.getElementById("story-dialogue")?.remove();
 
-  const wrapper = document.createElement("section");
-  wrapper.id = "story-dialogue";
-  wrapper.className = "story-dialogue";
-  wrapper.setAttribute("aria-live", "polite");
-  applyStyle(wrapper, {
-    position: "fixed",
-    top: "96px",
-    left: "12px",
-    width: "656px",
-    aspectRatio: `${1 / FRAME_ASPECT_RATIO}`,
-    zIndex: "11",
-    color: "#f8fafc",
-    fontFamily: `"Microsoft YaHei", "Microsoft JhengHei", SimHei, SimSun, "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "Noto Sans CJK KR", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif`,
-    pointerEvents: "auto",
-    userSelect: "none",
-    filter: "drop-shadow(0 16px 22px rgba(0, 0, 0, 0.58))",
-  });
+  const layout = resolveLayout(options);
+  const container = scene.add.container(layout.left, layout.top).setScrollFactor(0).setDepth(STORY_DIALOGUE_DEPTH);
 
-  const frame = document.createElement("img");
-  frame.src = `${ASSET_BASE}assets/story/dialogue_frame.webp`;
-  frame.alt = "";
-  applyStyle(frame, {
-    position: "absolute",
-    inset: "0",
-    width: "100%",
-    height: "100%",
-    display: "block",
-    pointerEvents: "none",
-  });
+  const frame = scene.add.image(0, 0, STORY_DIALOGUE_FRAME_TEXTURE_KEY).setOrigin(0, 0);
+  frame.setDisplaySize(layout.width, layout.height);
 
-  const portrait = document.createElement("img");
-  portrait.alt = "";
-  applyStyle(portrait, {
-    position: "absolute",
-    left: "3.2%",
-    top: "14.5%",
-    width: "15.2%",
-    height: "67.5%",
-    objectFit: "cover",
-    display: "block",
-    pointerEvents: "none",
-  });
+  const portrait = scene.add.image(0, 0, STORY_DIALOGUE_FRAME_TEXTURE_KEY).setOrigin(0, 0);
+  const namePlate = scene.add
+    .text(0, 0, "", {
+      fontFamily:
+        '"Microsoft YaHei", "Microsoft JhengHei", SimHei, SimSun, "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "Noto Sans CJK KR", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif',
+      fontSize: `${layout.fontSize}px`,
+      fontStyle: "900",
+      color: "#f5c76a",
+      align: "left",
+      fixedWidth: layout.width * 0.25,
+      resolution: 2,
+    })
+    .setOrigin(0, 0.5);
+  namePlate.setLineSpacing(0);
+  namePlate.setShadow(0, 2, "rgba(0, 0, 0, 0.86)", 0, true, true);
 
-  const namePlate = document.createElement("div");
-  applyStyle(namePlate, {
-    position: "absolute",
-    left: "23.2%",
-    top: "10.5%",
-    width: "25.8%",
-    height: "13.5%",
-    display: "flex",
-    alignItems: "center",
-    paddingLeft: "2.1%",
-    paddingRight: "1.4%",
-    boxSizing: "border-box",
-    color: "#f5c76a",
-    fontSize: "var(--story-dialogue-font-size, 22px)",
-    fontWeight: "900",
-    lineHeight: "1",
-    letterSpacing: "0",
-    whiteSpace: "nowrap",
-    overflow: "hidden",
-    textOverflow: "ellipsis",
-    textShadow: "0 2px 0 rgba(0, 0, 0, 0.86), 0 0 8px rgba(247, 201, 106, 0.18)",
-  });
+  const message = scene.add
+    .text(0, 0, "", {
+      fontFamily:
+        '"Microsoft YaHei", "Microsoft JhengHei", SimHei, SimSun, "PingFang SC", "Noto Sans CJK SC", "Noto Sans SC", "Noto Sans CJK KR", "Noto Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", "Yu Gothic", "Hiragino Kaku Gothic ProN", Meiryo, system-ui, sans-serif',
+      fontSize: `${layout.fontSize}px`,
+      fontStyle: "900",
+      color: "#f8fafc",
+      align: "left",
+      fixedWidth: layout.width * 0.665,
+      wordWrap: { width: layout.width * 0.665, useAdvancedWrap: true },
+      resolution: 2,
+    })
+    .setOrigin(0, 0);
+  message.setLineSpacing(Math.round(layout.fontSize * 0.45));
+  message.setShadow(0, 2, "rgba(0, 0, 0, 0.9)", 2, true, true);
 
-  const message = document.createElement("p");
-  applyStyle(message, {
-    position: "absolute",
-    left: "23.8%",
-    top: "34%",
-    width: "66.5%",
-    margin: "0",
-    color: "#f8fafc",
-    fontSize: "var(--story-dialogue-font-size, 22px)",
-    fontWeight: "900",
-    lineHeight: "1.55",
-    letterSpacing: "0",
-    textShadow: "0 2px 2px rgba(0, 0, 0, 0.9), 0 0 8px rgba(255, 255, 255, 0.12)",
-  });
-
-  const nextButton = document.createElement("button");
-  nextButton.type = "button";
-  nextButton.ariaLabel = locale === "ja" ? "次のメッセージ" : "Next message";
-  applyStyle(nextButton, {
-    position: "absolute",
-    right: "4.8%",
-    bottom: "18.5%",
-    width: "8%",
-    height: "22%",
-    border: "0",
-    padding: "0",
-    background: "transparent",
-    cursor: "pointer",
-  });
-
-  wrapper.append(frame, portrait, namePlate, message, nextButton);
-  root.appendChild(wrapper);
-  playTvSwitchIn(wrapper);
-
-  const syncToGameFrame = () => {
-    const canvas = document.querySelector<HTMLCanvasElement>("#game canvas") ?? document.querySelector<HTMLCanvasElement>("canvas");
-    const rect = canvas?.getBoundingClientRect();
-    const frameLeft = rect?.left ?? 0;
-    const frameTop = rect?.top ?? 0;
-    const frameWidth = rect?.width ?? window.innerWidth;
-    const scale = rect ? Math.min(rect.width / GAME_DESIGN_WIDTH, rect.height / GAME_DESIGN_HEIGHT) : 1;
-    const safeScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
-    const logicalLeft = options.left ?? DEFAULT_DIALOGUE_LEFT;
-    const logicalTop = options.top ?? DEFAULT_DIALOGUE_TOP;
-    const logicalWidth = options.width ?? DEFAULT_DIALOGUE_WIDTH;
-    const left = frameLeft + logicalLeft * safeScale;
-    let top = frameTop + logicalTop * safeScale;
-    const maxWidth = Math.max(MIN_DIALOGUE_WIDTH, frameWidth - logicalLeft * safeScale - DEFAULT_DIALOGUE_LEFT * safeScale);
-    const width = Math.max(MIN_DIALOGUE_WIDTH, Math.min(logicalWidth * safeScale, maxWidth));
-    const fontSize = Math.min(
-      DEFAULT_DIALOGUE_FONT_SIZE,
-      Math.max(MIN_DIALOGUE_FONT_SIZE, DEFAULT_DIALOGUE_FONT_SIZE * safeScale),
-    );
-
-    const guardLeft = frameLeft + HUD_GUARD_LEFT * safeScale;
-    const guardTop = frameTop + HUD_GUARD_TOP * safeScale;
-    const guardRight = guardLeft + HUD_GUARD_WIDTH * safeScale;
-    const guardBottom = guardTop + HUD_GUARD_HEIGHT * safeScale;
-    const dialogueLeft = left;
-    const dialogueTop = top;
-    const dialogueRight = left + width;
-    const dialogueBottom = top + Math.round(width * FRAME_ASPECT_RATIO);
-    const overlapsHud =
-      dialogueLeft < guardRight &&
-      dialogueRight > guardLeft &&
-      dialogueTop < guardBottom &&
-      dialogueBottom > guardTop;
-    if (overlapsHud) {
-      top = guardBottom + HUD_GUARD_MARGIN * safeScale;
-    }
-
-    wrapper.style.left = `${Math.round(left)}px`;
-    wrapper.style.top = `${Math.round(top)}px`;
-    wrapper.style.width = `${Math.round(width)}px`;
-    wrapper.style.setProperty("--story-dialogue-font-size", `${fontSize.toFixed(1)}px`);
-  };
-
-  syncToGameFrame();
-  window.addEventListener("resize", syncToGameFrame);
-  window.visualViewport?.addEventListener("resize", syncToGameFrame);
-  const canvas = document.querySelector<HTMLCanvasElement>("#game canvas") ?? document.querySelector<HTMLCanvasElement>("canvas");
-  const resizeObserver = typeof ResizeObserver === "undefined" ? undefined : new ResizeObserver(syncToGameFrame);
-  if (canvas && resizeObserver) {
-    resizeObserver.observe(canvas);
-  }
-
-  const stopPropagation = (event: Event) => event.stopPropagation();
-  wrapper.addEventListener("pointerdown", stopPropagation);
-  wrapper.addEventListener("keydown", stopPropagation);
-  nextButton.addEventListener("click", () => {
+  const nextZone = scene.add
+    .zone(layout.width * 0.872, layout.height * 0.595, layout.width * 0.08, layout.height * 0.22)
+    .setOrigin(0, 0)
+    .setInteractive({ useHandCursor: true });
+  nextZone.on("pointerup", () => {
     next();
   });
 
+  container.add([frame, portrait, namePlate, message, nextZone]);
+  placeElements(layout, portrait, namePlate, message, nextZone);
+  playTvSwitchIn(scene, container);
+
   const setLine = (line: StoryDialogueLine) => {
-    portrait.src = line.portraitUrl;
-    namePlate.textContent = line.characterName;
-    message.textContent = line.message;
+    const portraitKey = getStoryDialogueTextureKey(line.portraitUrl);
+    portrait.setTexture(scene.textures.exists(portraitKey) ? portraitKey : STORY_DIALOGUE_FRAME_TEXTURE_KEY);
+    portrait.setDisplaySize(layout.width * 0.152, layout.height * 0.675);
+    namePlate.setText(line.characterName);
+    message.setText(line.message);
   };
 
   const setLines = (nextLines: StoryDialogueLine[], startIndex = 0) => {
@@ -238,28 +138,17 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
     return true;
   };
 
-  let isRemoving = false;
-  const cleanup = () => {
-    wrapper.removeEventListener("pointerdown", stopPropagation);
-    wrapper.removeEventListener("keydown", stopPropagation);
-    window.removeEventListener("resize", syncToGameFrame);
-    window.visualViewport?.removeEventListener("resize", syncToGameFrame);
-    resizeObserver?.disconnect();
-  };
-
   const remove = (removeOptions: { animate?: boolean } = {}) => {
     if (isRemoving) {
       return;
     }
-
     isRemoving = true;
-    cleanup();
+    nextZone.disableInteractive();
     if (removeOptions.animate) {
-      playTvSwitchOut(wrapper, () => wrapper.remove());
+      playTvSwitchOut(scene, container, () => container.destroy(true));
       return;
     }
-
-    wrapper.remove();
+    container.destroy(true);
   };
 
   setLines(lines);
@@ -267,56 +156,70 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
   return { setLine, setLines, next, remove };
 }
 
-function applyStyle(element: HTMLElement, style: Partial<CSSStyleDeclaration>) {
-  Object.assign(element.style, style);
-}
+function resolveLayout(options: StoryDialogueOptions) {
+  const left = options.left ?? DEFAULT_DIALOGUE_LEFT;
+  let top = options.top ?? DEFAULT_DIALOGUE_TOP;
+  const maxWidth = Math.max(MIN_DIALOGUE_WIDTH, GAME_DESIGN_WIDTH - left - DEFAULT_DIALOGUE_LEFT);
+  const width = Math.max(MIN_DIALOGUE_WIDTH, Math.min(options.width ?? DEFAULT_DIALOGUE_WIDTH, maxWidth));
+  const height = Math.round(width * FRAME_ASPECT_RATIO);
+  const fontSize = Math.min(DEFAULT_DIALOGUE_FONT_SIZE, Math.max(MIN_DIALOGUE_FONT_SIZE, DEFAULT_DIALOGUE_FONT_SIZE));
 
-function resolvePortraitUrl(path: string) {
-  return /^https?:\/\//.test(path) || path.startsWith("/") ? path : `${ASSET_BASE}${path}`;
-}
-
-function playTvSwitchIn(element: HTMLElement) {
-  if (!element.animate) {
-    return;
+  const guardRight = HUD_GUARD_LEFT + HUD_GUARD_WIDTH;
+  const guardBottom = HUD_GUARD_TOP + HUD_GUARD_HEIGHT;
+  const dialogueRight = left + width;
+  const dialogueBottom = top + height;
+  const overlapsHud = left < guardRight && dialogueRight > HUD_GUARD_LEFT && top < guardBottom && dialogueBottom > HUD_GUARD_TOP;
+  if (overlapsHud) {
+    top = guardBottom + HUD_GUARD_MARGIN;
   }
 
-  element.style.transformOrigin = "50% 50%";
-  element.animate(
-    [
-      { opacity: 0, transform: "scaleX(0.02) scaleY(0.006)", filter: "brightness(3.8) contrast(2.2) blur(1px)" },
-      { opacity: 1, transform: "scaleX(1.04) scaleY(0.035)", filter: "brightness(3.2) contrast(2.6) blur(0.5px)", offset: 0.22 },
-      { opacity: 0.72, transform: "scaleX(0.98) scaleY(1.08)", filter: "brightness(1.8) contrast(1.7)", offset: 0.48 },
-      { opacity: 1, transform: "scaleX(1.01) scaleY(0.97)", filter: "brightness(1.28) contrast(1.18)", offset: 0.72 },
-      { opacity: 1, transform: "scaleX(1) scaleY(1)", filter: "brightness(1) contrast(1)" },
-    ],
-    {
-      duration: TV_SWITCH_IN_MS,
-      easing: "cubic-bezier(0.16, 1, 0.3, 1)",
-    },
-  );
+  return { left, top, width, height, fontSize };
 }
 
-function playTvSwitchOut(element: HTMLElement, onFinish: () => void) {
-  if (!element.animate) {
-    onFinish();
-    return;
-  }
+function placeElements(
+  layout: { width: number; height: number; fontSize: number },
+  portrait: Phaser.GameObjects.Image,
+  namePlate: Phaser.GameObjects.Text,
+  message: Phaser.GameObjects.Text,
+  nextZone: Phaser.GameObjects.Zone,
+) {
+  portrait.setPosition(layout.width * 0.032, layout.height * 0.145);
+  portrait.setDisplaySize(layout.width * 0.152, layout.height * 0.675);
 
-  element.style.pointerEvents = "none";
-  element.style.transformOrigin = "50% 50%";
-  const animation = element.animate(
-    [
-      { opacity: 1, transform: "scaleX(1) scaleY(1)", filter: "brightness(1) contrast(1)" },
-      { opacity: 0.95, transform: "scaleX(1.02) scaleY(0.12)", filter: "brightness(2.2) contrast(2.1)", offset: 0.42 },
-      { opacity: 0.72, transform: "scaleX(0.86) scaleY(0.025)", filter: "brightness(4.2) contrast(2.8) blur(0.4px)", offset: 0.72 },
-      { opacity: 0, transform: "scaleX(0.02) scaleY(0.004)", filter: "brightness(5) contrast(3) blur(1px)" },
-    ],
-    {
-      duration: TV_SWITCH_OUT_MS,
-      easing: "cubic-bezier(0.7, 0, 0.84, 0)",
-      fill: "forwards",
-    },
-  );
-  animation.onfinish = onFinish;
-  animation.oncancel = onFinish;
+  namePlate.setPosition(layout.width * 0.253, layout.height * 0.172);
+  namePlate.setFontSize(layout.fontSize);
+  namePlate.setFixedSize(layout.width * 0.24, layout.height * 0.135);
+
+  message.setPosition(layout.width * 0.238, layout.height * 0.34);
+  message.setFontSize(layout.fontSize);
+  message.setFixedSize(layout.width * 0.665, 0);
+  message.setWordWrapWidth(layout.width * 0.665, true);
+
+  nextZone.setPosition(layout.width * 0.872, layout.height * 0.595);
+  nextZone.setSize(layout.width * 0.08, layout.height * 0.22);
+}
+
+function playTvSwitchIn(scene: Phaser.Scene, container: Phaser.GameObjects.Container) {
+  container.setAlpha(0);
+  container.setScale(0.02, 0.006);
+  scene.tweens.add({
+    targets: container,
+    alpha: 1,
+    scaleX: 1,
+    scaleY: 1,
+    duration: TV_SWITCH_IN_MS,
+    ease: "Cubic.Out",
+  });
+}
+
+function playTvSwitchOut(scene: Phaser.Scene, container: Phaser.GameObjects.Container, onFinish: () => void) {
+  scene.tweens.add({
+    targets: container,
+    alpha: 0,
+    scaleX: 0.02,
+    scaleY: 0.004,
+    duration: TV_SWITCH_OUT_MS,
+    ease: "Cubic.In",
+    onComplete: onFinish,
+  });
 }

@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.439
+### English
+- Rebuilt story dialogue bubbles as Phaser game objects so mobile controls keep receiving gameplay input while dialogue is visible.
+### Japanese
+- ストーリー吹き出しをPhaserのゲームオブジェクトとして再実装し、表示中でもモバイル操作がゲーム入力を受け続けられるようにしました。
+
 ## v0.1.438
 ### English
 - Matched the top-right MENU button height to the camera button so the canvas menu controls share a consistent size.
