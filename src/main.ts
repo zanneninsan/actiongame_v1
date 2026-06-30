@@ -115,7 +115,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.442";
+const DEBUG_VERSION = "v0.1.443";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -329,6 +329,7 @@ const CLEAR_ACTION_DESKTOP_GAP = 58;
 const CLEAR_ACTION_MOBILE_X = GAME_WIDTH / 2;
 const CLEAR_ACTION_MOBILE_Y = GAME_HEIGHT - 214;
 const CLEAR_ACTION_MOBILE_GAP = 82;
+const WORLD_MAP_CONFIRM_DEPTH = 420;
 const SHOW_CLEAR_RANK_AND_MISSIONS = true;
 const DECORATION_PLATFORM_LAND_TOLERANCE = 6;
 const DECORATION_PLATFORM_DROP_CROUCH_MS = 500;
@@ -458,6 +459,8 @@ class PrototypeScene extends Phaser.Scene {
   private countdownOverlay?: StartCountdownOverlay;
   private resultScreenContainer?: Phaser.GameObjects.Container;
   private clearStampContainer?: Phaser.GameObjects.Container;
+  private worldMapReturnConfirmContainer?: Phaser.GameObjects.Container;
+  private worldMapReturnConfirmResolve?: (shouldReturn: boolean) => void;
   private missText?: Phaser.GameObjects.Text;
   private danmaku?: DanmakuOverlay;
   private minimap?: MinimapOverlay;
@@ -1316,6 +1319,7 @@ class PrototypeScene extends Phaser.Scene {
     this.resultScreenContainer = undefined;
     this.clearStampContainer?.destroy(true);
     this.clearStampContainer = undefined;
+    this.closeWorldMapReturnConfirm(false);
     this.missText = undefined;
   }
 
@@ -1624,69 +1628,120 @@ class PrototypeScene extends Phaser.Scene {
   }
 
   private confirmReturnToWorldMap() {
-    document.getElementById("world-map-return-confirm")?.remove();
-    document.body.classList.add("is-world-map-return-confirm-open");
-
+    this.closeWorldMapReturnConfirm(false);
     return new Promise<boolean>((resolve) => {
-      const overlay = document.createElement("div");
-      overlay.id = "world-map-return-confirm";
-      overlay.setAttribute("role", "dialog");
-      overlay.setAttribute("aria-modal", "true");
-      overlay.setAttribute("aria-labelledby", "world-map-return-confirm-title");
+      this.worldMapReturnConfirmResolve = resolve;
+      const container = this.add.container(0, 0).setScrollFactor(0).setDepth(WORLD_MAP_CONFIRM_DEPTH);
+      const shade = this.add
+        .rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x020617, 0.72)
+        .setOrigin(0.5)
+        .setInteractive({ useHandCursor: false });
+      const panelWidth = this.controlMode === "mobile" ? 620 : 560;
+      const panelHeight = this.controlMode === "mobile" ? 252 : 224;
+      const panelX = GAME_WIDTH / 2;
+      const panelY = GAME_HEIGHT / 2;
+      const panel = this.add.graphics();
+      panel.fillStyle(0x061629, 0.96);
+      panel.fillRoundedRect(panelX - panelWidth / 2, panelY - panelHeight / 2, panelWidth, panelHeight, 24);
+      panel.fillStyle(0x12343a, 0.34);
+      panel.fillRoundedRect(panelX - panelWidth / 2 + 10, panelY - panelHeight / 2 + 10, panelWidth - 20, panelHeight - 20, 18);
+      panel.lineStyle(3, 0xf5c76a, 0.86);
+      panel.strokeRoundedRect(panelX - panelWidth / 2 + 1, panelY - panelHeight / 2 + 1, panelWidth - 2, panelHeight - 2, 24);
+      panel.lineStyle(1, 0x7dd3fc, 0.28);
+      panel.strokeRoundedRect(panelX - panelWidth / 2 + 12, panelY - panelHeight / 2 + 12, panelWidth - 24, panelHeight - 24, 16);
 
-      const dialog = document.createElement("div");
-      dialog.className = "world-map-return-confirm-dialog";
+      const title = this.add
+        .text(panelX, panelY - 72, t(this.locale, "menu.returnToWorldMapTitle"), {
+          fontFamily: UI_DISPLAY_FONT_FAMILY,
+          fontSize: this.controlMode === "mobile" ? "28px" : "24px",
+          fontStyle: "900",
+          color: "#f5c76a",
+          align: "center",
+          fixedWidth: panelWidth - 64,
+          resolution: UI_TEXT_RESOLUTION,
+        })
+        .setOrigin(0.5);
+      title.setShadow(0, 2, "#020617", 0, true, true);
 
-      const title = document.createElement("h2");
-      title.id = "world-map-return-confirm-title";
-      title.textContent = t(this.locale, "menu.returnToWorldMapTitle");
+      const message = this.add
+        .text(panelX, panelY - 18, t(this.locale, "menu.returnToWorldMapConfirm"), {
+          fontFamily: UI_TEXT_FONT_FAMILY,
+          fontSize: this.controlMode === "mobile" ? "19px" : "17px",
+          fontStyle: "800",
+          color: "#dbeafe",
+          align: "center",
+          fixedWidth: panelWidth - 86,
+          wordWrap: { width: panelWidth - 86, useAdvancedWrap: true },
+          resolution: UI_TEXT_RESOLUTION,
+        })
+        .setOrigin(0.5);
+      message.setShadow(0, 2, "#020617", 0, true, true);
 
-      const message = document.createElement("p");
-      message.textContent = t(this.locale, "menu.returnToWorldMapConfirm");
+      const yesButton = this.createWorldMapReturnConfirmButton(
+        panelX - 140,
+        panelY + 76,
+        t(this.locale, "menu.returnToWorldMapYes"),
+        true,
+        () => this.closeWorldMapReturnConfirm(true),
+      );
+      const noButton = this.createWorldMapReturnConfirmButton(
+        panelX + 140,
+        panelY + 76,
+        t(this.locale, "menu.returnToWorldMapNo"),
+        false,
+        () => this.closeWorldMapReturnConfirm(false),
+      );
 
-      const actions = document.createElement("div");
-      actions.className = "world-map-return-confirm-actions";
-
-      const yesButton = document.createElement("button");
-      yesButton.type = "button";
-      yesButton.className = "world-map-return-confirm-yes";
-      yesButton.textContent = t(this.locale, "menu.returnToWorldMapYes");
-
-      const noButton = document.createElement("button");
-      noButton.type = "button";
-      noButton.className = "world-map-return-confirm-no";
-      noButton.textContent = t(this.locale, "menu.returnToWorldMapNo");
-
-      const finish = (shouldReturn: boolean) => {
-        overlay.remove();
-        document.body.classList.remove("is-world-map-return-confirm-open");
-        resolve(shouldReturn);
-      };
-
-      yesButton.addEventListener("click", () => finish(true));
-      noButton.addEventListener("click", () => finish(false));
-      overlay.addEventListener("pointerdown", (event) => {
-        event.stopPropagation();
-        if (event.target === overlay) {
-          finish(false);
-        }
-      });
-      overlay.addEventListener("keydown", (event) => {
-        event.stopPropagation();
-        if (event.key === "Escape") {
-          finish(false);
-        }
-        if (event.key === "Enter") {
-          finish(true);
-        }
-      });
-
-      actions.append(yesButton, noButton);
-      dialog.append(title, message, actions);
-      overlay.append(dialog);
-      document.body.appendChild(overlay);
-      noButton.focus();
+      shade.on("pointerup", () => this.closeWorldMapReturnConfirm(false));
+      container.add([shade, panel, title, message, yesButton, noButton]);
+      this.worldMapReturnConfirmContainer = container;
     });
+  }
+
+  private closeWorldMapReturnConfirm(shouldReturn: boolean) {
+    const resolve = this.worldMapReturnConfirmResolve;
+    this.worldMapReturnConfirmResolve = undefined;
+    this.worldMapReturnConfirmContainer?.destroy(true);
+    this.worldMapReturnConfirmContainer = undefined;
+    resolve?.(shouldReturn);
+  }
+
+  private createWorldMapReturnConfirmButton(x: number, y: number, label: string, primary: boolean, onPress: () => void) {
+    const width = this.controlMode === "mobile" ? 230 : 196;
+    const height = this.controlMode === "mobile" ? 62 : 52;
+    const container = this.add.container(x, y).setSize(width, height);
+    const hitZone = this.add.zone(0, 0, width, height).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    const back = this.add.graphics();
+    back.fillStyle(0x020617, 0.4);
+    back.fillRoundedRect(-width / 2 + 5, -height / 2 + 7, width, height, 16);
+    back.fillStyle(primary ? 0x4b2f08 : 0x071526, 0.94);
+    back.fillRoundedRect(-width / 2, -height / 2, width, height, 16);
+    back.fillStyle(primary ? 0xf5c76a : 0x0d2a4a, primary ? 0.2 : 0.28);
+    back.fillRoundedRect(-width / 2 + 3, -height / 2 + 3, width - 6, height - 6, 13);
+    back.lineStyle(3, primary ? 0xf5c76a : 0x7dd3fc, primary ? 0.95 : 0.62);
+    back.strokeRoundedRect(-width / 2 + 1, -height / 2 + 1, width - 2, height - 2, 16);
+    const text = this.add
+      .text(0, 0, label, {
+        fontFamily: UI_DISPLAY_FONT_FAMILY,
+        fontSize: this.controlMode === "mobile" ? "21px" : "17px",
+        fontStyle: "900",
+        color: primary ? "#fff7d6" : "#dbeafe",
+        align: "center",
+        fixedWidth: width - 20,
+        resolution: UI_TEXT_RESOLUTION,
+      })
+      .setOrigin(0.5);
+    text.setShadow(0, 2, "#020617", 0, true, true);
+    container.add([hitZone, back, text]);
+    hitZone
+      .on("pointerover", () => container.setScale(1.035))
+      .on("pointerout", () => container.setScale(1))
+      .on("pointerdown", () => container.setScale(0.97))
+      .on("pointerup", () => {
+        container.setScale(1.035);
+        onPress();
+      });
+    return container;
   }
 
   private handleRestartKey() {

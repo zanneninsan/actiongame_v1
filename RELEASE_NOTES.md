@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.443
+### English
+- Rebuilt the post-clear world map return confirmation as an in-canvas Phaser dialog so it no longer leaves a DOM overlay blocking result-screen buttons, and renamed the choices to "To World Map" and "Stop".
+### Japanese
+- クリア後のワールドマップ復帰確認を Phaser のゲーム内ダイアログに作り替え、DOM オーバーレイがリザルト画面のボタン入力を塞がないようにし、選択肢を「ワールドマップへ」「やめる」に変更しました。
+
 ## v0.1.442
 ### English
 - Tightened the compact story dialogue nameplate text so Japanese names fit cleanly and render with a higher-resolution label.
