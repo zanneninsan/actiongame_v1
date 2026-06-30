@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.444
+### English
+- Constrained compact story dialogue body text to the frame, automatically tightens font size and line spacing for longer tutorial lines, and improved the in-canvas world map confirmation button padding.
+### Japanese
+- コンパクトなストーリー吹き出しの本文が枠外にはみ出さないようにし、長いチュートリアル文ではフォントサイズと行間を自動で詰め、ゲーム内ワールドマップ確認ボタンの余白も整えました。
+
 ## v0.1.443
 ### English
 - Rebuilt the post-clear world map return confirmation as an in-canvas Phaser dialog so it no longer leaves a DOM overlay blocking result-screen buttons, and renamed the choices to "To World Map" and "Stop".

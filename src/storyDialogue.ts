@@ -32,9 +32,13 @@ const DEFAULT_DIALOGUE_LEFT = 12;
 const DEFAULT_DIALOGUE_TOP = 96;
 const DEFAULT_DIALOGUE_WIDTH = 437;
 const MIN_DIALOGUE_WIDTH = 176;
-const DEFAULT_DIALOGUE_FONT_SIZE = 17;
-const MIN_DIALOGUE_FONT_SIZE = 10;
+const DEFAULT_DIALOGUE_FONT_SIZE = 15;
+const MIN_DIALOGUE_FONT_SIZE = 11;
 const NAME_PLATE_FONT_SIZE = 13;
+const MESSAGE_LEFT_RATIO = 0.34;
+const MESSAGE_TOP_RATIO = 0.32;
+const MESSAGE_WIDTH_RATIO = 0.58;
+const MESSAGE_MAX_HEIGHT_RATIO = 0.56;
 const TV_SWITCH_IN_MS = 520;
 const TV_SWITCH_OUT_MS = 420;
 const STORY_DIALOGUE_DEPTH = 240;
@@ -94,13 +98,14 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
       fontStyle: "900",
       color: "#f8fafc",
       align: "left",
-      fixedWidth: layout.width * 0.56,
-      wordWrap: { width: layout.width * 0.56, useAdvancedWrap: true },
-      resolution: 2,
+      fixedWidth: getMessageWidth(layout),
+      fixedHeight: getMessageMaxHeight(layout),
+      wordWrap: { width: getMessageWidth(layout), useAdvancedWrap: true },
+      resolution: 4,
     })
     .setOrigin(0, 0);
-  message.setLineSpacing(Math.round(layout.fontSize * 0.45));
-  message.setShadow(0, 2, "rgba(0, 0, 0, 0.9)", 2, true, true);
+  message.setLineSpacing(getMessageLineSpacing(layout.fontSize));
+  message.setShadow(0, 1, "rgba(0, 0, 0, 0.9)", 0, true, true);
 
   const nextZone = scene.add
     .zone(layout.width * 0.872, layout.height * 0.595, layout.width * 0.08, layout.height * 0.22)
@@ -119,7 +124,7 @@ export function createStoryDialogue(options: StoryDialogueOptions): StoryDialogu
     portrait.setTexture(scene.textures.exists(portraitKey) ? portraitKey : STORY_DIALOGUE_FRAME_TEXTURE_KEY);
     portrait.setDisplaySize(layout.width * 0.23, layout.height * 0.675);
     namePlate.setText(line.characterName);
-    message.setText(line.message);
+    fitMessageToFrame(message, layout, line.message);
   };
 
   const setLines = (nextLines: StoryDialogueLine[], startIndex = 0) => {
@@ -191,13 +196,47 @@ function placeElements(
   namePlate.setFontSize(NAME_PLATE_FONT_SIZE);
   namePlate.setFixedSize(layout.width * 0.3, layout.height * 0.16);
 
-  message.setPosition(layout.width * 0.34, layout.height * 0.34);
+  message.setPosition(layout.width * MESSAGE_LEFT_RATIO, layout.height * MESSAGE_TOP_RATIO);
   message.setFontSize(layout.fontSize);
-  message.setFixedSize(layout.width * 0.56, 0);
-  message.setWordWrapWidth(layout.width * 0.56, true);
+  message.setFixedSize(getMessageWidth(layout), getMessageMaxHeight(layout));
+  message.setWordWrapWidth(getMessageWidth(layout), true);
+  message.setLineSpacing(getMessageLineSpacing(layout.fontSize));
 
   nextZone.setPosition(layout.width * 0.872, layout.height * 0.595);
   nextZone.setSize(layout.width * 0.08, layout.height * 0.22);
+}
+
+function getMessageWidth(layout: { width: number }) {
+  return layout.width * MESSAGE_WIDTH_RATIO;
+}
+
+function getMessageMaxHeight(layout: { height: number }) {
+  return layout.height * MESSAGE_MAX_HEIGHT_RATIO;
+}
+
+function getMessageLineSpacing(fontSize: number) {
+  return Math.max(0, Math.round(fontSize * 0.12));
+}
+
+function fitMessageToFrame(
+  message: Phaser.GameObjects.Text,
+  layout: { width: number; height: number; fontSize: number },
+  text: string,
+) {
+  const messageWidth = getMessageWidth(layout);
+  const maxHeight = getMessageMaxHeight(layout);
+  for (let fontSize = layout.fontSize; fontSize >= MIN_DIALOGUE_FONT_SIZE; fontSize -= 1) {
+    message.setFontSize(fontSize);
+    message.setLineSpacing(getMessageLineSpacing(fontSize));
+    message.setFixedSize(messageWidth, 0);
+    message.setWordWrapWidth(messageWidth, true);
+    message.setText(text);
+    if (message.height <= maxHeight) {
+      message.setFixedSize(messageWidth, maxHeight);
+      return;
+    }
+  }
+  message.setFixedSize(messageWidth, maxHeight);
 }
 
 function playTvSwitchIn(scene: Phaser.Scene, container: Phaser.GameObjects.Container) {

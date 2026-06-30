@@ -115,7 +115,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.443";
+const DEBUG_VERSION = "v0.1.444";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -1679,14 +1679,14 @@ class PrototypeScene extends Phaser.Scene {
 
       const yesButton = this.createWorldMapReturnConfirmButton(
         panelX - 140,
-        panelY + 76,
+        panelY + 62,
         t(this.locale, "menu.returnToWorldMapYes"),
         true,
         () => this.closeWorldMapReturnConfirm(true),
       );
       const noButton = this.createWorldMapReturnConfirmButton(
         panelX + 140,
-        panelY + 76,
+        panelY + 62,
         t(this.locale, "menu.returnToWorldMapNo"),
         false,
         () => this.closeWorldMapReturnConfirm(false),
@@ -1713,7 +1713,7 @@ class PrototypeScene extends Phaser.Scene {
     const hitZone = this.add.zone(0, 0, width, height).setOrigin(0.5).setInteractive({ useHandCursor: true });
     const back = this.add.graphics();
     back.fillStyle(0x020617, 0.4);
-    back.fillRoundedRect(-width / 2 + 5, -height / 2 + 7, width, height, 16);
+    back.fillRoundedRect(-width / 2 + 4, -height / 2 + 5, width - 2, height, 16);
     back.fillStyle(primary ? 0x4b2f08 : 0x071526, 0.94);
     back.fillRoundedRect(-width / 2, -height / 2, width, height, 16);
     back.fillStyle(primary ? 0xf5c76a : 0x0d2a4a, primary ? 0.2 : 0.28);
