@@ -9,6 +9,7 @@ const RESOLVED_BACKGROUND_ASSETS_ID = `\0${VIRTUAL_BACKGROUND_ASSETS_ID}`;
 const BACKGROUND_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 const REAR_ORDER = ["IMG_4202.webp", "starry_sky.webp", "ED96A78D-7F78-4486-8F37-8004120CB7FC.png"];
 const MIDGROUND_ORDER = ["city_loop_strip.webp"];
+const ASSETS_SOURCE_SEGMENT = "/assets_source/";
 
 type BackgroundKind = "rear" | "midground";
 
@@ -72,6 +73,23 @@ function isBackgroundAssetPath(filePath: string) {
   return filePath.startsWith(backgroundRoot) && BACKGROUND_EXTENSIONS.has(getExtension(filePath));
 }
 
+function isAssetsSourceImport(id: string) {
+  const normalized = id.replace(/\\/g, "/");
+  return normalized === "assets_source" || normalized.startsWith("assets_source/") || normalized.includes(ASSETS_SOURCE_SEGMENT);
+}
+
+function blockAssetsSourceImportsPlugin(): Plugin {
+  return {
+    name: "block-assets-source-imports",
+    resolveId(id) {
+      if (isAssetsSourceImport(id)) {
+        this.error(`assets_source is for preserved source files only and must not be imported by runtime code: ${id}`);
+      }
+      return null;
+    },
+  };
+}
+
 function backgroundAssetsPlugin(): Plugin {
   return {
     name: "background-assets",
@@ -120,7 +138,7 @@ export default defineConfig({
         ? githubPagesBasePath
         : "/actiongame_v1/"
       : "/",
-  plugins: [backgroundAssetsPlugin()],
+  plugins: [blockAssetsSourceImportsPlugin(), backgroundAssetsPlugin()],
   build: {
     chunkSizeWarningLimit: 1800,
     rolldownOptions: {
