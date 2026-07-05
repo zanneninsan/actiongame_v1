@@ -2,6 +2,12 @@
 
 Older entries through v0.1.100 were moved to `docs/RELEASE_NOTES_ARCHIVE.md`.
 
+## v0.1.445
+### English
+- Removed the extra small-landscape HUD scaling branch so the in-game HUD now uses the same fit-based scale calculation on mobile.
+### Japanese
+- 横長スマホ画面向けの追加 HUD 縮小分岐を削除し、モバイルでも通常のフィット基準のスケール計算を使うようにしました。
+
 ## v0.1.444
 ### English
 - Constrained compact story dialogue body text to the frame, automatically tightens font size and line spacing for longer tutorial lines, and improved the in-canvas world map confirmation button padding.

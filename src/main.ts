@@ -115,7 +115,7 @@ const GAME_HEIGHT = 720;
 const CAMERA_ZOOM = 1;
 const TILE = 32;
 const ASSET_BASE = import.meta.env.BASE_URL;
-const DEBUG_VERSION = "v0.1.444";
+const DEBUG_VERSION = "v0.1.445";
 const HUD_PANEL_TEXTURE_KEY = "ui-hud-panel-fantasy";
 const HUD_CHIP_TEXTURE_KEY = "ui-hud-label-plate";
 const RESULT_PANEL_TEXTURE_KEY = "ui-result-panel-kawaii";
@@ -2209,9 +2209,6 @@ class PrototypeScene extends Phaser.Scene {
   private calculateHudScale() {
     const displayWidth = this.scale.displaySize?.width ?? GAME_WIDTH;
     const displayHeight = this.scale.displaySize?.height ?? GAME_HEIGHT;
-    if (displayHeight <= 520 && displayWidth > displayHeight) {
-      return Phaser.Math.Clamp((displayHeight / HUD_SCALE_BASE_HEIGHT) * 1.35, HUD_MIN_SCALE, 0.92);
-    }
     const fitScale = Math.min(displayWidth / HUD_SCALE_BASE_WIDTH, displayHeight / HUD_SCALE_BASE_HEIGHT);
     const targetScale = fitScale < 1 ? 1 + (1 - fitScale) * 0.35 : 1 + (fitScale - 1) * 0.28;
     return Phaser.Math.Clamp(targetScale, HUD_MIN_SCALE, HUD_MAX_SCALE);
